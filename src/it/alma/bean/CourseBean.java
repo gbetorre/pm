@@ -62,6 +62,7 @@ import java.util.Vector;
  * <cite>Partizionamenti</cite>.
  * 
  * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
+ * @version 3
  */
 public class CourseBean implements Serializable {
     
@@ -81,27 +82,35 @@ public class CourseBean implements Serializable {
      *               Attributi da tracciato record estrazione WI                *
      * ************************************************************************ */
     /** Contatore (row.names) */
-     private int id; 
-     /** Codice Corso di Studi di WebIntegrato (WI) */
-     private String codiceCdSWI;
-     /** Codice Corso di Studi di UGOV */
-     private String codiceCdSUGOV;
-     /** Nome Corso di Studi di WI */
-     private String nomeCdSWI;
-     /** Nome Corso di Studi di UGOV */
-     private String nomeCdSUGOV;
-     /** Nome struttura didattica associata */
-     private String DipartimentoScuola;
-     /** Sede di WebIntegrato */
-     private String SedePrimariaCDS;
-     /** Codice Attivit&agrave; Didattica di WebIntegrato */
-     private int codiceADWI;
-     /** Codice Attivit&agrave; Didattica di UGOV */
-     private String codiceADUGOV;
-     /** Nome Attività Didattica (AD) */
-     private String nomeInsegnamento;
+    private int id; 
+    /** Codice Corso di Studi di WebIntegrato (WI) */
+    private String codiceCdSWI;
+    /** Codice Corso di Studi di UGOV */
+    private String codiceCdSUGOV;
+    /** Nome Corso di Studi di WI */
+    private String nomeCdSWI;
+    /** Nome Corso di Studi di UGOV */
+    private String nomeCdSUGOV;
+    /** Nome struttura didattica associata */
+    private String dipartimentoScuola;
+    /** Sede di WebIntegrato */
+    private String sedePrimariaCDS;
+    /** Codice Attivit&agrave; Didattica di WebIntegrato */
+    private int codiceADWI;
+    /** Codice Attivit&agrave; Didattica di UGOV */
+    private String codiceADUGOV;
+    /** Nome Attività Didattica (AD) */
+    private String nomeInsegnamento;
     /** Settore Scientifico Disciplinare (SSD) */
     private String SSD;
+    /** Cognome Docente Attivit&agrave; Didattica */
+    private String cognomeDocente;
+    /** Nome Docente Attivit&agrave; Didattica */
+    private String nomeDocente;
+    /** CF Docente Attivit&agrave; Didattica */
+    private String codiceFiscaleDocente;
+    /** Flag Docente coordinatore Attivit&agrave; Didattica */
+    private int coordinatore;
     /** Docente Attivit&agrave; Didattica */
     private PersonBean docente;
      /** Flag Modulo */
@@ -211,17 +220,27 @@ public class CourseBean implements Serializable {
      * Inizializza i campi a valori convenzionali di default.
      */
     public CourseBean() {
-        id = modulo = idMutuante = idPadreUL = -2;
-        crediti = creditiPadre = -2;
-        replica = ' ';
-        annoAccademico = nomeInsegnamento = discriminante = url = null;
-        misura = null;
-        nomeModulo = discriminanteModulo = discrPerCreditiDiversi = nomeUL = null;
-        periodi = null;
+        annoAccademico = nomeInsegnamento = url = null;
+        codiceCdSWI = codiceCdSUGOV = nomeCdSWI = nomeCdSUGOV = dipartimentoScuola = sedePrimariaCDS = null;
+        codiceADWI = -2;
+        codiceADUGOV = nomeInsegnamento = SSD = null;
+        cognomeDocente = nomeDocente = codiceFiscaleDocente = null;
+        coordinatore = -2;
+        docente = null;
         docenti = null;
-        corsiStudi = null;
-        divisoInModuli = mutuato = conLezioni = comuneIndirizzi = divisoInUnita = false;
+        modulo = -2;
+        ul = false;
+        id = modulo = idMutuante = idPadreUL = -2;
+        divisoInModuli = divisoInUnita = mutuato = conLezioni = comuneIndirizzi = false;
+        nomeModulo = discriminanteModulo = discrPerCreditiDiversi = discriminante = nomeUL = null;
         mutuante = null;
+        misura = null;        
+        replica = ' ';        
+        crediti = creditiTotali = creditiLezione = creditiLaboratorio = creditiAltro = -2;
+        creditiPadre = -2;
+        ore = oreLezione = oreLaboratorio = oreAltro = oreSeminario = oreEsercitazione = oreTirocinio = null;
+        periodi = null;
+        corsiStudi = null;
         obiettiviFormativi = linguaObiettiviFormativi = null;
         programma = linguaProgramma = null;
         modalitaEsame = linguaModalitaEsame = null;
@@ -1180,7 +1199,7 @@ public class CourseBean implements Serializable {
      * @return the dipartimentoScuola
      */
     public String getDipartimentoScuola() {
-        return DipartimentoScuola;
+        return dipartimentoScuola;
     }
 
 
@@ -1188,7 +1207,7 @@ public class CourseBean implements Serializable {
      * @param dipartimentoScuola the dipartimentoScuola to set
      */
     public void setDipartimentoScuola(String dipartimentoScuola) {
-        DipartimentoScuola = dipartimentoScuola;
+        dipartimentoScuola = dipartimentoScuola;
     }
 
 
@@ -1196,7 +1215,7 @@ public class CourseBean implements Serializable {
      * @return the sedePrimariaCDS
      */
     public String getSedePrimariaCDS() {
-        return SedePrimariaCDS;
+        return sedePrimariaCDS;
     }
 
 
@@ -1204,7 +1223,7 @@ public class CourseBean implements Serializable {
      * @param sedePrimariaCDS the sedePrimariaCDS to set
      */
     public void setSedePrimariaCDS(String sedePrimariaCDS) {
-        SedePrimariaCDS = sedePrimariaCDS;
+        sedePrimariaCDS = sedePrimariaCDS;
     }
 
 
@@ -1493,6 +1512,79 @@ public class CourseBean implements Serializable {
      */
     public void setFinePerDid(String finePerDid) {
         this.finePerDid = finePerDid;
+    }
+
+    /* Attributi nominali del docente.
+     * In realtà esiste un bean di tipo PersonBean, e un Vector<PersonBean> in caso
+     * di codocenze, proprio per rappresentare il / i docenti dell'AD, perché 
+     * è più pulito rappresentare l'informazione in quel modo.
+     * Tuttavia, siccome le tuple devono essere elaborate da un algoritmo 
+     * più che presentate in una webapplication, sono stati aggiunti anche
+     * i campi nominali de-normalizzati, e dunque queste due tipologie di
+     * attributi (String e PersonBean) in questo caso coesistono.
+     * (And don't be a pine in my ass, please, I don't give a shit!...).
+     */
+    /**
+     * @return the cognomeDocente
+     */
+    public String getCognomeDocente() {
+        return cognomeDocente;
+    }
+
+
+    /**
+     * @param cognomeDocente the cognomeDocente to set
+     */
+    public void setCognomeDocente(String cognomeDocente) {
+        this.cognomeDocente = cognomeDocente;
+    }
+
+
+    /**
+     * @return the nomeDocente
+     */
+    public String getNomeDocente() {
+        return nomeDocente;
+    }
+
+
+    /**
+     * @param nomeDocente the nomeDocente to set
+     */
+    public void setNomeDocente(String nomeDocente) {
+        this.nomeDocente = nomeDocente;
+    }
+
+
+    /**
+     * @return the codiceFiscaleDocente
+     */
+    public String getCodiceFiscaleDocente() {
+        return codiceFiscaleDocente;
+    }
+
+
+    /**
+     * @param codiceFiscaleDocente the codiceFiscaleDocente to set
+     */
+    public void setCodiceFiscaleDocente(String codiceFiscaleDocente) {
+        this.codiceFiscaleDocente = codiceFiscaleDocente;
+    }
+
+
+    /**
+     * @return the coordinatore
+     */
+    public int getCoordinatore() {
+        return coordinatore;
+    }
+
+
+    /**
+     * @param coordinatore the coordinatore to set
+     */
+    public void setCoordinatore(int coordinatore) {
+        this.coordinatore = coordinatore;
     }
 
 
