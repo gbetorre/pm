@@ -32,7 +32,7 @@
 package it.alma;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.Vector;
 import java.util.logging.Logger;
 
@@ -49,6 +49,8 @@ import it.alma.exception.CommandException;
 import it.alma.exception.WebStorageException;
 import it.alma.DBWrapper;
 import it.alma.Utils;
+import it.alma.bean.ItemBean;
+import it.alma.command.Command;
 
 
 /**
@@ -56,7 +58,7 @@ import it.alma.Utils;
  * <code>Alma on Line</code>.</p>
  * 
  * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
- * @version 1.0
+ * @version 2
  * @since JDK 1.7
  */
 public class Main extends HttpServlet {
@@ -74,9 +76,17 @@ public class Main extends HttpServlet {
      */
     static final String FOR_NAME = "\n" + Logger.getLogger(new Throwable().getStackTrace()[0].getClassName()) + ": ";
     /**
+     * Suffisso per le Command
+     */
+    static final String COMMAND_SUFFIX = "Command";
+    /**
      * DataBound.
      */
     private DBWrapper db;
+    /**
+     * Tabella hash (dictionary) contenente le command predefinite.
+     */
+    private HashMap<String, Command> commands;
     /**
      * Nome e percorso della pagina di errore cui ridirigere in caso
      * di eccezioni rilevate.
@@ -115,7 +125,7 @@ public class Main extends HttpServlet {
      * che saranno utilizzate anche dalle altre classi:
      * <ul>
      * <li> connessione al database: <code>db</code></li>
-     * <li> tabella hash di tutte le classi richiamabili dal web</li>
+     * <li> tabella hash di tutte le classi richiamabili dall'applicazione</li>
      * <li> vettore delle voci menu principale (menu orizzontale)</li>
      * </ul>
      * 
@@ -134,23 +144,32 @@ public class Main extends HttpServlet {
          * Nome della pagina di errore
          */
         errorJsp = getServletContext().getInitParameter("errorJsp");
-        if (errorJsp == null) throw new ServletException(FOR_NAME + "\n\nManca il parametro di contesto 'errorJsp'!\n\n");
+        if (errorJsp == null) { 
+            throw new ServletException(FOR_NAME + "\n\nManca il parametro di contesto 'errorJsp'!\n\n");
+        }
+        /*
+         * Nome del parametro che identifica la Command da interpellare
+         */
+        entToken = getServletContext().getInitParameter("entToken");
+        if (entToken == null) {
+            throw new ServletException(FOR_NAME + "\n\nManca il parametro di contesto 'entToken'!\n\n");
+        }
+
         /*
          * Nome home page
          */
         homePage = getServletContext().getInitParameter("home");
-        if (homePage == null) throw new ServletException(FOR_NAME + "\n\nManca il parametro di contesto 'nomeHomePage'!\n\n");
+        if (homePage == null) { 
+            throw new ServletException(FOR_NAME + "\n\nManca il parametro di contesto 'nomeHomePage'!\n\n");
+        }
         /*
          * Nome del template da invocare per l'assemblaggio 
          * dei vari componenti dell'output
          */
         templateJsp = getServletContext().getInitParameter("templateJsp");
-        if (templateJsp == null) throw new ServletException(FOR_NAME + "\n\nManca il parametro di contesto 'templateJsp'!\n\n");
-        /*
-         * Si inizializza il DataUrl con il servletToken, 
-         * che solitamente è '/' o '/main' 
-         */
-        ServletContext servletContext = getServletContext();
+        if (templateJsp == null) {
+            throw new ServletException(FOR_NAME + "\n\nManca il parametro di contesto 'templateJsp'!\n\n");
+        }
         /*
          * Attiva la connessione al database
          */
@@ -159,6 +178,69 @@ public class Main extends HttpServlet {
         }
         catch (WebStorageException wse) {
             throw new ServletException(FOR_NAME + "Non e\' possibile avere una connessione al database.\n" + wse.getMessage(), wse);
+        }
+        /*
+         * Inizializza la tabella <code>commands</code> che deve contenere
+         * tutte le classi che saranno richiamabili da questa
+         * servlet. Tali classi dovrebbero essere dichiarate in un file
+         * di configurazione (p.es. web.xml) o nel database.
+         */
+        Vector<ItemBean> classiCommand = new Vector<ItemBean>();
+        try {
+            /*
+             * Prepara la Command della Valutazione
+             */
+            final String commandName = "Valuation" + COMMAND_SUFFIX;
+            ItemBean voce = new ItemBean();
+            voce.setId(voce.hashCode());
+            voce.setNome("Valuation");
+            voce.setNomeClasse(commandName);
+            voce.setPaginaJsp(templateJsp);
+            classiCommand.add(voce);
+        }
+        catch (Exception e) {
+            throw new ServletException(FOR_NAME + "Problemi nel caricare le classi Command.\n" + e.getMessage(), e);
+        }
+        ItemBean voceMenu = null;
+        Command classCommand = null;
+        commands = new HashMap<String, Command>();
+        for (int i=0; i < classiCommand.size(); i++) {
+            voceMenu = classiCommand.get(i);
+            try {
+                classCommand = (Command) Class.forName("it.alma.command." + voceMenu.getNomeClasse()).newInstance();
+                classCommand.init(voceMenu);
+                commands.put(voceMenu.getNome(), classCommand);
+            } catch (ClassNotFoundException cnfe) {
+                try {
+                    classCommand = (Command) Class.forName("it.alma.command." + voceMenu.getNomeClasse()).newInstance();
+                    classCommand.init(voceMenu);
+                    commands.put(voceMenu.getNome(), classCommand);
+                }
+                catch (ClassNotFoundException cnfex) {
+                    String error = FOR_NAME +
+                                   "La classe collegata alla voce menu '" +
+                                   voceMenu.getNome() +
+                                   "' &egrave; '" +
+                                   voceMenu.getNomeClasse() +
+                                   " e non pu&ograve; essere caricata: " + cnfex.getMessage();
+                    throw new ServletException(error);
+                }
+                catch (Exception e) {
+                    String error = FOR_NAME +
+                                   "Problema generico nel caricare la classe " +
+                                   voceMenu.getNomeClasse() +
+                                   ". Dettaglio errore: " +
+                                   e.getMessage();
+                    throw new ServletException(error);
+                }
+            } catch (Exception e) {
+                    String error = FOR_NAME +
+                                   "Problema generico nel caricare la classe " +
+                                   voceMenu.getNomeClasse() +
+                                   ".\n Dettaglio errore: " +
+                                   e.getMessage();
+                    throw new ServletException(error);
+            }
         }
     }
     
@@ -204,27 +286,53 @@ public class Main extends HttpServlet {
          */
         String fileJsp = null;
         /*
+         * Dichiara le variabili in base a cui ricercare la Command
+         */
+        String q = null;
+        /*
          * Cerca la command associata al parametro 'ent'
          * e, se la trova, ne invoca il metodo execute()
          */
-        String q = null;
         JOptionPane.showMessageDialog(null, "ok", "Messaggio: 214", 0, null);
         try {
             q = req.getParameter(entToken);
         } catch (NullPointerException npe) { // Potrebbe già uscire qui
             req.setAttribute("javax.servlet.jsp.jspException", npe);
             fileJsp = errorJsp;
-            log("Errore: " + npe);
+            log(FOR_NAME + "Problema di puntamento: applicazione terminata!" + npe);
+            final RequestDispatcher rd = getServletContext().getRequestDispatcher(fileJsp + "?" + req.getQueryString());
+            rd.forward(req, res);
+            return;
+        } catch (NumberFormatException nfe) { // Controllo sull'input
+            req.setAttribute("javax.servlet.jsp.jspException", nfe);
+            fileJsp = errorJsp;
+            log(FOR_NAME + "Parametro in formato non valido: applicazione terminata!" + nfe);
+            final RequestDispatcher rd = getServletContext().getRequestDispatcher(fileJsp + "?" + req.getQueryString());
+            rd.forward(req, res);
+            return;
+        } catch (Exception e) { // Just in case
+            req.setAttribute("javax.servlet.jsp.jspException", e);
+            fileJsp = errorJsp;
+            log(FOR_NAME + "Eccezione generica: " + e);
             final RequestDispatcher rd = getServletContext().getRequestDispatcher(fileJsp + "?" + req.getQueryString());
             rd.forward(req, res);
             return;
         }
         try {
-            Vector v = new Vector(19);
-            v = lookupParams(q);
-            JOptionPane.showMessageDialog(null, v.size(), "Vector Size", 0, null);
-            req.setAttribute("courses", v);
-        } catch (CommandException e) {
+            /*
+             * Cerca la command associata al parametro 'ent'
+             * e, se la trova, ne invoca il metodo execute()
+             */
+            Command cmd = lookupCommand(q);
+            cmd.execute(req);
+        } catch (CommandException e) { // Potrebbe già uscire qui
+            req.setAttribute("javax.servlet.jsp.jspException", e);
+            fileJsp = errorJsp;
+            log("Errore: " + e);
+            final RequestDispatcher rd = getServletContext().getRequestDispatcher(fileJsp + "?" + req.getQueryString());
+            rd.forward(req, res);
+            return;
+        } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -261,32 +369,10 @@ public class Main extends HttpServlet {
         }
         final RequestDispatcher rd = getServletContext().getRequestDispatcher(fileJsp + "?" + req.getQueryString());
         rd.forward(req, res);
-        /*
-        try {
-            ResultSet rs = db.get(Query.NUM_MATRICOLE_2016);
-            Vector<String> results = db.getVector(rs);
-            PrintWriter out = response.getWriter();
-            JOptionPane.showMessageDialog(null, "ok", "Messaggio: Successo", 0, null);
-            out.println("<HTML>");
-            out.println("<HEAD>");
-            out.println("<TITLE>Servlet Testing</TITLE>");
-            out.println("</HEAD>");
-            out.println("<BODY>");
-            //out.println("I didn't find anything!");
-            out.println("I found " + results.size() + " rows");
-            //out.println("I found " + tuple.size() + " rows");
-            //out.println("I found " + rs.getString("count") + " rows");
-            out.println("</BODY>");
-            out.println("</HTML>");
-        } catch (WebStorageException wse) {
-            throw new ServletException(FOR_NAME + "Non e\' possibile avere una connessione al database.\n" + wse.getMessage(), wse);
-        //} catch (SQLException sqle) {
-        //    throw new ServletException(FOR_NAME + "Non e\' possibile accedere al resultset.\n" + sqle.getMessage(), sqle);
-        }*/
     }
 
     
-    /**TODO
+    /**
      * lookupCommand restituisce la classe Command associata parametro
      * d'input <code>cmd</code>, come specificato nella HashTable
      * <code>command</code>. Se il parametro è nullo, allora
@@ -300,71 +386,16 @@ public class Main extends HttpServlet {
      * @exception CommandException  se il parametro <code>cmd</code> non
      *      corrisponde a nessuna classe.
      */
-    private Vector lookupParams(String cmd)
-                         throws CommandException {
+    private Command lookupCommand(String cmd)
+                           throws CommandException {
         if (cmd == null)
             cmd = homePage;
-        /*
-        if (commands.containsKey(cmd.toLowerCase()))
-            return (Command) commands.get(cmd.toLowerCase());
+        if (commands.containsKey(cmd))
+            return (Command) commands.get(cmd);
         else
-            throw new CommandException("Classe Command non valida: "+ cmd.toLowerCase());
-        */
-        try {
-            return db.getCourse();
-        } catch (WebStorageException wse) {
-            throw new CommandException(wse);
-        }
-    }
-    
-    
-    /**
-     * <p>Gestisce le richieste del client.</p>
-     * <p><cite id="malacarne" data-exact-page="99">
-     *  Il metodo service viene invocato dal servlet-engine come azione
-     *  di risposta alla ricezione di una HttpRequest.
-     *  Questo metodo, nella sua implementazione originale, funziona
-     *  come dispatcher, ossia, in base al codice operazione HTTP ricevuto,
-     *  attiva il metodo disponibile pi&uacute; opportuno (...)
-     * </cite></p>
-     * <cite id="malacarne" data-exact-page="100">
-     * <p>Una sottoclasse di HttpServlet dovrebbe preferenzialmente
-     *  sovrascrivere uno dei metodi precedenti<br />
-     *  (n.d.r.: <code>doGet | doPost | doOption | doPut | doTrace</code>)</p>
-     * <p>In taluni casi per&ograve; (...) risulta essere pi&uacute; 
-     *  conveniente, ma deve essere una scelta ben ponderata, sovrascrivere
-     *  direttamente il metodo service.</p> 
-     * </cite>
-     *
-     * <pre>
-     * OUTPUT:
-     *  nome variabile  | scope    | descrizione
-     * -----------------------------------------------------------------------
-     *  menuPrincipale   request    nome del main menu di aol 
-     *  queryString      request    tutta la QueryString in input 
-     *  lingue           request    oggetto costruito in base alla lingua ev.
-     *                               presente nei parametri di navigazione
-     * </pre>
-     * 
-     * @param req la HttpServletRequest contenente la richiesta del client
-     * @param res la HttpServletResponse contenente la risposta del server
-     * @throws ServletException eccezione che viene sollevata se si verifica un problema nell'inoltro (forward) della richiesta/risposta
-     * @throws IOException      eccezione che viene sollevata se si verifica un problema nell'inoltro (forward) della richiesta/risposta
-     *
-    public void service(HttpServletRequest req, HttpServletResponse res)
-                 throws ServletException, IOException {
-        String fileJsp = null;
-        req.setAttribute("queryString", req.getQueryString());
-		if (req.getAttribute("rss") != null) {
-		    fileJsp = (String) req.getAttribute("fileJsp");
-		} else {
-	        fileJsp = templateJsp;
-    		retrieveFixedInfo(req);
-		}
-		final RequestDispatcher rd = getServletContext().getRequestDispatcher(fileJsp + "?" + req.getQueryString());
-		rd.forward(req, res);
-	}
-    */
+            throw new CommandException(FOR_NAME + "Classe Command non valida: " + cmd);
+    }    
+
     
     /** 
      * Esegue pezzi di codice della OrganizzazioneCommand senza crearne 
