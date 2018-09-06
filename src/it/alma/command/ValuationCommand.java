@@ -32,12 +32,17 @@
 package it.alma.command;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Vector;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 
 import it.alma.DBWrapper;
+import it.alma.Query;
 import it.alma.bean.CourseBean;
 import it.alma.bean.ItemBean;
 import it.alma.exception.CommandException;
@@ -56,7 +61,7 @@ import it.alma.exception.WebStorageException;
  * </p>
  * <p>Created on martedì 4 settembre 2018 10:28:08</p>
  * 
- * @version 2
+ * 
  * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
  */
 public class ValuationCommand extends ItemBean implements Command {
@@ -70,7 +75,11 @@ public class ValuationCommand extends ItemBean implements Command {
      * Pagina a cui la servlet reindirizza
      */
     private static final String nomeFileElenco = "/jsp/elenco.jsp";  
-  
+    /**
+     * Lista Hash contenente tutti i codici dei corsi elettivi
+     */
+    private LinkedList<String> corsiElettivi;
+    
     
     /** 
      * Crea una nuova istanza di ValuationCommand 
@@ -94,9 +103,16 @@ public class ValuationCommand extends ItemBean implements Command {
         this.setNomeClasse(voceMenu.getNomeClasse());
         this.setPaginaJsp(voceMenu.getPaginaJsp());
         this.setInformativa(voceMenu.getInformativa());
-        if (this.getPaginaJsp()==null) {
-          String error = "La voce menu' " + this.getNome() + " non ha il campo paginaJsp. Impossibile visualizzare i risultati.";
-          throw new CommandException(error);
+        if (this.getPaginaJsp() == null) {
+          String msg = FOR_NAME + "La voce menu' " + this.getNome() + " non ha il campo paginaJsp. Impossibile visualizzare i risultati.\n";
+          throw new CommandException(msg);
+        }
+        // Trasforma l'array dei corsi elettivi in una LinkedList per comodità di utilizzo
+        corsiElettivi = new LinkedList<String>();
+        for (int i = 0; i < Query.CODICI_CORSI_ELETTIVI.length; i++) {
+            // Codice corrente corso elettivo
+            String codiceElettivo = Query.CODICI_CORSI_ELETTIVI[i];
+            corsiElettivi.add(codiceElettivo);
         }
     }  
   
@@ -107,9 +123,11 @@ public class ValuationCommand extends ItemBean implements Command {
      */
     public void execute(HttpServletRequest req) throws CommandException {  
         DBWrapper db = null;               // Databound        
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         Vector<CourseBean> v = new Vector<CourseBean>();
-        Vector<CourseBean> list = new Vector<CourseBean>();
+        Vector<CourseBean> adSemplici = new Vector<CourseBean>();
+        Vector<CourseBean> doppioni = new Vector<CourseBean>();
+        HashMap<String, CourseBean> vHash = new HashMap<String, CourseBean>();
+        List<CourseBean> duplicati = new ArrayList<CourseBean>();
         // Instanzia nuova classe WebStorage per il recupero dei dati
         try {
             db = new DBWrapper();
@@ -119,6 +137,13 @@ public class ValuationCommand extends ItemBean implements Command {
         // Recupero Attività Didattiche Semplici
         try {
             v = db.getADSemplici();
+            /* Trasforma il Vector in HashMap con chiave formata da una concatenazione univoca dei valori
+            for (int i = 0; i < v.size(); i++) {
+                CourseBean course = v.get(i);
+                // Genera la chiave
+                String key =  course.getKey();
+                vHash.put(key, course);
+            }*/
         } catch (NotFoundException nfe) {
             throw new CommandException(FOR_NAME + ": Impossibile recuperare un attributo obbligatorio.\n" + nfe.getMessage());
         } catch (WebStorageException wse) {
@@ -146,13 +171,60 @@ public class ValuationCommand extends ItemBean implements Command {
         }
         // Individua le Attività Didattiche Semplici da porre in valutazione
         try {
-            for (int i = 0; i < v.size(); i++) {
-                CourseBean ad = v.get(i);
+            int vSize = v.size();
+            int j = 0;
+            while (j < vSize) {
+                for (int i = 0; i < vSize; i++) {
+                    CourseBean first = v.elementAt(j);
+                    CourseBean current = v.elementAt(i);
+                    // Controllo sui duplicati
+                    if (first.getKey().equals(current.getKey())) {
+                        int indexOfDuplicate = v.indexOf(current);
+                        duplicati.add(current);   // Elements will be removed later                   
+                    }
+                }
+                j = j + 1;
+            }
+            v.removeAll(duplicati);
+                
+                
+                // Controlla se è un corso di area medica
+                //if (ad.getCodiceCdSUGOV().startsWith("M")) {
+                    /* *******************************
+                     *    Ramo Corsi di area medica
+                     * *******************************/
+                    // Se NON è un corso elettivo
+                //    if (!corsiElettivi.contains(ad.getCodiceADUGOV())) {
+                        // Se NON è un corso elettivo ha senso continuare...
+                        //
+                  //  }
+                /*}
+                
+                else {
+                    /* *******************************
+                     *  Ramo Corsi di area non medica
+                     * *******************************/
+                    //
+                //}
+                    // Se no, controlla se i CFU totali sono >= 4
+                        // Controlla che i CFU di tipo LEZ siano > 0
+                
+                // Se sì controlla che non sia un corso elettivo
+                    // Controlla che i CFU di tipo LEZ siano > 0
+                
+                // Sul risultato trovato cerca i doppioni
+                    // Se è un doppione cerca di accorpare i periodi
+                /*
+                // Controlla che i CFU totali siano pià di 3
+                if (ad.getCreditiTotali() < 4) {
+                    // Se è un corso di area medica va considerato, altrimenti va scartato direttamente
+                    if (ad.getCodiceCdSUGOV())
+                }
                 // Controlla che ci siano ore di lezione
 //                if (ad.getOreLezione() > 0) {
                     
 //                }
-            }
+            }*/
 //        } catch (NotFoundException nfe) {
 //            throw new CommandException(FOR_NAME + ": Impossibile recuperare un attributo obbligatorio.\n" + nfe.getMessage());
         } catch (NullPointerException npe) {
@@ -170,9 +242,7 @@ public class ValuationCommand extends ItemBean implements Command {
         req.setAttribute("fileJsp", nomeFileElenco);
          // Salva nella request: elenco AD Semplici
         req.setAttribute("elenco", v);
-    }
-    
-    
-    
+        req.setAttribute("duplicati", duplicati);
+    }    
     
 }
