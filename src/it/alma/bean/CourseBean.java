@@ -251,138 +251,32 @@ public class CourseBean implements Serializable {
 
     
     /**
-     * Restituisce il nome dell'insegnamento completo di discriminante, 
-     * nome modulo e discriminante modulo nel formato 
-     * "insegnamento [<em>discriminante</em>] - modulo [<em>discriminanteModulo</em>]". 
-     * Se un attributo &egrave; stringa vuota, allora non viene stampato. 
-     * Se &egrave; null, viene lanciata un'eccezione di attributo mancante. 
-     * La stringa risultante &egrave; una stringa HTML. 
-     * Questo metodo DEVE essere il metodo di riferimento 
-     * per stampare il nome completo in tutti gli ambiti dell'applicazione Alma.
+     * Restituisce una chiave univoca per un'Attivit&agrave; Didattica.
+     * Due Attivit&agrave; Didattiche sono uguali quando hanno la stessa chiave univoca.
      * 
-     * @param insegnamento nome dell'insegnamento. Non può essere NULL. Esempio: 'Algoritmi'
-     * @param discriminante discriminante per il nome dell'insegnamento. Non può essere NULL. Esempio: 'A-L'
-     * @param modulo nome del modulo. Non può essere NULL. Esempio: 'Teoria'
-     * @param discriminanteModulo discriminante per il nome del modulo. Non pu&ograve; essere NULL. Esempio: 'matricole pari'
-     * @return il nome dell'insegnamento completo di discriminante, nome modulo e discriminante modulo in formato HTML.
-     * @throws AttributoNonValorizzatoException se uno dei parametri è NULL.
-     */
-    static public String getNomeInsegnamentoCompleto(String insegnamento, 
-                                                     String discriminante, 
-                                                     String modulo,
-                                                     String discriminanteModulo) 
-                                              throws AttributoNonValorizzatoException {
-        // Verifico che i parametri siano corretti!
-        String attributiErrati = "";
-        if (insegnamento == null)
-            attributiErrati = "insegnamento";
-        if (discriminante == null)
-            attributiErrati += ", discriminante";
-        if (modulo == null)
-            attributiErrati += ", modulo";
-        if (discriminanteModulo == null)
-            attributiErrati += ", discriminanteModulo.";
-        if (!attributiErrati.equals(""))
-            throw new AttributoNonValorizzatoException("CourseBean: attributi '" + attributiErrati
-                    + "' non sono valorizzati!");
-        // Costruisco il nome!
-        StringBuffer nome = new StringBuffer(insegnamento);
-        if (discriminante.length() > 0) {
-            nome.append(" [<em>" + discriminante + "</em>]");
-        }
-        if (modulo.length() > 0) {
-            nome.append(" - " + modulo);
-            if (discriminanteModulo.length() > 0) {
-                nome.append(" [<em>" + discriminanteModulo + "</em>]");
-            }
-        }
-        return nome.toString();
-    }
-
-    
-    /**
-     * Restituisce il nome dell'insegnamento completo di: 
-     * discriminante, nome modulo e discriminante modulo e anno accademico nel formato 
-     * "insegnamento [<em>discriminante</em>] - modulo [<em>discriminanteModulo</em>] (anno accademico)".
-     * Vedi {@link #getNomeInsegnamentoCompleto(String, String, String, String)}.
-     * 
-     * @param insegnamento nome dell'insegnamento. Non può essere NULL. Esempio: 'Algoritmi'
-     * @param discriminante discriminante per il nome dell'insegnamento. Non può essere NULL. Esempio: 'A-L'
-     * @param modulo nome del modulo. Non può essere NULL. Esempio: 'Teoria'
-     * @param discriminanteModulo discriminante per il nome del modulo. Non può essere NULL. Esempio: 'matricole pari'
-     * @param aa anna accademico
-     * @return il nome dell'insegnamento completo di discriminante, nome modulo e discriminante modulo in formato HTML.
-     * @throws AttributoNonValorizzatoException se uno dei parametri è NULL.
-     * @see #getNomeInsegnamentoCompleto(String, String, String, String)
-     */
-    static public String getNomeInsegnamentoCompleto(String insegnamento, 
-                                                     String discriminante, 
-                                                     String modulo,
-                                                     String discriminanteModulo, 
-                                                     String aa) 
-                                              throws AttributoNonValorizzatoException {
-        // Controllo sull'input
-        if (aa == null)
-            throw new AttributoNonValorizzatoException(
-                    "CourseBean.getNomeInsegnamentoCompleto: attributo anno accademico non sono valorizzato!");
-        // Costruisco il nome!
-        StringBuffer nome = new StringBuffer(CourseBean.getNomeInsegnamentoCompleto(insegnamento,
-                discriminante, modulo, discriminanteModulo));
-        nome.append(" (" + aa + ")");
-        return nome.toString();
-    }
-
-    
-    static public String getNomeInsegnamentoCompleto(String insegnamento, 
-                                                     String discriminante, 
-                                                     String modulo,
-                                                     String discriminanteModulo, 
-                                                     String aa, 
-                                                     String nomeUL) 
-                                              throws AttributoNonValorizzatoException {
-        // Controllo sull'input
-        if (aa == null)
-            throw new AttributoNonValorizzatoException(
-                    "CourseBean.getNomeInsegnamentoCompleto: attributo anno accademico non sono valorizzato!");
-        // Costruisco il nome!
-        StringBuffer nome = new StringBuffer(CourseBean.getNomeInsegnamentoCompleto(insegnamento,
-                discriminante, modulo, discriminanteModulo));
-        if (nomeUL != null && !nomeUL.equals("")) {
-            nome.append(" - "+nomeUL);
-        }
-        if (aa != null && !aa.equals("")) {
-            nome.append(" (" + aa + ")");
-        }
-        return nome.toString();
-    }
-
-   
-    /**
-     * Restituisce il nome dell'insegnamento completo di: 
-     * discriminante, nome modulo e discriminante modulo.
-     * 
-     * @param oi Occorrenza insegnamento contenente l'insegnamento da pubblicare.
-     * @return il nome dell'insegnamento completo di discriminante, nome modulo e discriminante modulo in formato HTML.
+     * @return
      * @throws AttributoNonValorizzatoException
-     * @see #getNomeInsegnamentoCompleto(String, String, String, String)
      */
-    static public String getNomeInsegnamentoCompleto(CourseBean oi)
-                                              throws AttributoNonValorizzatoException {
-        return CourseBean.getNomeInsegnamentoCompleto(oi.getNomeInsegnamento(), oi.getDiscriminante(),
-                oi.getNomeModulo(), oi.getDiscriminanteModulo());
+    public String getKey()
+                  throws AttributoNonValorizzatoException {
+        return this.getCodiceCdSUGOV() + this.getCodiceADUGOV() + this.getCodiceFiscaleDocente() + this.getInizioPerDid() + this.getFinePerDid();
     }
-
     
-    /**
-     * Restituisce il nome dell'insegnamento completo di: 
-     * discriminante, nome modulo e discriminante modulo.
-     * 
-     * @return il nome dell'insegnamento completo di discriminante, nome modulo e discriminante modulo in formato HTML.
-     * @see #getNomeInsegnamentoCompleto(String, String, String, String)
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
      */
-    public String getNomeInsegnamentoCompleto() 
-                                       throws AttributoNonValorizzatoException {
-        return CourseBean.getNomeInsegnamentoCompleto(this.getNomeInsegnamento(), this.getDiscriminante(), this.getNomeModulo(), this.getDiscriminanteModulo());
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof CourseBean) {
+            return this.id == ((CourseBean) obj).id 
+                && this.codiceCdSUGOV == ((CourseBean) obj).codiceCdSUGOV 
+                && this.codiceADUGOV.equals(((CourseBean) obj).codiceADUGOV)
+                && this.codiceFiscaleDocente.equals(((CourseBean) obj).codiceFiscaleDocente)
+                && this.inizioPerDid.equals(((CourseBean) obj).inizioPerDid)
+                && this.finePerDid.equals(((CourseBean) obj).inizioPerDid);
+        }
+        return super.equals(obj);
     }
 
     
@@ -815,10 +709,9 @@ public class CourseBean implements Serializable {
      */
     public Date getInizioPeriodo() throws AttributoNonValorizzatoException {
         if (new Date(0).equals(inizioPeriodo)) {
-            throw new AttributoNonValorizzatoException("PeriodoDidatticoBean: attributo inizio non valorizzato!");
-        } else {
-            return this.inizioPeriodo;
-        }
+            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo inizio periodo non valorizzato!");
+        } 
+        return this.inizioPeriodo;
     }
 
     /**
@@ -833,10 +726,9 @@ public class CourseBean implements Serializable {
      */
     public Date getFinePeriodo() throws AttributoNonValorizzatoException {
         if (new Date(0).equals(finePeriodo)) {
-            throw new AttributoNonValorizzatoException("PeriodoDidatticoBean: attributo fine non valorizzato!");
-        } else {
-            return this.finePeriodo;
+            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo fine non valorizzato!");
         }
+        return this.finePeriodo;
     }
 
     /**
