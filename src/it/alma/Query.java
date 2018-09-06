@@ -31,15 +31,135 @@
 
 package it.alma;
 
+import java.io.Serializable;
+import java.util.LinkedList;
+
 
 /**
- * @author trrgnr59
- * @version 2
- *
+ * <p>Query &egrave; l'interfaccia contenente tutte le query della 
+ * web-application &nbsp;<code>Alma on Line</code>.</p>
+ * 
+ * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
  */
-public interface Query {
+public interface Query extends Serializable {
 
+    /**
+     * Lista Hash contenente tutti i corsi elettivi
+     */
+    public LinkedList<String> CORSI_ELETTIVI = new LinkedList<String>();
     
+    /**
+     *  Carica la lista con i codici U-GOV dei corsi elettivi
+     */
+    public String[] CODICI_CORSI_ELETTIVI = {"4S000766",  
+                                             "0813M",
+                                             "4S004786",
+                                             "4S004102",
+                                             "4S006311",
+                                             "0763M",
+                                             "0783M",
+                                             "4S003529",
+                                             "4S006312",
+                                             "4S00183",
+                                             "0729M",
+                                             "0660M",
+                                             "0699M",
+                                             "0656M",
+                                             "0820M",
+                                             "4S000825",
+                                             "4S006318",
+                                             "4S004785",
+                                             "4S006319",
+                                             "4S001136",
+                                             "4S004783",
+                                             "4S006320",
+                                             "4S000768",
+                                             "4S001459",
+                                             "0828M",
+                                             "4S000823",
+                                             "4S000770",
+                                             "0738M",
+                                             "0728M",
+                                             "4S001137",
+                                             "0758M",
+                                             "4S01927",
+                                             "DF-0022",
+                                             "4S001007",
+                                             "0854M",
+                                             "0760M",
+                                             "4S004103",
+                                             "4S007217",
+                                             "0752M",
+                                             "4S006321",
+                                             "4S006322",
+                                             "4S006422",
+                                             "0808M",
+                                             "4S000771",
+                                             "0810M",
+                                             "0716M",
+                                             "0811M",
+                                             "4S006323",
+                                             "4S001139",
+                                             "0812M",
+                                             "4S001462",
+                                             "4S006324",
+                                             "4S004505",
+                                             "4S001008",
+                                             "0665M",
+                                             "0800M",
+                                             "4S003471",
+                                             "4S004787",
+                                             "0890M",
+                                             "0858M",
+                                             "4S000821",
+                                             "4S000797",
+                                             "4S003472",
+                                             "0775M",
+                                             "0794M",
+                                             "4S006325",
+                                             "4S004105",
+                                             "0903M",
+                                             "DF-0020",
+                                             "0650M",
+                                             "4S004106",
+                                             "0671M",
+                                             "4S003525",
+                                             "0746M",
+                                             "4S003474",
+                                             "0837M",
+                                             "0672M",
+                                             "0889M",
+                                             "0859M",
+                                             "0857M",
+                                             "0855M",
+                                             "0856M",
+                                             "0860M",
+                                             "4S006326",
+                                             "4S001012",
+                                             "DF-0009",
+                                             "4S006327",
+                                             "0781M",
+                                             "4S007166",
+                                             "0648M",
+                                             "4S001013",
+                                             "4S006328",
+                                             "4S006329",
+                                             "4S001014",
+                                             "0649M",
+                                             "4S000794",
+                                             "4S006330",
+                                             "0902M",
+                                             "0891M",
+                                             "4S006331",
+                                             "4S006332",
+                                             "0745M",
+                                             "DF-0023",
+                                             "4S006333"
+                                            };
+
+    /**
+     * Query per estrarre le tuple delle AD Semplici.
+     */
     public static final String AD_SEMPLICI = 
             "SELECT " 
           + " \"row.names\"             AS \"id\""
@@ -73,44 +193,5 @@ public interface Query {
           + ",\"FinePerDid\"            AS \"finePerDid\""
           + " FROM \"AD-Semplici-II2017\" AD" 
           + " --LIMIT 10";
-    
-    /**
-     * Estrae il profilo dei laureati dalla base dati Almalaurea
-     * Access Style Query
-     *
-    public static final String NUM_LAUREATI = 
-            "SELECT " 
-          + "2016_A.CORSb            AS [Codice CdS]," 
-          + "2016_A.CORSc            AS [Corso di Studio]," 
-          + "Count(2016_A.MATRICOLA) AS [Numero di laureati 2016]," 
-          + "Sum(2016_A.Abbin)       AS [Hanno compilato il questionario],"
-          + "2016_A.CORSclasse"
-          + "FROM" 
-          + "[2016-A-GW] AS 2016_A"
-          + "INNER JOIN [2016-GX-LT] AS 2016_B ON 2016_A.id_cv = 2016_B.id_cv" 
-          + "WHERE ("
-          + "("
-          + "(2016_A.CORSb) = 'C75' OR (2016_A.CORSb) = 'MM10'"
-          + ")" 
-          + ")"
-          + "GROUP BY 2016_A.CORSb, 2016_A.CORSc, 2016_A.CORSclasse"
-          + "ORDER BY 2016_A.CORSb;";
-    
-    
-    public static final String NUM_MATRICOLE_2016 = 
-            "SELECT" 
-//          + " count(*) "
-          + " * "
-          + " FROM " 
-          + " \"70040-2016\" LIMIT 10";
-    
-    public static final String AD_2016 = 
-            "SELECT " 
-          + " \"MATRICOLA\"   AS \"misura\""
-          + ",\"CODICIONE\"   AS \"codiceInsegnamento\""
-          + ",\"CORSb\"       AS \"codiceCs\""
-          + " FROM \"70040-2016\" A" 
-          + " LIMIT 10";
-*/
     
 }
