@@ -33,6 +33,7 @@ package it.alma.command;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -125,9 +126,12 @@ public class ValuationCommand extends ItemBean implements Command {
         DBWrapper db = null;               // Databound        
         Vector<CourseBean> v = new Vector<CourseBean>();
         Vector<CourseBean> adSemplici = new Vector<CourseBean>();
-        Vector<CourseBean> doppioni = new Vector<CourseBean>();
+        Vector<CourseBean> duplicati = new Vector<CourseBean>();
+        Vector<CourseBean> purged = new Vector<CourseBean>();
         HashMap<String, CourseBean> vHash = new HashMap<String, CourseBean>();
-        List<CourseBean> duplicati = new ArrayList<CourseBean>();
+        List<CourseBean> duplicates = null;
+        List<CourseBean> cleanDuplicates = null;
+        //List<CourseBean> duplicati = new ArrayList<CourseBean>();
         // Instanzia nuova classe WebStorage per il recupero dei dati
         try {
             db = new DBWrapper();
@@ -172,6 +176,8 @@ public class ValuationCommand extends ItemBean implements Command {
         // Individua le Attività Didattiche Semplici da porre in valutazione
         try {
             int vSize = v.size();
+            purged = v;
+            /*
             int j = 0;
             while (j < vSize) {
                 for (int i = 0; i < vSize; i++) {
@@ -186,7 +192,44 @@ public class ValuationCommand extends ItemBean implements Command {
                 j = j + 1;
             }
             v.removeAll(duplicati);
-                
+            */
+            duplicates = new ArrayList<CourseBean>();
+            int pos = 0;
+            for (int i = 0; i < v.size(); i++) {
+                for (int j = 0; j < v.size(); j++) {
+                    if (i != j) {   // Se i e j sono uguali sta puntando allo stesso elemento, ed è evidente che un elemento è uguale a se stesso...
+                        CourseBean courseRaw = v.elementAt(i);
+                        CourseBean courseOrd = v.elementAt(j);
+                        if (courseRaw.getKey().equals(courseOrd.getKey()) && (courseRaw.getId() != courseOrd.getId())) {
+                            //duplicati.insertElementAt(courseOrd, pos);
+                            //pos++;
+                            duplicates.add(courseOrd);
+                        }
+                    }
+                }
+            }
+            Collections.sort(duplicates);
+            cleanDuplicates = new ArrayList<CourseBean>(duplicates);
+            for (int i = 0; i < duplicates.size(); i++) {
+                int j = i + 1;
+                if (j < duplicates.size()) {
+                    if (duplicates.get(i).getId() == duplicates.get(j).getId()) {
+                        cleanDuplicates.remove(j);
+                    }
+                }
+            }
+            /* Toglie i doppioni puri dall'elenco completo
+            for (int i = 0; i < duplicates.size(); i++) {
+                CourseBean current = duplicates.get(i);
+                for (int j = 0; j < v.size(); j++) {
+                    CourseBean c = v.elementAt(j);
+                    if (c.getId() == current.getId()) {
+                        v.removeElementAt(j);
+                    }
+                }
+            }*/
+            //Collections.sort(sortedKeys);
+            //return resultsVector;
                 
                 // Controlla se è un corso di area medica
                 //if (ad.getCodiceCdSUGOV().startsWith("M")) {
@@ -225,14 +268,28 @@ public class ValuationCommand extends ItemBean implements Command {
                     
 //                }
             }*/
-//        } catch (NotFoundException nfe) {
-//            throw new CommandException(FOR_NAME + ": Impossibile recuperare un attributo obbligatorio.\n" + nfe.getMessage());
+        } catch (ArrayIndexOutOfBoundsException aiobe) {
+            StackTraceElement[] stackTrace = aiobe.getStackTrace();
+            StringBuffer sb = new StringBuffer();
+            for (int i = 0; i<stackTrace.length; i++) {
+                StackTraceElement ste = stackTrace[i];
+                sb.append(ste.getClassName());
+                sb.append(".");
+                sb.append(ste.getMethodName());
+                sb.append(" (");
+                sb.append(ste.getClassName());
+                sb.append(":");
+                sb.append(ste.getLineNumber());
+                sb.append(")");
+                sb.append("\n\t");
+            }
+            throw new CommandException(FOR_NAME + ": Puntamento fuori tabella!\n" + aiobe.getMessage() + "\n stack: " + sb, aiobe);
         } catch (NullPointerException npe) {
             StackTraceElement[] stackTrace = npe.getStackTrace();
-            throw new CommandException(FOR_NAME + "Si e\' verificato un puntamento a null in " + this.getClass().getName() + ": " + npe.getMessage() + "\n stack: " + stackTrace[0]);            
+            throw new CommandException(FOR_NAME + "Si e\' verificato un puntamento a null in " + this.getClass().getName() + ": " + npe.getMessage() + "\n stack: " + stackTrace[0], npe);            
         } catch (Exception e) {
             StackTraceElement[] stackTrace = e.getStackTrace();
-            throw new CommandException(FOR_NAME + "Eccezione generica da " + this.getClass().getName() + ": " + e.getMessage() + "\n stack: " + stackTrace[0]);
+            throw new CommandException(FOR_NAME + "Eccezione generica da " + this.getClass().getName() + ": " + e.getMessage() + "\n stack: " + stackTrace[0], e);
         }
         // Imposta il testo del Titolo da visualizzare prima dell'elenco
         req.setAttribute("titoloE", "AD Semplici");
@@ -242,7 +299,7 @@ public class ValuationCommand extends ItemBean implements Command {
         req.setAttribute("fileJsp", nomeFileElenco);
          // Salva nella request: elenco AD Semplici
         req.setAttribute("elenco", v);
-        req.setAttribute("duplicati", duplicati);
+        req.setAttribute("duplicati", cleanDuplicates);
     }    
     
 }
