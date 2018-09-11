@@ -64,7 +64,7 @@ import java.util.Vector;
  * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
  * @version 3
  */
-public class CourseBean implements Serializable {
+public class CourseBean implements Serializable, Comparable<CourseBean> {
     
     /**
      * La serializzazione necessita di dichiarare una costante di tipo long
@@ -259,7 +259,26 @@ public class CourseBean implements Serializable {
      */
     public String getKey()
                   throws AttributoNonValorizzatoException {
-        return this.getCodiceCdSUGOV() + this.getCodiceADUGOV() + this.getCodiceFiscaleDocente() + this.getInizioPerDid() + this.getFinePerDid();
+        return this.getCodiceCdSUGOV() + 
+               this.getCodiceADUGOV()  + 
+               this.getCodiceFiscaleDocente() + 
+               this.getInizioPerDid() + 
+               this.getFinePerDid();
+    }
+    
+    
+    /**
+     * Restituisce una chiave univoca per un'Attivit&agrave; Didattica.
+     * Due Attivit&agrave; Didattiche sono uguali quando hanno la stessa chiave univoca.
+     * 
+     * @return
+     * @throws AttributoNonValorizzatoException
+     */
+    public String getSmallKey()
+                  throws AttributoNonValorizzatoException {
+        return this.getCodiceCdSUGOV() + 
+               this.getCodiceADUGOV()  + 
+               this.getCodiceFiscaleDocente();
     }
     
     
@@ -278,7 +297,38 @@ public class CourseBean implements Serializable {
         }
         return super.equals(obj);
     }
+    
 
+    /**
+     * Restituisce un intero:
+     * <ul>
+     * <li>&lt; 0</li>
+     * <li>&equiv; 0</li>
+     * <li>&gt; 0</li>
+     * </ul> 
+     * a seconda che l'id del dipartimento
+     * corrente sia minore, uguale, maggiore
+     * dell'id del dipartimento <code>o</code> passato come argomento.
+     * 
+     */
+    @Override
+    public int compareTo(CourseBean o) {
+        int std = -1;
+        if (o == null)
+            return 1;
+        try {
+            std = this.getId();
+        } catch (AttributoNonValorizzatoException anve) {
+            // Auto-generated method stub
+            return 0;
+        }
+        try {
+            return new Integer(std).compareTo(new Integer(o.getId())); 
+        } catch (AttributoNonValorizzatoException anve) {
+            return 1;
+        }
+    }
+    
     
     /* **************************************************** *
      *           Metodi getter e setter per id              *
