@@ -34,6 +34,7 @@ package it.alma.command;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -46,6 +47,7 @@ import it.alma.DBWrapper;
 import it.alma.Query;
 import it.alma.bean.CourseBean;
 import it.alma.bean.ItemBean;
+import it.alma.exception.AttributoNonValorizzatoException;
 import it.alma.exception.CommandException;
 import it.alma.exception.NotFoundException;
 import it.alma.exception.WebStorageException;
@@ -122,34 +124,25 @@ public class ValuationCommand extends ItemBean implements Command {
      * <p>Gestisce il flusso principale.</p>
      * <p>Prepara i bean.</p>
      */
-    public void execute(HttpServletRequest req) throws CommandException {  
+    public void execute(HttpServletRequest req) 
+                 throws CommandException {  
         DBWrapper db = null;               // Databound        
         Vector<CourseBean> v = new Vector<CourseBean>();
-        Vector<CourseBean> adSemplici = new Vector<CourseBean>();
-        Vector<CourseBean> duplicati = new Vector<CourseBean>();
-        Vector<CourseBean> purged = new Vector<CourseBean>();
-        HashMap<String, CourseBean> vHash = new HashMap<String, CourseBean>();
+        List<CourseBean> sda = new Vector<CourseBean>();
         List<CourseBean> duplicates = null;
-        List<CourseBean> cleanDuplicates = null;
-        //List<CourseBean> duplicati = new ArrayList<CourseBean>();
+        //Vector<CourseBean> purged = new Vector<CourseBean>();
+        //HashMap<String, CourseBean> vHash = new HashMap<String, CourseBean>();
         // Instanzia nuova classe WebStorage per il recupero dei dati
         try {
             db = new DBWrapper();
         } catch (WebStorageException wse) {
-            throw new CommandException(FOR_NAME + "Non e\' disponibile un collegamento al database\n." + wse.getMessage());
+            throw new CommandException(FOR_NAME + "Non e\' disponibile un collegamento al database\n." + wse.getMessage(), wse);
         }
-        // Recupero Attività Didattiche Semplici
+        // Recupera Attività Didattiche Semplici
         try {
             v = db.getADSemplici();
-            /* Trasforma il Vector in HashMap con chiave formata da una concatenazione univoca dei valori
-            for (int i = 0; i < v.size(); i++) {
-                CourseBean course = v.get(i);
-                // Genera la chiave
-                String key =  course.getKey();
-                vHash.put(key, course);
-            }*/
         } catch (NotFoundException nfe) {
-            throw new CommandException(FOR_NAME + ": Impossibile recuperare un attributo obbligatorio.\n" + nfe.getMessage());
+            throw new CommandException(FOR_NAME + ": Impossibile recuperare un attributo obbligatorio.\n" + nfe.getMessage(), nfe);
         } catch (WebStorageException wse) {
             StackTraceElement[] stackTrace = wse.getStackTrace();
             StringBuffer sb = new StringBuffer();
@@ -165,109 +158,79 @@ public class ValuationCommand extends ItemBean implements Command {
                 sb.append(")");
                 sb.append("\n\t");
             }
-            throw new CommandException(FOR_NAME + "Si e\' verificato un problema nel recuperare i dati relativi all'elenco delle AD.\n" + wse.getMessage() + "\n stack: " + sb);
+            throw new CommandException(FOR_NAME + "Si e\' verificato un problema nel recuperare i dati relativi all'elenco delle AD.\n" + wse.getMessage() + "\n stack: " + sb, wse);
         } catch (NullPointerException npe) {
             StackTraceElement[] stackTrace = npe.getStackTrace();
-            throw new CommandException(FOR_NAME + "Si e\' verificato un puntamento a null in " + this.getClass().getName() + ": " + npe.getMessage() + "\n stack: " + stackTrace[0]);            
+            throw new CommandException(FOR_NAME + "Si e\' verificato un puntamento a null in " + this.getClass().getName() + ": " + npe.getMessage() + "\n stack: " + stackTrace[0], npe);            
         } catch (Exception e) {
             StackTraceElement[] stackTrace = e.getStackTrace();
-            throw new CommandException(FOR_NAME + "Eccezione generica da " + this.getClass().getName() + ": " + e.getMessage() + "\n stack: " + stackTrace[0]);
+            throw new CommandException(FOR_NAME + "Eccezione generica da " + this.getClass().getName() + ": " + e.getMessage() + "\n stack: " + stackTrace[0], e);
         }
+        
+        duplicates = getDuplicates(v);
+        // Ordina i duplicati per chiave
+        sortByCode(duplicates);
+        List<CourseBean> cleanDuplicates = splitDuplicates(duplicates);
         // Individua le Attività Didattiche Semplici da porre in valutazione
+        sortByCode(v);
+        sda = removeDuplicates(v, new ArrayList<CourseBean>(cleanDuplicates));
+        // Imposta il testo del Titolo da visualizzare prima dell'elenco
+        req.setAttribute("titoloE", "AD Semplici");
+        // Salva nella request: Titolo (da mostrare nell'HTML)
+        req.setAttribute("tP", req.getAttribute("titoloE"));         
+        // Imposta la Pagina JSP di forwarding
+        req.setAttribute("fileJsp", nomeFileElenco);
+         // Salva nella request: elenco AD Semplici
+        req.setAttribute("elenco", sda);
+        req.setAttribute("duplicati", cleanDuplicates);
+    }    
+    
+    
+    /**
+     * <p>Restituisce una lista di AD che sono state individuate come doppie
+     * in base alla chiave specificata nell'oggetto AD.</p>
+     * 
+     * @param v
+     * @return
+     * @throws CommandException
+     */
+    private List<CourseBean> getDuplicates(Vector<CourseBean> v)
+                                    throws CommandException {
+        List<CourseBean> duplicates = null;
+        List<CourseBean> cleanDuplicates = null;
         try {
             int vSize = v.size();
-            purged = v;
-            /*
-            int j = 0;
-            while (j < vSize) {
-                for (int i = 0; i < vSize; i++) {
-                    CourseBean first = v.elementAt(j);
-                    CourseBean current = v.elementAt(i);
-                    // Controllo sui duplicati
-                    if (first.getKey().equals(current.getKey())) {
-                        int indexOfDuplicate = v.indexOf(current);
-                        duplicati.add(current);   // Elements will be removed later                   
-                    }
-                }
-                j = j + 1;
-            }
-            v.removeAll(duplicati);
-            */
             duplicates = new ArrayList<CourseBean>();
-            int pos = 0;
-            for (int i = 0; i < v.size(); i++) {
-                for (int j = 0; j < v.size(); j++) {
+            // Cicla due volte il Vector delle AD per individuare AD con la stessa chiave
+            for (int i = 0; i < vSize; i++) {
+                for (int j = 0; j < vSize; j++) {
                     if (i != j) {   // Se i e j sono uguali sta puntando allo stesso elemento, ed è evidente che un elemento è uguale a se stesso...
                         CourseBean courseRaw = v.elementAt(i);
                         CourseBean courseOrd = v.elementAt(j);
                         if (courseRaw.getKey().equals(courseOrd.getKey()) && (courseRaw.getId() != courseOrd.getId())) {
-                            //duplicati.insertElementAt(courseOrd, pos);
-                            //pos++;
                             duplicates.add(courseOrd);
                         }
                     }
                 }
             }
+            // Ordina la lista ottenuta in base al criterio specificato nel metodo override compareTo del Bean
             Collections.sort(duplicates);
+            // Clona la lista dei duplicati
             cleanDuplicates = new ArrayList<CourseBean>(duplicates);
+            // Cicla la lista dei duplicati
             for (int i = 0; i < duplicates.size(); i++) {
+                // Costruisce l'indice del record successivo a quello recuperato
                 int j = i + 1;
+                // Controllo per evitare puntamento fuori tabella
                 if (j < duplicates.size()) {
+                    // I doppioni veri hanno anche lo stesso id
                     if (duplicates.get(i).getId() == duplicates.get(j).getId()) {
+                        // Elimina il doppione vero
                         cleanDuplicates.remove(j);
                     }
                 }
             }
-            /* Toglie i doppioni puri dall'elenco completo
-            for (int i = 0; i < duplicates.size(); i++) {
-                CourseBean current = duplicates.get(i);
-                for (int j = 0; j < v.size(); j++) {
-                    CourseBean c = v.elementAt(j);
-                    if (c.getId() == current.getId()) {
-                        v.removeElementAt(j);
-                    }
-                }
-            }*/
-            //Collections.sort(sortedKeys);
-            //return resultsVector;
-                
-                // Controlla se è un corso di area medica
-                //if (ad.getCodiceCdSUGOV().startsWith("M")) {
-                    /* *******************************
-                     *    Ramo Corsi di area medica
-                     * *******************************/
-                    // Se NON è un corso elettivo
-                //    if (!corsiElettivi.contains(ad.getCodiceADUGOV())) {
-                        // Se NON è un corso elettivo ha senso continuare...
-                        //
-                  //  }
-                /*}
-                
-                else {
-                    /* *******************************
-                     *  Ramo Corsi di area non medica
-                     * *******************************/
-                    //
-                //}
-                    // Se no, controlla se i CFU totali sono >= 4
-                        // Controlla che i CFU di tipo LEZ siano > 0
-                
-                // Se sì controlla che non sia un corso elettivo
-                    // Controlla che i CFU di tipo LEZ siano > 0
-                
-                // Sul risultato trovato cerca i doppioni
-                    // Se è un doppione cerca di accorpare i periodi
-                /*
-                // Controlla che i CFU totali siano pià di 3
-                if (ad.getCreditiTotali() < 4) {
-                    // Se è un corso di area medica va considerato, altrimenti va scartato direttamente
-                    if (ad.getCodiceCdSUGOV())
-                }
-                // Controlla che ci siano ore di lezione
-//                if (ad.getOreLezione() > 0) {
-                    
-//                }
-            }*/
+            return cleanDuplicates;
         } catch (ArrayIndexOutOfBoundsException aiobe) {
             StackTraceElement[] stackTrace = aiobe.getStackTrace();
             StringBuffer sb = new StringBuffer();
@@ -291,15 +254,175 @@ public class ValuationCommand extends ItemBean implements Command {
             StackTraceElement[] stackTrace = e.getStackTrace();
             throw new CommandException(FOR_NAME + "Eccezione generica da " + this.getClass().getName() + ": " + e.getMessage() + "\n stack: " + stackTrace[0], e);
         }
-        // Imposta il testo del Titolo da visualizzare prima dell'elenco
-        req.setAttribute("titoloE", "AD Semplici");
-        // Salva nella request: Titolo (da mostrare nell'HTML)
-        req.setAttribute("tP", req.getAttribute("titoloE"));         
-        // Imposta la Pagina JSP di forwarding
-        req.setAttribute("fileJsp", nomeFileElenco);
-         // Salva nella request: elenco AD Semplici
-        req.setAttribute("elenco", v);
-        req.setAttribute("duplicati", cleanDuplicates);
-    }    
+    }
+    
+    
+    private List<CourseBean> splitDuplicates(List<CourseBean> duplicates)
+                                      throws CommandException {
+        int vSize = duplicates.size();
+        List<CourseBean> halfDuplicates = new ArrayList<CourseBean>();
+        try {
+            // Cicla la lista dei duplicati
+            for (int i = 0; i < duplicates.size(); i++) {
+                // Costruisce l'indice del record successivo a quello recuperato
+                int j = i + 1;
+                // Controllo per evitare puntamento fuori tabella
+                if (j < duplicates.size()) {
+                    // Recupera l'occorrenza corrente
+                    CourseBean doublet = duplicates.get(i);
+                    // Se i due doppioni hanno la stessa chiave ne prende il primo
+                    if (doublet.getKey().equals(duplicates.get(j).getKey())) {
+                        // Prende il primo
+                        halfDuplicates.add(doublet);
+                    }
+                }
+            }
+            return halfDuplicates;
+        } catch (AttributoNonValorizzatoException anve) {
+            throw new CommandException(anve);
+        } catch (ArrayIndexOutOfBoundsException aiobe) {
+            throw new CommandException(aiobe);
+        } catch (NullPointerException npe) {
+            throw new CommandException(npe);
+        } catch (Exception e) {
+            throw new CommandException(e);
+        }
+    }
+    
+    
+    private static Vector<CourseBean> removeDuplicates(Vector<CourseBean> v, ArrayList<CourseBean> duplicates)
+            throws CommandException {
+        try {
+            for (int i = 0; i < duplicates.size(); i++) {
+                CourseBean ad = v.elementAt(i);
+                // Ciclo forEach (Java 1.5+)
+                for (int j = 0; j < duplicates.size(); j++) {
+                    CourseBean doublet = duplicates.get(j);
+                    if (ad.getKey().equals(doublet.getKey())) {
+                       v.removeElementAt(i); 
+                    }
+                }
+            }
+        } catch (AttributoNonValorizzatoException anve) {
+            throw new CommandException(anve);
+        } catch (ArrayIndexOutOfBoundsException aiobe) {
+            throw new CommandException(aiobe);
+        } catch (NullPointerException npe) {
+            throw new CommandException(npe);
+        } catch (Exception e) {
+            throw new CommandException(e);
+        }
+        return v;
+    }
+    
+    
+    private ArrayList<CourseBean> clean(Vector<CourseBean> v) {
+        List<CourseBean> simpleDA = new ArrayList<CourseBean>(v);
+        
+        // Ripulisce la lista delle AD Semplici dai duplicati
+        
+        // Controlla se è un corso di area medica
+        //if (ad.getCodiceCdSUGOV().startsWith("M")) {
+            /* *******************************
+             *    Ramo Corsi di area medica
+             * *******************************/
+            // Se NON è un corso elettivo
+        //    if (!corsiElettivi.contains(ad.getCodiceADUGOV())) {
+                // Se NON è un corso elettivo ha senso continuare...
+                //
+          //  }
+        /*}
+        
+        else {
+            /* *******************************
+             *  Ramo Corsi di area non medica
+             * *******************************/
+            //
+        //}
+            // Se no, controlla se i CFU totali sono >= 4
+                // Controlla che i CFU di tipo LEZ siano > 0
+        
+        // Se sì controlla che non sia un corso elettivo
+            // Controlla che i CFU di tipo LEZ siano > 0
+        
+        // Sul risultato trovato cerca i doppioni
+            // Se è un doppione cerca di accorpare i periodi
+        /*
+        // Controlla che i CFU totali siano pià di 3
+        if (ad.getCreditiTotali() < 4) {
+            // Se è un corso di area medica va considerato, altrimenti va scartato direttamente
+            if (ad.getCodiceCdSUGOV())
+        }
+        // Controlla che ci siano ore di lezione
+        //        if (ad.getOreLezione() > 0) {
+            
+        //        }
+        }*/
+        return null;
+    }
+    
+    
+    private void sortByKey(List<CourseBean> l) 
+            throws CommandException {
+        Collections.sort(l, new Sortbykey());
+        //return null;
+    }
+    
+    
+    private void sortByCode(List<CourseBean> l) 
+            throws CommandException {
+        Collections.sort(l, new Sortbycode());
+        //return null;
+    }
+    
+    
+    protected class Sortbykey  implements Comparator<CourseBean> 
+    { 
+        // Used for sorting in ascending order of course key 
+        @Override
+        public int compare(CourseBean o1, CourseBean o2) {
+            String std = null;
+            if (o1 == null || o2 == null)
+                return 1;
+            try {
+                std = o1.getKey();
+            } catch (AttributoNonValorizzatoException anve) {
+                // Auto-generated method stub
+                return 0;
+            }
+            try {
+                return std.compareTo(o2.getKey());
+            } catch (AttributoNonValorizzatoException anve) {
+                return 1;
+            }
+        } 
+    } 
+    
+    
+    protected class Sortbycode  implements Comparator<CourseBean> 
+    { 
+        // Used for sorting in ascending order of course key 
+        @Override
+        public int compare(CourseBean o1, CourseBean o2) {
+            String std = null;
+            if (o1 == null || o2 == null)
+                return 1;
+            try {
+                std = o1.getCodiceFiscaleDocente() + 
+                      o1.getCodiceADUGOV() + 
+                      o1.getCodiceCdSUGOV() + 
+                      o1.getInizioPerDid() + 
+                      o1.getFinePerDid();
+            } catch (NullPointerException npe) {
+                // Auto-generated method stub
+                return 0;
+            }
+            try {
+                return std.compareTo(o2.getCodiceFiscaleDocente() + o2.getCodiceADUGOV() + o2.getCodiceCdSUGOV() + o1.getInizioPerDid() + o1.getFinePerDid());
+            } catch (NullPointerException npe) {
+                return 1;
+            }
+        } 
+    } 
     
 }
