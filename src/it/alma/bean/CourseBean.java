@@ -34,6 +34,7 @@ package it.alma.bean;
 import it.alma.exception.AttributoNonValorizzatoException;
 
 import java.io.Serializable;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Vector;
 
@@ -62,7 +63,6 @@ import java.util.Vector;
  * <cite>Partizionamenti</cite>.
  * 
  * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
- * @version 3
  */
 public class CourseBean implements Serializable, Comparable<CourseBean> {
     
@@ -259,11 +259,11 @@ public class CourseBean implements Serializable, Comparable<CourseBean> {
      */
     public String getKey()
                   throws AttributoNonValorizzatoException {
-        return this.getCodiceCdSUGOV() + 
-               this.getCodiceADUGOV()  + 
-               this.getCodiceFiscaleDocente() + 
-               this.getInizioPerDid() + 
-               this.getFinePerDid();
+        return this.getCodiceCdSUGOV().trim() + 
+               this.getCodiceADUGOV().trim()  + 
+               this.getCodiceFiscaleDocente().trim() + 
+               this.getInizioPerDid().trim() + 
+               this.getFinePerDid().trim();
     }
     
     
@@ -276,9 +276,9 @@ public class CourseBean implements Serializable, Comparable<CourseBean> {
      */
     public String getSmallKey()
                   throws AttributoNonValorizzatoException {
-        return this.getCodiceCdSUGOV() + 
-               this.getCodiceADUGOV()  + 
-               this.getCodiceFiscaleDocente();
+        return this.getCodiceCdSUGOV().trim() + 
+               this.getCodiceADUGOV().trim()  + 
+               this.getCodiceFiscaleDocente().trim();
     }
     
     
@@ -289,11 +289,11 @@ public class CourseBean implements Serializable, Comparable<CourseBean> {
     public boolean equals(Object obj) {
         if (obj instanceof CourseBean) {
             return this.id == ((CourseBean) obj).id 
-                && this.codiceCdSUGOV == ((CourseBean) obj).codiceCdSUGOV 
-                && this.codiceADUGOV.equals(((CourseBean) obj).codiceADUGOV)
-                && this.codiceFiscaleDocente.equals(((CourseBean) obj).codiceFiscaleDocente)
-                && this.inizioPerDid.equals(((CourseBean) obj).inizioPerDid)
-                && this.finePerDid.equals(((CourseBean) obj).inizioPerDid);
+                && this.codiceCdSUGOV.trim().equals(((CourseBean) obj).codiceCdSUGOV.trim())
+                && this.codiceADUGOV.trim().equals(((CourseBean) obj).codiceADUGOV.trim())
+                && this.codiceFiscaleDocente.trim().equals(((CourseBean) obj).codiceFiscaleDocente.trim())
+                && this.inizioPerDid.trim().equals(((CourseBean) obj).inizioPerDid.trim())
+                && this.finePerDid.trim().equals(((CourseBean) obj).inizioPerDid.trim());
         }
         return super.equals(obj);
     }
@@ -328,7 +328,7 @@ public class CourseBean implements Serializable, Comparable<CourseBean> {
             return 1;
         }
     }
-    
+        
     
     /* **************************************************** *
      *           Metodi getter e setter per id              *
