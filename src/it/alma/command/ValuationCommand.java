@@ -155,7 +155,7 @@ public class ValuationCommand extends ItemBean implements Command {
      */
     public void execute(HttpServletRequest req) 
                  throws CommandException {  
-        DBWrapper db = null;               // Databound        
+        DBWrapper db = null;               // Databound
         Vector<CourseBean> v = new Vector<CourseBean>();
         HashMap<String, CourseBean> sda = new HashMap<String, CourseBean>();
         List<CourseBean> duplicates = null;
@@ -195,11 +195,14 @@ public class ValuationCommand extends ItemBean implements Command {
             StackTraceElement[] stackTrace = e.getStackTrace();
             throw new CommandException(FOR_NAME + "Eccezione generica da " + this.getClass().getName() + ": " + e.getMessage() + "\n stack: " + stackTrace[0], e);
         }
-        
+        // Ottiene i duplicati logici (righe con la stessa chiave e id diversi)
         duplicates = getDuplicates(v);
-        // Ordina i duplicati per chiave
+        // Ordina i duplicati logici per chiave
         sortByCode(duplicates);
-        List<CourseBean> halfDuplicates = splitDuplicates(duplicates);
+        // Ottiene una lista di solo i campioni di duplicati, cioè in pratica di chiavi che hanno due o più occorrenze nella lista delle AD
+        List<CourseBean> samplesDuplicates = splitDuplicates(duplicates);
+        
+        List<CourseBean> merged = mergeDates(samplesDuplicates);
         // Individua le Attività Didattiche Semplici da porre in valutazione
         //sortByCode(v);
         sda = removeDuplicates(v, new ArrayList<CourseBean>(duplicates));
@@ -214,25 +217,31 @@ public class ValuationCommand extends ItemBean implements Command {
         req.setAttribute("lista", sda);
         req.setAttribute("elenco", v);
         req.setAttribute("duplicati", duplicates);
-        req.setAttribute("doppioni", halfDuplicates);
+        req.setAttribute("doppioni", samplesDuplicates);
+        req.setAttribute("doppi", merged);
     }
     
     
     /**
      * <p>Restituisce una lista di AD che sono state individuate come doppie
      * in base alla chiave specificata nell'oggetto AD.</p>
+     * <p>I doppioni si definiscono come <code>"AD aventi la stessa chiave"</code>
+     * e non quindi come "tuple identiche".<br />
+     * Si tratta quindi di duplicati logici, non di duplicati identici.<br /> 
+     * Il presente metodo effettua un controllo per eliminare eventuali duplicati
+     * identici e restituisce soltanto i duplicati logici.</p>
      * 
-     * @param v
-     * @return
-     * @throws CommandException
+     * @param v un Vector di AD da setacciare alla ricerca di duplicati
+     * @return <code>List&lt;CourseBean&gt;</code> - ArrayList di duplicati trovati  
+     * @throws CommandException se si verifica un problema, generalmente nell'accesso a qualche valore o un puntamento fuori tabella
      */
     private List<CourseBean> getDuplicates(Vector<CourseBean> v)
                                     throws CommandException {
-        List<CourseBean> duplicates = null;
-        List<CourseBean> cleanDuplicates = null;
+        List<CourseBean> genericDuplicates = null;
+        List<CourseBean> logicalDuplicates = null;
         try {
             int vSize = v.size();
-            duplicates = new ArrayList<CourseBean>();
+            genericDuplicates = new ArrayList<CourseBean>();
             // Cicla due volte il Vector delle AD per individuare AD con la stessa chiave
             for (int i = 0; i < vSize; i++) {
                 for (int j = 0; j < vSize; j++) {
@@ -240,29 +249,29 @@ public class ValuationCommand extends ItemBean implements Command {
                         CourseBean courseRaw = v.elementAt(i);
                         CourseBean courseOrd = v.elementAt(j);
                         if (courseRaw.getKey().equals(courseOrd.getKey()) && (courseRaw.getId() != courseOrd.getId())) {
-                            duplicates.add(courseOrd);
+                            genericDuplicates.add(courseOrd);
                         }
                     }
                 }
             }
             // Ordina la lista ottenuta in base al criterio specificato nel metodo override compareTo del Bean
-            Collections.sort(duplicates);
+            Collections.sort(genericDuplicates);
             // Clona la lista dei duplicati
-            cleanDuplicates = new ArrayList<CourseBean>(duplicates);
+            logicalDuplicates = new ArrayList<CourseBean>(genericDuplicates);
             // Cicla la lista dei duplicati
-            for (int i = 0; i < duplicates.size(); i++) {
+            for (int i = 0; i < genericDuplicates.size(); i++) {
                 // Costruisce l'indice del record successivo a quello recuperato
                 int j = i + 1;
                 // Controllo per evitare puntamento fuori tabella
-                if (j < duplicates.size()) {
+                if (j < genericDuplicates.size()) {
                     // I doppioni veri hanno anche lo stesso id
-                    if (duplicates.get(i).getId() == duplicates.get(j).getId()) {
-                        // Elimina il doppione vero
-                        cleanDuplicates.remove(j);
+                    if (genericDuplicates.get(i).getId() == genericDuplicates.get(j).getId()) {
+                        // Elimina il doppione vero (vero = identico in tutto, anche nell'id)
+                        logicalDuplicates.remove(j);
                     }
                 }
             }
-            return cleanDuplicates;
+            return logicalDuplicates;
         } catch (ArrayIndexOutOfBoundsException aiobe) {
             StackTraceElement[] stackTrace = aiobe.getStackTrace();
             StringBuffer sb = new StringBuffer();
@@ -278,7 +287,7 @@ public class ValuationCommand extends ItemBean implements Command {
                 sb.append(")");
                 sb.append("\n\t");
             }
-            throw new CommandException(FOR_NAME + ": Puntamento fuori tabella!\n" + aiobe.getMessage() + "\n stack: " + sb, aiobe);
+            throw new CommandException(FOR_NAME + "Puntamento fuori tabella!\n" + aiobe.getMessage() + "\n stack: " + sb, aiobe);
         } catch (NullPointerException npe) {
             StackTraceElement[] stackTrace = npe.getStackTrace();
             throw new CommandException(FOR_NAME + "Si e\' verificato un puntamento a null in " + this.getClass().getName() + ": " + npe.getMessage() + "\n stack: " + stackTrace[0], npe);            
@@ -290,70 +299,47 @@ public class ValuationCommand extends ItemBean implements Command {
     
     
     /**
-     * <p>Suddivide la lista delle AD duplicate in due, individuando le chiavi
-     * duplicate.</p>
+     * <p>Ottiene la lista dei "doppi singoli" ("doppioni puliti") 
+     * ovvero di una singola copia delle righe doppie, non di entrambe
+     * (e men che meno pi&uacute;, come avviene nel caso di alcuni laboratori 
+     * o AD particolari come "Inglese Scientifico" che non hanno un solo
+     * doppione ma quattro o cinque).</p>
+     * <p>Prende in input la lista dei duplicati logici, passata come
+     * argomento, e suddivide tale lista delle AD duplicate approssimativamente  
+     * in due, individuando le chiavi duplicate - cio&egrave; in pratica 
+     * chiavi che hanno due o più occorrenze nella lista delle AD.</p>
      * <p>Restituisce una lista di elementi che hanno un valore doppio.
      * I duplicati, per definizione, vanno a coppie (almeno), per cui, volendo
-     * eliminarli dall'elenco delle tuple, non vanno eliminati a coppie, ma solo
-     * singolarmente.
-     * P.es., se avessi il seguente insieme {3, 4, 4, 7}
-     * volendo eliminare i duplicati dovrei eliminare UN 4, non tutti e due;
-     * ma, nel vettore dei duplicati, attualmente ci sono tutti i duplicati,
-     * non solo l'elenco distinto degli elementi soggetti a duplicazione.
+     * eliminarli dall'elenco delle tuple "grezze", non vanno eliminati a coppie, 
+     * ma solo singolarmente.<br />
+     * P.es., se avessi il seguente insieme &nbsp;<code>{3, 4, 4, 7}</code>
+     * volendo eliminare i duplicati dovrei eliminare <strong>un solo</strong> 4, 
+     * non tutti e due; ma, nel vettore dei duplicati, attualmente ci sono 
+     * tutti i duplicati (tranne i duplicati identici, naturalmente, cio&egrave;
+     * tuple identiche in tutto e per tutto, anche nell'id), quindi tutti i 
+     * duplicati logici - ovvero le tuple aventi la stessa chiave ma diverso id -
+     * e non solo l'elenco distinto degli elementi soggetti a duplicazione.
      * Per questo motivo, il presente metodo seleziona, secondo un criterio
-     * ragionato, solo la met&agrave; dei duplicati, in modo da toglierli
-     * dall'elenco completo.</p> 
+     * ragionato, solo la met&agrave;, o poco meno, dei duplicati 
+     * in modo da poterli togliere dall'elenco completo.</p> 
      * 
-     * @param duplicates
-     * @return
-     * @throws CommandException
+     * @param duplicates lista dei duplicati logici
+     * @return <code>List&lt;CourseBean&gt;</code> - ArrayList di AD campione che hanno almeno un duplicato  
+     * @throws CommandException se si verifica un problema in un puntamento fuori tabella o nell'accesso a qualche elemento
      */
     private static List<CourseBean> splitDuplicates(List<CourseBean> duplicates)
                                              throws CommandException {
+        // Calcola la lunghezza della lista di duplicati logici
         int vSize = duplicates.size();
-        List<CourseBean> halfDuplicates = new ArrayList<CourseBean>();
-        List<CourseBean> duplicatesCopy = new ArrayList<CourseBean>(duplicates);
+        // Dichiara la lista "pulita" di elementi che hanno almeno un duplicato logico
+        List<CourseBean> samplesDuplicates = new ArrayList<CourseBean>();
         try {
-            /*
-            // Cicla due volte il Vector delle AD duplicate per individuare AD con la stessa chiave
-            for (int i = 0; i < vSize; i++) {
-                for (int j = 0; j < vSize; j++) {
-                    if (i != j) {   // Se i e j sono uguali sta puntando allo stesso elemento, ed è evidente che un elemento è uguale a se stesso...
-                        CourseBean courseRaw = duplicates.get(i);
-                        CourseBean courseOrd = duplicates.get(j);
-                        if (courseRaw.getKey().equals(courseOrd.getKey()) && (courseRaw.getId() != courseOrd.getId())) {
-                            halfDuplicates.add(courseOrd);
-                        }
-                    }
-                }
-            }
-            // Si potrebbe  costruire così se fossimo sicuri dell'ordine; ma purtroppo non lo siamo, e quindi se i doppioni non sono sempre consecutivi è un problema...
-            int j = 0;
-            for (int i = 0; i < vSize; i++) {
-                // Costruisce l'indice del record successivo a quello recuperato
-                j = i + 1;
-                // Controllo per evitare puntamento fuori tabella
-                if (j < duplicates.size()) {
-                    // Recupera l'occorrenza corrente
-                    CourseBean courseRaw = duplicates.get(i);
-                    // Recupera l'occorrenza successiva
-                    CourseBean doublet = duplicates.get(j);
-                    // Se i due doppioni hanno la stessa chiave ne prende il primo
-                    if ((courseRaw.getKey().equals(doublet.getKey()) && (courseRaw.getId() != doublet.getId()))) {
-                        // Prende il primo
-                        halfDuplicates.add(courseRaw);
-                    }
-                }
-            }
-            // Bisogna fare una ricerca diversa (ovviamente non questa qui...)
-            for (int i = 0; i < vSize; i = i + 2) {
-                halfDuplicates.add(duplicates.get(i));
-            }*/
+            // Contatori
             int i = 0;
             int j = 0;
-            // Il primo va aggiunto a mano, altrimenti dato l'algoritmo non entrerebbe mai nei duplicati puliti...
-            halfDuplicates.add(duplicates.get(i));
-            
+            // Il primo va aggiunto a mano, altrimenti, dato l'algoritmo, non entrerebbe mai nei duplicati puliti...
+            samplesDuplicates.add(duplicates.get(i));
+            // Cicla tutti i duplicati logici
             while (i < vSize) {
                 // Indice del successivo
                 j = i + 1;
@@ -361,44 +347,141 @@ public class ValuationCommand extends ItemBean implements Command {
                 CourseBean current = duplicates.get(i);
                 // Recupera la chiave
                 String key = current.getKey();
-                
+                // Controllo per evitare puntamento fuori tabella
                 if (j < vSize) {
-                    // Punta al record successivo
-
-                    // Confronta la chiave col record successivo
-                    // Finché la chiave non cambia
+                    // Punta al record successivo e confronta la chiave col record successivo
+                    // Finché la chiave non cambia...
                     while (j < vSize && key.equals(duplicates.get(j).getKey())) {
-                        // Incrementa l'indice
+                        // ...incrementa l'indice
                         if (j < vSize) {
                             j++;
                         }
                     }
+                    // Controllo per evitare puntamento fuori tabella
                     if (j < vSize) {
                         // Nel momento in cui la chiave cambia, tiene il record
                         String candidateKey = duplicates.get(j).getKey();
-                        
+                        // Flag specificante se il record corrente è già stato salvato nella lista delle AD che hanno duplicazioni
                         boolean alreadyYet = false;
-                        // A meno che non sia già presente nel Vector (potrebbe essere)
-                        for (int k = 0; k < halfDuplicates.size(); k++) {
-                            CourseBean controllo = halfDuplicates.get(k);
+                        // A meno che non sia già presente nel Vector (could be...)
+                        for (int k = 0; k < samplesDuplicates.size(); k++) {
+                            CourseBean controllo = samplesDuplicates.get(k);
                             // Recupera la chiave
                             String controlKey = controllo.getKey();
+                            // Se le due chiavi sono uguali... 
                             if (controlKey.equals(candidateKey)) {
+                                // ...vuol dire che il record era già stato salvato nella lista delle AD campione che hanno duplicazioni 
                                 alreadyYet = true;
+                                // Esce dal ciclo perché non c'è bisogno di sapere altro
                                 break;
                             }
                         }
-                        // Se non è già presente nei record salvati lo aggiunge
+                        // Se non è già presente nei record salvati...
                         if (!alreadyYet) {
-                            halfDuplicates.add(duplicates.get(j));
+                            // ...lo aggiunge alla lista delle AD campione che hanno duplicazioni
+                            samplesDuplicates.add(duplicates.get(j));
                         }
                     }
                 } 
                 i++;
             }
-            return halfDuplicates;
+            return samplesDuplicates;
         } catch (ClassCastException cce) {
-            throw new CommandException(cce);
+            throw new CommandException(FOR_NAME + cce);
+        } catch (ArrayIndexOutOfBoundsException aiobe) {
+            throw new CommandException(FOR_NAME + "Si e\' verificato un problema nell'indice di un puntamento in una lista di AD duplicate.\n", aiobe);
+        } catch (NullPointerException npe) {
+            throw new CommandException(FOR_NAME + "Si e\' verificato un problema nel puntamento a un oggetto.\n", npe);
+        } catch (Exception e) {
+            throw new CommandException(FOR_NAME + "Si e\' verificato un problema.\n",e);
+        }
+    }
+    
+    
+    /**
+     * <p>Prende in input un lista di AD che, nell'estrazione grezza, presentano
+     * uno o pi&uacute; duplicati logici tra cui vi sono alcune AD aventi
+     * la stessa chiave-base ma diverso periodo.<br />
+     * Tenta di unire i periodi dove possibile, ovvero dove il doppione 
+     * &egrave; persistito nella lista dei "doppioni puliti", 
+     * ottenendo cos&iacute; una lista di AD pulite 
+     * e tutte distinte anche per chiave-base, che dovr&agrave;
+     * essere poi unita (in gergo informatichese: joinata, mergiata...)
+     * alla lista delle AD da cui sono stati tolti i duplicati, per ottenere
+     * l'elenco pulito delle AD.</p>  
+     * 
+     * @param duplicates
+     * @return
+     * @throws CommandException
+     */
+    private static List<CourseBean> mergeDates(List<CourseBean> samplesDuplicates)
+            throws CommandException {
+        // Calcola la lunghezza della lista di campioni di duplicati logici
+        int vSize = samplesDuplicates.size();
+        // Dichiara la lista "grezza" di elementi che hanno la stessa chiave-base ma diverso periodo di erogazione
+        List<CourseBean> baseDuplicates = new ArrayList<CourseBean>();
+        /* Trasforma la lista in una HashMap per poter utilizzare i metodi di ricerca ottimizzati
+        HashMap<String, CourseBean> samplesDuplicatesAsHashMap = new HashMap<String, CourseBean>();
+        try {
+            // Ciclo forEach (Java 1.5+)            
+            for (CourseBean ad : samplesDuplicates) {
+                //String key = ad.getKey();
+                String smallKey = ad.getSmallKey();
+                samplesDuplicatesAsHashMap.put(smallKey, ad);
+            }
+            // Unisce i periodi dove possibile, ovvero dove il doppione è persistito nella lista dei "doppioni puliti"
+            int size = samplesDuplicatesAsHashMap.size();*/
+        // Cicla
+        try {
+            // Contatori
+            int i = 0;
+            int j = 0;
+            // Cicla tutti i duplicati logici
+            while (i < vSize) {
+                // Indice del successivo
+                j = i + 1;
+                // Punta al record corrente
+                CourseBean current = samplesDuplicates.get(i);
+                // Per definizione di questa List le chiavi complete non possono essere uguali, quindi recupera la chiave-base
+                String smallKey = current.getSmallKey();
+                /*
+                // Controllo per evitare puntamento fuori tabella
+                if (j < vSize) {
+                    // Punta al record successivo e confronta la chiave col record successivo
+                    // Finché la chiave-base è diversa...
+                    while (j < vSize && !smallKey.equals(samplesDuplicates.get(j).getSmallKey())) {
+                        // ...incrementa l'indice
+                        if (j < vSize) {
+                            j++;
+                        }
+                    }
+                    // Controllo per evitare puntamento fuori tabella
+                    if (j < vSize) {
+                        // Nel momento in cui le chiavi-base sono uguali, tiene il record perché gli interessa
+                        baseDuplicates.add(samplesDuplicates.get(j));
+                    }
+                }*/
+                for (CourseBean ad : samplesDuplicates) {
+                    // Controlla che le occorrenze abbiano la stessa chiave-base ma diverso id 
+                    // (AD con la stessa chiave-base e lo stesso id sono la stessa AD!)
+                    if (ad.getSmallKey().equals(current.getSmallKey()) && ad.getId() != current.getId()) {
+                     // Nel momento in cui le chiavi-base sono uguali (e gli id diversi), tiene il record perché gli interessa
+                        baseDuplicates.add(ad);
+                    }
+                }
+                i++;
+            }
+        // confronta la smallkey
+        // se le smallkey sono uguali, cerca la data minore, la data maggiore, e genera un unico periodo che è la fusione dei due
+        // setta il nuovo periodo in un bean avente la stessa smallkey ma ovviamente a questo punto differente key
+        // rimuove dal vector i 2 oggetti con i due periodi parziali e ci aggiunge il vector con il periodo risultante dai due
+            
+            // Toglie dalla lista grezza delle AD semplici (semilavorato) tutti i doppi indistintamente
+            // Riaggiunge alla lista depurata di tutti i doppi la lista dei "doppi singoli" lavorati, ovvero con i periodi uniti
+            // Questa è la lista finale pulita delle AD semplici, su cui si può implementare l'ulteriore algoritmo di scelta delle AD Semplici da valutare
+
+        } catch (AttributoNonValorizzatoException anve) {
+            throw new CommandException(anve);
         } catch (ArrayIndexOutOfBoundsException aiobe) {
             throw new CommandException(aiobe);
         } catch (NullPointerException npe) {
@@ -406,8 +489,9 @@ public class ValuationCommand extends ItemBean implements Command {
         } catch (Exception e) {
             throw new CommandException(e);
         }
+        return baseDuplicates;
     }
-    
+
     
     /**
      * <p>Trasforma il Vector in una HashMap.</p>
@@ -455,19 +539,10 @@ public class ValuationCommand extends ItemBean implements Command {
         return vH;
     }
     
-    
-    // 
-    private static List<CourseBean> mergePeriod(List<CourseBean> duplicates)
-            throws CommandException {
-        // Prende in input il vector dei duplicati 
-        // cicla
-        // confronta la smallkey
-        // se le smallkey sono uguali, cerca la data minore, la data maggiore, e genera un unico periodo che è la fusione dei due
-        // setta il nuovo periodo in un bean avente la stessa smallkey ma ovviamente a questo punto differente key
-        // rimuove dal vector i 2 oggetti con i due periodi parziali e ci aggiunge il vector con il periodo risultante dai due
-        return null;
+    private List<CourseBean> purge(Vector<CourseBean> v) {
+        List<CourseBean> a = new ArrayList<CourseBean>(v);
+        return a;
     }
-    
     
     private ArrayList<CourseBean> clean(Vector<CourseBean> v) {
         List<CourseBean> simpleDA = new ArrayList<CourseBean>(v);
