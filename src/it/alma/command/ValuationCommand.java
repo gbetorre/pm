@@ -35,6 +35,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -202,10 +204,12 @@ public class ValuationCommand extends ItemBean implements Command {
         // Ottiene una lista di solo i campioni di duplicati, cioè in pratica di chiavi che hanno due o più occorrenze nella lista delle AD
         List<CourseBean> samplesDuplicates = splitDuplicates(duplicates);
         
-        List<CourseBean> merged = mergeDates(samplesDuplicates);
+        List<CourseBean> differentByPeriod = getCoupletByPeriod(samplesDuplicates);
+        
+        List<CourseBean> merged = mergeDates(differentByPeriod);
         // Individua le Attività Didattiche Semplici da porre in valutazione
         //sortByCode(v);
-        sda = removeDuplicates(v, new ArrayList<CourseBean>(duplicates));
+        //sda = removeDuplicates(v, new ArrayList<CourseBean>(duplicates));
         
         // Imposta il testo del Titolo da visualizzare prima dell'elenco
         req.setAttribute("titoloE", "AD Semplici");
@@ -214,11 +218,12 @@ public class ValuationCommand extends ItemBean implements Command {
         // Imposta la Pagina JSP di forwarding
         req.setAttribute("fileJsp", nomeFileElenco);
          // Salva nella request: elenco AD Semplici
-        req.setAttribute("lista", sda);
+        //req.setAttribute("lista", sda);
         req.setAttribute("elenco", v);
         req.setAttribute("duplicati", duplicates);
         req.setAttribute("doppioni", samplesDuplicates);
-        req.setAttribute("doppi", merged);
+        req.setAttribute("doppi", differentByPeriod);
+        req.setAttribute("periodiUniti", merged);
     }
     
     
@@ -402,35 +407,81 @@ public class ValuationCommand extends ItemBean implements Command {
      * <p>Prende in input un lista di AD che, nell'estrazione grezza, presentano
      * uno o pi&uacute; duplicati logici tra cui vi sono alcune AD aventi
      * la stessa chiave-base ma diverso periodo.<br />
-     * Tenta di unire i periodi dove possibile, ovvero dove il doppione 
-     * &egrave; persistito nella lista dei "doppioni puliti", 
-     * ottenendo cos&iacute; una lista di AD pulite 
-     * e tutte distinte anche per chiave-base, che dovr&agrave;
-     * essere poi unita (in gergo informatichese: joinata, mergiata...)
-     * alla lista delle AD da cui sono stati tolti i duplicati, per ottenere
-     * l'elenco pulito delle AD.</p>  
+     * Seleziona queste ultime, ovvero quelle con:
+     * <strong> stesso CdS, Codice U-GOV, Docente </strong> 
+     * ma periodo diverso (da unire successivamente) quindi in sostanza
+     * l doppioni che hanno persistito nella lista dei "doppioni puliti", 
+     * ottenendo cos&iacute; una lista di AD accoppiate per chiave-base
+     * ma distinte per periodo, che dovranno poi essere ridotte a elementi
+     * distinti con i periodi uniti.</p>
      * 
-     * @param duplicates
-     * @return
-     * @throws CommandException
+     * @param samplesDuplicates ArrayList di AD campione che sono tutte distinte, tranne alcune che hanno stessa chiave-base ma periodo diverso 
+     * @return <code>List&lt;CourseBean&gt;</code> - ArrayList di AD che sono tutte uguali nella chiave-base ma diverse nel periodo  
+     * @throws CommandException se si verifica un problema di puntatore fuori tabella o in qualche altro tipo di puntamento
      */
-    private static List<CourseBean> mergeDates(List<CourseBean> samplesDuplicates)
-            throws CommandException {
+    private static List<CourseBean> getCoupletByPeriod(List<CourseBean> samplesDuplicates)
+                                                throws CommandException {
         // Calcola la lunghezza della lista di campioni di duplicati logici
         int vSize = samplesDuplicates.size();
         // Dichiara la lista "grezza" di elementi che hanno la stessa chiave-base ma diverso periodo di erogazione
         List<CourseBean> baseDuplicates = new ArrayList<CourseBean>();
-        /* Trasforma la lista in una HashMap per poter utilizzare i metodi di ricerca ottimizzati
-        HashMap<String, CourseBean> samplesDuplicatesAsHashMap = new HashMap<String, CourseBean>();
+        // Cicla
         try {
-            // Ciclo forEach (Java 1.5+)            
-            for (CourseBean ad : samplesDuplicates) {
-                //String key = ad.getKey();
-                String smallKey = ad.getSmallKey();
-                samplesDuplicatesAsHashMap.put(smallKey, ad);
+            // Contatori
+            int i = 0;
+            // Cicla tutti i duplicati logici
+            while (i < vSize) {
+                // Punta al record corrente
+                CourseBean current = samplesDuplicates.get(i);
+                // Per definizione di questa List le chiavi complete non possono essere uguali, quindi recupera la chiave-base
+                String smallKey = current.getSmallKey();
+                // Ciclo forEach (Java 1.5+)
+                for (CourseBean ad : samplesDuplicates) {
+                    // Controlla che le occorrenze abbiano la stessa chiave-base ma diverso id 
+                    // (AD con la stessa chiave-base e lo stesso id sono la stessa AD!)
+                    if (ad.getSmallKey().equals(smallKey) && ad.getId() != current.getId()) {
+                     // Nel momento in cui le chiavi-base sono uguali (e gli id diversi), tiene il record perché gli interessa
+                        baseDuplicates.add(ad);
+                    }
+                }
+                i++;
             }
-            // Unisce i periodi dove possibile, ovvero dove il doppione è persistito nella lista dei "doppioni puliti"
-            int size = samplesDuplicatesAsHashMap.size();*/
+        } catch (AttributoNonValorizzatoException anve) {
+            throw new CommandException(FOR_NAME + "Si e\' verificato un problema nel recupero di un attributo.\n" + anve.getMessage(), anve);
+        } catch (ArrayIndexOutOfBoundsException aiobe) {
+            throw new CommandException(FOR_NAME + "Si e\' verificato un puntamento fuori da una lista.\n" + aiobe.getMessage(), aiobe);
+        } catch (NullPointerException npe) {
+            throw new CommandException(FOR_NAME + "Si e\' verificato un puntamento a un oggetto non esistente.\n" + npe.getMessage(), npe);
+        } catch (Exception e) {
+            throw new CommandException(FOR_NAME + "Si e\' verificato un problema" + e.getMessage(), e);
+        }
+        return baseDuplicates;
+    }
+
+    
+    /**
+     * <p>Prende in input un lista di AD aventi
+     * la stessa chiave-base ma diverso periodo.<br />
+     * Tenta di unire i periodi dove possibile, usando il criterio di
+     * tenere le date pi&uacute; distanti possibile, quindi di calcolare
+     * l'unione degli intervalli,
+     * ottenendo cos&iacute; una lista di AD pulite 
+     * e tutte distinte anche per chiave-base, che dovr&agrave;
+     * essere poi unita (in gergo informatichese: joinata, mergiata...)
+     * alla lista delle AD da cui sono stati tolti i duplicati, 
+     * insieme alle basi dei duplicati veri (AD che presentano duplicati) 
+     * per ottenere infine l'elenco pulito delle AD.</p>
+     * 
+     * @param duplicateButPeriod ArrayList contenente un elenco di AD uguali nella chiave base ma differenti solo per il periodo
+     * @return
+     * @throws CommandException
+     */
+    private static List<CourseBean> mergeDates(List<CourseBean> duplicateButPeriod)
+                                        throws CommandException {
+        // Calcola la lunghezza della lista di campioni di duplicati logici
+        int vSize = duplicateButPeriod.size();
+        // Dichiara la lista "grezza" di elementi che hanno la stessa chiave-base ma diverso periodo di erogazione
+        List<CourseBean> merged = new ArrayList<CourseBean>();
         // Cicla
         try {
             // Contatori
@@ -441,32 +492,59 @@ public class ValuationCommand extends ItemBean implements Command {
                 // Indice del successivo
                 j = i + 1;
                 // Punta al record corrente
-                CourseBean current = samplesDuplicates.get(i);
-                // Per definizione di questa List le chiavi complete non possono essere uguali, quindi recupera la chiave-base
-                String smallKey = current.getSmallKey();
-                /*
-                // Controllo per evitare puntamento fuori tabella
+                CourseBean current = duplicateButPeriod.get(i);
                 if (j < vSize) {
-                    // Punta al record successivo e confronta la chiave col record successivo
-                    // Finché la chiave-base è diversa...
-                    while (j < vSize && !smallKey.equals(samplesDuplicates.get(j).getSmallKey())) {
-                        // ...incrementa l'indice
-                        if (j < vSize) {
-                            j++;
-                        }
-                    }
-                    // Controllo per evitare puntamento fuori tabella
-                    if (j < vSize) {
-                        // Nel momento in cui le chiavi-base sono uguali, tiene il record perché gli interessa
-                        baseDuplicates.add(samplesDuplicates.get(j));
-                    }
-                }*/
-                for (CourseBean ad : samplesDuplicates) {
-                    // Controlla che le occorrenze abbiano la stessa chiave-base ma diverso id 
+                    // Punta al record successivo
+                    CourseBean next = duplicateButPeriod.get(j);
+                    // Per definizione di questa List le chiavi complete non possono essere uguali, quindi recupera la chiave-base del corrente
+                    String smallKey = current.getSmallKey();
+                    // Controlla che l'occorrenza corrente e quella successiva abbiano la stessa chiave-base ma diverso id 
                     // (AD con la stessa chiave-base e lo stesso id sono la stessa AD!)
-                    if (ad.getSmallKey().equals(current.getSmallKey()) && ad.getId() != current.getId()) {
-                     // Nel momento in cui le chiavi-base sono uguali (e gli id diversi), tiene il record perché gli interessa
-                        baseDuplicates.add(ad);
+                    if ((smallKey.equals(next.getSmallKey())) && (current.getId() != next.getId())) {
+                        // Se siamo qui vuol dire che le due occorrenze sono uguali nella chiave-base ma non nel periodo
+                        // Recupera tutte le date, che dal bean arrivano sotto forma di String
+                        String startFirstDate  = current.getInizioPerDid();
+                        String endFirstDate    = current.getFinePerDid();
+                        String startSecondDate = next.getInizioPerDid();
+                        String endSecondDate   = next.getFinePerDid();
+                        // Converte le Sting in oggetti Date
+                        Date startFirstDateAsDate  = new SimpleDateFormat("yyyy-MM-dd").parse(startFirstDate);
+                        Date endFirstDateAsDate    = new SimpleDateFormat("yyyy-MM-dd").parse(endFirstDate);
+                        Date startSecondDateAsDate = new SimpleDateFormat("yyyy-MM-dd").parse(startSecondDate);
+                        Date endSecondDateAsDate   = new SimpleDateFormat("yyyy-MM-dd").parse(endSecondDate);
+                        /*
+                        System.out.println(startFirstDateAsDate.toString());
+                        System.out.println(endFirstDateAsDate.toString());
+                        System.out.println(startSecondDateAsDate.toString());
+                        System.out.println(endSecondDateAsDate.toString());
+                        */
+                        // Ordina le date dalla prima all'ultima
+                        ArrayList<Date> date = new ArrayList<>();
+                        date.add(startFirstDateAsDate);
+                        date.add(endFirstDateAsDate);
+                        date.add(startSecondDateAsDate);
+                        date.add(endSecondDateAsDate);
+                        Collections.sort(date);
+                        //System.out.println(date);
+                        // Prende la prima e l'ultima (gli estremi dell'intervallo)
+                        /*StringBuffer firstStart = new StringBuffer();
+                        GregorianCalendar calendar = new GregorianCalendar(); 
+                        calendar.setTime(date.get(0));
+                        firstStart.append(calendar.YEAR);
+                        firstStart.append("-");
+                        firstStart.append(calendar.MONTH);
+                        firstStart.append("-");
+                        firstStart.append(calendar.DAY_OF_MONTH);*/
+                        java.sql.Date firstStart = new java.sql.Date(date.get(0).getTime());
+                        java.sql.Date lastEnd = new java.sql.Date(date.get(3).getTime());
+
+                        // Costruisce un nuovo oggetto, uguale a uno dei due considerati
+                        CourseBean mergedCourse = new CourseBean(current); 
+                        //mergedCourse         current;
+                                                
+                        mergedCourse.setInizioPerDid(firstStart.toString());
+                        mergedCourse.setFinePerDid(lastEnd.toString());
+                        merged.add(mergedCourse);
                     }
                 }
                 i++;
@@ -489,9 +567,9 @@ public class ValuationCommand extends ItemBean implements Command {
         } catch (Exception e) {
             throw new CommandException(e);
         }
-        return baseDuplicates;
+        return merged;
     }
-
+    
     
     /**
      * <p>Trasforma il Vector in una HashMap.</p>
