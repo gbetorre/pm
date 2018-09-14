@@ -5,21 +5,13 @@
  */
 package it.alma.bean;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.beanutils.ConvertUtils;
-import org.apache.commons.beanutils.converters.DoubleConverter;
-import org.apache.commons.beanutils.converters.FloatConverter;
-import org.apache.commons.beanutils.converters.IntegerConverter;
-import org.apache.commons.beanutils.converters.LongConverter;
-import org.apache.commons.beanutils.converters.SqlDateConverter;
-import org.apache.commons.beanutils.converters.SqlTimeConverter;
 //import org.apache.commons.beanutils.converters.SqlTimestampConverter;
 
 /**
@@ -32,7 +24,6 @@ import org.apache.commons.beanutils.converters.SqlTimeConverter;
  * Created: 25/06/2003
  * 
  * @author Roberto Posenato
- * @version 0.3
  */
 public class BeanUtil {
 
@@ -54,7 +45,7 @@ public class BeanUtil {
 	 */
 	private static Logger log = Logger.getLogger(BeanUtil.class.getName());
 
-	/**
+	/*
 	 * static initializer block Inizializza tutti i parametri per le chiamate ai
 	 * convertitori.
 	 *
@@ -93,8 +84,6 @@ public class BeanUtil {
 	 *        a JavaDataBean to fill.
 	 * @param resultSet
 	 *        the result set that contains data.
-	 * @param lingue
-	 *        the wanted languages.
 	 */
 	public static void populate(Object bean, ResultSet resultSet) throws SQLException {
 		int cols = 0;
@@ -169,87 +158,4 @@ public class BeanUtil {
 		}
 	}
 
-	/*
-	 * Popola gli attributi di bean che hanno nome uguale a nomi delle attributi
-	 * del resultSet con i valori presenti nel resultSet. <br>
-	 * Il bean deve rispettare la specifica dei Java Data Bean circa la
-	 * composizione dei nomi e dei metodi getter e setter degli attributi. <br>
-	 * Questo metodo non gestisce i campi nelle query per le traduzioni (L0-*,
-	 * L1-*, L2-*).
-	 *
-	public static void populate(Object bean, ResultSet resultSet) throws SQLException {
-		BeanUtil.populate(bean, resultSet, null);
-	}*/
-
-	/*
-	 * Dato un array di 3 stringhe 'traduzione', dove traduzione[0] è il valore
-	 * in italiano di un attributo, traduzione[1] è il valore nella prima lingua
-	 * e traduzione[2] è il valore nella seconda lingua, il metodo restituisce
-	 * il valore dell'attributo nella PrimaLingua specificata dall'oggetto
-	 * 'lingue' o, nel caso in cui questo valore sia nullo, nella SecondaLingua.
-	 * Se anche il valore nella SecondaLingua non è presente, restituisce il
-	 * valore in italiano (presente per gli attributi obbligatori, mentre può
-	 * essere a 'null' negli altri). Il numero di lingue dell'oggetto 'lingue'
-	 * viene modificato in base alla lingua utilizzata per estrarre
-	 * l'informazione. Il valore di ritorno è un oggetto ValoreELingua in
-	 * quanto, oltre il valore, restituisce anche il codice della lingua del
-	 * valore scelto.
-	 *
-	static ValoreELingua getMultilingua(String[] traduzione, Lingue lingue) {
-		String tmp = null, tmpL = null;
-		String a1 = null, l1 = null;
-		String a2 = null, l2 = null;
-		int nLingue = 1;
-
-//		 seleziono tra i 3 valori possibili per l'attributo
-//		 le due traduzioni principali in base all'ordine delle lingue
-//		 richieste
-//		 seguendo le direttive della specifica 09.
-//		 a1 = valore attributo nella prima lingua richiesta
-//		 a2 = valore attributo nella seconda lingua richiesta
-		if (lingue.getPrimaLingua().equals("it")) {
-			a1 = traduzione[0];
-			l1 = "it";
-			// la prima lingua non è presente in quanto è l'italiano
-			// si deve prendere la seconda
-			a2 = traduzione[2];
-			l2 = lingue.getSecondaLingua();
-		} else {
-			a1 = traduzione[1];
-			l1 = lingue.getPrimaLingua();
-
-			if (lingue.getSecondaLingua().equals("it")) {
-				a2 = traduzione[0];
-				l2 = "it";
-			} else {
-				a2 = traduzione[2];
-				l2 = lingue.getSecondaLingua();
-			}
-		}
-
-		// La prima e/o la seconda traduzione possono essere nulle...
-		// Determino il valore da restituire in base a queste possibilità,
-		// restituendo il valore in italiano se nessuna delle due traduzioni
-		// è presente, come indicato nella specifica 09.
-		tmp = a1;
-		tmpL = l1;
-
-		if (tmp == null) {
-			nLingue = 2;
-			tmp = a2;
-			tmpL = l2;
-			if (tmp == null) {
-				nLingue = 3;
-				tmp = traduzione[0];
-				tmpL = "it";
-			}
-		}
-
-		if (tmp != null) {
-			// esiste un valore per l'attributo
-			// modifico il numero Lingue usate
-			lingue.setNLingue(nLingue);
-		}
-		return new ValoreELingua(tmp, tmpL);
-	}*/
 }
