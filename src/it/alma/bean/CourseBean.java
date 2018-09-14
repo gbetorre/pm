@@ -31,36 +31,74 @@
 
 package it.alma.bean;
 
-import it.alma.exception.AttributoNonValorizzatoException;
-
 import java.io.Serializable;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.Vector;
 
+import it.alma.exception.AttributoNonValorizzatoException;
+
 
 /**
- * <p>Classe per rappresentare occorrenze di insegnamento, anche dette,
- * in terminologia Reporting, <cite>&quot;Attivit&agrave; Didattiche&quot;</cite>.</p>
- * Le &quot;Attivit&agrave; Didattiche&quot; (o AD) possono presentarsi sotto
- * molteplici forme ed avere svariate tipologie, come per esempio:
+ * <p>Classe per rappresentare <cite>Occorrenze di Insegnamento</cite>, 
+ * anche dette, in terminologia Reporting, 
+ * <cite>&quot;Attivit&agrave; Didattiche&quot;</cite>.</p>
+ * <h5>Il variegato mondo degli <code>Insegn</code></h5>
+ * <small><p>In terminologia S.I.A. (anni 2005&ndash;2016) si distingueva 
+ * il mondo degli Insegnamenti tra:
  * <ul>
- *  <li>AD Semplici</li>
- *  <li>AD con Moduli</li>
+ * <li>Insegnamenti Promessi (Insegn, o "Nomi degli Insegnamenti")</li>
+ * <li>Insegnamenti Erogati (o "Occorrenze di Insegnamento")</li>
+ * Le erogazioni, a loro volta, si suddividevano in "MRM":
+ * <ul>
+ * <li>Moduli</li>
+ * <li>Repliche</li>
+ * <li>Mutuazioni</li>
+ * <li>Unit&agrave; Logistiche</li>
+ * </ul></ul>
+ * <cite>A latere</cite> rispetto a questa tassonomia si collocavano
+ * le "Attivit&agrave; Didattiche Avanzate" (o <code>AttDidAva</code>), che comprendevano
+ * in pratica tutto quello che restava escluso dal complessivo mondo degli
+ * <code>Insegn</code>, quindi, soprattutto, Attivit&agrave; di Dottorato, 
+ * ma anche Seminari, gli stessi insegnamenti del CLA... in effetti tutto quello
+ * che era al momento escluso dal flusso ordinario della gestione della
+ * didattica, vale a dire: 
+ * <ol>
+ * <li>Caricamento della promessa</li>
+ * <li>Specializzazione dell'offerta</li>
+ * <li>Trasferimento su Esse3</li>
+ * </ol>
+ * (quindi quello che nelle intenzioni dei "Signori dell'
+ * informatica di Univr" avrei dovuto riportare io nel flusso della 
+ * gestione ordinaria della didattica, lavorando da solo in un cubicolo/
+ * sgabuzzino del CLA per la loro bella faccia...)</p></small>
+ * <h5>La Didattica dal punto di vista del Reporting</h5>
+ * <p>Le &quot;Attivit&agrave; Didattiche&quot; (o AD) possono presentarsi sotto
+ * molteplici forme ed avere svariate tipologie, come per esempio:<br /><br />
+ * <tt><ul>
+ *  <li><strong>AD Semplici</strong></li>
+ *  <li><strong>AD con Moduli</strong></li>
      <ul>
  *    <li>Insegnamento Padre</li>
- *    <li>Modulo (Insegnamento Figlio)</li>
+ *    <li>Modulo<br /> <cite id="Belussi">(Insegnamento Figlio)</cite></li>
  *   </ul>
- *  <li>AD con UL (Unit&agrave; Logistiche)</li>
- *  <li>Mutuazioni</li>
+ *  <li><strong>AD con UL</strong><br /> <cite id="Belussi">(Unit&agrave; Logistiche)</cite></li>
+ *  <li><strong>Mutuazioni</strong></li>
  *   <ul>
  *    <li>Reale</li>
  *    <li>Fantasma</li>
  *   </ul>
- *  <li>Repliche</li> 
- * </ul>
+ *  <li><strong>Repliche</strong></li> 
+ * </ul></tt>
  * Le Repliche e le Unit&agrave; Logistiche in Esse3 vanno sotto il nome di
- * <cite>Partizionamenti</cite>.
+ * <cite>Partizionamenti</cite></p>
+ * <p>La presente classe ha il compito di rappresentare tutte queste
+ * situazioni di configurazione differente di insegnamenti.<br />
+ * Al momento, per semplicit&agrave;, tutti gli attributi possibili
+ * sono compresi nella Classe, ma potrebbe essere opportuno in seguito 
+ * definire un padre con gli attributi di base e tanti figli quante sono 
+ * le possibili "variazioni sul tema" (del tipo: "ModuloBean", 
+ * "UnitaLogisticaBean", eventualmente "MutuazioneBean" e cos&iacute; via...).</p> 
+ * 
  * 
  * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
  */
@@ -145,6 +183,10 @@ public class CourseBean implements Serializable, Comparable<CourseBean> {
     private String inizioPerDid;
     /** Data fine periodo didattico */
     private String finePerDid;
+    /** Flag valutare Si/No */
+    private boolean valutare;
+    /** Motivazione per valutare/non valutare */
+    private String motivo;
     /* ************************************************************************ *  
      *                      Attributi utili da codice legacy                    *
      * ************************************************************************ */
@@ -216,25 +258,25 @@ public class CourseBean implements Serializable, Comparable<CourseBean> {
 
     
     /**
-     * Costruttore.
+     * Costruttore!
      * Inizializza i campi a valori convenzionali di default.
      */
     public CourseBean() {
         annoAccademico = nomeInsegnamento = url = null;
         codiceCdSWI = codiceCdSUGOV = nomeCdSWI = nomeCdSUGOV = dipartimentoScuola = sedePrimariaCDS = null;
         codiceADWI = -2;
-        codiceADUGOV = nomeInsegnamento = SSD = null;
+        codiceADUGOV = SSD = null;
         cognomeDocente = nomeDocente = codiceFiscaleDocente = null;
         coordinatore = -2;
         docente = null;
         docenti = null;
         modulo = -2;
-        ul = false;
+        ul = valutare = false;
         id = modulo = idMutuante = idPadreUL = -2;
         divisoInModuli = divisoInUnita = mutuato = conLezioni = comuneIndirizzi = false;
         nomeModulo = discriminanteModulo = discrPerCreditiDiversi = discriminante = nomeUL = null;
         mutuante = null;
-        misura = null;        
+        misura = motivo = null;        
         replica = ' ';        
         crediti = creditiTotali = creditiLezione = creditiLaboratorio = creditiAltro = -2;
         creditiPadre = -2;
@@ -244,6 +286,7 @@ public class CourseBean implements Serializable, Comparable<CourseBean> {
         obiettiviFormativi = linguaObiettiviFormativi = null;
         programma = linguaProgramma = null;
         modalitaEsame = linguaModalitaEsame = null;
+        inizioPerDid = finePerDid = null;
         inizioPeriodo = finePeriodo = new Date(0);
         sede = provinciaSede = null;
         linguaErog = null;
@@ -251,11 +294,148 @@ public class CourseBean implements Serializable, Comparable<CourseBean> {
 
     
     /**
-     * Restituisce una chiave univoca per un'Attivit&agrave; Didattica.
-     * Due Attivit&agrave; Didattiche sono uguali quando hanno la stessa chiave univoca.
+     * Costruttore per clonatura.
+     * Inizializza i campi a valori presi da un altro bean - se sono valorizzati,
+     * altrimenti li inizializza a valori di default.
+     * In questo modo non si dovrebbero verificare problemi con i puntatori.
+     * Utilizzare questo metodo per clonare un oggetto, non assegnarlo semplicemente!
+     * Ad esempio:
+     * <pre>
+     * CourseBean object = new CourseBean();
+     * CourseBean another = object;
+     * </pre>
+     * <strong>is wrong!!!</strong>
+     * perch&eacute; another punta a object e se si modifica questo si modifica
+     * "retroattivamente" anche object!
+     * Il codice corretto &egrave; il seguente:
+     * <pre>
+     * // Costruisce un nuovo oggetto, uguale a uno dei due considerati:
+     * CourseBean object = new CourseBean();
+     * CourseBean another = new CourseBean(object);
+     * </pre>   
+     *                      
+     * @param o oggetto CorsoBean i cui valori devono essere copiati
+     * @throws AttributoNonValorizzatoException se l'identificativo dell'AD passata come argomento non e' valorizzato!
+     */
+    public CourseBean(CourseBean o)
+               throws AttributoNonValorizzatoException {
+        // Ammette la mancata valorizzazione di quasi tutti i valori, ma non transige sull'id!
+        id                      = o.getId();
+        try {
+            annoAccademico          = o.getAnnoAccademico();
+        } catch (AttributoNonValorizzatoException anve) {
+            annoAccademico = null;
+        }
+        try {
+            nomeInsegnamento        = o.getNomeInsegnamento();
+        } catch (AttributoNonValorizzatoException anve) {
+            nomeInsegnamento = null;
+        }
+        try {
+            url                     = o.getUrl();
+        } catch (AttributoNonValorizzatoException anve) {
+            url = null;
+        }      
+        try {
+            nomeModulo              = o.getNomeModulo(); 
+            discriminanteModulo     = o.getDiscriminanteModulo();
+            discrPerCreditiDiversi  = o.getDiscrPerCreditiDiversi();
+            discriminante           = o.getDiscriminante();
+            nomeUL                  = o.getNomeUL();
+        } catch (AttributoNonValorizzatoException anve) {
+            nomeModulo = discriminanteModulo = discrPerCreditiDiversi = discriminante = nomeUL = null;
+        }
+        try {
+            crediti                 = o.getCrediti();
+            creditiTotali           = o.getCreditiTotali();
+            creditiLezione          = o.getCreditiLezione();
+            creditiLaboratorio      = o.getCreditiLaboratorio();
+            creditiAltro            = o.getCreditiAltro();
+            creditiPadre            = o.getCreditiPadre();
+        } catch (AttributoNonValorizzatoException anve) {
+            crediti = creditiTotali = creditiLezione = creditiLaboratorio = creditiAltro = creditiPadre = -2;
+        }        
+        try {
+            obiettiviFormativi      = o.getObiettiviFormativi(); 
+            linguaObiettiviFormativi = o.getObiettiviFormativi();
+            programma               = o.getProgramma(); 
+            linguaProgramma         = o.getLinguaProgramma();
+            modalitaEsame           = o.getModalitaEsame(); 
+            linguaModalitaEsame     = o.getLinguaModalitaEsame();
+        } catch (AttributoNonValorizzatoException anve) {
+            obiettiviFormativi = linguaObiettiviFormativi = programma = linguaProgramma = modalitaEsame = linguaModalitaEsame = null;
+        }
+        try {
+            periodi                 = o.getPeriodi();
+        } catch (AttributoNonValorizzatoException anve) {
+            periodi = null;
+        } 
+        try {
+            inizioPeriodo           = o.getInizioPeriodo();
+            finePeriodo             = o.getFinePeriodo();
+        } catch (AttributoNonValorizzatoException anve) {
+            inizioPeriodo = finePeriodo = new Date(0);
+        } 
+        try {
+            sede                    = o.getSede();
+            provinciaSede           = o.getProvinciaSede();
+        } catch (AttributoNonValorizzatoException anve) {
+            sede = provinciaSede = null;
+        } 
+        // Attributi che non sollevano eccezione se non inizializzati
+        codiceCdSWI             = o.getCodiceCdSWI();
+        codiceCdSUGOV           = o.getCodiceCdSUGOV();
+        nomeCdSWI               = o.getNomeCdSWI();
+        nomeCdSUGOV             = o.getNomeCdSUGOV();
+        dipartimentoScuola      = o.getDipartimentoScuola();
+        sedePrimariaCDS         = o.getSedePrimariaCDS();
+        codiceADWI              = o.getCodiceADWI();
+        codiceADUGOV            = o.getCodiceADUGOV();
+        nomeInsegnamento        = o.getNomeInsegnamento();
+        SSD                     = o.getSSD();
+        cognomeDocente          = o.getCognomeDocente();
+        nomeDocente             = o.getNomeDocente();
+        codiceFiscaleDocente    = o.getCodiceFiscaleDocente();
+        coordinatore            = o.getCoordinatore();
+        docente                 = o.getDocente();
+        docenti                 = o.getDocenti();
+        modulo                  = o.getModulo();
+        ul                      = o.isUl();
+        valutare                = o.isValutare();
+        modulo                  = o.getModulo();
+        idMutuante              = o.getIdMutuante();
+        idPadreUL               = o.getIdPadreUL();
+        mutuante                = o.getMutuante();
+        misura                  = o.getMisura();
+        motivo                  = o.getMotivo();
+        replica                 = o.getReplica();
+        ore                     = o.getOre();
+        oreLezione              = o.getOreLezione();
+        oreLaboratorio          = o.getOreLaboratorio();
+        oreAltro                = o.getOreAltro();
+        oreSeminario            = o.getOreSeminario();
+        oreEsercitazione        = o.getOreEsercitazione();
+        oreTirocinio            = o.getOreTirocinio();
+        corsiStudi              = o.getCorsiStudi();
+        inizioPerDid            = o.getInizioPerDid();
+        finePerDid              = o.getFinePerDid();
+        linguaErog              = o.getLinguaErog();
+    }
+    
+    
+    /* ********************************************************** *
+     *           Metodi che costruiscono e restituiscono          *
+     *             le chiavi logiche degli oggetti AD             *
+     * ********************************************************** */
+    /**
+     * <p>Costruisce e restituisce una chiave logicamente univoca 
+     * per un'Attivit&agrave; Didattica.<br />
+     * Tale chiave univoca, completa, include il periodo didattico.<br />
+     * Due Attivit&agrave; Didattiche sono uguali 
+     * quando hanno la stessa chiave univoca.</p>
      * 
-     * @return
-     * @throws AttributoNonValorizzatoException
+     * @return <code>String</code> - Una chiave logicamente univoca per identificare l'attivita' didattica
+     * @throws AttributoNonValorizzatoException se si verifica un problema nel recupero di qualche attributo
      */
     public String getKey()
                   throws AttributoNonValorizzatoException {
@@ -268,11 +448,14 @@ public class CourseBean implements Serializable, Comparable<CourseBean> {
     
     
     /**
-     * Restituisce una chiave univoca per un'Attivit&agrave; Didattica.
-     * Due Attivit&agrave; Didattiche sono uguali quando hanno la stessa chiave univoca.
+     * <p>Costruisce e restituisce una chiave logicamente univoca 
+     * per un'Attivit&agrave; Didattica.<br />
+     * Tale chiave univoca, ridotta, non include il periodo didattico.<br />
+     * Due Attivit&agrave; Didattiche sono uguali 
+     * quando hanno la stessa chiave univoca.</p>
      * 
-     * @return
-     * @throws AttributoNonValorizzatoException
+     * @return <code>String</code> - Una chiave logicamente univoca per identificare l'attivita' didattica indipendentemente dal periodo didattico
+     * @throws AttributoNonValorizzatoException se si verifica un problema nel recupero di qualche attributo
      */
     public String getSmallKey()
                   throws AttributoNonValorizzatoException {
@@ -282,6 +465,14 @@ public class CourseBean implements Serializable, Comparable<CourseBean> {
     }
     
     
+    /* ********************************************************** *
+     *           Metodi che sovrascrivono o implementano          *
+     *             comportamenti ereditati dai padri              *
+     * ********************************************************** */
+    /**
+     * <p>Due Attivit&agrave; Didattiche sono uguali se hanno la stessa
+     * chiave logica!</p>
+     */
     /* (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)
      */
@@ -293,7 +484,7 @@ public class CourseBean implements Serializable, Comparable<CourseBean> {
                 && this.codiceADUGOV.trim().equals(((CourseBean) obj).codiceADUGOV.trim())
                 && this.codiceFiscaleDocente.trim().equals(((CourseBean) obj).codiceFiscaleDocente.trim())
                 && this.inizioPerDid.trim().equals(((CourseBean) obj).inizioPerDid.trim())
-                && this.finePerDid.trim().equals(((CourseBean) obj).inizioPerDid.trim());
+                && this.finePerDid.trim().equals(((CourseBean) obj).finePerDid.trim());
         }
         return super.equals(obj);
     }
@@ -328,7 +519,60 @@ public class CourseBean implements Serializable, Comparable<CourseBean> {
             return 1;
         }
     }
+
+    
+    /**
+     * <p>Un'Attivit&agrave; Didattica si presenta al mondo
+     * mostrando i valori dei suoi attributi pi&uacute; importanti.</p>
+     */
+    @Override
+    public String toString() { 
+        return (this.id +
+                this.codiceCdSWI +
+                this.codiceCdSUGOV +
+                this.nomeCdSWI +
+                this.nomeCdSUGOV +
+                this.dipartimentoScuola +
+                this.sedePrimariaCDS +
+                this.codiceADWI +
+                this.codiceADUGOV +
+                this.nomeInsegnamento +
+                this.SSD +
+                this.cognomeDocente +
+                this.nomeDocente +
+                this.codiceFiscaleDocente +
+                this.coordinatore +
+                this.docente +
+                this.modulo +
+                this.ul +
+                this.discriminante +
+                this.creditiTotali +
+                this.creditiLezione +
+                this.creditiLaboratorio +
+                this.creditiAltro +
+                this.ore +
+                this.oreLezione +
+                this.oreLaboratorio +
+                this.oreAltro +
+                this.oreSeminario +
+                this.oreEsercitazione +
+                this.oreTirocinio +
+                this.inizioPerDid +
+                this.finePerDid +
+                this.valutare +
+                this.motivo +
+                this.annoAccademico);
+        }
+    
+    /*
+    public CourseBean clone(CourseBean an) 
+                     throws AttributoNonValorizzatoException {
+        CourseBean o = new CourseBean();
+        o.setId(an.getId());
         
+        return o;
+    }*/
+    
     
     /* **************************************************** *
      *           Metodi getter e setter per id              *
@@ -1527,6 +1771,38 @@ public class CourseBean implements Serializable, Comparable<CourseBean> {
      */
     public void setCoordinatore(int coordinatore) {
         this.coordinatore = coordinatore;
+    }
+
+
+    /**
+     * @return the valutare
+     */
+    public boolean isValutare() {
+        return valutare;
+    }
+
+
+    /**
+     * @param valutare the valutare to set
+     */
+    public void setValutare(boolean valutare) {
+        this.valutare = valutare;
+    }
+
+
+    /**
+     * @return the motivo
+     */
+    public String getMotivo() {
+        return motivo;
+    }
+
+
+    /**
+     * @param motivo the motivo to set
+     */
+    public void setMotivo(String motivo) {
+        this.motivo = motivo;
     }
 
 
