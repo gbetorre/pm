@@ -6,8 +6,16 @@
     <title>HTML5, for Fun &amp; Work</title>
   </head>
   <body>
-  
+  <ul>
+  <li><a href="#merged">PERIODI UNITI</a></li>
+  <li><a href="#samekey">STESSA CHIAVE PERIODO DIVERSO</a></li>
+  <li><a href="#cleanduplicates">DUPLICATI PULITI</a></li>
+  <li><a href="#doubleduplicates">DUPLICATI DOPPI</a></li>
+  <li><a href="#butdiplicates">DUPLICATI TOLTI</a></li>
+  <li><a href="#all">ELENCO COMPLETO</a></li>
+  </ul>
       <!-- Vector -->
+    <a name="merged" />
     <h1>PERIODI UNITI</h1>
     <p>FetchSize is: <c:out value="${requestScope.periodiUniti.size()}" /></p>
     <table border="1">
@@ -40,6 +48,7 @@
     </table>
   
       <!-- Vector -->
+      <a name="samekey" />
     <h1>STESSA CHIAVE PERIODO DIVERSO</h1>
     <p>FetchSize is: <c:out value="${requestScope.doppi.size()}" /></p>
     <table border="1">
@@ -72,6 +81,7 @@
     </table>
   
       <!-- Vector -->
+      <a name="cleanduplicates" />
     <h1>DUPLICATI PULITI</h1>
     <p>FetchSize is: <c:out value="${requestScope.doppioni.size()}" /></p>
     <table border="1">
@@ -126,6 +136,7 @@
   </c:forEach>
   </ul>
   --%>
+  <a name="doubleduplicates" />
     <h1>DUPLICATI DOPPI</h1>
     <p>FetchSize is: <c:out value="${requestScope.duplicati.size()}" /></p>
     <table border="1">
@@ -236,6 +247,51 @@
     </c:if>
  --%>
     <!-- Vector -->
+    <a name="butdiplicates" />
+    <h1>Tolti duplicati</h1>
+    <p>FetchSize is: <c:out value="${requestScope.senzaDuplicati.size()}" /></p>
+    <table border="1">
+      <thead>
+        <tr>
+          <th>N.</th>
+          <th>Codice CdS</th>
+          <th>Nome Insegnamento</th>
+          <th>Codice AD</th>
+          <th>Crediti Totali</th>
+          <th>Crediti Lezione</th>
+          <th>Ore Totali</th>
+          <th>Ore Lezione</th>
+          <th>Cognome Docente</th>
+          <th>Nome Docente</th>
+          <th>CF Docente</th>
+          <th>Coord.</th>
+          <th>Data Inizio Perido</th>
+          <th>Data Fine Periodo</th>
+        </tr>
+      </thead>
+      <tbody>
+        <c:forEach var="ad" items="${requestScope.senzaDuplicati}" varStatus="loop">
+        <tr>
+          <td><c:out value="${ad.id}" /></td>
+          <td><c:out value="${ad.codiceCdSUGOV}" /></td>
+          <td><c:out value="${ad.nomeInsegnamento}" /></td>
+          <td><c:out value="${ad.codiceADUGOV}" /></td>
+          <td><c:out value="${ad.creditiTotali}" /></td>
+          <td><c:out value="${ad.creditiLezione}" /></td>
+          <td><c:out value="${ad.ore}" /></td>
+          <td><c:out value="${ad.oreLezione}" /></td>
+          <td><c:out value="${ad.cognomeDocente}" /></td>
+          <td><c:out value="${ad.nomeDocente}" /></td>
+          <td><c:out value="${ad.codiceFiscaleDocente}" /></td>
+          <td><c:out value="${ad.coordinatore}" /></td>
+          <td><c:out value="${ad.inizioPerDid}" /></td>
+          <td><c:out value="${ad.finePerDid}" /></td>
+        </tr>
+        </c:forEach>
+      </tbody>
+    </table>
+    <!-- Vector -->
+    <a name="all" />
     <h1>Elenco completo</h1>
     <a href="/almalaurea?q=1">link</a><br />
     <p>FetchSize is: <c:out value="${requestScope.elenco.size()}" /></p>
