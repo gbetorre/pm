@@ -230,8 +230,6 @@ public class ValuationCommand extends ItemBean implements Command {
         DBWrapper db = null;
         // Struttura che conterrà tutte le AD dal semilavorato
         Vector<CourseBean> v = new Vector<CourseBean>();
-        // Struttura che conterrà le righe duplicate
-        List<CourseBean> duplicates = null;
         // Instanzia nuova classe WebStorage per il recupero dei dati
         try {
             db = new DBWrapper();
@@ -267,19 +265,23 @@ public class ValuationCommand extends ItemBean implements Command {
             throw new CommandException(FOR_NAME + "Eccezione generica da " + this.getClass().getName() + ": " + e.getMessage() + "\n stack: " + stackTrace[0], e);
         }
         // Ottiene i duplicati logici (righe con la stessa chiave e id diversi)
-        duplicates = getDuplicates(v);
+        //duplicates = getLogicalDuplicates(v);
+        // Ottiene i duplicati da lavorare (righe con la stessa chiave base, id diversi e periodi uguali o diversi)
+        //duplicates = getDuplicates(v);
         // Ordina i duplicati logici per chiave
-        sortByCode(duplicates);
-        // Ottiene una lista di solo i campioni di duplicati, cioè in pratica 
-        // di chiavi che hanno due o più occorrenze nella lista delle AD
-        List<CourseBean> samplesDuplicates = splitDuplicates(duplicates);
+        //sortByCode(duplicates);
+        // Ottiene l'elenco del semilavato ripulito dai duplicati da lavorare e riunire una volta puliti
+        //ArrayList<CourseBean> candidates = clean(v);
+        // Individua le Attività Didattiche su cui applicare i criteri
+        //ArrayList<CourseBean> candidates = purge(v, new ArrayList<CourseBean>(duplicates));
+        /* Individua le Attività Didattiche Semplici da porre in valutazione */
+        // Trasforma il Vector di AD semilavorate in un ArrayList
+        //ArrayList<CourseBean> vAsArrayList = new ArrayList<CourseBean>(v);
         
-        List<CourseBean> differentByPeriod = getCoupletByPeriod(samplesDuplicates);
+        ArrayList<CourseBean> medical = getMedicalCourses(v);
+        ArrayList<CourseBean> butMedical = discardMedicalCourses(v);
+        ArrayList<CourseBean> butMedicalAndHeavy = getGreatherThan(butMedical, 3);
         
-        List<CourseBean> merged = mergeDates(differentByPeriod);
-        // Individua le Attività Didattiche Semplici da porre in valutazione
-        //sortByCode(v);
-        List<CourseBean> singles = removeDuplicates(v, new ArrayList<CourseBean>(duplicates));
         
         // Imposta il testo del Titolo da visualizzare prima dell'elenco
         req.setAttribute("titoloE", "AD Semplici");
@@ -288,13 +290,22 @@ public class ValuationCommand extends ItemBean implements Command {
         // Imposta la Pagina JSP di forwarding
         req.setAttribute("fileJsp", nomeFileElenco);
          // Salva nella request: elenco AD Semplici
+        
+        req.setAttribute("adMedicina", medical);
+        req.setAttribute("elenco", butMedical);
+        req.setAttribute("candidati", butMedicalAndHeavy);
+        
+        
+        //req.setAttribute("senzaDuplicati", candidates);
         //req.setAttribute("lista", sda);
-        req.setAttribute("elenco", v);
-        req.setAttribute("senzaDuplicati", singles);
-        req.setAttribute("duplicati", duplicates);
-        req.setAttribute("doppioni", samplesDuplicates);
-        req.setAttribute("doppi", differentByPeriod);
-        req.setAttribute("periodiUniti", merged);
+        //req.setAttribute("elenco", candidates);
+        //req.setAttribute("duplicati", duplicates);
+        //req.setAttribute("doppioni", samplesDuplicates);
+        //req.setAttribute("doppi", differentByPeriod);
+        //req.setAttribute("periodiUniti", merged);
+        //req.setAttribute("duplicatiDaAggiungere", refinedDuplicates);
+        //req.setAttribute("duplicatiResidui", equalsButPeriod);
+        //req.setAttribute("duplicatiResiduiPeriodiUniti", mergedDates); */
     }
     
     
@@ -344,6 +355,242 @@ public class ValuationCommand extends ItemBean implements Command {
     
     
     /**
+     * <p>Estrae dalla lista grezza delle AD semplici (semilavorato) 
+     * tutte le AD di area medica da sottoporre a valutazione.</p>
+     * <p>Le AD in questione:
+     * <ul>
+     * <li>devono essere appartenenti a un corso di medicina</li>
+     * <li>devono avere crediti di lezione > 0</li>
+     * <li>non devono rientrare nella lista dei corsi elettivi</li>
+     * </ul>
+     * </p>
+     * 
+     * @param v e' la lista grezza delle AD in cui cercare i doppi
+     * @return
+     * @throws CommandException
+     */
+    private  ArrayList<CourseBean> getMedicalCourses(Vector<CourseBean> v)
+                                              throws CommandException {
+        // Dichiara la lista delle AD di area medica
+        ArrayList<CourseBean> medicalCourses = new ArrayList<CourseBean>();
+        try {
+            for (int i = 0; i < v.size(); i++) {
+                CourseBean current = v.elementAt(i);
+                // Se il codice corso studio di U-GOV inizia per 'M' sicuramente è un'AD di area medica
+                if (current.getCodiceCdSUGOV().trim().startsWith("M")) {
+                    // Ma, nel caso di medicina, va aggiunto solo se ha crediti lezione > 0
+                    if (current.getCreditiLezione() > 0) {
+                        // E inoltre se è un corso elettivo non lo vogliamo
+                        if (!corsiElettivi.contains(current.getCodiceADUGOV().trim())) {
+                            medicalCourses.add(current);
+                        }
+                    }
+                }
+            }
+        } catch (IndexOutOfBoundsException iobe) {
+            String msg = FOR_NAME + "Si e\' verificato un problmea nello scorrimento delle lista delle AD.\n" + iobe.getMessage();
+            throw new CommandException(msg, iobe);
+        } catch (ClassCastException cce) {
+            String msg = FOR_NAME + "Si e\' verificato un problema in qualche conversione di tipo.\n" + cce.getMessage();
+            throw new CommandException(msg, cce);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n" + npe.getMessage();
+            throw new CommandException(msg, npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
+            throw new CommandException(msg, e);
+        }        
+        return medicalCourses;
+    }
+    
+    
+    /**
+     * <p>Partendo dalla lista grezza delle AD semplici (semilavorato) 
+     * restituisce tutte le AD NON di medicina.</p>
+     * 
+     * 
+     * @param v e' la lista grezza delle AD in cui cercare i doppi
+     * @return
+     * @throws CommandException
+     */
+    private static ArrayList<CourseBean> discardMedicalCourses(Vector<CourseBean> v)
+                                                        throws CommandException {
+        // Trasforma il Vector di AD semilavorate in un ArrayList
+        ArrayList<CourseBean> vAsArrayList = new ArrayList<CourseBean>(v);
+        // Dichiara la lista delle AD NON di area medica
+        ArrayList<CourseBean> allButMedicalCourses = new ArrayList<CourseBean>();
+        try {
+            for (int i = 0; i < vAsArrayList.size(); i++) {
+                CourseBean current = vAsArrayList.get(i);
+                // Se il corso di studi dell'AD corrente NON inizia per M l'AD NON è di medicina
+                if (!current.getCodiceCdSUGOV().trim().startsWith("M")) {   
+                    allButMedicalCourses.add(current);
+                }
+            }
+        } catch (IndexOutOfBoundsException iobe) {
+            String msg = FOR_NAME + "Si e\' verificato un problmea nello scorrimento di liste.\n" + iobe.getMessage();
+            throw new CommandException(msg, iobe);
+        } catch (ClassCastException cce) {
+            String msg = FOR_NAME + "Si e\' verificato un problema in qualche conversione di tipo.\n" + cce.getMessage();
+            throw new CommandException(msg, cce);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n" + npe.getMessage();
+            throw new CommandException(msg, npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
+            throw new CommandException(msg, e);
+        }        
+        return allButMedicalCourses;
+    }
+    
+    
+    /**
+     * Partendo dalla lista delle AD semplici non di medicina 
+     * restituisce tutte le AD con un numero di crediti totali strettamente
+     * maggiori di 3
+     * 
+     * 
+     * @param v e' la lista grezza delle AD in cui cercare i doppi
+     * @return
+     * @throws CommandException
+     */
+    private static ArrayList<CourseBean> getGreatherThan(ArrayList<CourseBean> l, 
+                                                         int credits)
+                                                    throws CommandException {
+        // Trasforma il Vector di AD semilavorate in un ArrayList
+        //ArrayList<CourseBean> vAsArrayList = new ArrayList<CourseBean>(v);
+        // Dichiara la lista delle AD di peso sufficiente ad essere esaminate
+        ArrayList<CourseBean> greatherThan = new ArrayList<CourseBean>();
+
+        try {
+
+            for (int i = 0; i < l.size(); i++) {
+                CourseBean current = l.get(i);
+                // Se i e j sono uguali sta puntando allo stesso elemento, ed è evidente che un elemento è uguale a se stesso...
+                if (current.getCreditiTotali() > credits) {
+                    
+                    greatherThan.add(current);
+                }
+            }
+        } catch (IndexOutOfBoundsException iobe) {
+            String msg = FOR_NAME + "Si e\' verificato un problmea nello scorrimento della lista delle AD grezze o di quelle duplicate.\n" + iobe.getMessage();
+            throw new CommandException(msg, iobe);
+        } catch (ClassCastException cce) {
+            String msg = FOR_NAME + "Si e\' verificato un problema in qualche conversione di tipo.\n" + cce.getMessage();
+            throw new CommandException(msg, cce);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n" + npe.getMessage();
+            throw new CommandException(msg, npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
+            throw new CommandException(msg, e);
+        }        
+        return greatherThan;
+    }   
+    
+    
+    /**
+     * Estrae dalla lista grezza delle AD semplici (semilavorato) 
+     * tutti i doppi indistintamente
+     * 
+     * 
+     * @param v e' la lista grezza delle AD in cui cercare i doppi
+     * @return
+     * @throws CommandException
+     */
+    private static ArrayList<CourseBean> getDuplicates(Vector<CourseBean> v)
+                                 throws CommandException {
+        // Trasforma il Vector di AD semilavorate in un ArrayList
+        ArrayList<CourseBean> vAsArrayList = new ArrayList<CourseBean>(v);
+        // Dichiara la lista dei duplicati
+        ArrayList<CourseBean> duplicates = new ArrayList<CourseBean>();
+        // Deve ciclare la lista del semilavorato, e confrontare riga per riga
+        // se la riga corrente è uguale - da un punto di vista logico - 
+        // alla riga successiva (cioè se ne condivide la chiave)
+        try {
+            // Cicla due volte l'ArrayList delle AD per individuare AD con la stessa chiave
+            for (int i = 0; i < vAsArrayList.size(); i++) {
+                for (int j = 0; j < vAsArrayList.size(); j++) {
+                    // Se i e j sono uguali sta puntando allo stesso elemento, ed è evidente che un elemento è uguale a se stesso...
+                    if (i != j) {   
+                        CourseBean courseRaw = vAsArrayList.get(i);
+                        CourseBean courseOrd = vAsArrayList.get(j);
+                        if (courseRaw.getKey().equals(courseOrd.getKey()) && (courseRaw.getId() != courseOrd.getId())) {
+                            duplicates.add(courseOrd);
+                        }
+                    }
+                }
+            }
+        } catch (IndexOutOfBoundsException iobe) {
+            String msg = FOR_NAME + "Si e\' verificato un problmea nello scorrimento della lista delle AD grezze o di quelle duplicate.\n" + iobe.getMessage();
+            throw new CommandException(msg, iobe);
+        } catch (ClassCastException cce) {
+            String msg = FOR_NAME + "Si e\' verificato un problema in qualche conversione di tipo.\n" + cce.getMessage();
+            throw new CommandException(msg, cce);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n" + npe.getMessage();
+            throw new CommandException(msg, npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
+            throw new CommandException(msg, e);
+        }        
+        return duplicates;
+    }
+    
+       
+    /**
+     * Toglie dalla lista grezza delle AD semplici (semilavorato) 
+     * tutti i doppi indistintamente
+     * 
+     * 
+     * @param v e' la lista grezza delle AD da ripulire
+     * @return
+     * @throws CommandException
+     */
+    private static ArrayList<CourseBean> clean(Vector<CourseBean> v)
+                                        throws CommandException {
+        // Trasforma il Vector di AD semilavorate in un ArrayList
+        ArrayList<CourseBean> vAsArrayList = new ArrayList<CourseBean>(v);
+        
+        // Ordina la list per ottimizzare
+        //sortByKey(vAsArrayList);
+        
+        // Deve ciclare la lista del semilavorato, e confrontare riga per riga
+        // se la riga corrente è uguale - da un punto di vista logico - 
+        // alla riga successiva (cioè se ne condivide la chiave)
+        try {
+            // Cicla due volte l'ArrayList delle AD per individuare AD con la stessa chiave
+            for (int i = 0; i < vAsArrayList.size(); i++) {
+                for (int j = 0; j < vAsArrayList.size(); j++) {
+                    // Se i e j sono uguali sta puntando allo stesso elemento, ed è evidente che un elemento è uguale a se stesso...
+                    if (i != j) {   
+                        CourseBean courseRaw = vAsArrayList.get(i);
+                        CourseBean courseOrd = vAsArrayList.get(j);
+                        if (courseRaw.getKey().equals(courseOrd.getKey()) && (courseRaw.getId() != courseOrd.getId())) {
+                            vAsArrayList.remove(j);
+                        }
+                    }
+                }
+            }
+        } catch (IndexOutOfBoundsException iobe) {
+            String msg = FOR_NAME + "Si e\' verificato un problmea nello scorrimento della lista delle AD grezze o di quelle duplicate.\n" + iobe.getMessage();
+            throw new CommandException(msg, iobe);
+        } catch (ClassCastException cce) {
+            String msg = FOR_NAME + "Si e\' verificato un problema in qualche conversione di tipo.\n" + cce.getMessage();
+            throw new CommandException(msg, cce);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n" + npe.getMessage();
+            throw new CommandException(msg, npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
+            throw new CommandException(msg, e);
+        }        
+        return vAsArrayList;
+    }
+    
+    
+    /**
+     * <p>Ottiene i duplicati logici (righe con la stessa chiave e id diversi).</p>
      * <p>Restituisce una lista di AD che sono state individuate come doppie
      * in base alla chiave specificata nell'oggetto AD.</p>
      * <p>I doppioni si definiscono come <code>"AD aventi la stessa chiave"</code>
@@ -361,7 +608,7 @@ public class ValuationCommand extends ItemBean implements Command {
      * @return <code>List&lt;CourseBean&gt;</code> - ArrayList di duplicati trovati  
      * @throws CommandException se si verifica un problema, generalmente nell'accesso a qualche valore o un puntamento fuori tabella
      */
-    private List<CourseBean> getDuplicates(Vector<CourseBean> v)
+    private List<CourseBean> getLogicalDuplicates(Vector<CourseBean> v)
                                     throws CommandException {
         List<CourseBean> genericDuplicates = null;
         List<CourseBean> logicalDuplicates = null;
@@ -425,17 +672,26 @@ public class ValuationCommand extends ItemBean implements Command {
     
     
     /**
+     * <p>Partendo da un elenco di tuple che presentano duplicazioni logiche
+     * (quindi che non sono identiche in tutto (anche nell'id) ma logicamente
+     * identiche &ndash; cio&egrave; uguali nella stessa chiave), passato
+     * come argomento, toglie da questo elenco, 
+     * in maniera relativamente arbitraria, i "doppioni doppi",
+     * cio&egrave; una delle due tuple logicamente identiche, tenendo l'altra:
+     * in altre parole, tiene soltanto una copia 
+     * delle chiavi logiche duplicate.</p>
      * <p>Ottiene la lista dei "doppi singoli" ("doppioni puliti") 
      * ovvero di una singola copia delle righe doppie, non di entrambe
      * (e men che meno pi&uacute;, come avviene nel caso di alcuni laboratori 
      * o AD particolari come "Inglese Scientifico" che non hanno un solo
      * doppione ma quattro o cinque).</p>
-     * <p>Prende in input la lista dei duplicati logici, passata come
+     * <p>In altri termini:<br />
+     * prende in input la lista dei duplicati logici, passata come
      * argomento, e suddivide tale lista delle AD duplicate approssimativamente  
      * in due, individuando le chiavi duplicate - cio&egrave; in pratica 
      * chiavi che hanno due o più occorrenze nella lista delle AD.</p>
-     * <p>Restituisce una lista di elementi che hanno un valore doppio.
-     * I duplicati, per definizione, vanno a coppie (almeno), per cui, volendo
+     * <p>Restituisce una lista di elementi che hanno un valore doppio.</p>
+     * <p>I duplicati, per definizione, vanno a coppie (almeno), per cui, volendo
      * eliminarli dall'elenco delle tuple "grezze", non vanno eliminati a coppie, 
      * ma solo singolarmente.<br />
      * P.es., se avessi il seguente insieme &nbsp;<code>{4, 4, 8, 15, 16}</code>
@@ -681,8 +937,9 @@ public class ValuationCommand extends ItemBean implements Command {
      * <p>Quindi se, per esempio, l'insieme dei dati di <code>p1</code> 
      * fosse il seguente:
      * <pre>{4, 8, 8, 15, 16, 23, 23, 42}</pre> si assume che il chiamante
-     * abbia calcolato la lista dei duplicati doppi:
-     * <pre>{8, 8, 23, 23}</pre> e che questa, passata come argomento 
+     * abbia calcolato la lista dei duplicati doppi, che in questo caso sono
+     * le tuple da togliere:
+     * <pre>{8, 8, 23, 23}</pre> e che questa lista, passata come argomento 
      * (<code>p2</code>) debba essere tolta per cui, a seguito dell'applicazione
      * di questo metodo, dovremmo ottenere solo gli elementi che non presentano
      * duplicazioni, e cio&egrave;: 
@@ -699,7 +956,7 @@ public class ValuationCommand extends ItemBean implements Command {
      * solo due e non pi&uacute; di due, a differenza di quanto l'esempio 
      * sopra riportato potrebbe suggerire. Esempio reale:
      * <pre> tupla di p1 (n. 1 occorrenze):
-     *  416 MM15  Inglese scientifico 4S01572 3.0 0.0   Cafaro  Daniela CFRDNL79A60B963R    1   2018-03-05  2018-04-29
+     *      416 MM15  Inglese scientifico 4S01572 3.0 0.0   Cafaro  Daniela CFRDNL79A60B963R    1   2018-03-05  2018-04-29
      * tupla di p2 (n. 2 occorrenze):
      *  24  416 MM15 Inglese scientifico 4S01572 Cafaro Daniela CFRDNL79A60B963R 2018-03-05 2018-04-29
      *  25  416 MM15 Inglese scientifico 4S01572 Cafaro Daniela CFRDNL79A60B963R 2018-03-05 2018-04-29</pre>
@@ -708,12 +965,49 @@ public class ValuationCommand extends ItemBean implements Command {
      * <code>p1</code> fosse 8 e quella di <code>p2</code> fosse 3, 
      * l'Array finale in questo caso non avrebbe cardinalit&agrave; 8 - 3 = 5 
      * ma  8 - 2 = 6, perch&eacute; la riga con id 416 pu&ograve; 
-     * essere sottratta una sola volta, non due!
-     * Nel caso delle AD Semplici del II Semestre 2017, ad esempio, che erano
+     * essere sottratta una sola volta, non due!<br />
+     * Pertanto, si pu&ograve; enunciare la formula di calcolo della
+     * cardinalit&agrave; della lista al meno dei duplicati come:<br />
+     * <code>c = c(p1) - c(p2) + r</code><br />
+     * dove <code>c(p1)</code> &egrave; la cardinalit&agrave; dell'elenco
+     * completo di elementi, cio&egrave; sia quelli che si presentano
+     * una volta sola, sia quelli che si presentano pi&uacute; volte, 
+     * <code>c(p2)</code> &egrave; la cardinalit&agrave; dell'elenco di elementi
+     * che presentano duplicazioni logiche, e <code>r</code> &egrave; il numero 
+     * di ripetizioni identiche.</p>
+     * <p>Ad esempio, nel caso delle AD Semplici del II Semestre 2017, che erano
      * 1020 nell'estrazione grezza del semilavorato (<code>p1</code>) 
      * mentre i duplicati doppi erano 258, la cardinalit&agrave; delle 
      * (AD Semplici - Duplicati Doppi) non era uguale a 1020 - 258 = 762
-     * bens&iacute; 1020 - 258 + 7 = 769.
+     * bens&iacute; 1020 - 258 + 8 = 770, perch&eacute; c'erano 8 occorrenze
+     * di duplicazioni identiche.<br />
+     * <p><small>Erano le seguenti:<pre>
+     * 24  416 MM15 Inglese scientifico 4S01572 Cafaro Daniela CFRDNL79A60B963R 2018-03-05 2018-04-29
+     * 25  416 MM15 Inglese scientifico 4S01572 Cafaro Daniela CFRDNL79A60B963R 2018-03-05 2018-04-29
+     * 26  417 MM15 Inglese scientifico 4S01572 Cafaro Daniela CFRDNL79A60B963R 2018-03-05 2018-04-29
+     * 27  417 MM15 Inglese scientifico 4S01572 Cafaro Daniela CFRDNL79A60B963R 2018-03-05 2018-04-29
+     * 29  419 MM15 Inglese scientifico 4S01572 Cafaro Daniela CFRDNL79A60B963R 2018-03-05 2018-04-29
+     * 30  419 MM15 Inglese scientifico 4S01572 Cafaro Daniela CFRDNL79A60B963R 2018-03-05 2018-04-29
+     * 103 913 W23  Pedagogia dell'infanzia 4S00794 Augelli Alessandra GLLLSN79M45I158D 2018-02-26 2018-04-21
+     * 104 913 W23  Pedagogia dell'infanzia 4S00794 Augelli Alessandra GLLLSN79M45I158D 2018-02-26 2018-04-21
+     * 105 914 W23  Pedagogia dell'infanzia 4S00794 Augelli Alessandra GLLLSN79M45I158D 2018-02-26 2018-04-21
+     * 106 914 W23  Pedagogia dell'infanzia 4S00794 Augelli Alessandra GLLLSN79M45I158D 2018-02-26 2018-04-21
+     * 107 915 W23  Pedagogia dell'infanzia 4S00794 Augelli Alessandra GLLLSN79M45I158D 2018-04-23 2018-06-09
+     * 108 915 W23  Pedagogia dell'infanzia 4S00794 Augelli Alessandra GLLLSN79M45I158D 2018-04-23 2018-06-09
+     * 109 916 W23  Pedagogia dell'infanzia 4S00794 Augelli Alessandra GLLLSN79M45I158D 2018-04-23 2018-06-09
+     * 110 916 W23  Pedagogia dell'infanzia 4S00794 Augelli Alessandra GLLLSN79M45I158D 2018-04-23 2018-06-09
+     * 112 918 W23  Pedagogia dell'infanzia 4S00794 Augelli Alessandra GLLLSN79M45I158D 2018-02-26 2018-04-21
+     * 113 918 W23  Pedagogia dell'infanzia 4S00794 Augelli Alessandra GLLLSN79M45I158D 2018-02-26 2018-04-21
+     * </pre>
+     * Erano, appunto, 8 coppie, per cui:<br />
+     * <code>c = c(p1) - c(p2) + r</code>  vale<br />
+     * <ul>
+     * <li>Elenco completo: FetchSize is: 1020</li>
+     * <li>DUPLICATI DOPPI: FetchSize is: 258</li>
+     * <li>Tolti duplicati: FetchSize is: 770</li>
+     * </ul>
+     * Infatti:<br />
+     * <code>1020 - 258 + 8 =  770</code></small></p>
      * 
      * @param v la lista grezza delle AD da ripulire
      * @param duplicates la lista degli elementi che presentano duplicazioni, e le duplicazioni stesse
@@ -744,25 +1038,90 @@ public class ValuationCommand extends ItemBean implements Command {
     }
     
     
-    // Toglie dalla lista grezza delle AD semplici (semilavorato) tutti i doppi indistintamente
-    // v e' la lista grezza delle AD da ripulire
-    private List<CourseBean> purge(Vector<CourseBean> v, 
-                                   ArrayList<CourseBean> duplicates)
-                            throws CommandException {
-        List<CourseBean> vAsArrayList = null;
-        // Cicla il Vector di AD, per individuare i doppioni
+    /**
+     * Toglie da questo elenco tutte le AD che hanno la stessa chiave-base ma diverso periodo
+     * Unisce i periodi, riducendo alla metà le righe dell'elenco dei duplicati per periodo
+     * Costruisce la lista delle AD pulite unendo le righe con i periodi uniti
+     * con le righe dei duplicati puliti al netto dei duplicati per periodo
+     * Ottiene la lista dei "doppi singoli" ("doppioni puliti") ovvero di una singola copia delle righe doppie, non di entrambe
+     * Unisce i periodi dove possibile, ovvero dove il doppione è persistito nella lista dei "doppioni puliti"
+     * Toglie dalla lista grezza delle AD semplici (semilavorato) tutti i doppi indistintamente
+     * Riaggiunge alla lista depurata di tutti i doppi la lista dei "doppi singoli" lavorati, ovvero con i periodi uniti
+     * Questa è la lista finale pulita delle AD semplici, su cui si può implementare l'ulteriore algoritmo di scelta delle AD Semplici da valutare
+     * Toglie da questo elenco, in maniera relativamente arbitraria, i "doppioni doppi",
+     * cioè, in altri termini, tiene soltanto una copia delle chiavi logiche duplicate
+     * rimuove dal vector i 2 oggetti con i due periodi parziali e ci aggiunge il vector con il periodo risultante dai due
+     * 
+     * @deprecated
+     * @param v 
+     * @param duplicates 
+     * @return 
+     * @throws CommandException 
+     */
+    private ArrayList<CourseBean> purge(Vector<CourseBean> v,
+                                        ArrayList<CourseBean> duplicates)
+                                 throws CommandException {
+        ArrayList<CourseBean> distinctSingleKeys = null;
         try {
-            // Toglie i doppioni completi (non le singole chiavi duplicate) dalla lista delle AD Semplici
-            for (int i = 0; i < v.size(); i++) {
-                CourseBean ad = v.elementAt(i);
-                for (int j = 0; j < duplicates.size(); j++) {
-                    CourseBean du = duplicates.get(j);
-                    if (ad.equals(du)) {
-                        v.removeElementAt(i);
+            // Ottiene una lista di solo i campioni di duplicati, cioè in pratica 
+            // di chiavi che hanno due o più occorrenze nella lista delle AD
+            List<CourseBean> samplesDuplicates = splitDuplicates(duplicates);
+            // Ottiene una lista di tuple aventi la stessa chiave ma periodi diversi
+            List<CourseBean> differentByPeriod = getCoupletByPeriod(samplesDuplicates);
+            // Unisce i periodi, dimezzando le tuple
+            List<CourseBean> merged = mergeDates(differentByPeriod);
+            // Toglie dall'elenco completo tutti gli elementi che hanno duplicati logici
+            List<CourseBean> singleKeys = removeDuplicates(v, new ArrayList<CourseBean>(duplicates));
+            // Fa una copia dell'elenco delle singole istanze dei duplicati logici
+            List<CourseBean> refinedDuplicates = new ArrayList<CourseBean>(samplesDuplicates);
+            // In questa lista ci sono ancora le tuple distinte per periodo ma doppie per chiave
+            // Bisogna quindi togliere tali elementi dalla lista delle singole istanze 
+            // dei duplicati logici, prima di aggiungerci le tuple con i periodi uniti
+            // Quindi fa una copia dei campioni di duplicati...
+            List<CourseBean> samplesDuplicatesButDifferentByPeriod = new ArrayList<CourseBean>(refinedDuplicates);
+            // ...e vi toglie tutte le tuple che verranno poi unite:
+            samplesDuplicatesButDifferentByPeriod.removeAll(differentByPeriod);
+            // Aggiunge alla lista dei campioni di duplicati 
+            // ripulita delle tuple doppie perché dovevano essere accorpati i periodi 
+            // le tuple con i periodi uniti
+            samplesDuplicatesButDifferentByPeriod.addAll(merged);
+            // Riaggiunge alla lista depurata di tutti i doppi la lista dei "doppi singoli" lavorati, 
+            // ovvero con l'aggiunta di un singolo esemplare di doppio ma con i periodi uniti
+            // Questa è la lista finale pulita delle AD semplici, su cui si può implementare l'ulteriore algoritmo di scelta delle AD Semplici da valutare
+            singleKeys.addAll(samplesDuplicatesButDifferentByPeriod);
+            // cardinalità: 880, infatti 1020 - (258 + 8) + (126 - 32 + 16) = 880!
+            // Su questo ci sono ancora duplicazioni. Bisogna eliminare i periodi doppi residui:
+            List<CourseBean> equalsButPeriod = getCoupletByPeriod(singleKeys);
+            // Ordina i duplicati logici per chiave
+            sortByCode(equalsButPeriod);
+            // Unisce i periodi, dimezzando le tuple doppie
+            List<CourseBean> mergedDates = mergeDates(equalsButPeriod);
+            // Toglie i doppi per periodo
+            singleKeys.removeAll(equalsButPeriod);
+            // Ci aggiunge i singoli con i periodi uniti (totale: 880 - 262 + 126 = 744 - mi trovo grosso modo perché la cardinalità è 747...) 
+            singleKeys.addAll(mergedDates);
+            // Ho capito perché! Ci sono alcune duplicazione di righe identiche, che vanno tolte:
+            // 922 W23 Psicologia transculturale   4S02388 -2.0    -2.0            De Cordova  Federica    DCRFRC67T44D969C    1   26/02/2018  09/06/2018  W234S02388DCRFRC67T44D969C
+            // 924 W23 Psicologia transculturale   4S02388 -2.0    -2.0        54000.0 De Cordova  Federica    DCRFRC67T44D969C    0   26/02/2018  09/06/2018  W234S02388DCRFRC67T44D969C
+            // 922 W23 Psicologia transculturale   4S02388 -2.0    -2.0            De Cordova  Federica    DCRFRC67T44D969C    1   26/02/2018  09/06/2018  W234S02388DCRFRC67T44D969C
+            // 924 W23 Psicologia transculturale   4S02388 -2.0    -2.0        54000.0 De Cordova  Federica    DCRFRC67T44D969C    0   26/02/2018  21/04/2018  W234S02388DCRFRC67T44D969C
+            // Ordina la lista ottenuta in base al criterio specificato nel metodo override compareTo del Bean
+            Collections.sort(singleKeys);
+            // Clona la lista dei duplicati
+            distinctSingleKeys = new ArrayList<CourseBean>(singleKeys);
+            // Cicla la lista dei duplicati
+            for (int i = 0; i < distinctSingleKeys.size(); i++) {
+                // Costruisce l'indice del record successivo a quello recuperato
+                int j = i + 1;
+                // Controllo per evitare puntamento fuori tabella
+                if (j < singleKeys.size()) {
+                    // I doppioni veri hanno anche lo stesso id
+                    if (singleKeys.get(i).getId() == singleKeys.get(j).getId()) {
+                        // Elimina il doppione vero (vero = identico in tutto, anche nell'id)
+                        distinctSingleKeys.remove(j);
                     }
                 }
             }
-            vAsArrayList = new ArrayList<CourseBean>(v);
         } catch (ArrayIndexOutOfBoundsException aiobe) {
             String msg = FOR_NAME + "Si e\' verificato un problmea nello scorrimento della lista delle AD grezze o di quelle duplicate" + aiobe.getMessage();
             throw new CommandException(msg, aiobe);
@@ -775,123 +1134,8 @@ public class ValuationCommand extends ItemBean implements Command {
         } catch (Exception e) {
             String msg = FOR_NAME + "Si e\' verificato un problema" + e.getMessage();
             throw new CommandException(msg, e);
-        }
-        // Ottiene i duplicati logici (righe con la stessa chiave e id diversi)
-
-        // Riaggiunge alla lista depurata di tutti i doppi la lista dei "doppi singoli" lavorati, ovvero con i periodi uniti
-        // Questa è la lista finale pulita delle AD semplici, su cui si può implementare l'ulteriore algoritmo di scelta delle AD Semplici da valutare
-
-        // Toglie da questo elenco, in maniera relativamente arbitraria, i "doppioni doppi", 
-        // cioè, in altri termini, tiene soltanto una copia delle chiavi logiche duplicate
-        
-        // Toglie da questo elenco tutte le AD che hanno la stessa chiave-base ma diverso periodo
-        // Unisce i periodi, riducendo alla metà le righe dell'elenco dei duplicati per periodo
-        // Costruisce la lista delle AD pulite unendo le righe con i periodi uniti 
-        // con le righe dei duplicati puliti al netto dei duplicati per periodo 
-        
-        // Ottiene la lista dei "doppi singoli" ("doppioni puliti") ovvero di una singola copia delle righe doppie, non di entrambe
-        // Unisce i periodi dove possibile, ovvero dove il doppione è persistito nella lista dei "doppioni puliti"
-        
-        // Ottiene i duplicati logici (righe con la stessa chiave e id diversi)
-        // Toglie dalla lista grezza delle AD semplici (semilavorato) tutti i doppi indistintamente
-        // Riaggiunge alla lista depurata di tutti i doppi la lista dei "doppi singoli" lavorati, ovvero con i periodi uniti
-        // Questa è la lista finale pulita delle AD semplici, su cui si può implementare l'ulteriore algoritmo di scelta delle AD Semplici da valutare
-
-        //* <p>Rimuove dal set dei risultati (elenco completo) gli elementi
-        //* che sono duplicati. P.es., se l'insieme dei risultati fosse il seguente:
-        //* <pre>{4, 8, 8, 15, 16, 23, 23, 42}</pre> dovremmo ottenere: 
-        //* <code>{4, 8, 15, 16, 23, 42}.</p> 
-        // Ottiene i duplicati logici (righe con la stessa chiave e id diversi)
-
-        // Riaggiunge alla lista depurata di tutti i doppi la lista dei "doppi singoli" lavorati, ovvero con i periodi uniti
-        // Questa è la lista finale pulita delle AD semplici, su cui si può implementare l'ulteriore algoritmo di scelta delle AD Semplici da valutare
-
-        // Toglie da questo elenco, in maniera relativamente arbitraria, i "doppioni doppi", 
-        // cioè, in altri termini, tiene soltanto una copia delle chiavi logiche duplicate
-        
-        // Toglie da questo elenco tutte le AD che hanno la stessa chiave-base ma diverso periodo
-        // Unisce i periodi, riducendo alla metà le righe dell'elenco dei duplicati per periodo
-        // Costruisce la lista delle AD pulite unendo le righe con i periodi uniti 
-        // con le righe dei duplicati puliti al netto dei duplicati per periodo 
-        
-        // Ottiene la lista dei "doppi singoli" ("doppioni puliti") ovvero di una singola copia delle righe doppie, non di entrambe
-        // Unisce i periodi dove possibile, ovvero dove il doppione è persistito nella lista dei "doppioni puliti"
-        // Toglie dalla lista grezza delle AD semplici (semilavorato) tutti i doppi indistintamente
-        // Riaggiunge alla lista depurata di tutti i doppi la lista dei "doppi singoli" lavorati, ovvero con i periodi uniti
-        // Questa è la lista finale pulita delle AD semplici, su cui si può implementare l'ulteriore algoritmo di scelta delle AD Semplici da valutare
-
-        // rimuove dal vector i 2 oggetti con i due periodi parziali e ci aggiunge il vector con il periodo risultante dai due
-        
-        /*
-         * <p>Rimuove, dalla lista grezza delle AD semplici (semilavorato) 
-         * tutti i record soggetti a duplicazione, indistintamente.</p>
-         * <p>Quindi se, per esempio, l'insieme dei dati fosse il seguente:
-         * <pre>{4, 8, 8, 15, 16, 23, 23, 42}</pre> a seguito dell'applicazione
-         * di questo metodo dovremmo ottenere solo gli elementi che non presentano
-         * duplicazioni, e cio&egrave;: 
-         * <pre>{4, 15, 16, 42}</pre></p> 
-         * 
-         * @param v la lista grezza delle AD da ripulire
-         * @param duplicates la lista degli elementi che presentano duplicazioni, e le duplicazioni stesse
-         * @return <code>List&lt;CourseBean&gt;</code> - ArrayList di AD che non presentano alcuna duplicazione
-         * @throws CommandException se si verifica un problema nello scorrimento di liste o in qualche altro tipo di puntamento
-         *
-        private static List<CourseBean> removeDuplicates(Vector<CourseBean> v, ArrayList<CourseBean> duplicates)
-                                                  throws CommandException {
-            List<CourseBean> vAsArrayList = null;
-            try {
-                vAsArrayList = new ArrayList<CourseBean>(v);
-                vAsArrayList.removeAll(duplicates);
-                /*
-                // Ordina la lista ottenuta in base al criterio specificato nel metodo override compareTo del Bean
-                Collections.sort(genericDuplicates);
-                // Clona la lista dei duplicati
-                logicalDuplicates = new ArrayList<CourseBean>(genericDuplicates);
-                // Cicla la lista dei duplicati
-                for (int i = 0; i < genericDuplicates.size(); i++) {
-                    // Costruisce l'indice del record successivo a quello recuperato
-                    int j = i + 1;
-                    // Controllo per evitare puntamento fuori tabella
-                    if (j < genericDuplicates.size()) {
-                        // I doppioni veri hanno anche lo stesso id
-                        if (genericDuplicates.get(i).getId() == genericDuplicates.get(j).getId()) {
-                            // Elimina il doppione vero (vero = identico in tutto, anche nell'id)
-                            logicalDuplicates.remove(j);
-                        }
-                    }
-                }
-            
-            /*
-            try {
-                // Toglie i doppioni completi (non le singole chiavi duplicate) dalla lista delle AD Semplici
-                for (int i = 0; i < v.size(); i++) {
-                    CourseBean ad = v.elementAt(i);
-                    for (int j = 0; j < duplicates.size(); j++) {
-                        CourseBean du = duplicates.get(j);
-                        if (ad.equals(du)) {
-                            v.removeElementAt(i);
-                        }
-                    }
-                }
-                
-            } catch (ArrayIndexOutOfBoundsException aiobe) {
-                String msg = FOR_NAME + "Si e\' verificato un problmea nello scorrimento della lista delle AD grezze o di quelle duplicate" + aiobe.getMessage();
-                throw new CommandException(msg, aiobe);
-            } catch (ClassCastException cce) {
-                String msg = FOR_NAME + "Si e\' verificato un problema in qualche conversione di tipo" + cce.getMessage();
-                throw new CommandException(msg, cce);
-            } catch (NullPointerException npe) {
-                String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null" + npe.getMessage();
-                throw new CommandException(msg, npe);
-            } catch (Exception e) {
-                String msg = FOR_NAME + "Si e\' verificato un problema" + e.getMessage();
-                throw new CommandException(msg, e);
-            }
-            return vAsArrayList;
-        }
-        */
-        
-        return vAsArrayList;
+        }        
+        return distinctSingleKeys;
     }
     
     
@@ -925,7 +1169,7 @@ public class ValuationCommand extends ItemBean implements Command {
     }
     
     
-    private ArrayList<CourseBean> clean(Vector<CourseBean> v) {
+    private ArrayList<CourseBean> manage(Vector<CourseBean> v) {
         List<CourseBean> simpleDA = new ArrayList<CourseBean>(v);
         
         // Ripulisce la lista delle AD Semplici dai duplicati
