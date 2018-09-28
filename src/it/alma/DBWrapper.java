@@ -53,12 +53,34 @@ import it.alma.exception.WebStorageException;
 
 
 /**
- * 
- * @author trrgnr59
- * @version 2
+ * <p><code>DBWrapper.java</code> &egrave; la classe che implementa 
+ * l'accesso ai database utilizzati dall'applicazione nonch&eacute;
+ * l'esecuzione delle query e la gestione dei risultati restituiti,
+ * che impacchetta in oggetti di tipo JavaBean e restituisce al chiamante.</p>
+ *  
+ *  
+ * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
  */
 public class DBWrapper implements Query {
     
+    /**
+     * <p>La serializzazione necessita di dichiarare una costante di tipo long
+     * identificativa della versione seriale.<br /> 
+     * (Se questo dato non fosse inserito, verrebbe calcolato in maniera a
+     * utomatica dalla JVM, e questo potrebbe portare a errori 
+     * riguardo alla serializzazione).</p>
+     * <p><small>I moderni IDE, come Eclipse, permettono di assegnare 
+     * questa costante in due modi diversi:
+     *  <ul> 
+     *  <li>o attraverso un valore di default assegnato a questa costante<br />
+     *  (p.es. <code>private static final long serialVersionUID = 1L;</code>)
+     *  </li>
+     *  <li>o attraverso un valore calcolato tramite un algoritmo implementato
+     *  internamente<br /> (p.es. 
+     *  <code>private static final long serialVersionUID = -8762739881448133461L;</code>)
+     *  </li></small></p>
+     */
+    private static final long serialVersionUID = -8762739881448133461L;
     /**
      * <p>Logger della classe per scrivere i messaggi di errore. 
      * All logging goes through this logger.</p>
@@ -88,66 +110,68 @@ public class DBWrapper implements Query {
      * in caso di connessioni gi&agrave; aperte.</p>
      * 
      * @throws WebStorageException in caso di mancata connessione al database per errore password o dbms down
+     * @see DataSource
      */
     public DBWrapper() throws WebStorageException {
         if (manager == null) {
             try {
-                JOptionPane.showMessageDialog(null, "ok", "Messaggio: 110", 0, null);
                 manager = (DataSource) ((Context) new InitialContext()).lookup("java:comp/env/jdbc/almalaurea");
-                if (manager == null) 
-                    throw new WebStorageException(FOR_NAME + "La risorsa `jdbc/almalaurea' non è disponibile. Verificare configurazione e collegamenti.");
+                if (manager == null)
+                    throw new WebStorageException(FOR_NAME + "La risorsa `jdbc/almalaurea' non e\' disponibile. Verificare configurazione e collegamenti.\n");
+                JOptionPane.showMessageDialog(null, "Accesso al DB", "Inizializzazione Completata", 0, null);
             } catch (NamingException ne) {
                 throw new WebStorageException(FOR_NAME + "Problema nel recuperare la risorsa jdbc/almalaurea per problemi di naming: " + ne.getMessage());
             } catch (Exception e) {
-                throw new WebStorageException(FOR_NAME + "Errore generico nel costruttore: " + e.getMessage());
+                throw new WebStorageException(FOR_NAME + "Errore generico nel costruttore: " + e.getMessage(), e);
             }
         }
     }
     
     
     /**
-     * Restituisce un vettore di CourseBean.
-     * Data creazione 07/01/2016
+     * <p>Restituisce un Vector di CourseBean di tipo "AD Semplice".</p>
      *
-     * @param Lingue lingue
-     * @return Vector DipartimentiBean
-     * @throws WebStorageException
+     * @return <code>Vector&lt;CourseBean&gt;</code> - lista di CourseBean rappresentanti ciascuno un'AD Semplice
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
-    public Vector<CourseBean> getADSemplici()
-                                     throws WebStorageException {
-      ResultSet rs = null;
-      Connection con = null;
-      PreparedStatement pst = null;
-      CourseBean course = null;
-      Vector<CourseBean> lista = new Vector<CourseBean>();
-      try {
-        con = manager.getConnection();
-        pst = con.prepareStatement(AD_SEMPLICI);
-        pst.clearParameters();
-        rs = pst.executeQuery();
-        while (rs.next()) {
-          course = new CourseBean();
-          BeanUtil.populate(course, rs);
-          lista.add(course);
-        }
-        return lista;
-      } catch (SQLException sqle) {
-        throw new WebStorageException(sqle.getMessage());
-      } finally {
+    @SuppressWarnings("null")
+    public static Vector<CourseBean> getADSemplici()
+                                            throws WebStorageException {
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        CourseBean course = null;
+        Vector<CourseBean> lista = new Vector<CourseBean>();
         try {
-          con.close();
-        } catch (NullPointerException npe) {
-            throw new WebStorageException(npe.getMessage());
+            con = manager.getConnection();
+            pst = con.prepareStatement(AD_SEMPLICI);
+            pst.clearParameters();
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                course = new CourseBean();
+                BeanUtil.populate(course, rs);
+                lista.add(course);
+            }
+            return lista;
         } catch (SQLException sqle) {
-          throw new WebStorageException(sqle.getMessage());
+            throw new WebStorageException(sqle.getMessage());
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                throw new WebStorageException(npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(sqle.getMessage());
+            }
         }
-      }
     }
     
     
-    /* **************************************************************************
-     * =========================================================================
-     */
+    /* ************************************************************************ *
+     *                    Codice Inutile, Obsoleto o Deprecato                  *
+     *                              TODO: eliminare                             *
+     * ************************************************************************ */
+    
     /**
      *  metodo per effettuare qualsiasi query sul DB
      * @param query
