@@ -38,19 +38,16 @@ import java.util.logging.Logger;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.swing.JOptionPane;
 
-import it.alma.exception.CommandException;
-import it.alma.exception.WebStorageException;
-import it.alma.DBWrapper;
-import it.alma.Utils;
 import it.alma.bean.ItemBean;
 import it.alma.command.Command;
+import it.alma.exception.CommandException;
+import it.alma.exception.WebStorageException;
 
 
 /**
@@ -58,8 +55,6 @@ import it.alma.command.Command;
  * <code>Alma on Line</code>.</p>
  * 
  * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
- * @version 2
- * @since JDK 1.7
  */
 public class Main extends HttpServlet {
     
@@ -293,7 +288,7 @@ public class Main extends HttpServlet {
          * Cerca la command associata al parametro 'ent'
          * e, se la trova, ne invoca il metodo execute()
          */
-        JOptionPane.showMessageDialog(null, "ok", "Messaggio: 214", 0, null);
+        JOptionPane.showMessageDialog(null, "Chiamata arrivata dall\'applicazione!", "Esito: OK", JOptionPane.INFORMATION_MESSAGE, null);
         try {
             q = req.getParameter(entToken);
         } catch (NullPointerException npe) { // Potrebbe già uscire qui
