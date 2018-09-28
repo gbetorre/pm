@@ -55,7 +55,8 @@ import it.alma.exception.WebStorageException;
 
 
 /** 
- * <p><code>ValuationCommand.java</code></p>
+ * <p><code>ValuationCommand.java</code><br />
+ * Implementa l'algoritmo di scelta delle AD da valutare.</p>
  * 
  * <p>Classe per l'implementazione delle regole di scelta delle AD
  * da mettere in valutazione ai fini dei questionari della didattica.
@@ -108,7 +109,7 @@ public class ValuationCommand extends ItemBean implements Command {
      * @author <a href="mailto:giovanroberto.torre@univr.it">trrgnr59</a>
      * @see ValuationCommand
      */
-    protected class Sortbycode implements Comparator<CourseBean> 
+    protected class Sortbycode implements Comparator<CourseBean>
     { 
         // Used for sorting in ascending order of course key 
         @Override
@@ -127,7 +128,7 @@ public class ValuationCommand extends ItemBean implements Command {
                 return 0;
             }
             try {
-                return std.compareTo(o2.getCodiceFiscaleDocente() + o2.getCodiceADUGOV() + o2.getCodiceCdSUGOV() + o1.getInizioPerDid() + o1.getFinePerDid());
+                return std.compareTo(o2.getCodiceFiscaleDocente() + o2.getCodiceADUGOV() + o2.getCodiceCdSUGOV() + o2.getInizioPerDid() + o2.getFinePerDid());
             } catch (NullPointerException npe) {
                 return 1;
             }
@@ -169,10 +170,52 @@ public class ValuationCommand extends ItemBean implements Command {
     
     
     /**
+     * <p>Classe annidata destinata ad essere utilizzata come criterio
+     * per ordinare, in base ad un codice costruito internamente alla
+     * classe stessa &ndash; comunque esso sia definito &ndash; 
+     * due o pi&uacute; oggetti di tipo {@link CourseBean}.</p> 
+     * 
+     * 
+     * @author <a href="mailto:giovanroberto.torre@univr.it">trrgnr59</a>
+     * @see ValuationCommand
+     */
+    protected class Sortbyid implements Comparator<CourseBean>
+    { 
+        // Used for sorting in ascending order of course key 
+        @Override
+        public int compare(CourseBean o1, CourseBean o2) {
+            Integer std = null;
+            if (o1 == null || o2 == null)
+                return 1;
+            try {
+                std = new Integer(o1.getId());
+            } catch (AttributoNonValorizzatoException anve) {
+                // Auto-generated method stub
+                return 0;
+            } catch (NullPointerException npe) {
+                // Auto-generated method stub
+                return 0;
+            }
+            try {
+                return std.compareTo(o2.getId());
+            } catch (AttributoNonValorizzatoException anve) {
+                return 1;
+            } catch (NullPointerException npe) {
+                return 1;
+            }
+        } 
+    } 
+    
+    
+    /**
      *  Nome di questa classe 
      *  (utilizzato per contestualizzare i messaggi di errore)
      */
     static final String FOR_NAME = "\n" + Logger.getLogger(new Throwable().getStackTrace()[0].getClassName()) + ": ";
+    
+    private static final boolean READ_DUPLICATES = false;
+    
+    private static final boolean WRITE_DUPLICATES = true;
     /**
      * Pagina a cui la servlet reindirizza
      */
@@ -278,10 +321,31 @@ public class ValuationCommand extends ItemBean implements Command {
         // Trasforma il Vector di AD semilavorate in un ArrayList
         //ArrayList<CourseBean> vAsArrayList = new ArrayList<CourseBean>(v);
         
+        // Estrapola i corsi di area medica (es. 48)
         ArrayList<CourseBean> medical = getMedicalCourses(v);
-        ArrayList<CourseBean> butMedical = discardMedicalCourses(v);
-        ArrayList<CourseBean> butMedicalAndHeavy = getGreatherThan(butMedical, 3);
-        
+        // Li ordina per id
+        sortById(medical);
+        // Estrapola i corsi di area NON medica
+        ArrayList<CourseBean> notMedical = discardMedicalCourses(v);
+        // Estrapola i corsi di area NON medica papabili (CFU > 3)
+        ArrayList<CourseBean> notMedicalAndHeavy = getGreatherThan(notMedical, 3);
+        // Estrapola i corsi di area medica che sono presenti in occorrenze multiple (doppie) (es. 22)
+        ArrayList<CourseBean> medicalDuplicates = handleDuplicates(medical, READ_DUPLICATES);
+        // Rimuove (secondo un criterio logico non causale) una copia dei doppi, tenendo l'altra (quindi 11)
+        ArrayList<CourseBean> medicalCleaned = handleDuplicates(medical, WRITE_DUPLICATES);
+        // Ordina le AD di area medica per codice fiscale docente (ora sono: 48 - 11 = 37)
+        sortByCode(medicalCleaned);
+        // Cerca di unire i periodi dove ci sono occorrenze doppie
+        // Ottiene la lista delle AD mediche uguali in tutto tranne che nel periodo (p. es. 6)
+        List<CourseBean> medicalDifferentByPeriod = getCoupletByPeriod(medicalCleaned);
+        // Riduce le righe unendo tutti i periodi, ed ottenendo così una lista di AD distinte
+        List<CourseBean> merged = mergeDates(new ArrayList<CourseBean>(medicalDifferentByPeriod));
+        // Fa una copia delle AD mediche con i doppioni già ripuliti
+        ArrayList<CourseBean> medicalAD = new ArrayList<CourseBean>(medicalCleaned);
+        // Toglie dalla lista originale delle AD mediche tutte le AD con i periodi da unire
+        medicalAD.removeAll(medicalDifferentByPeriod);
+        // Ci aggiunge i singoli con i periodi uniti (totale: 37 - 6 + 3 = 34) 
+        medicalAD.addAll(merged);
         
         // Imposta il testo del Titolo da visualizzare prima dell'elenco
         req.setAttribute("titoloE", "AD Semplici");
@@ -292,17 +356,17 @@ public class ValuationCommand extends ItemBean implements Command {
          // Salva nella request: elenco AD Semplici
         
         req.setAttribute("adMedicina", medical);
-        req.setAttribute("elenco", butMedical);
-        req.setAttribute("candidati", butMedicalAndHeavy);
+        req.setAttribute("elenco", notMedical);
+        req.setAttribute("candidati", notMedicalAndHeavy);
         
-        
-        //req.setAttribute("senzaDuplicati", candidates);
+        //req.setAttribute("senzaDuplicati", medicalAD);
         //req.setAttribute("lista", sda);
-        //req.setAttribute("elenco", candidates);
-        //req.setAttribute("duplicati", duplicates);
-        //req.setAttribute("doppioni", samplesDuplicates);
-        //req.setAttribute("doppi", differentByPeriod);
-        //req.setAttribute("periodiUniti", merged);
+        req.setAttribute("elenco", medicalAD);
+        req.setAttribute("duplicati", medicalDuplicates);
+        req.setAttribute("doppioni", medicalCleaned);
+        req.setAttribute("doppi", medicalDifferentByPeriod);
+        req.setAttribute("periodiUniti", merged);
+        
         //req.setAttribute("duplicatiDaAggiungere", refinedDuplicates);
         //req.setAttribute("duplicatiResidui", equalsButPeriod);
         //req.setAttribute("duplicatiResiduiPeriodiUniti", mergedDates); */
@@ -355,19 +419,42 @@ public class ValuationCommand extends ItemBean implements Command {
     
     
     /**
+     * <p>Ordina un {@link ArrayList} secondo un criterio definito dall'utente.<br />
+     * Nel caso specifico, il metodo invoca la classe annidata 
+     * {@link Sortbyid} che tenta di ordinare 
+     * gli elementi dell'ArrayList passato come argomento al presente metodo
+     * in base all'identificativo dell'Attivit&agrave; Didattica, 
+     * come definito all'interno della stessa classe annidata.</p>
+     * <p>Il metodo agisce per riferimento (<code>ByRef</code>) 
+     * piuttosto che per valore (<code>ByVal</code>), quindi cambia l'ordinamento
+     * dell'oggetto passato come argomento; se pertanto non si desidera 
+     * modificare l'ordine originale dell'oggetto, &egrave; necessario 
+     * prima clonarlo e poi passare il clone come parametro.</p>
+     * 
+     * @param l ArrayList da ordinare secondo il criterio specificato nella classe di cui il presente metodo passera' un'instanza
+     * @throws CommandException se si verifica un problema generalmente di puntamento a null
+     */
+    public void sortById(List<CourseBean> l) 
+            throws CommandException {
+        Collections.sort(l, new Sortbyid());
+        // return null;
+    }
+    
+    
+    /**
      * <p>Estrae dalla lista grezza delle AD semplici (semilavorato) 
      * tutte le AD di area medica da sottoporre a valutazione.</p>
      * <p>Le AD in questione:
      * <ul>
      * <li>devono essere appartenenti a un corso di medicina</li>
-     * <li>devono avere crediti di lezione > 0</li>
-     * <li>non devono rientrare nella lista dei corsi elettivi</li>
+     * <li>devono avere &nbsp;<strong><code>crediti di lezione &gt; 0</code></strong></li>
+     * <li><strong>non</strong> devono rientrare nella lista dei corsi elettivi</li>
      * </ul>
      * </p>
      * 
-     * @param v e' la lista grezza delle AD in cui cercare i doppi
-     * @return
-     * @throws CommandException
+     * @param v e' la lista grezza delle AD in cui cercare le AD di area medica al fine di restituirle
+     * @return <code>ArrayList&lt;CourseBean&gt;</code> - la lista delle AD di area medica da sottoporre a valutazione, salvo duplicazioni
+     * @throws CommandException se si verifica un problema nello scorrimento di liste o in qualche altro tipo di puntamento
      */
     private  ArrayList<CourseBean> getMedicalCourses(Vector<CourseBean> v)
                                               throws CommandException {
@@ -388,7 +475,7 @@ public class ValuationCommand extends ItemBean implements Command {
                 }
             }
         } catch (IndexOutOfBoundsException iobe) {
-            String msg = FOR_NAME + "Si e\' verificato un problmea nello scorrimento delle lista delle AD.\n" + iobe.getMessage();
+            String msg = FOR_NAME + "Si e\' verificato un problema nello scorrimento delle lista delle AD.\n" + iobe.getMessage();
             throw new CommandException(msg, iobe);
         } catch (ClassCastException cce) {
             String msg = FOR_NAME + "Si e\' verificato un problema in qualche conversione di tipo.\n" + cce.getMessage();
@@ -408,10 +495,9 @@ public class ValuationCommand extends ItemBean implements Command {
      * <p>Partendo dalla lista grezza delle AD semplici (semilavorato) 
      * restituisce tutte le AD NON di medicina.</p>
      * 
-     * 
-     * @param v e' la lista grezza delle AD in cui cercare i doppi
-     * @return
-     * @throws CommandException
+     * @param v e' la lista grezza delle AD in cui cercare le AD di area medica al fine di scartarle
+     * @return <code>ArrayList&lt;CourseBean&gt;</code> - la lista delle AD semilavorate, depurate di quelle di area medica
+     * @throws CommandException se si verifica un problema nello scorrimento di liste o in qualche altro tipo di puntamento
      */
     private static ArrayList<CourseBean> discardMedicalCourses(Vector<CourseBean> v)
                                                         throws CommandException {
@@ -428,7 +514,7 @@ public class ValuationCommand extends ItemBean implements Command {
                 }
             }
         } catch (IndexOutOfBoundsException iobe) {
-            String msg = FOR_NAME + "Si e\' verificato un problmea nello scorrimento di liste.\n" + iobe.getMessage();
+            String msg = FOR_NAME + "Si e\' verificato un problema nello scorrimento di liste.\n" + iobe.getMessage();
             throw new CommandException(msg, iobe);
         } catch (ClassCastException cce) {
             String msg = FOR_NAME + "Si e\' verificato un problema in qualche conversione di tipo.\n" + cce.getMessage();
@@ -445,35 +531,31 @@ public class ValuationCommand extends ItemBean implements Command {
     
     
     /**
-     * Partendo dalla lista delle AD semplici non di medicina 
-     * restituisce tutte le AD con un numero di crediti totali strettamente
-     * maggiori di 3
+     * <p>Partendo da una lista di AD (p.es. dalla lista delle 
+     * AD semplici non di medicina) restituisce tutte le AD 
+     * con un numero di crediti totali strettamente maggiori 
+     * di quelli di un intero passato come argomento.</p>
      * 
-     * 
-     * @param v e' la lista grezza delle AD in cui cercare i doppi
-     * @return
-     * @throws CommandException
+     * @param l lista di AD in cui cercare le AD in base al criterio che abbiano un peso maggiore strettamente maggiore di <code>credits</code>
+     * @param credits criterio di pesatura in base a cui tenere o scartare ciascuna AD passata al vaglio
+     * @return <code>ArrayList&lt;CourseBean&gt;</code> - lista delle AD rispondenti al criterio
+     * @throws CommandException se si verifica un problema nello scorrimento di liste o in qualche altro tipo di puntamento
      */
     private static ArrayList<CourseBean> getGreatherThan(ArrayList<CourseBean> l, 
                                                          int credits)
-                                                    throws CommandException {
-        // Trasforma il Vector di AD semilavorate in un ArrayList
-        //ArrayList<CourseBean> vAsArrayList = new ArrayList<CourseBean>(v);
-        // Dichiara la lista delle AD di peso sufficiente ad essere esaminate
+                                                  throws CommandException {
         ArrayList<CourseBean> greatherThan = new ArrayList<CourseBean>();
-
         try {
-
             for (int i = 0; i < l.size(); i++) {
                 CourseBean current = l.get(i);
-                // Se i e j sono uguali sta puntando allo stesso elemento, ed è evidente che un elemento è uguale a se stesso...
+                // Se i crediti totali sono strettamente maggiori di credits...
                 if (current.getCreditiTotali() > credits) {
-                    
+                    // ...conserva l'AD
                     greatherThan.add(current);
                 }
             }
         } catch (IndexOutOfBoundsException iobe) {
-            String msg = FOR_NAME + "Si e\' verificato un problmea nello scorrimento della lista delle AD grezze o di quelle duplicate.\n" + iobe.getMessage();
+            String msg = FOR_NAME + "Si e\' verificato un problema nello scorrimento della lista delle AD grezze o di quelle duplicate.\n" + iobe.getMessage();
             throw new CommandException(msg, iobe);
         } catch (ClassCastException cce) {
             String msg = FOR_NAME + "Si e\' verificato un problema in qualche conversione di tipo.\n" + cce.getMessage();
@@ -488,6 +570,249 @@ public class ValuationCommand extends ItemBean implements Command {
         return greatherThan;
     }   
     
+    
+    /**
+     * <p>Cerca in una lista, passata come argomento, tutti i duplicati, 
+     * logici e fisici; a seconda del valore di un flag, passato come argomento, 
+     * restituisce:
+     * <dl>
+     * <dt>(se il flag &egrave; falso)</dt>
+     * <dd>la lista dei duplicati trovati</dd>
+     * oppure
+     * <dt>(se il flag &egrave; vero)</dt>
+     * <dd>una copia della lista originale, depurata dei duplicati</dd>
+     * </dl></p> 
+     * 
+     * @param l una lista di AD, presumibilmente contenente duplicati
+     * @param removeThemAll flag specificante se i duplicati vanno restituiti oppure epurati
+     * @return <code>ArrayList&lt;CourseBean&gt;</code> - lista delle AD duplicate o depurate, a seconda del valore del criterio
+     * @throws CommandException se si verifica un problema nello scorrimento di liste o in qualche altro tipo di puntamento
+     */
+    private static ArrayList<CourseBean> handleDuplicates(ArrayList<CourseBean> l, 
+                                                          boolean removeThemAll)
+                                                   throws CommandException {
+        // Copia l'ArrayList passato come rgomento in un ArrayList variabile locale
+        // per non alterare, per riferimento, il valore del parametro passato dal chiamante
+        ArrayList<CourseBean> m = new ArrayList<CourseBean>(l);
+        // Dichiara la lista dei duplicati
+        ArrayList<CourseBean> duplicates = new ArrayList<CourseBean>();
+        // Deve ciclare la lista passata, e confrontare, riga per riga,
+        // se la riga corrente è uguale - da un punto di vista logico - 
+        // alla riga successiva (cioè se ne condivide la chiave)
+        try {
+            // Cicla due volte l'ArrayList delle AD per individuare AD con la stessa chiave
+            for (int i = 0; i < m.size(); i++) {
+                for (int j = 0; j < m.size(); j++) {
+                    // Se i e j sono uguali sta puntando allo stesso elemento, ed è evidente che un elemento è uguale a se stesso...
+                    if (i != j) {   
+                        CourseBean courseRaw = m.get(i);
+                        CourseBean courseOrd = m.get(j);
+                        // Diamo per scontato (ragionevolmente!) che non ci siano tuple con lo stesso id
+                        if (courseRaw.getKey().equals(courseOrd.getKey()) && (courseRaw.getId() != courseOrd.getId())) {
+                            if (removeThemAll) {
+                                // Cerca (per scartarlo) tra i 2 record uguali quello con il coordinatore = 1
+                                if (courseRaw.getCoordinatore() > courseOrd.getCoordinatore()) {
+                                    m.remove(courseRaw);
+                                }
+                                else if (courseRaw.getCoordinatore() < courseOrd.getCoordinatore()) {
+                                    m.remove(courseOrd);
+                                }
+                                // I flag coordinatore sono uguali!
+                                else {
+                                    // Nel caso in cui avessero entrambi lo stesso valore, tiene quello con il numero di crediti maggiore
+                                    if (courseRaw.getCrediti() > courseOrd.getCrediti()) {
+                                        m.remove(courseRaw);
+                                    }
+                                    else {
+                                        m.remove(courseOrd);
+                                    }
+                                }
+                            }
+                            else {
+                                duplicates.add(courseOrd);
+                            }
+                            
+                        }
+                    }
+                }
+            }
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di un attributo del bean.\n" + anve.getMessage();
+            throw new CommandException(msg, anve);            
+        } catch (IndexOutOfBoundsException iobe) {
+            String msg = FOR_NAME + "Si e\' verificato un probleea nello scorrimento della lista delle AD grezze o di quelle duplicate.\n" + iobe.getMessage();
+            throw new CommandException(msg, iobe);
+        } catch (ClassCastException cce) {
+            String msg = FOR_NAME + "Si e\' verificato un problema in qualche conversione di tipo.\n" + cce.getMessage();
+            throw new CommandException(msg, cce);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n" + npe.getMessage();
+            throw new CommandException(msg, npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
+            throw new CommandException(msg, e);
+        }
+        if (removeThemAll) {
+            return m;
+        }
+        return duplicates;
+    }
+    
+    
+    /**
+     * <p>Prende in input un lista di AD che, nell'estrazione grezza, presentano
+     * uno o pi&uacute; duplicati logici tra cui vi sono alcune AD aventi
+     * la stessa chiave-base ma diverso periodo.<br />
+     * Seleziona queste ultime, ovvero quelle con:
+     * <strong> stesso CdS, Codice U-GOV, Docente </strong> 
+     * ma periodo diverso (da unire successivamente) quindi in sostanza
+     * l doppioni che hanno persistito nella lista dei "doppioni puliti", 
+     * ottenendo cos&iacute; una lista di AD accoppiate per chiave-base
+     * ma distinte per periodo, che dovranno poi essere ridotte a elementi
+     * distinti con i periodi uniti.</p>
+     * 
+     * @param samplesDuplicates ArrayList di AD campione che sono tutte distinte, tranne alcune che hanno stessa chiave-base ma periodo diverso 
+     * @return <code>List&lt;CourseBean&gt;</code> - ArrayList di AD che sono tutte uguali nella chiave-base ma diverse nel periodo  
+     * @throws CommandException se si verifica un problema di puntatore fuori tabella o in qualche altro tipo di puntamento
+     */
+    private static List<CourseBean> getCoupletByPeriod(List<CourseBean> samplesDuplicates)
+                                                throws CommandException {
+        // Calcola la lunghezza della lista di campioni di duplicati logici
+        int vSize = samplesDuplicates.size();
+        // Dichiara la lista "grezza" di elementi che hanno la stessa chiave-base ma diverso periodo di erogazione
+        List<CourseBean> baseDuplicates = new ArrayList<CourseBean>();
+        // Cicla
+        try {
+            // Contatori
+            int i = 0;
+            // Cicla tutti i duplicati logici
+            while (i < vSize) {
+                // Punta al record corrente
+                CourseBean current = samplesDuplicates.get(i);
+                // Per definizione di questa List le chiavi complete non possono essere uguali, quindi recupera la chiave-base
+                String smallKey = current.getSmallKey();
+                // Ciclo forEach (Java 1.5+)
+                for (CourseBean ad : samplesDuplicates) {
+                    // Controlla che le occorrenze abbiano la stessa chiave-base ma diverso id 
+                    // (AD con la stessa chiave-base e lo stesso id sono la stessa AD!)
+                    if (ad.getSmallKey().equals(smallKey) && ad.getId() != current.getId()) {
+                     // Nel momento in cui le chiavi-base sono uguali (e gli id diversi), tiene il record perché gli interessa
+                        baseDuplicates.add(ad);
+                    }
+                }
+                i++;
+            }
+        } catch (AttributoNonValorizzatoException anve) {
+            throw new CommandException(FOR_NAME + "Si e\' verificato un problema nel recupero di un attributo.\n" + anve.getMessage(), anve);
+        } catch (ArrayIndexOutOfBoundsException aiobe) {
+            throw new CommandException(FOR_NAME + "Si e\' verificato un puntamento fuori da una lista.\n" + aiobe.getMessage(), aiobe);
+        } catch (NullPointerException npe) {
+            throw new CommandException(FOR_NAME + "Si e\' verificato un puntamento a un oggetto non esistente.\n" + npe.getMessage(), npe);
+        } catch (Exception e) {
+            throw new CommandException(FOR_NAME + "Si e\' verificato un problema" + e.getMessage(), e);
+        }
+        return baseDuplicates;
+    }
+
+    
+    /**
+     * <p>Prende in input un lista di AD aventi
+     * la stessa chiave-base ma diverso periodo.<br />
+     * Tenta di unire i periodi dove possibile, usando il criterio di
+     * tenere le date pi&uacute; distanti possibile, quindi di calcolare
+     * l'unione degli intervalli,
+     * ottenendo cos&iacute; una lista di AD pulite 
+     * e tutte distinte anche per chiave-base, che dovr&agrave;
+     * essere poi unita (in gergo informatichese: joinata, mergiata...)
+     * alla lista delle AD da cui sono stati tolti i duplicati, 
+     * insieme alle basi dei duplicati veri (AD che presentano duplicati) 
+     * per ottenere infine l'elenco pulito delle AD.</p>
+     * <p>Questo metodo confronta la smallkey;
+     * se le smallkey sono uguali, cerca la data minore, la data maggiore, 
+     * e genera un unico periodo che è la fusione dei due;
+     * setta il nuovo periodo in un bean avente la stessa smallkey 
+     * ma ovviamente a questo punto differente key.</p>
+     * TODO: gestire il caso in cui ci sono 3 o più righe con periodi uniti, non solo 2
+     * 
+     * @param duplicateButPeriod ArrayList contenente un elenco di AD uguali nella chiave base ma differenti solo per il periodo
+     * @return <code>List&lt;CourseBean&gt;</code> - ArrayList di AD che sono tutte diverse nella chiave base e nel periodo
+     * @throws CommandException se si verifica un problema nell'accesso ad un attributo o in qualche altro tipo di puntamento
+     */
+    private static List<CourseBean> mergeDates(List<CourseBean> duplicateButPeriod)
+                                        throws CommandException {
+        // Calcola la lunghezza della lista di campioni di duplicati logici
+        int vSize = duplicateButPeriod.size();
+        // Dichiara la lista "grezza" di elementi che hanno la stessa chiave-base ma diverso periodo di erogazione
+        List<CourseBean> merged = new ArrayList<CourseBean>();
+        // Cicla
+        try {
+            // Contatori
+            int i = 0;
+            int j = 0;
+            // Cicla tutti i duplicati logici
+            while (i < vSize) {
+                // Indice del successivo
+                j = i + 1;
+                // Punta al record corrente
+                CourseBean current = duplicateButPeriod.get(i);
+                if (j < vSize) {
+                    // Punta al record successivo
+                    CourseBean next = duplicateButPeriod.get(j);
+                    // Per definizione di questa List le chiavi complete non possono essere uguali, quindi recupera la chiave-base del corrente
+                    String smallKey = current.getSmallKey();
+                    // Controlla che l'occorrenza corrente e quella successiva abbiano la stessa chiave-base ma diverso id 
+                    // (AD con la stessa chiave-base e lo stesso id sono la stessa AD!)
+                    if ((smallKey.equals(next.getSmallKey())) && (current.getId() != next.getId())) {
+                        // Se siamo qui vuol dire che le due occorrenze sono uguali nella chiave-base ma non nel periodo
+                        // Recupera tutte le date, che dal bean arrivano sotto forma di String
+                        String startFirstDate  = current.getInizioPerDid();
+                        String endFirstDate    = current.getFinePerDid();
+                        String startSecondDate = next.getInizioPerDid();
+                        String endSecondDate   = next.getFinePerDid();
+                        // Converte le Sting in oggetti Date
+                        Date startFirstDateAsDate  = new SimpleDateFormat("yyyy-MM-dd").parse(startFirstDate);
+                        Date endFirstDateAsDate    = new SimpleDateFormat("yyyy-MM-dd").parse(endFirstDate);
+                        Date startSecondDateAsDate = new SimpleDateFormat("yyyy-MM-dd").parse(startSecondDate);
+                        Date endSecondDateAsDate   = new SimpleDateFormat("yyyy-MM-dd").parse(endSecondDate);
+                        // Carica le date in una struttura
+                        ArrayList<Date> date = new ArrayList<>();
+                        date.add(startFirstDateAsDate);
+                        date.add(endFirstDateAsDate);
+                        date.add(startSecondDateAsDate);
+                        date.add(endSecondDateAsDate);
+                        // Ordina le date dalla prima all'ultima
+                        Collections.sort(date);
+                        // Prende la prima e l'ultima (gli estremi dell'intervallo)
+                        java.sql.Date firstStart = new java.sql.Date(date.get(0).getTime());
+                        java.sql.Date lastEnd = new java.sql.Date(date.get(3).getTime());
+                        // Costruisce un nuovo oggetto, uguale a uno dei due considerati
+                        CourseBean mergedCourse = new CourseBean(current); 
+                        // Setta le date trovate come estremi dell'intervallo nell'oggetto
+                        mergedCourse.setInizioPerDid(firstStart.toString());
+                        mergedCourse.setFinePerDid(lastEnd.toString());
+                        // Aggiunge l'oggetto a una struttura da restituire come la lista delle AD con le date unite
+                        merged.add(mergedCourse);
+                    }
+                }
+                i++;
+            }
+        } catch (AttributoNonValorizzatoException anve) {
+            throw new CommandException(FOR_NAME + "Si e\' verificato un problema nel recupero di un attributo.\n" + anve.getMessage(), anve);
+        } catch (ArrayIndexOutOfBoundsException aiobe) {
+            throw new CommandException(FOR_NAME + "Si e\' verificato un puntamento fuori da una lista.\n" + aiobe.getMessage(), aiobe);
+        } catch (NullPointerException npe) {
+            throw new CommandException(FOR_NAME + "Si e\' verificato un puntamento a un oggetto non esistente.\n" + npe.getMessage(), npe);
+        } catch (Exception e) {
+            throw new CommandException(FOR_NAME + "Si e\' verificato un problema" + e.getMessage(), e);
+        }
+        return merged;
+    }
+    
+    
+    /* ************************************************************************ *
+     *                    Codice Inutile, Obsoleto o Deprecato                  *
+     *                              TODO: eliminare                             *
+     * ************************************************************************ */    
     
     /**
      * Estrae dalla lista grezza delle AD semplici (semilavorato) 
@@ -522,7 +847,7 @@ public class ValuationCommand extends ItemBean implements Command {
                 }
             }
         } catch (IndexOutOfBoundsException iobe) {
-            String msg = FOR_NAME + "Si e\' verificato un problmea nello scorrimento della lista delle AD grezze o di quelle duplicate.\n" + iobe.getMessage();
+            String msg = FOR_NAME + "Si e\' verificato un problema nello scorrimento della lista delle AD grezze o di quelle duplicate.\n" + iobe.getMessage();
             throw new CommandException(msg, iobe);
         } catch (ClassCastException cce) {
             String msg = FOR_NAME + "Si e\' verificato un problema in qualche conversione di tipo.\n" + cce.getMessage();
@@ -546,15 +871,12 @@ public class ValuationCommand extends ItemBean implements Command {
      * @param v e' la lista grezza delle AD da ripulire
      * @return
      * @throws CommandException
+     * @deprecated perche' questo metodo e' stato migliorato e perfezionato nel contesto della riscrittura dell'algoritmo di scelta
      */
     private static ArrayList<CourseBean> clean(Vector<CourseBean> v)
                                         throws CommandException {
         // Trasforma il Vector di AD semilavorate in un ArrayList
         ArrayList<CourseBean> vAsArrayList = new ArrayList<CourseBean>(v);
-        
-        // Ordina la list per ottimizzare
-        //sortByKey(vAsArrayList);
-        
         // Deve ciclare la lista del semilavorato, e confrontare riga per riga
         // se la riga corrente è uguale - da un punto di vista logico - 
         // alla riga successiva (cioè se ne condivide la chiave)
@@ -573,7 +895,7 @@ public class ValuationCommand extends ItemBean implements Command {
                 }
             }
         } catch (IndexOutOfBoundsException iobe) {
-            String msg = FOR_NAME + "Si e\' verificato un problmea nello scorrimento della lista delle AD grezze o di quelle duplicate.\n" + iobe.getMessage();
+            String msg = FOR_NAME + "Si e\' verificato un problema nello scorrimento della lista delle AD grezze o di quelle duplicate.\n" + iobe.getMessage();
             throw new CommandException(msg, iobe);
         } catch (ClassCastException cce) {
             String msg = FOR_NAME + "Si e\' verificato un problema in qualche conversione di tipo.\n" + cce.getMessage();
@@ -609,7 +931,7 @@ public class ValuationCommand extends ItemBean implements Command {
      * @throws CommandException se si verifica un problema, generalmente nell'accesso a qualche valore o un puntamento fuori tabella
      */
     private List<CourseBean> getLogicalDuplicates(Vector<CourseBean> v)
-                                    throws CommandException {
+                                           throws CommandException {
         List<CourseBean> genericDuplicates = null;
         List<CourseBean> logicalDuplicates = null;
         try {
@@ -708,6 +1030,7 @@ public class ValuationCommand extends ItemBean implements Command {
      * @param duplicates lista dei duplicati logici
      * @return <code>List&lt;CourseBean&gt;</code> - ArrayList di AD campione che hanno almeno un duplicato  
      * @throws CommandException se si verifica un problema in un puntamento fuori tabella o nell'accesso a qualche elemento
+     * @deprecated perche' il criterio di eliminazione dei doppioni e' troppo arbitrario
      */
     private static List<CourseBean> splitDuplicates(List<CourseBean> duplicates)
                                              throws CommandException {
@@ -777,155 +1100,6 @@ public class ValuationCommand extends ItemBean implements Command {
         } catch (Exception e) {
             throw new CommandException(FOR_NAME + "Si e\' verificato un problema.\n",e);
         }
-    }
-    
-    
-    /**
-     * <p>Prende in input un lista di AD che, nell'estrazione grezza, presentano
-     * uno o pi&uacute; duplicati logici tra cui vi sono alcune AD aventi
-     * la stessa chiave-base ma diverso periodo.<br />
-     * Seleziona queste ultime, ovvero quelle con:
-     * <strong> stesso CdS, Codice U-GOV, Docente </strong> 
-     * ma periodo diverso (da unire successivamente) quindi in sostanza
-     * l doppioni che hanno persistito nella lista dei "doppioni puliti", 
-     * ottenendo cos&iacute; una lista di AD accoppiate per chiave-base
-     * ma distinte per periodo, che dovranno poi essere ridotte a elementi
-     * distinti con i periodi uniti.</p>
-     * 
-     * @param samplesDuplicates ArrayList di AD campione che sono tutte distinte, tranne alcune che hanno stessa chiave-base ma periodo diverso 
-     * @return <code>List&lt;CourseBean&gt;</code> - ArrayList di AD che sono tutte uguali nella chiave-base ma diverse nel periodo  
-     * @throws CommandException se si verifica un problema di puntatore fuori tabella o in qualche altro tipo di puntamento
-     */
-    private static List<CourseBean> getCoupletByPeriod(List<CourseBean> samplesDuplicates)
-                                                throws CommandException {
-        // Calcola la lunghezza della lista di campioni di duplicati logici
-        int vSize = samplesDuplicates.size();
-        // Dichiara la lista "grezza" di elementi che hanno la stessa chiave-base ma diverso periodo di erogazione
-        List<CourseBean> baseDuplicates = new ArrayList<CourseBean>();
-        // Cicla
-        try {
-            // Contatori
-            int i = 0;
-            // Cicla tutti i duplicati logici
-            while (i < vSize) {
-                // Punta al record corrente
-                CourseBean current = samplesDuplicates.get(i);
-                // Per definizione di questa List le chiavi complete non possono essere uguali, quindi recupera la chiave-base
-                String smallKey = current.getSmallKey();
-                // Ciclo forEach (Java 1.5+)
-                for (CourseBean ad : samplesDuplicates) {
-                    // Controlla che le occorrenze abbiano la stessa chiave-base ma diverso id 
-                    // (AD con la stessa chiave-base e lo stesso id sono la stessa AD!)
-                    if (ad.getSmallKey().equals(smallKey) && ad.getId() != current.getId()) {
-                     // Nel momento in cui le chiavi-base sono uguali (e gli id diversi), tiene il record perché gli interessa
-                        baseDuplicates.add(ad);
-                    }
-                }
-                i++;
-            }
-        } catch (AttributoNonValorizzatoException anve) {
-            throw new CommandException(FOR_NAME + "Si e\' verificato un problema nel recupero di un attributo.\n" + anve.getMessage(), anve);
-        } catch (ArrayIndexOutOfBoundsException aiobe) {
-            throw new CommandException(FOR_NAME + "Si e\' verificato un puntamento fuori da una lista.\n" + aiobe.getMessage(), aiobe);
-        } catch (NullPointerException npe) {
-            throw new CommandException(FOR_NAME + "Si e\' verificato un puntamento a un oggetto non esistente.\n" + npe.getMessage(), npe);
-        } catch (Exception e) {
-            throw new CommandException(FOR_NAME + "Si e\' verificato un problema" + e.getMessage(), e);
-        }
-        return baseDuplicates;
-    }
-
-    
-    /**
-     * <p>Prende in input un lista di AD aventi
-     * la stessa chiave-base ma diverso periodo.<br />
-     * Tenta di unire i periodi dove possibile, usando il criterio di
-     * tenere le date pi&uacute; distanti possibile, quindi di calcolare
-     * l'unione degli intervalli,
-     * ottenendo cos&iacute; una lista di AD pulite 
-     * e tutte distinte anche per chiave-base, che dovr&agrave;
-     * essere poi unita (in gergo informatichese: joinata, mergiata...)
-     * alla lista delle AD da cui sono stati tolti i duplicati, 
-     * insieme alle basi dei duplicati veri (AD che presentano duplicati) 
-     * per ottenere infine l'elenco pulito delle AD.</p>
-     * <p>Questo metodo confronta la smallkey;
-     * se le smallkey sono uguali, cerca la data minore, la data maggiore, 
-     * e genera un unico periodo che è la fusione dei due;
-     * setta il nuovo periodo in un bean avente la stessa smallkey 
-     * ma ovviamente a questo punto differente key.</p>
-     * 
-     * @param duplicateButPeriod ArrayList contenente un elenco di AD uguali nella chiave base ma differenti solo per il periodo
-     * @return <code>List&lt;CourseBean&gt;</code> - ArrayList di AD che sono tutte diverse nella chiave base e nel periodo
-     * @throws CommandException se si verifica un problema nell'accesso ad un attributo o in qualche altro tipo di puntamento
-     */
-    private static List<CourseBean> mergeDates(List<CourseBean> duplicateButPeriod)
-                                        throws CommandException {
-        // Calcola la lunghezza della lista di campioni di duplicati logici
-        int vSize = duplicateButPeriod.size();
-        // Dichiara la lista "grezza" di elementi che hanno la stessa chiave-base ma diverso periodo di erogazione
-        List<CourseBean> merged = new ArrayList<CourseBean>();
-        // Cicla
-        try {
-            // Contatori
-            int i = 0;
-            int j = 0;
-            // Cicla tutti i duplicati logici
-            while (i < vSize) {
-                // Indice del successivo
-                j = i + 1;
-                // Punta al record corrente
-                CourseBean current = duplicateButPeriod.get(i);
-                if (j < vSize) {
-                    // Punta al record successivo
-                    CourseBean next = duplicateButPeriod.get(j);
-                    // Per definizione di questa List le chiavi complete non possono essere uguali, quindi recupera la chiave-base del corrente
-                    String smallKey = current.getSmallKey();
-                    // Controlla che l'occorrenza corrente e quella successiva abbiano la stessa chiave-base ma diverso id 
-                    // (AD con la stessa chiave-base e lo stesso id sono la stessa AD!)
-                    if ((smallKey.equals(next.getSmallKey())) && (current.getId() != next.getId())) {
-                        // Se siamo qui vuol dire che le due occorrenze sono uguali nella chiave-base ma non nel periodo
-                        // Recupera tutte le date, che dal bean arrivano sotto forma di String
-                        String startFirstDate  = current.getInizioPerDid();
-                        String endFirstDate    = current.getFinePerDid();
-                        String startSecondDate = next.getInizioPerDid();
-                        String endSecondDate   = next.getFinePerDid();
-                        // Converte le Sting in oggetti Date
-                        Date startFirstDateAsDate  = new SimpleDateFormat("yyyy-MM-dd").parse(startFirstDate);
-                        Date endFirstDateAsDate    = new SimpleDateFormat("yyyy-MM-dd").parse(endFirstDate);
-                        Date startSecondDateAsDate = new SimpleDateFormat("yyyy-MM-dd").parse(startSecondDate);
-                        Date endSecondDateAsDate   = new SimpleDateFormat("yyyy-MM-dd").parse(endSecondDate);
-                        // Carica le date in una struttura
-                        ArrayList<Date> date = new ArrayList<>();
-                        date.add(startFirstDateAsDate);
-                        date.add(endFirstDateAsDate);
-                        date.add(startSecondDateAsDate);
-                        date.add(endSecondDateAsDate);
-                        // Ordina le date dalla prima all'ultima
-                        Collections.sort(date);
-                        // Prende la prima e l'ultima (gli estremi dell'intervallo)
-                        java.sql.Date firstStart = new java.sql.Date(date.get(0).getTime());
-                        java.sql.Date lastEnd = new java.sql.Date(date.get(3).getTime());
-                        // Costruisce un nuovo oggetto, uguale a uno dei due considerati
-                        CourseBean mergedCourse = new CourseBean(current); 
-                        // Setta le date trovate come estremi dell'intervallo nell'oggetto
-                        mergedCourse.setInizioPerDid(firstStart.toString());
-                        mergedCourse.setFinePerDid(lastEnd.toString());
-                        // Aggiunge l'oggetto a una struttura da restituire come la lista delle AD con le date unite
-                        merged.add(mergedCourse);
-                    }
-                }
-                i++;
-            }
-        } catch (AttributoNonValorizzatoException anve) {
-            throw new CommandException(FOR_NAME + "Si e\' verificato un problema nel recupero di un attributo.\n" + anve.getMessage(), anve);
-        } catch (ArrayIndexOutOfBoundsException aiobe) {
-            throw new CommandException(FOR_NAME + "Si e\' verificato un puntamento fuori da una lista.\n" + aiobe.getMessage(), aiobe);
-        } catch (NullPointerException npe) {
-            throw new CommandException(FOR_NAME + "Si e\' verificato un puntamento a un oggetto non esistente.\n" + npe.getMessage(), npe);
-        } catch (Exception e) {
-            throw new CommandException(FOR_NAME + "Si e\' verificato un problema" + e.getMessage(), e);
-        }
-        return merged;
     }
     
     
@@ -1022,7 +1196,7 @@ public class ValuationCommand extends ItemBean implements Command {
             vAsArrayList = new ArrayList<CourseBean>(v);
             vAsArrayList.removeAll(duplicates);
         } catch (ArrayIndexOutOfBoundsException aiobe) {
-            String msg = FOR_NAME + "Si e\' verificato un problmea nello scorrimento della lista delle AD grezze o di quelle duplicate" + aiobe.getMessage();
+            String msg = FOR_NAME + "Si e\' verificato un problema nello scorrimento della lista delle AD grezze o di quelle duplicate" + aiobe.getMessage();
             throw new CommandException(msg, aiobe);
         } catch (ClassCastException cce) {
             String msg = FOR_NAME + "Si e\' verificato un problema in qualche conversione di tipo" + cce.getMessage();
@@ -1052,11 +1226,11 @@ public class ValuationCommand extends ItemBean implements Command {
      * cioè, in altri termini, tiene soltanto una copia delle chiavi logiche duplicate
      * rimuove dal vector i 2 oggetti con i due periodi parziali e ci aggiunge il vector con il periodo risultante dai due
      * 
-     * @deprecated
      * @param v 
      * @param duplicates 
      * @return 
      * @throws CommandException 
+     * @deprecated
      */
     private ArrayList<CourseBean> purge(Vector<CourseBean> v,
                                         ArrayList<CourseBean> duplicates)
@@ -1123,7 +1297,7 @@ public class ValuationCommand extends ItemBean implements Command {
                 }
             }
         } catch (ArrayIndexOutOfBoundsException aiobe) {
-            String msg = FOR_NAME + "Si e\' verificato un problmea nello scorrimento della lista delle AD grezze o di quelle duplicate" + aiobe.getMessage();
+            String msg = FOR_NAME + "Si e\' verificato un problema nello scorrimento della lista delle AD grezze o di quelle duplicate" + aiobe.getMessage();
             throw new CommandException(msg, aiobe);
         } catch (ClassCastException cce) {
             String msg = FOR_NAME + "Si e\' verificato un problema in qualche conversione di tipo" + cce.getMessage();
