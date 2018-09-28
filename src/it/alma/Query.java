@@ -39,6 +39,7 @@ import java.util.LinkedList;
  * <p>Query &egrave; l'interfaccia contenente tutte le query della 
  * web-application &nbsp;<code>Alma on Line</code>.</p>
  * 
+ * 
  * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
  */
 public interface Query extends Serializable {
@@ -191,7 +192,48 @@ public interface Query extends Serializable {
           + ",\"Oretirocinio\"          AS \"oreTirocinio\""
           + ",\"InizioPerDid\"          AS \"inizioPerDid\""
           + ",\"FinePerDid\"            AS \"finePerDid\""
-          + " FROM \"AD-Semplici-II2017\" AD" 
-          + " --LIMIT 10";
+          + " FROM \"AD-Semplici-II2017\" AD"
+          + " ORDER BY \"codiceFiscaleDocente\", \"codiceADUGOV\", \"codiceCdSUGOV\", \"inizioPerDid\", \"finePerDid\""
+          + " --ORDER BY \"id\" "
+          + " --LIMIT 30";
+    
+    /**
+     * Query per estrarre le tuple delle Unit&agrave; Logistiche.
+     */
+    public static final String UL = 
+            "SELECT " 
+          + " \"row.names\"             AS \"id\""
+          + ",\"CodiceCDSWI\"           AS \"codiceCdSWI\""
+          + ",\"CodiceCDSUGOV\"         AS \"codiceCdSUGOV\""
+          + ",\"NomeCDS\"               AS \"nomeCdSWI\""
+          //+ ",\"NOMECDS2\"              AS \"nomeCdSUGOV\""
+          + ",\"DipartimentoScuola\"    AS \"dipartimentoScuola\""
+          + ",\"SedePrimariaCDS\"       AS \"sedePrimariaCDS\""
+          + ",\"CodiceADWI\"            AS \"codiceADWI\""
+          + ",\"CodiceADUGOV\"          AS \"codiceADUGOV\""
+          + ",\"AD\"                    AS \"nomeInsegnamento\""
+          + ",\"Modulo\"                AS \"modulo\""
+          + ",\"UL\"                    AS \"ul\""
+          + ",\"Discriminante\"         AS \"discriminante\""
+          + ",\"CFUtotali\"             AS \"crediti\""
+          + ",\"CFUtotali\"             AS \"creditiTotali\""
+          //+ ",\"CFUlezione\"            AS \"creditiLezione\""
+          + ",\"SSD\"                   AS \"SSD\""
+          + ",\"CognomeDocente\"        AS \"cognomeDocente\""
+          + ",\"NomeDocente\"           AS \"nomeDocente\""
+          + ",\"CodiceFiscaleDocente\"  AS \"codiceFiscaleDocente\""
+          + ",\"Coordinatore\"          AS \"coordinatore\""
+          + ",\"Orelezione\"            AS \"oreLezione\""
+          + ",\"Orelaboratorio\"        AS \"oreLaboratorio\""
+          + ",\"Orealtro\"              AS \"oreAltro\""
+          + ",\"Oreseminario\"          AS \"oreSeminario\""
+          + ",\"Oreesercitazione\"      AS \"oreEsercitazione\""
+          + ",\"Oretirocinio\"          AS \"oreTirocinio\""
+          + ",\"InizioPerDid\"          AS \"inizioPerDid\""
+          + ",\"FinePerDid\"            AS \"finePerDid\""
+          + " FROM \"UL-2018-I\" UL"
+          + " ORDER BY \"codiceFiscaleDocente\", \"codiceADUGOV\", \"codiceCdSUGOV\", \"inizioPerDid\", \"finePerDid\""
+          + " --ORDER BY \"id\" "
+          + " --LIMIT 30";
     
 }
