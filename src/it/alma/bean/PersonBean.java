@@ -1,68 +1,63 @@
 /*
- *   uol: University on Line. Applicazione WEB per la visualizzazione
- *   di siti web di Facoltà
- *   Copyright (C) 2000,2001 Roberto Posenato, Mirko Manea
+ *   Alma on Line: Applicazione WEB per la visualizzazione 
+ *   delle schede di indagine su popolazione dell'ateneo,
+ *   della gestione dei progetti on line (POL) 
+ *   e della preparazione e del monitoraggio delle informazioni riguardanti 
+ *   l'offerta formativa che hanno ricadute sulla valutazione della didattica 
+ *   (questionari on line - QOL).
  *   
- *   uol: University on Line. Applicazione WEB per la visualizzazione
- *   del sito web dei dipartimenti, delle ex-facoltà, dell'ateneo, 
- *   delle scuole di dottorato.
- *   University on Line (uol), web application to publish the faculties, 
- *   departments, PhD schools and university information
- *   Copyright (C) renewed 2002 Universita' degli Studi di Verona, 
+ *   Copyright (C) 2018 Giovanroberto Torre<br />
+ *   Alma on Line (aol), Projects on Line (pol), Questionnaire on Line (qol);
+ *   web applications to publish, and manage, students evaluation,
+ *   projects, students and degrees information.
+ *   Copyright (C) renewed 2018 Universita' degli Studi di Verona, 
  *   all right reserved
  *
- *   This program is free software; you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation; either version 2 of the License, or
- *   (at your option) any later version.
+ *   This program is free software; you can redistribute it and/or modify 
+ *   it under the terms of the GNU General Public License as published by 
+ *   the Free Software Foundation; either version 2 of the License, or 
+ *   (at your option) any later version. 
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful, 
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of 
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+ *   GNU General Public License for more details. 
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program; if not, write to the Free Software
- *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *   Roberto Posenato <posenato@sci.univr.it>
- *   Dipartimento di Informatica
- *   Università degli Studi di Verona
- *   Strada le Grazie 15
- *   37134 Verona (Italy)
- *
+ *   You should have received a copy of the GNU General Public License 
+ *   along with this program; if not, write to the Free Software 
+ *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA<br>
+ *   
  *   Giovanroberto Torre <giovanroberto.torre@univr.it>
- *   Direzione Informatica
- *   Università degli Studi di Verona
- *   Via Paradiso 6
+ *   Sistemi Informatici per il Reporting di Ateneo
+ *   Universita' degli Studi di Verona
+ *   Via Dell'Artigliere, 8
  *   37129 Verona (Italy)
  */
+
 package it.alma.bean;
 
 import it.alma.exception.AttributoNonValorizzatoException;
 
+import java.io.Serializable;
 import java.sql.Date;
 import java.util.Vector;
 
 
 /**
- * <p>PersonBean &egrave; l'oggetto atto a rappresentare l'elemento
+ * <p>PersonBean &egrave; l'oggetto che rappresenta l'elemento
  * pi&uacute; importante, ed uno dei pi&uacute; complessi, dell'applicazione
- * web <code>uol</code>.</p>
- * <p><dl>
- * <dt>Someday:</dt>
- * <dd>lun ago 27 13:14:20 CEST 2007 gtorre</dd>
- * <dd>lun ago 27 13:14:20 CEST 2007 gtorre: + 
-       data di fine servizio presso le direzioni</dd>
-   <dd>ven gen 12 13:37:55 CET 2007: + PEC</dd>
-   <dd>gio set  8 14:32:42 CEST 2005: + flag responsabileUO</dd>
- * </dl></p>
+ * web <code>alma on line</code>.</p>
  * 
- * @version 1.20.2.6
- * @author trrgnr59
  * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
  */
-public class PersonBean {
+public class PersonBean implements Serializable {
+    /**
+     * La serializzazione necessita di dichiarare una costante di tipo long
+     * identificativa della versione seriale. 
+     * (Se questo dato non fosse inserito, verrebbe calcolato in maniera automatica
+     * dalla JVM, e questo potrebbe portare a errori riguardo alla serializzazione). 
+     */
+    private static final long serialVersionUID = -3415439696526030885L;
     /* ************************************************************************ *  
      *                    Dati identificativi della persona                     *
      * ************************************************************************ */
@@ -239,24 +234,6 @@ public class PersonBean {
     //private Vector<QualificaBean> qualificheAfferenzeSecondarie;
     /** Flag specificante se trattasi di un tecnico di ex-facolt&agrave; */
     private boolean isTAFacolta;
-    /* ************************************************************************ *  
-     *               Variabili per lingua / internazionalizzazione              *
-     * ************************************************************************ */
-    private String linguaNote;
-    private String linguaDescrizioneSettore;
-    private String linguaCaricaInOrganoCol;
-    private String linguaFacolta;
-    private String linguaDipartimento;
-    private String linguaQualificaPrincipaleFacolta;
-    private String linguaQualificaPrincipaleDip;
-    private String linguaSezione;
-    private String linguaNoteRicevimento;
-    private String linguaNomeDirezione;
-    private String linguaNomeQualificaDirezione;
-    private String linguaNomeBibliocr;
-    private String linguaNomeQualificaBibliocr;
-    private String linguaPianoUfficio;
-    private String linguaNomeCS;
     
     
     /**
@@ -265,20 +242,20 @@ public class PersonBean {
     public PersonBean() {
         id = idDipartimento = idFacolta = idUfficio = idQualificaPrincipaleFacolta = idQualificaPrincipaleDip = -2;
         nome = cognome = telefono = telefonoMobile = fax = email = emailCertificata = urlPersonalPage = null;
-        note = linguaNote = codiceSettore = descrizioneSettore = noteRicevimento = linguaNoteRicevimento = null;
+        note = codiceSettore = descrizioneSettore = noteRicevimento = null;
         stanzaUfficio = pianoUfficio = edificioUfficio = null;
-        nomeCiclo = nomeCS = linguaNomeCS = null;
-        facolta = qualificaPrincipaleFacolta = linguaQualificaPrincipaleFacolta = urlFacolta = linguaFacolta = null;
-        dipartimento = qualificaPrincipaleDip = linguaQualificaPrincipaleDip = urlDipartimento = linguaDipartimento = null;
-        mansione = sezione = linguaSezione = null;
+        nomeCiclo = nomeCS = null;
+        facolta = qualificaPrincipaleFacolta = urlFacolta = null;
+        dipartimento = qualificaPrincipaleDip = urlDipartimento = null;
+        mansione = sezione = null;
         dataNascita = fineServizioDipart = fineServizio = fineServizioDir = fineServizioBiblioCR = dataDisattivazioneDip = dataDisattivazioneFac = setFineServizioMax(new Date(0));
         esterno = mostraPersonale = mostraTelefono = tempoPieno = inServizio = titolare = coordinatore = responsabileArea = responsabileUO = inAttivazioneDip = oblio = false;
         idDirezione = idBibliocr = idQualificaDirezione = idQualificaBibliocr = -2;
-        linguaNomeDirezione = nomeDirezione = nomeQualificaDirezione = linguaNomeQualificaDirezione = null;
-        linguaNomeBibliocr = nomeBibliocr = nomeQualificaBibliocr = linguaNomeQualificaBibliocr = urlBibliocr = incaricoBibliocr = null;
+        nomeDirezione = nomeQualificaDirezione = null;
+        nomeBibliocr = nomeQualificaBibliocr = urlBibliocr = incaricoBibliocr = null;
         sesso = ' ';
         ruoloBibliocr = ' ';
-        caricaInOrganoCol = linguaCaricaInOrganoCol = null;
+        caricaInOrganoCol = null;
         nomeCiclo = null;
         incaricoInArea = null;
         skypeid=null;
@@ -1571,268 +1548,10 @@ public class PersonBean {
             this.sesso = sesso;
     }
     
-    /**
-     * Getter for property linguaNote.
-     * @return Value of property linguaNote.
-     */
-    public String getLinguaNote() throws AttributoNonValorizzatoException {
-        if (linguaNote == null) {
-            throw new AttributoNonValorizzatoException("PersonBean: attributo linguaNote non valorizzato!");
-        } else {
-            return this.linguaNote;
-        }
-    }
-    
-    /**
-     * Setter for property linguaNote.
-     * @param linguaNote New value of property linguaNote.
-     */
-    public void setLinguaNote(String linguaNote) {
-        this.linguaNote = linguaNote;
-    }
-    
-    /**
-     * Getter for property linguaDescrizioneSettore.
-     * @return Value of property linguaDescrizioneSettore.
-     */
-    public String getLinguaDescrizioneSettore() throws AttributoNonValorizzatoException {
-        if (linguaDescrizioneSettore == null) {
-            throw new AttributoNonValorizzatoException("PersonBean: attributo linguaDescrizioneSettore non valorizzato!");
-        } else {
-            return this.linguaDescrizioneSettore;
-        }
-    }
-    
-    /**
-     * Setter for property linguaDescrizioneSettore.
-     * @param linguaDescrizioneSettore New value of property linguaDescrizioneSettore.
-     */
-    public void setLinguaDescrizioneSettore(String linguaDescrizioneSettore) {
-        this.linguaDescrizioneSettore = linguaDescrizioneSettore;
-    }
-    
-    
-    /**
-     * Setter for property linguaFacolta.
-     * @param linguaFacolta New value of property linguaFacolta.
-     */
-    public void setLinguaFacolta(String linguaFacolta) {
-        this.linguaFacolta = linguaFacolta;
-    }
-    
-    
-    
-    public String getLinguaNomeCS() throws AttributoNonValorizzatoException {
-        if (linguaNomeCS == null) {
-            throw new AttributoNonValorizzatoException("PersonBean: attributo linguaNomeCS non valorizzato!");
-        } else {
-            return this.linguaNomeCS;
-        }
-    }
-    
-    public void setLinguaNomeCS(String string) {
-        linguaNomeCS = string;
-    }
-    
-    public String getLinguaFacolta() throws AttributoNonValorizzatoException {
-        if (linguaFacolta == null) {
-            throw new AttributoNonValorizzatoException("PersonBean: attributo linguaFacolta non valorizzato!");
-        } else {
-            return this.linguaFacolta;
-        }
-    }
-    
-    
-    /**
-     * Setter for property linguaDipartimeto.
-     * @param linguaDipartimeto New value of property linguaDipartimeto.
-     */
-    public void setLinguaDipartimento(String lingua) {
-        this.linguaDipartimento = lingua;
-    }
-    
-    public String getLinguaDipartimento() throws AttributoNonValorizzatoException {
-        if (linguaDipartimento == null) {
-            throw new AttributoNonValorizzatoException("PersonBean: attributo linguaDipartimento non valorizzato!");
-        } else {
-            return this.linguaDipartimento;
-        }
-    }
-    
-    
-    /**
-     * Setter for property linguaQualificaPrincipaleFacolta.
-     * @param linguaQualificaPrincipaleFacolta New value of property linguaQualificaPrincipaleFacolta.
-     */
-    public void setLinguaQualificaPrincipaleFacolta(String linguaQualificaPrincipaleFacolta) {
-        this.linguaQualificaPrincipaleFacolta = linguaQualificaPrincipaleFacolta;
-    }
-    
-    public String getLinguaQualificaPrincipaleFacolta() throws AttributoNonValorizzatoException {
-        if (linguaQualificaPrincipaleFacolta == null) {
-            throw new AttributoNonValorizzatoException(
-            "PersonBean: attributo linguaQualificaPrincipaleFacolta non valorizzato!");
-        } else {
-            return this.linguaQualificaPrincipaleFacolta;
-        }
-    }
-    
-    
-    /**
-     * Setter for property linguaQualificaPrincipaleDip.
-     * @param linguaQualificaPrincipaleDip New value of property linguaQualificaPrincipaleDip.
-     */
-    public void setLinguaQualificaPrincipaleDip(String linguaQualificaPrincipaleDip) {
-        this.linguaQualificaPrincipaleDip = linguaQualificaPrincipaleDip;
-    }
-    
-    public String getLinguaCaricaInOrganoCol() throws AttributoNonValorizzatoException {
-        if (linguaCaricaInOrganoCol == null) {
-            throw new AttributoNonValorizzatoException("PersonBean: attributo linguaCaricaInOrganoCol non valorizzato!");
-        } else {
-            return this.linguaCaricaInOrganoCol;
-        }
-    }
-    
-    /**
-     * Setter for property linguaCaricaInOrganoCol.
-     * @param linguaCaricaInOraganoCol New value of property linguaCaricaInOrganoCol.
-     */
-    public void setLinguaCaricaInOrganoCol(String lingua) {
-        this.linguaCaricaInOrganoCol = lingua;
-    }
-    
-    public String getLinguaSezione() throws AttributoNonValorizzatoException {
-        if (linguaSezione == null) {
-            throw new AttributoNonValorizzatoException("PersonBean: attributo linguaSezione non valorizzato!");
-        } else {
-            return this.linguaSezione;
-        }
-    }
-    
-    /**
-     * Setter for property linguaSezione.
-     * @param linguaSezione New value of property linguaSezione.
-     */
-    public void setLinguaSezione(String linguaSezione) {
-        this.linguaSezione = linguaSezione;
-    }
-    
-    public String getLinguaQualificaPrincipaleDip() throws AttributoNonValorizzatoException {
-        if (linguaQualificaPrincipaleDip == null) {
-            throw new AttributoNonValorizzatoException("PersonBean: attributo linguaQualificaPrincipaleDip non valorizzato!");
-        } else {
-            return this.linguaQualificaPrincipaleDip;
-        }
-    }
-    
-    public String getLinguaNoteRicevimento() throws AttributoNonValorizzatoException {
-        if (this.linguaNoteRicevimento == null) {
-            throw new AttributoNonValorizzatoException("PersonBean: attributo linguaNoteRicevimento non valorizzato!");
-        } else {
-            return this.linguaNoteRicevimento;
-        }
-    }
-    
-    /**
-     * Setter for property linguaNoteRicevimento.
-     * @param linguaNoteRicevimento New value of property linguaNoteRicevimento.
-     */
-    public void setLinguaNoteRicevimento(String linguaNoteRicevimento) {
-        this.linguaNoteRicevimento = linguaNoteRicevimento;
-    }
-    
-    public String getLinguaNomeDirezione() throws AttributoNonValorizzatoException {
-        if ( linguaNomeDirezione == null ) {
-            String error = "PersonBean: attributo 'linguaNomeDirezione' non valorizzato.";
-            throw new AttributoNonValorizzatoException(error);
-        } else {
-            return linguaNomeDirezione;
-        }
-    }
-    
-    /**
-     * Setter for property linguaNomeDirezione.
-     * @param linguaNomeDirezione New value of property linguaNomeDirezione.
-     */
-    public void setLinguaNomeDirezione(String linguaNomeDirezione) {
-        this.linguaNomeDirezione = linguaNomeDirezione;
-    }
-    
-    public String getLinguaNomeBibliocr() throws AttributoNonValorizzatoException {
-        if ( linguaNomeBibliocr == null ) {
-            String error = "PersonBean: attributo 'linguaNomeBibliocr' non valorizzato.";
-            throw new AttributoNonValorizzatoException(error);
-        } else {
-            return linguaNomeBibliocr;
-        }
-    }
-    
-    /**
-     * Setter for property linguaNomeQualificaBibliocr.
-     * @param linguaNomeQualificaBibliocr New value of property linguaNomeQualificaBibliocr.
-     */
-    public void setLinguaNomeQualificaBibliocr(String linguaNomeQualificaBibliocr) {
-        this.linguaNomeQualificaBibliocr = linguaNomeQualificaBibliocr;
-    }
-
-    public String getLinguaNomeQualificaBibliocr() throws AttributoNonValorizzatoException {
-        if ( linguaNomeQualificaBibliocr == null ) {
-            String error = "PersonBean: attributo 'linguaNomeQualificaBibliocr' non valorizzato.";
-            throw new AttributoNonValorizzatoException(error);
-        } else {
-            return linguaNomeQualificaBibliocr;
-        }
-    }
-
-    /**
-     * Setter for property linguaNomeBibliocr.
-     * @param linguaNomeBibliocr New value of property linguaNomeBibliocr.
-     */
-    public void setLinguaNomeBibliocr(String linguaNomeBibliocr) {
-        this.linguaNomeBibliocr = linguaNomeBibliocr;
-    }
-    
-    public String getLinguaNomeQualificaDirezione() throws AttributoNonValorizzatoException {
-        if ( linguaNomeQualificaDirezione == null ) {
-            String error = "PersonBean: attributo 'linguaNomeQualificaDirezione' non valorizzato.";
-            throw new AttributoNonValorizzatoException(error);
-        } else {
-            return linguaNomeQualificaDirezione;
-        }
-    }
-    
-    /**
-     * Setter for property linguaNomeQualificaDirezione.
-     * @param linguaNomeQualificaDirezione New value of property linguaNomeQualificaDirezione.
-     */
-    public void setLinguaNomeQualificaDirezione(String linguaNomeQualificaDirezione) {
-        this.linguaNomeQualificaDirezione = linguaNomeQualificaDirezione;
-    }
-    
     public void setIncaricoInArea(String incaricoInArea) {
         this.incaricoInArea = incaricoInArea;
     }
     
-    /**
-     * Getter for property linguaPianoUfficio.
-     * @return Value of property linguaPianoUfficio.
-     */
-    public String getLinguaPianoUfficio() throws AttributoNonValorizzatoException {
-        if (linguaPianoUfficio == null) {
-            throw new AttributoNonValorizzatoException("PersonBean: attributo linguaPianoUfficio non valorizzato!");
-        } else {
-            return this.linguaPianoUfficio;
-        }
-    }
-    
-    /**
-     * Setter for property linguaPianoUfficio.
-     * @param linguaDescrizioneSettore New value of property linguaPianoUfficio.
-     */
-    public void setLinguaPianoUfficio(String linguaPianoUfficio) {
-        this.linguaPianoUfficio = linguaPianoUfficio;
-    }
     
     public void setResponsabileArea(boolean responsabileArea) {
         this.responsabileArea = responsabileArea;
