@@ -1,10 +1,15 @@
 /*
  *   Alma on Line: Applicazione WEB per la visualizzazione 
- *   delle schede di indagine su popolazione dell'ateneo.<br />
+ *   delle schede di indagine su popolazione dell'ateneo,
+ *   della gestione dei progetti on line (POL) 
+ *   e della preparazione e del monitoraggio delle informazioni riguardanti 
+ *   l'offerta formativa che hanno ricadute sulla valutazione della didattica 
+ *   (questionari on line - QOL).
  *   
  *   Copyright (C) 2018 Giovanroberto Torre<br />
- *   Alma on Line (aol), web application to publish students 
- *   and degrees informations.
+ *   Alma on Line (aol), Projects on Line (pol), Questionnaire on Line (qol);
+ *   web applications to publish, and manage, students evaluation,
+ *   projects, students and degrees information.
  *   Copyright (C) renewed 2018 Universita' degli Studi di Verona, 
  *   all right reserved
  *
@@ -236,4 +241,38 @@ public interface Query extends Serializable {
           + " --ORDER BY \"id\" "
           + " --LIMIT 30";
     
+    /**
+     * Estrae le classi command previste per l'applicazione
+     */
+    public static final String LOOKUP_COMMAND =
+            "SELECT " +
+            "       id          AS \"id\"" +
+            "   ,   nome        AS \"nomeReale\"" +
+            "   ,   nome        AS \"nomeClasse\"" +
+            "   ,   token       AS \"nome\"" +
+            "   ,   labelweb    AS \"labelWeb\"" +
+            "   ,   jsp         AS \"paginaJsp\"" +
+            "   ,   informativa AS \"informativa\"" + 
+            "  FROM command";
+    
+    /**
+     * Estrae le classi command previste per l'applicazione
+     */
+    public static final String GET_USR =
+            "SELECT " +
+            "       U.id            " +
+            "   ,   P.id            AS \"id\"" +
+            "   ,   P.nome          AS \"nome\"" +
+            "   ,   P.cognome       AS \"cognome\"" +
+            "   ,   P.sesso         AS \"sesso\"" +
+            "   ,   P.datanascita   AS \"dataNascita\"" +
+            "   ,   P.codicefiscale AS \"codiceFiscale\"" +
+            //"   ,   informativa AS \"informativa\"" + 
+            "   FROM usr U" +
+            "       INNER JOIN identita I ON U.id = I.id0_usr" + 
+            "       INNER JOIN persona P ON P.id = I.id1_persona" + 
+            "   WHERE login = ?" +
+            "       AND passwd = ?"
+            ;
+                    
 }
