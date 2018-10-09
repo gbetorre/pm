@@ -1,10 +1,15 @@
 /*
  *   Alma on Line: Applicazione WEB per la visualizzazione 
- *   delle schede di indagine su popolazione dell'ateneo.<br />
+ *   delle schede di indagine su popolazione dell'ateneo,
+ *   della gestione dei progetti on line (POL) 
+ *   e della preparazione e del monitoraggio delle informazioni riguardanti 
+ *   l'offerta formativa che hanno ricadute sulla valutazione della didattica 
+ *   (questionari on line - QOL).
  *   
  *   Copyright (C) 2018 Giovanroberto Torre<br />
- *   Alma on Line (aol), web application to publish students 
- *   and degrees informations.
+ *   Alma on Line (aol), Projects on Line (pol), Questionnaire on Line (qol);
+ *   web applications to publish, and manage, students evaluation,
+ *   projects, students and degrees information.
  *   Copyright (C) renewed 2018 Universita' degli Studi di Verona, 
  *   all right reserved
  *
@@ -48,6 +53,8 @@ import javax.swing.JOptionPane;
 
 import it.alma.bean.BeanUtil;
 import it.alma.bean.CourseBean;
+import it.alma.bean.ItemBean;
+import it.alma.bean.PersonBean;
 import it.alma.exception.NotFoundException;
 import it.alma.exception.WebStorageException;
 
@@ -57,7 +64,6 @@ import it.alma.exception.WebStorageException;
  * l'accesso ai database utilizzati dall'applicazione nonch&eacute;
  * l'esecuzione delle query e la gestione dei risultati restituiti,
  * che impacchetta in oggetti di tipo JavaBean e restituisce al chiamante.</p>
- *  
  *  
  * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
  */
@@ -129,14 +135,94 @@ public class DBWrapper implements Query {
     
     
     /**
+     * <p>Restituisce un Vector di Command.</p>
+     *
+     * @return <code>Vector&lt;ItemBean&gt;</code> - lista di ItemBean rappresentanti ciascuno una Command dell'applicazione
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public Vector<ItemBean> lookupCommand()
+                                   throws WebStorageException {
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        ItemBean cmd = null;
+        Vector<ItemBean> commands = new Vector<ItemBean>();
+        try {
+            con = manager.getConnection();
+            pst = con.prepareStatement(LOOKUP_COMMAND);
+            pst.clearParameters();
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                cmd = new ItemBean();
+                BeanUtil.populate(cmd, rs);
+                commands.add(cmd);
+            }
+            return commands;
+        } catch (SQLException sqle) {
+            throw new WebStorageException(FOR_NAME + sqle.getMessage());
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                throw new WebStorageException(FOR_NAME + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce un PersonBean rappresentante un utente loggato.</p>
+     *
+     * @return <code>PersonBean</code> - PersonBean rappresentante l'utente loggato
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public PersonBean getUser()
+                       throws WebStorageException {
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        PersonBean usr = null;
+        try {
+            con = manager.getConnection();
+            pst = con.prepareStatement(GET_USR);
+            pst.clearParameters();
+            rs = pst.executeQuery();
+            if (rs.next()) {
+                usr = new PersonBean();
+                BeanUtil.populate(usr, rs);
+            }
+            return usr;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }    
+    
+    
+    /**
      * <p>Restituisce un Vector di CourseBean di tipo "AD Semplice".</p>
      *
      * @return <code>Vector&lt;CourseBean&gt;</code> - lista di CourseBean rappresentanti ciascuno un'AD Semplice
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
-    @SuppressWarnings("null")
-    public static Vector<CourseBean> getADSemplici()
-                                            throws WebStorageException {
+    @SuppressWarnings({ "null", "static-method" })
+    public Vector<CourseBean> getADSemplici()
+                                     throws WebStorageException {
         ResultSet rs = null;
         Connection con = null;
         PreparedStatement pst = null;
