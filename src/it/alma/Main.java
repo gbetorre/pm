@@ -1,10 +1,15 @@
 /*
  *   Alma on Line: Applicazione WEB per la visualizzazione 
- *   delle schede di indagine su popolazione dell'ateneo.<br />
+ *   delle schede di indagine su popolazione dell'ateneo,
+ *   della gestione dei progetti on line (POL) 
+ *   e della preparazione e del monitoraggio delle informazioni riguardanti 
+ *   l'offerta formativa che hanno ricadute sulla valutazione della didattica 
+ *   (questionari on line - QOL).
  *   
  *   Copyright (C) 2018 Giovanroberto Torre<br />
- *   Alma on Line (aol), web application to publish students 
- *   and degrees informations.
+ *   Alma on Line (aol), Projects on Line (pol), Questionnaire on Line (qol);
+ *   web applications to publish, and manage, students evaluation,
+ *   projects, students and degrees information.
  *   Copyright (C) renewed 2018 Universita' degli Studi di Verona, 
  *   all right reserved
  *
@@ -71,10 +76,6 @@ public class Main extends HttpServlet {
      */
     static final String FOR_NAME = "\n" + Logger.getLogger(new Throwable().getStackTrace()[0].getClassName()) + ": ";
     /**
-     * Suffisso per le Command
-     */
-    static final String COMMAND_SUFFIX = "Command";
-    /**
      * DataBound.
      */
     private DBWrapper db;
@@ -121,7 +122,8 @@ public class Main extends HttpServlet {
      * <ul>
      * <li> connessione al database: <code>db</code></li>
      * <li> tabella hash di tutte le classi richiamabili dall'applicazione</li>
-     * <li> vettore delle voci menu principale (menu orizzontale)</li>
+     * <li> pagina di errore</li>
+     * etc...
      * </ul>
      * 
      * @param config la configurazione usata dal servlet container per passare informazioni alla servlet <strong>durante l'inizializzazione</strong>
@@ -149,7 +151,6 @@ public class Main extends HttpServlet {
         if (entToken == null) {
             throw new ServletException(FOR_NAME + "\n\nManca il parametro di contesto 'entToken'!\n\n");
         }
-
         /*
          * Nome home page
          */
@@ -182,16 +183,7 @@ public class Main extends HttpServlet {
          */
         Vector<ItemBean> classiCommand = new Vector<ItemBean>();
         try {
-            /*
-             * Prepara la Command della Valutazione
-             */
-            final String commandName = "Valuation" + COMMAND_SUFFIX;
-            ItemBean voce = new ItemBean();
-            voce.setId(voce.hashCode());
-            voce.setNome("Valuation");
-            voce.setNomeClasse(commandName);
-            voce.setPaginaJsp(templateJsp);
-            classiCommand.add(voce);
+            classiCommand = db.lookupCommand();
         }
         catch (Exception e) {
             throw new ServletException(FOR_NAME + "Problemi nel caricare le classi Command.\n" + e.getMessage(), e);
@@ -199,15 +191,15 @@ public class Main extends HttpServlet {
         ItemBean voceMenu = null;
         Command classCommand = null;
         commands = new HashMap<String, Command>();
-        for (int i=0; i < classiCommand.size(); i++) {
+        for (int i = 0; i < classiCommand.size(); i++) {
             voceMenu = classiCommand.get(i);
             try {
                 classCommand = (Command) Class.forName("it.alma.command." + voceMenu.getNomeClasse()).newInstance();
                 classCommand.init(voceMenu);
                 commands.put(voceMenu.getNome(), classCommand);
-            } catch (ClassNotFoundException cnfe) {
+            } catch (ClassNotFoundException cnfe) { // Se non riesce a istanziare la Command in generali la cerca in un sottopackage
                 try {
-                    classCommand = (Command) Class.forName("it.alma.command." + voceMenu.getNomeClasse()).newInstance();
+                    classCommand = (Command) Class.forName("it.alma.pol.command." + voceMenu.getNomeClasse()).newInstance();
                     classCommand.init(voceMenu);
                     commands.put(voceMenu.getNome(), classCommand);
                 }
@@ -257,16 +249,6 @@ public class Main extends HttpServlet {
      *  conveniente, <strong>ma deve essere una scelta ben ponderata</strong>, 
      *  sovrascrivere direttamente il metodo service.</p> 
      * </cite>
-     *
-     * <pre>
-     * OUTPUT:
-     *  nome variabile  | scope    | descrizione
-     * -----------------------------------------------------------------------
-     *  menuPrincipale   request    nome del main menu di aol 
-     *  queryString      request    tutta la QueryString in input 
-     *  lingue           request    oggetto costruito in base alla lingua ev.
-     *                               presente nei parametri di navigazione
-     * </pre>
      * 
      * @param req la HttpServletRequest contenente la richiesta del client
      * @param res la HttpServletResponse contenente la risposta del server
@@ -378,8 +360,7 @@ public class Main extends HttpServlet {
      *
      * @param cmd string che individua la classe Command da creare.
      * @return a Command class
-     * @exception CommandException  se il parametro <code>cmd</code> non
-     *      corrisponde a nessuna classe.
+     * @exception CommandException se il parametro <code>cmd</code> non corrisponde a nessuna classe.
      */
     private Command lookupCommand(String cmd)
                            throws CommandException {
@@ -393,15 +374,13 @@ public class Main extends HttpServlet {
 
     
     /** 
-     * Esegue pezzi di codice della OrganizzazioneCommand senza crearne 
-     * una nuova istanza, ma richiamandoli direttamente dalla Main,
+     * Esegue pezzi di codice richiamabili direttamente dalla Main,
      * che &egrave; invocata ad ogni richiesta del client e quindi gi&agrave;
      * presente in memoria.<br />
-     * &Egrave; invocata, implicitamente, dal template per 
+     * Pu&ograve; essere invocata, implicitamente, dal template per 
      * recuperare 
      * <ul>
-     * <li>le lingue</li> 
-     * <li>gli elenchi di oggetti che servono all'header 
+     * <li>elenchi di oggetti che servono all'header 
      * per popolare le liste in esso mostrate 
      * (aree, dipartimenti, scuole di dottorato, ecc.)</li>
      * <li>il baseHref</li>
@@ -415,65 +394,15 @@ public class Main extends HttpServlet {
      * A ogni richiesta standard del client, infatti, ovvero
      * ogni richiesta effettuata per visualizzare un output html
      * (per output diversi quali files CSV o simili &egrave; possibile
-     * invocare servlet diverse da Main), viene implicitamente 
-     * richiamato il metodo service, e di conseguenza il presente
-     * metodo, la cui invocazione &egrave; presente in service.</p>
-     * <p>Questo meccanismo di valorizzazione dell'header tramite
-     * valori peraltro &ndash; nella maggior parte dei casi &ndash;  
-     * gi&agrave; presenti in memoria perch&eacute;
-     * statici (vengono valorizzati dalla init() della OrganizzazioneCommand
-     * quando "sale" il server), vale solo per tutte le pagine di aol gestite
-     * tramite template, quindi NON per l'homepage.<br />
-     * Quest'ultima istanzia una propria copia della OrganizzazioneCommand
-     * direttamente, copia che fa poi sostanzialmente le stesse
-     * operazioni implementate nel corrente metodo. 
-     * Il motivo per il quale questo codice, nel caso della home page 
-     * del sito di ateneo, non viene recuperato da Main ma attraverso
-     * un costruttore di OrganizzazioneCommand &egrave; chiaro:
-     * nell'homepage non esiste ancora quasi nulla dell'applicazione web 
-     * chiamata AOL!
-     * Non c'&egrave; la Main, 
-     * non si pu&ograve; far riferimento all'oggetto Lingue, 
-     * non si pu&ograve; far riferimento al DataUrl... 
-     * Quindi, se si vuol cambiare qualcosa nel comportamento del presente
-     * metodo, bisogna ricordarsi di gestire le stesse modidfiche
-     * anche nel costruttore dell'OrganizzazioneCommand 
-     * invocato dalla homepage!!</p> 
+     * invocare servlet diverse da Main), pu&ograve; implicitamente essere 
+     * richiamato dal metodo service o - separatamente - dalla sovrascrittura
+     * dei metodi <code>doGet</code> e/o <code>doPost</code>.<br />
      * Dialoga con l'HttpServletRequest attingendo a dati eventualmente
-     * valorizzati in essa e valorizzando nella stessa parametri da passare.<br />
-     * In particolare:
-     * <pre>
-     * INPUT: 
-     * nome variabile       | scope    | descrizione
-     * --------------------------------------------------------------------------
-     *   lang                 param      lingua in cui l'utente sta visualizzando
-     *   queryString          request    tutta la QueryString in input
-     *  
-     * OUTPUT:
-     * nome variabile       | scope    | descrizione
-     * -------------------------------------------------------------------------
-     *   lang                 request    valore del parametro 'lang'
-     *   dateFormatSymbols    request    formato di date e ore 
-     *   queryString          request    tutta la QueryString in input
-     *   baseHref             request    base href della pagina
-     *   flagsUrl             request    formattatore lingua contenuti
-     *   theCurrentYear       request    anno corrente per il &copy; del footer
-     *   dipartimenti         request    elenco dipartimenti (menu header)
-     *   scuoledottorato      request    elenco scuole dottorato (menu header)
-     *   scuoledottoratoesau  request    elenco scuole dottorato ad esaurimento (menu header)
-     *   biblioteche          request    elenco biblioteche centralizzate (menu header)
-     *   biblioPoli           request    elenco poli di biblioteca dipartimentale (menu header)
-     *   biblioCentri         request    elenco biblioteche dei centri (menu header)
-     *   biblioAltre          request    elenco altre biblioteche (menu header)
-     *   centriAteneo         request    elenco centri di servizio di ateneo (menu header)
-     *   centriRicerca        request    elenco centri di ricerca di ateneo (menu header)
-     *   poli                 request    elenco sedi didattiche compr. polo VI (menu header)
-     *   scuole               request    elenco scuole/strutture di raccordo (menu header)
-     *  </pre>
+     * valorizzati in essa e valorizzando nella stessa parametri da passare.</p> 
      * 
      * @param req  la HttpServletRequest contenente gli header HTTP e alcuni parametri
      */   
-    public void retrieveFixedInfo(HttpServletRequest req) {
+    private static void retrieveFixedInfo(HttpServletRequest req) {
         // Costruisce qui il valore del <base href... /> piuttosto che nelle pagine
         String baseHref = getBaseHref(req);
         // Setta nella request il valore del <base href... />
