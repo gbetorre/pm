@@ -1,0 +1,1 @@
+<!DOCTYPE html><html><head><title>Login</title></head><body><h1>Login</h1><form action="/almalaurea/auth" method="post"><p>Username:<input type="text" name="usr"></p>  <p>Password:<input type="password" name="pwd"></p>  <input type="submit" value="Login">  </form>  </body></html>
