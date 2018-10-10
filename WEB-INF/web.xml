@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.0"
+  xmlns="http://java.sun.com/xml/ns/javaee"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+ 
+   <!-- To save as "almalaurea\WEB-INF\web.xml" -->
+ 
+   <servlet>
+      <description>Servlet centrale dell'applicazione Almalaurea</description>        
+      <servlet-name>main</servlet-name>
+      <servlet-class>it.alma.Main</servlet-class>
+   </servlet>
+ 
+    <servlet>
+      <description>Servlet per la gestione delle sessioni utente</description>
+      <servlet-name>session</servlet-name>
+      <servlet-class>it.alma.SessionManager</servlet-class>
+   </servlet>
+ 
+   <!-- Note: All <servlet> elements MUST be grouped together and
+         placed IN FRONT of the <servlet-mapping> elements -->
+ 
+   <servlet-mapping>
+      <servlet-name>main</servlet-name>
+      <url-pattern>/</url-pattern>
+   </servlet-mapping>
+ 
+   <servlet-mapping>
+      <servlet-name>session</servlet-name>
+      <url-pattern>/auth</url-pattern>
+   </servlet-mapping>
+
+    <context-param>
+        <description></description>
+        <param-name>errorJsp</param-name>
+        <param-value>/jsp/error.jsp</param-value>
+    </context-param>
+
+    <context-param>
+        <description></description>
+        <param-name>home</param-name>
+        <param-value>/jsp/index.jsp</param-value>
+    </context-param>
+
+    <context-param>
+        <description></description>
+        <param-name>templateJsp</param-name>
+        <param-value>/jsp/template.jsp</param-value>
+    </context-param>
+
+    <context-param>
+        <description></description>
+        <param-name>entToken</param-name>
+        <param-value>q</param-value>
+    </context-param>
+
+    <context-param>
+        <description></description>
+        <param-name>idToken</param-name>
+        <param-value>id</param-value>
+    </context-param>
+
+    <resource-ref>
+        <description>
+            Resource reference to a factory for java.sql.Connection
+            instances that may be used for talking to a particular
+            database that is configured in the server.xml file.
+        </description>
+        <res-ref-name>
+            jdbc/almalaurea
+        </res-ref-name>
+        <res-type>
+            javax.sql.DataSource
+        </res-type>
+        <res-auth>
+            Container
+        </res-auth>
+    </resource-ref>
+</web-app>
