@@ -50,6 +50,10 @@ import java.util.LinkedList;
 public interface Query extends Serializable {
 
     /**
+     * Costante parlante per flag di recupero sessione utente
+     */
+    public static final boolean IF_EXISTS_DONOT_CREATE_NEW = false;
+    /**
      * Lista Hash contenente tutti i corsi elettivi
      */
     public LinkedList<String> CORSI_ELETTIVI = new LinkedList<String>();
@@ -271,7 +275,7 @@ public interface Query extends Serializable {
             "   FROM usr U" +
             "       INNER JOIN identita I ON U.id = I.id0_usr" + 
             "       INNER JOIN persona P ON P.id = I.id1_persona" + 
-            "   WHERE login = ?" +
+            "   WHERE   login = ?" +
             "       AND passwd = ?"
             ;
                     
