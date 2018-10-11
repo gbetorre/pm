@@ -37,7 +37,6 @@
 package it.alma;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletConfig;
@@ -81,10 +80,6 @@ public class SessionManager extends HttpServlet {
      * Log per debug in produzione
      */
     protected static Logger LOG = Logger.getLogger(Main.class.getName());
-    /**
-     * Costante parlante per flag di recupero sessione utente
-     */
-    private static final boolean IF_EXISTS_DONOT_CREATE_NEW = false;
     /**
      * <p>Nome e percorso della pagina di errore cui ridirigere in caso
      * di eccezioni rilevate.</p>
@@ -144,6 +139,7 @@ public class SessionManager extends HttpServlet {
         String username = null;                             // Credenziali
         String password = null;                             // Credenziali
         StringBuffer msg = new StringBuffer();              // Messaggio
+        //String fileJsp = null;      // Pagina in cui riversare l'output prodotto
         // Effettua la connessione al databound
         try {
             db = new DBWrapper();
@@ -163,23 +159,19 @@ public class SessionManager extends HttpServlet {
         }
         try {
             // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
-            HttpSession session = req.getSession(IF_EXISTS_DONOT_CREATE_NEW);
-            // Output utente
-            res.setContentType("text/html");  
-            PrintWriter out = res.getWriter();  
-            //msg = (String) mySession.getAttribute("msg") + " ";
-            if (authenticated) {
-                out.print("Hello "+ msg);  
+            HttpSession session = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
+            if (!authenticated) {
+                req.setAttribute("msg", msg);
+                req.getRequestDispatcher("/jsp/login.jsp").include(req, res);
             }
             else {
-                out.print("Something's Wrong "+ msg);
+                res.sendRedirect(res.encodeRedirectURL("/almalaurea/?q=pol"));
             }
-            out.close();
-        } catch (ClassCastException e) {
-            throw new ServletException("Attributo del dipartimento non valorizzato.\n" + e.getMessage(), e);
+        } catch (IllegalStateException e) {
+            throw new ServletException("Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n" + e.getMessage(), e);
         } catch (NullPointerException e) {
             throw new ServletException("Errore nell'estrazione dei dipartimenti che gestiscono il corso.\n" + e.getMessage(), e);
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (Exception e) {
             //msg += "il corso di studi associato alla matricola inserita non ha associato alcun dipartimento";
             //msg += bundle.getString("NoCorsoNoMatricola");
             //ent= "cs";
@@ -191,6 +183,8 @@ public class SessionManager extends HttpServlet {
             //Log dell'evento
             LOG.severe("Oggetto Vector<elencoDipartCs> non valorizzato; il corso di studi associato alla matricola inserita non ha associato alcun dipartimento"); 
         }
+        //final RequestDispatcher rd = getServletContext().getRequestDispatcher(fileJsp + "?" + req.getQueryString());
+        //rd.forward(req, res);
     }
     
 
@@ -228,6 +222,7 @@ public class SessionManager extends HttpServlet {
                     message.append("Benvenuto" + user.getNome());
                     session.setAttribute("msg", message);
                     session.setAttribute("error", false);
+                    session.setAttribute("usr", user);
                     authenticated = true;
                 } else {
                     message.append("Errore di autenticazione. Ricontrollare Username e Password." );
