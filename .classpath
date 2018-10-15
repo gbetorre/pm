@@ -8,5 +8,7 @@
 	<classpathentry kind="lib" path="C:/Programs/apache-tomcat-8.5.31/lib/jstl-1.2.jar"/>
 	<classpathentry kind="lib" path="C:/Programs/resin-pro-3.1.13/ext-lib/commons-beanutils-core.jar"/>
 	<classpathentry kind="lib" path="C:/Programs/resin-pro-3.1.13/ext-lib/commons-logging-api.jar"/>
+	<classpathentry kind="lib" path="C:/Program Files/resin-pro-4.0.39/webapps/uol_maintrunk/WEB-INF/lib/cos.jar"/>
+	<classpathentry kind="lib" path="C:/Programs/apache-tomcat-8.5.31/webapps/almalaurea/WEB-INF/lib/commons-text.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
