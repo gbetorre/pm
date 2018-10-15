@@ -180,7 +180,8 @@ public class DBWrapper implements Query {
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
     @SuppressWarnings({ "null", "static-method" })
-    public PersonBean getUser()
+    public PersonBean getUser(String username,
+                              String password)
                        throws WebStorageException {
         ResultSet rs = null;
         Connection con = null;
@@ -190,6 +191,8 @@ public class DBWrapper implements Query {
             con = manager.getConnection();
             pst = con.prepareStatement(GET_USR);
             pst.clearParameters();
+            pst.setString(1, username);
+            pst.setString(2, password);
             rs = pst.executeQuery();
             if (rs.next()) {
                 usr = new PersonBean();
@@ -252,61 +255,4 @@ public class DBWrapper implements Query {
         }
     }
     
-    
-    /* ************************************************************************ *
-     *                    Codice Inutile, Obsoleto o Deprecato                  *
-     *                              TODO: eliminare                             *
-     * ************************************************************************ */
-    
-    /**
-     *  metodo per effettuare qualsiasi query sul DB
-     * @param query
-     * @return
-     * @throws ServletException 
-     * @throws IOException 
-     * @throws WebStorageException 
-     */
-    public static ResultSet get(String query) 
-                         throws ServletException, IOException, WebStorageException {
-        ResultSet rs = null;
-        Connection con = null;
-        PreparedStatement pst = null;
-        try {
-            con = manager.getConnection();
-            pst = con.prepareStatement(query);
-            pst.clearParameters();
-            rs = pst.executeQuery();
-            //Statement stmt = con.createStatement();
-            //ResultSet rs = stmt.executeQuery(query);
-            //JOptionPane.showMessageDialog(null, "ok", "Messaggio: Successo", 0, null);
-            //System.out.println("ok");
-            return rs;
-        } catch (SQLException sqle) {
-            JOptionPane.showMessageDialog(null, "Interrogazione fallita: " + sqle.getMessage(), "Messaggio:", 0, null);
-            throw new NotFoundException(FOR_NAME + "DBWrapper.get: " + sqle.getMessage());
-            //closeConnection();
-            //return null;
-        } finally {
-            try {
-                if (con != null) con.close();
-            } catch (SQLException sqle) {
-                throw new WebStorageException(FOR_NAME + "DBWrapper.esisteOrarioInPD: " + sqle.getMessage());
-            }
-        }
-    }
-    
-    
-    public Vector<String> getVector(ResultSet rs) {
-        Vector<String> result = new Vector<String>();
-        try {
-            for (int i = 0; i <= rs.getFetchSize(); i++) {
-            String s = rs.getString(i);
-            result.add(s);
-            }
-        } catch (Exception ignored) {
-            ; //TODO GESTISCI
-        }
-        return result;
-    }
-
 }
