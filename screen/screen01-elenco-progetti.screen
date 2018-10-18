@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model:Screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:model="http://wireframesketcher.com/1.0/model.ecore">
+  <widgets xsi:type="model:Browser" id="1" x="40" y="16" width="641" height="425" text="almalaurea&#xD;&#xA;https://localhost:8080/almalaurea/elenco.html" measuredWidth="641" measuredHeight="425">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Label" id="2" x="56" y="80" text="Benvenuto &quot;nome&quot; &quot;cognome&quot;" measuredWidth="171" measuredHeight="23">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Button" id="3" x="520" y="79" text="LOGOUT" measuredWidth="67" measuredHeight="25">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Label" id="4" x="58" y="122" text="Elenco dei progetti, seleziona quello da visualizzare: " measuredWidth="279" measuredHeight="23">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Table" id="5" x="58" y="152" width="417" height="129" text="Seleziona,ID,NomeProgetto,Stato&#xA;{checked},1,Project1,&#xA;{unchecked},2,Project2,&#xA;{unchecked},3,Project3," measuredWidth="417" measuredHeight="129" alternative="#eee">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Combo" id="8" x="400" y="176" width="57" text="Stato1" measuredWidth="57" measuredHeight="23">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Combo" id="9" x="399" y="198" text="Stato2" measuredWidth="60" measuredHeight="23">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Combo" id="10" x="399" y="220" text="Stato3" measuredWidth="60" measuredHeight="23">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Button" id="12" x="72" y="329" text="Project Charter" measuredWidth="99" measuredHeight="25">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Button" id="13" x="200" y="329" text="Status" measuredWidth="52" measuredHeight="25">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Button" id="14" x="293" y="329" text="WBS" measuredWidth="44" measuredHeight="25">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Button" id="15" x="363" y="329" text="Attività" measuredWidth="58" measuredHeight="25">
+    <font/>
+  </widgets>
+  <hRuler/>
+  <vRuler/>
+  <font size="12px"/>
+</model:Screen>
