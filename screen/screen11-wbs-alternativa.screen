@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model:Screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:model="http://wireframesketcher.com/1.0/model.ecore">
+  <widgets xsi:type="model:Browser" id="1" x="160" y="72" width="505" height="398" text="Almalaurea&#xD;&#xA;https://localhost:8080/almalaurea/wbs.html" measuredWidth="505" measuredHeight="398">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Placeholder" id="2" x="224" y="168" width="377" height="281" text="WBS grafica con apertura maschera dell'attività" measuredWidth="377" measuredHeight="281"/>
+  <widgets xsi:type="model:Label" id="3" x="352" y="134" text="Nome del progetto" measuredWidth="107" measuredHeight="23">
+    <font/>
+  </widgets>
+  <hRuler/>
+  <vRuler/>
+  <font size="12px"/>
+</model:Screen>

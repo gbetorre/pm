@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model:Screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:model="http://wireframesketcher.com/1.0/model.ecore">
+  <widgets xsi:type="model:Browser" id="1" x="48" y="48" width="713" height="497" text="Almalaurea&#xD;&#xA;https://localhost:8080/almalaurea/attività.html" measuredWidth="713" measuredHeight="497">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Table" id="2" x="144" y="203" width="423" height="188" text="Work Package, Descrizione, ... , Milestone&#xD;&#xA;,,,&#xD;&#xA;,,,&#xD;&#xA;,,," measuredWidth="423" measuredHeight="188" alternative="#eee">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Label" id="3" x="302" y="110" text="Nome del progetto" measuredWidth="107" measuredHeight="23">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Label" id="5" x="334" y="160" text="Attività" measuredWidth="44" measuredHeight="23">
+    <font/>
+  </widgets>
+  <hRuler/>
+  <vRuler/>
+  <font size="12px"/>
+</model:Screen>

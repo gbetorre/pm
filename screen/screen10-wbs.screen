@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model:Screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:model="http://wireframesketcher.com/1.0/model.ecore">
+  <widgets xsi:type="model:Browser" id="1" x="48" y="64" width="489" height="361" text="Almalaurea&#xD;&#xA;https://localhost:8080/almalaurea/wbs.html" measuredWidth="489" measuredHeight="361">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:TabbedPane" id="2" x="96" y="164" width="377" height="241" text="WBS, Attività, Report" measuredWidth="377" measuredHeight="241" selection="0">
+    <items x="10" y="0" width="45" height="27" text="WBS"/>
+    <items x="55" y="0" width="59" height="27" text="Attività"/>
+    <items x="114" y="0" width="56" height="27" text="Report"/>
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Table" id="4" x="120" y="240" width="161" height="99" text="Nome progetto&#xD;&#xA;WBS&#xD;&#xA;Work package&#xD;&#xA;Attività" measuredWidth="161" measuredHeight="99" alternative="#eee">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Button" id="5" x="325" y="255" text="^" measuredWidth="28" measuredHeight="25">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Button" id="6" x="298" y="277" text="&lt;" measuredWidth="28" measuredHeight="25">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Button" id="7" x="325" y="301" text="v" measuredWidth="26" measuredHeight="25">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Button" id="8" x="352" y="277" text=">" measuredWidth="28" measuredHeight="25">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Label" id="9" x="231" y="128" text="Nome del progetto" measuredWidth="107" measuredHeight="23">
+    <font/>
+  </widgets>
+  <hRuler/>
+  <vRuler/>
+  <font size="12px"/>
+</model:Screen>
