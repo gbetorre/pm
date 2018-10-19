@@ -102,9 +102,13 @@ public class DBWrapper implements Query {
      */
     static final String FOR_NAME = "\n" + Logger.getLogger(new Throwable().getStackTrace()[0].getClassName()) + ": ";
     /**
-     * <p>Gestore del pool di connessioni al dbms.</p>
+     * <p>Gestore del pool di connessioni al dbms locale per almalaurea.</p>
      */
-    protected static DataSource manager = null;
+    protected static DataSource alma_manager = null;
+    /**
+     * <p>Connessione db oracle ESSE3.</p>
+     */
+    protected static DataSource pol_manager = null;
 
     
     /**
@@ -119,14 +123,26 @@ public class DBWrapper implements Query {
      * @see DataSource
      */
     public DBWrapper() throws WebStorageException {
-        if (manager == null) {
+        if (alma_manager == null) {
             try {
-                manager = (DataSource) ((Context) new InitialContext()).lookup("java:comp/env/jdbc/almalaurea");
-                if (manager == null)
+                alma_manager = (DataSource) ((Context) new InitialContext()).lookup("java:comp/env/jdbc/almalaurea");
+                if (alma_manager == null)
                     throw new WebStorageException(FOR_NAME + "La risorsa `jdbc/almalaurea' non e\' disponibile. Verificare configurazione e collegamenti.\n");
-                JOptionPane.showMessageDialog(null, "Accesso al DB", "Inizializzazione Completata", 0, null);
+                JOptionPane.showMessageDialog(null, "Accesso al DB per almalaurea", "Inizializzazione Completata", 0, null);
             } catch (NamingException ne) {
                 throw new WebStorageException(FOR_NAME + "Problema nel recuperare la risorsa jdbc/almalaurea per problemi di naming: " + ne.getMessage());
+            } catch (Exception e) {
+                throw new WebStorageException(FOR_NAME + "Errore generico nel costruttore: " + e.getMessage(), e);
+            }
+        }
+        if (pol_manager == null) {
+            try {
+                pol_manager = (DataSource) ((Context) new InitialContext()).lookup("java:comp/env/jdbc/pol");
+                if (pol_manager == null)
+                    throw new WebStorageException(FOR_NAME + "La risorsa `jdbc/pol' non e\' disponibile. Verificare configurazione e collegamenti.\n");
+                JOptionPane.showMessageDialog(null, "Accesso al DB di POL", "Inizializzazione Completata", 0, null);
+            } catch (NamingException ne) {
+                throw new WebStorageException(FOR_NAME + "Problema nel recuperare la risorsa jdbc/pol per problemi di naming: " + ne.getMessage());
             } catch (Exception e) {
                 throw new WebStorageException(FOR_NAME + "Errore generico nel costruttore: " + e.getMessage(), e);
             }
@@ -149,7 +165,7 @@ public class DBWrapper implements Query {
         ItemBean cmd = null;
         Vector<ItemBean> commands = new Vector<ItemBean>();
         try {
-            con = manager.getConnection();
+            con = pol_manager.getConnection();
             pst = con.prepareStatement(LOOKUP_COMMAND);
             pst.clearParameters();
             rs = pst.executeQuery();
@@ -188,7 +204,7 @@ public class DBWrapper implements Query {
         PreparedStatement pst = null;
         PersonBean usr = null;
         try {
-            con = manager.getConnection();
+            con = pol_manager.getConnection();
             pst = con.prepareStatement(GET_USR);
             pst.clearParameters();
             pst.setString(1, username);
@@ -232,7 +248,7 @@ public class DBWrapper implements Query {
         CourseBean course = null;
         Vector<CourseBean> lista = new Vector<CourseBean>();
         try {
-            con = manager.getConnection();
+            con = alma_manager.getConnection();
             pst = con.prepareStatement(AD_SEMPLICI);
             pst.clearParameters();
             rs = pst.executeQuery();
