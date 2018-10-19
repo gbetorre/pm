@@ -1,10 +1,15 @@
 /*
  *   Alma on Line: Applicazione WEB per la visualizzazione 
- *   delle schede di indagine su popolazione dell'ateneo.<br />
+ *   delle schede di indagine su popolazione dell'ateneo,
+ *   della gestione dei progetti on line (POL) 
+ *   e della preparazione e del monitoraggio delle informazioni riguardanti 
+ *   l'offerta formativa che hanno ricadute sulla valutazione della didattica 
+ *   (questionari on line - QOL).
  *   
  *   Copyright (C) 2018 Giovanroberto Torre<br />
- *   Alma on Line (aol), web application to publish students 
- *   and degrees informations.
+ *   Alma on Line (aol), Projects on Line (pol), Questionnaire on Line (qol);
+ *   web applications to publish, and manage, students evaluation,
+ *   projects, students and degrees information.
  *   Copyright (C) renewed 2018 Universita' degli Studi di Verona, 
  *   all right reserved
  *
@@ -93,7 +98,6 @@ import it.alma.exception.WebStorageException;
  * di un algoritmo di scelta che implenenta i criteri stabiliti dal presidio.</p>
  * 
  * <p>Created on martedì 4 settembre 2018 10:28:08</p>
- * 
  * 
  * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
  */
@@ -212,9 +216,15 @@ public class ValuationCommand extends ItemBean implements Command {
      *  (utilizzato per contestualizzare i messaggi di errore)
      */
     static final String FOR_NAME = "\n" + Logger.getLogger(new Throwable().getStackTrace()[0].getClassName()) + ": ";
-    
+    /**
+     * Costante autoesplicativa per incapsulare 
+     * il valore boolean <code>false</code>
+     */
     private static final boolean READ_DUPLICATES = false;
-    
+    /**
+     * Costante autoesplicativa per incapsulare 
+     * il valore boolean <code>true</code>
+     */
     private static final boolean WRITE_DUPLICATES = true;
     /**
      * Pagina a cui la servlet reindirizza
@@ -1387,6 +1397,5 @@ public class ValuationCommand extends ItemBean implements Command {
         }*/
         return null;
     }
-    
     
 }

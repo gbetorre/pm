@@ -10,13 +10,19 @@
     <meta name="creator" content="Universita' degli studi di Verona" />
     <meta name="author" content="Giovanroberto Torre, giovanroberto.torre@univr.it" />
     <link rev="made" href="giovanroberto.torre@univr.it" />
+    <base href="${requestScope.baseHref}" />
+    <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />bootstrap.css" type="text/css" />
   </head>
   <body>
     <!-- Header -->
-    <%@ include file="header.jspf"%>
+    <div style="background:#ffff99">
+      <%@ include file="header.jspf"%>
+    </div>
     <!-- Corpo pagina -->
-    <jsp:include page="${fileJspT}" />
+    <jsp:include page="${fileJsp}" />
     <!-- Footer -->
+    <div style="background:#ffcccc">
     <%@ include file="footer.jspf" %>
+    </div>
   </body>
 </html>
