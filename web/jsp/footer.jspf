@@ -22,37 +22,13 @@
               </ul>
             </div>
             <div class="grid_6 omega" id="social">
-              <div id="fan-store">
-                <!-- Fuori Aula Network -->  
-                <a id="fan" href="http://www.fuoriaulanetwork.com" title="Fuori Aula Network - Web Radio di Ateneo">Fuori Aula Network</a>
-                <!--  UniVerona STORE -->
-                <a id="unistore" href="http://www.store.univr.it/" title="UniVerona Store - Official merchandising">UniVerona STORE</a>
-              </div>
               <hr class="hrclear" />
               <div id="accFederato">
                 <a id="idem" href="http://www.univr.it/main?ent=servizi&idDest=2&serv=285&lang=it" title="IDEntity Management per l'accesso federato">Idem</a>
                 <a id="eduroam" href="http://www.univr.it/main?ent=servizioaol&idDest=1&sServ=284&serv=39&lang=it" title="EDUcation ROAMing per l'accesso wireless federato">EduRoam</a>                             
               </div>
-              <hr class="hrclear" />
-              <a id="cinquexmille" href="http://comunicazione.univr.it/5xmille/5xmille.html" title="Il 5 x mille per la Ricerca">5 per mille</a>
-              <hr class="hrclear" />
-              <p id="pbpv">
-                <a href="/dDest=1&serv=342">
-                  <img src="${initParam.urlDirectoryImmagini}banner-bpv4.png"  id="bpv" alt="Banca Popolare">
-                </a>
-              </p>
             </div>
           </div>
-        </div>
-        <hr class="hrclear" />
-        <div id="socialLinks"> 
-          <a id="facebook" href="https://www.facebook.com/univr" title="Facebook">Facebook</a>
-          <a id="twitter" href="http://twitter.com/univerona" title="Twitter">Twitter</a>
-          <a id="youtube" href="http://www.youtube.com/user/UniVerona" title="YouTube">YouTube</a>
-          <a id="flickr" href="http://www.flickr.com/photos/univerona/" title="Flickr">Flickr</a>
-          <a id="instagram" href="http://instagram.com/instaunivr" title="Instagram">Instagram</a>
-          <a id="linkdin" href="https://www.linkedin.com/company/university-of-verona" title="LinkdIn">LinkdIn</a>
-          <a id="snapchat" href="https://www.snapchat.com/add/univr" title="Snapchat">Snapchat</a>
         </div>
       </div>
       <hr class="hrclear" />
@@ -63,7 +39,7 @@
           </ul>
         </div>
         <p id="ragSociale"> 
-          &copy; 2002 - <c:out value="${requestScope.theCurrentYear}" />&nbsp;
+          &copy; 2018 - <c:out value="${requestScope.theCurrentYear}" />&nbsp;
           Universit&agrave; degli studi di Verona<br />
           Via dell'Artigliere 8, 37129 Verona &nbsp;|&nbsp; 
           Partita IVA IT01541040232 &nbsp;|&nbsp; 
