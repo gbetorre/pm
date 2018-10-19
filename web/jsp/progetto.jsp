@@ -1,0 +1,1 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %><h1>  Benvenuto <c:out value="${sessionScope.usr.nome}" /> <c:out value="${sessionScope.usr.cognome}" /></h1><h2>I tuoi progetti:</h2><p style="color:red;"><c:out value="${requestScope.msg}" /></p>

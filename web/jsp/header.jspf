@@ -4,4 +4,5 @@
     BENVENUTO
       <c:out value="${sessionScope.usr.nome}" />
       <c:out value="${sessionScope.usr.cognome}" />
+      <div class="alert-danger"><a href="/almalaurea/auth?q=logout">Esci</a></div>
     </div>
