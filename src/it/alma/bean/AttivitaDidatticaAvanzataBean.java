@@ -47,7 +47,6 @@ import java.util.Vector;
  * dottorato di ricerca, di una scuola di dottorato o comune a
  * pi&uacute; scuole di dottorato.</p>
  * 
- * @version 1.4
  * @author posenato
  * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
  *

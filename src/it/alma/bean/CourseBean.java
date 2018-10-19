@@ -1,10 +1,15 @@
 /*
  *   Alma on Line: Applicazione WEB per la visualizzazione 
- *   delle schede di indagine su popolazione dell'ateneo.<br />
+ *   delle schede di indagine su popolazione dell'ateneo,
+ *   della gestione dei progetti on line (POL) 
+ *   e della preparazione e del monitoraggio delle informazioni riguardanti 
+ *   l'offerta formativa che hanno ricadute sulla valutazione della didattica 
+ *   (questionari on line - QOL).
  *   
  *   Copyright (C) 2018 Giovanroberto Torre<br />
- *   Alma on Line (aol), web application to publish students 
- *   and degrees informations.
+ *   Alma on Line (aol), Projects on Line (pol), Questionnaire on Line (qol);
+ *   web applications to publish, and manage, students evaluation,
+ *   projects, students and degrees information.
  *   Copyright (C) renewed 2018 Universita' degli Studi di Verona, 
  *   all right reserved
  *
@@ -748,11 +753,7 @@ public class CourseBean implements Serializable, Comparable<CourseBean> {
     /**
      * @return creditiPadre
      */
-    public float getCreditiPadre() throws AttributoNonValorizzatoException {
-        if (creditiPadre == -2) {
-            throw new AttributoNonValorizzatoException(
-                    "CourseBean: attributo creditiPadre non valorizzato!");
-        }
+    public float getCreditiPadre() {
         return this.creditiPadre;
     }
 
@@ -900,6 +901,8 @@ public class CourseBean implements Serializable, Comparable<CourseBean> {
      * **************************************************** */
     /**
      * Metodo che ritorna se l'occorrenza insegnamento ha moduli
+     * 
+     * @return flag specificante se l'AD corrente e' divisa in moduli (true = modulata;  false = non modulata)
      */
     public boolean isDivisoInModuli() {
         return divisoInModuli;
@@ -907,6 +910,8 @@ public class CourseBean implements Serializable, Comparable<CourseBean> {
 
     /**
      * Metodo per settare se l'occorrenza insegnamento ha moduli
+     * 
+     * @param b flag specificante se l'AD corrente e' divisa in moduli (true = modulata; false = non modulata)
      */
     public void setDivisoInModuli(boolean b) {
         divisoInModuli = b;

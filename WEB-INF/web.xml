@@ -61,14 +61,43 @@
         <param-value>id</param-value>
     </context-param>
 
+    <context-param>
+        <description>Directory fogli stile di POL   ../style/</description>
+        <param-name>urlDirectoryStili</param-name>
+        <param-value>style/</param-value>
+    </context-param>
+    
+    <context-param>
+        <description>Directory script client di POL   ../js/</description>
+        <param-name>urlDirectoryScript</param-name>
+        <param-value>js/</param-value>
+    </context-param>
+
     <resource-ref>
         <description>
             Resource reference to a factory for java.sql.Connection
             instances that may be used for talking to a particular
-            database that is configured in the server.xml file.
+            database that is configured in the context.xml file.
         </description>
         <res-ref-name>
             jdbc/almalaurea
+        </res-ref-name>
+        <res-type>
+            javax.sql.DataSource
+        </res-type>
+        <res-auth>
+            Container
+        </res-auth>
+    </resource-ref>
+    
+    <resource-ref>
+        <description>
+            Resource reference to a factory for java.sql.Connection
+            instances that may be used for talking to a particular
+            database that is configured in the context.xml file.
+        </description>
+        <res-ref-name>
+            jdbc/pol
         </res-ref-name>
         <res-type>
             javax.sql.DataSource

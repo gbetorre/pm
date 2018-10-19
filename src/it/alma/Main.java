@@ -203,7 +203,7 @@ public class Main extends HttpServlet {
                     classCommand.init(voceMenu);
                     commands.put(voceMenu.getNome(), classCommand);
                 }
-                catch (ClassNotFoundException cnfex) {
+                catch (ClassNotFoundException cnfex) {  // Se non riesce neppure nel sottopackage "si arrende"
                     String error = FOR_NAME +
                                    "La classe collegata alla voce menu '" +
                                    voceMenu.getNome() +
@@ -270,7 +270,7 @@ public class Main extends HttpServlet {
          * Cerca la command associata al parametro 'ent'
          * e, se la trova, ne invoca il metodo execute()
          */
-        JOptionPane.showMessageDialog(null, "Chiamata arrivata dall\'applicazione!", "Esito: OK", JOptionPane.INFORMATION_MESSAGE, null);
+        JOptionPane.showMessageDialog(null, "Chiamata arrivata dall\'applicazione!", "Main: esito OK", JOptionPane.INFORMATION_MESSAGE, null);
         try {
             q = req.getParameter(entToken);
         } catch (NullPointerException npe) { // Potrebbe già uscire qui
@@ -343,6 +343,14 @@ public class Main extends HttpServlet {
              * baseHref, etc.)
              */
             retrieveFixedInfo(req);
+            /*
+             * Costruisce qui il valore del <base href... /> piuttosto che nelle pagine
+             */
+            String baseHref = getBaseHref(req);
+            /*
+             *  Setta nella request il valore del <base href... />
+             */
+            req.setAttribute("baseHref", baseHref);
         }
         final RequestDispatcher rd = getServletContext().getRequestDispatcher(fileJsp + "?" + req.getQueryString());
         rd.forward(req, res);
@@ -381,8 +389,7 @@ public class Main extends HttpServlet {
      * recuperare 
      * <ul>
      * <li>elenchi di oggetti che servono all'header 
-     * per popolare le liste in esso mostrate 
-     * (aree, dipartimenti, scuole di dottorato, ecc.)</li>
+     * per popolare le liste in esso mostrate</li>
      * <li>il baseHref</li>
      * <li>il flagsUrl</li>
      * <br />
@@ -395,7 +402,7 @@ public class Main extends HttpServlet {
      * ogni richiesta effettuata per visualizzare un output html
      * (per output diversi quali files CSV o simili &egrave; possibile
      * invocare servlet diverse da Main), pu&ograve; implicitamente essere 
-     * richiamato dal metodo service o - separatamente - dalla sovrascrittura
+     * richiamato dal metodo service o - meglio - dalla sovrascrittura
      * dei metodi <code>doGet</code> e/o <code>doPost</code>.<br />
      * Dialoga con l'HttpServletRequest attingendo a dati eventualmente
      * valorizzati in essa e valorizzando nella stessa parametri da passare.</p> 
@@ -407,15 +414,6 @@ public class Main extends HttpServlet {
         String baseHref = getBaseHref(req);
         // Setta nella request il valore del <base href... />
         req.setAttribute("baseHref", baseHref);
-        // Costruisce qui il valore del <flagsUrl> per cambiare lingua ai contenuti
-        String flagsUrl = (req.getAttribute("queryString") != null) ? ((String) req.getAttribute("queryString") ): req.getQueryString();
-        if (flagsUrl == null) 
-            flagsUrl = new String();                        // In error.jsp QueryString è nulla
-        flagsUrl = flagsUrl.replaceAll("&?lang=[^&]*", ""); // Toglie eventuale "lang=xx"
-        flagsUrl = flagsUrl.replaceAll("&", "&amp;");       // Sostituisce tutti gli & con &amp;
-        flagsUrl = (flagsUrl.length()>0) ? "main?" + flagsUrl + "&amp;lang=" : "?lang="; // Su fol il valore dell'ultima assegnazione sarebbe : "main?lang="
-        // Setta nella request il valore del <flagsUrl>
-        req.setAttribute("flagsUrl", flagsUrl);
         // Valorizza l'anno corrente: utile al footer
         String currentYear = Utils.getCurrentYear();
         req.setAttribute("theCurrentYear", currentYear);
@@ -444,6 +442,5 @@ public class Main extends HttpServlet {
         baseHref.append('/');
         return new String(baseHref);
     }
-    
     
 }
