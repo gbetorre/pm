@@ -35,8 +35,6 @@ import org.apache.commons.beanutils.Converter;
  * error occurs.</p>
  *
  * @author Roberto Posenato
- * @version $Revision: 1.1.1.1 $ $Date: 2008/09/01 13:41:51 $
- * @since 1.3
  */
 
 public final class DateConverter implements Converter {

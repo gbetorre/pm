@@ -118,7 +118,18 @@ public class SessionManager extends HttpServlet {
     protected void doGet(HttpServletRequest req, 
                          HttpServletResponse res)
                   throws ServletException, IOException {
-        doPost(req, res);
+        //doPost(req, res);
+        try {
+            // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
+            HttpSession session = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
+            session.invalidate();
+        } catch (IllegalStateException e) {
+            throw new ServletException("Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n" + e.getMessage(), e);
+        } catch (NullPointerException e) {
+            throw new ServletException("Errore nell'estrazione dei dipartimenti che gestiscono il corso.\n" + e.getMessage(), e);
+        } catch (Exception e) {
+            ;
+        }
     }
     
     
