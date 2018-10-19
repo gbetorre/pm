@@ -1,10 +1,15 @@
 /*
  *   Alma on Line: Applicazione WEB per la visualizzazione 
- *   delle schede di indagine su popolazione dell'ateneo.<br />
+ *   delle schede di indagine su popolazione dell'ateneo,
+ *   della gestione dei progetti on line (POL) 
+ *   e della preparazione e del monitoraggio delle informazioni riguardanti 
+ *   l'offerta formativa che hanno ricadute sulla valutazione della didattica 
+ *   (questionari on line - QOL).
  *   
  *   Copyright (C) 2018 Giovanroberto Torre<br />
- *   Alma on Line (aol), web application to publish students 
- *   and degrees informations.
+ *   Alma on Line (aol), Projects on Line (pol), Questionnaire on Line (qol);
+ *   web applications to publish, and manage, students evaluation,
+ *   projects, students and degrees information.
  *   Copyright (C) renewed 2018 Universita' degli Studi di Verona, 
  *   all right reserved
  *
@@ -49,7 +54,6 @@ package it.alma.exception;
  * personalizzate sarebbe soppresso.</p>  
  * </cite><br />
  *
- * @version 1.0
  * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
  */
 public class WebStorageException extends Exception {
