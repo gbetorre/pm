@@ -53,9 +53,11 @@ import javax.swing.JOptionPane;
 
 import it.alma.bean.BeanUtil;
 import it.alma.bean.CourseBean;
+import it.alma.bean.DepartmentBean;
 import it.alma.bean.ItemBean;
 import it.alma.bean.PersonBean;
 import it.alma.bean.ProjectBean;
+import it.alma.exception.AttributoNonValorizzatoException;
 import it.alma.exception.NotFoundException;
 import it.alma.exception.WebStorageException;
 
@@ -275,16 +277,21 @@ public class DBWrapper implements Query {
     
     /**
      * <p>Restituisce un Vector di ProjectBean rappresentante i progetti dell'utente loggato .</p>
-     *
+     * 
+     * @param userId identificativo dell'utente di cui si vogliono recuperare i progetti
+     * TODO: verificare se non è meglio passare l'identificativo della persona piuttosto che dell'utente!
      * @return <code>Vector&lt;ProjectBean&gt;</code> - ProjectBean rappresentante i progetti dell'utente loggato
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
+    @SuppressWarnings("static-method")
     public Vector<ProjectBean> getProjects(int userId)
-    							throws WebStorageException{
-    	
-    	ResultSet rs = null;
+    							    throws WebStorageException{
+    	ResultSet rs, rs2 = null;
     	Connection con = null;
         PreparedStatement pst = null;
+        ProjectBean project = null;
+        DepartmentBean dipart = null;
+        int idDipart = -1;
         Vector<ProjectBean> projects = new Vector<ProjectBean>();
         try {
             con = pol_manager.getConnection();
@@ -293,13 +300,29 @@ public class DBWrapper implements Query {
             pst.setInt(1, userId);
             rs = pst.executeQuery();
             while (rs.next()) {
-                ProjectBean project = new ProjectBean();
+                project = new ProjectBean();
                 BeanUtil.populate(project, rs);
+                // Recupera dipartimento del progetto
+                idDipart = project.getIdDipart();
+                pst = con.prepareStatement(GET_DIPART);
+                pst.clearParameters();
+                pst.setInt(1, idDipart);
+                rs2 = pst.executeQuery();
+                if (rs2.next()) {
+                    dipart = new DepartmentBean();
+                    BeanUtil.populate(dipart, rs2);
+                    project.setDipart(dipart);
+                }
+                // Aggiunge il progetto valorizzato all'elenco
                 projects.add(project);
             }
             return projects;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Oggetto ProjectBean.idDipart non valorizzato; problema nella query dei progetti.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
         } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Oggetto ProjectBean non valorizzato; problema nella query dell\'utente.\n";
+            String msg = FOR_NAME + "Oggetto ProjectBean non valorizzato; problema nella query dei progetti.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
         } finally {
