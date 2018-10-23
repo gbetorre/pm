@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model:Screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:model="http://wireframesketcher.com/1.0/model.ecore">
+  <widgets xsi:type="model:Browser" id="1" x="40" y="16" width="641" height="425" text="almalaurea&#xD;&#xA;https://localhost:8080/almalaurea/elenco.html" measuredWidth="641" measuredHeight="425">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Label" id="2" x="56" y="80" text="Benvenuto &quot;nome&quot; &quot;cognome&quot;" measuredWidth="171" measuredHeight="23">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Button" id="3" x="520" y="79" text="LOGOUT" measuredWidth="67" measuredHeight="25">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Label" id="4" x="58" y="122" text="Elenco dei progetti, seleziona quello da visualizzare o modificare, selezionando anche la funzione: " measuredWidth="520" measuredHeight="23">
+    <font/>
+  </widgets>
+  <widgets xsi:type="model:Table" id="5" x="152" y="168" width="407" height="153" text="ID,NomeProgetto (link),Stato,Opzioni (link)&#xA;1,Project1,Stato1,Visualizza   |   Modifica   |   Elimina&#xA;2,Project2,Stato1,Visualizza   |   Modifica   |   Elimina&#xA;3,Project3,Stato3,Visualizza   |   Modifica   |   Elimina&#xA;4,Project4,Stato2,Visualizza   |   Modifica   |   Elimina" measuredWidth="407" measuredHeight="153" alternative="#eee">
+    <font/>
+  </widgets>
+  <hRuler/>
+  <vRuler/>
+  <font size="12px"/>
+</model:Screen>
