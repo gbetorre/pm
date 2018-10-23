@@ -12,17 +12,19 @@
 	</div>
 		
 	<div class="row">
-		<div class="col-sm-1">IDProgetto1</div>
-		<div class="col-sm-5">NomeProgetto1</div>
-		<div class="col-sm-2">
-		    <select class="form-control" id="azione">
-		      <option>Project Charter</option>
-		      <option>Status</option>
-		      <option>WBS</option>
-		      <option>Attivit&agrave;</option>
-		      <option>Scheda</option>
-		    </select>
-		</div>
+  <c:forEach var="prj" items="${requestScope.progetti}" varStatus="loop">
+    <div class="col-sm-1">id progetto <c:out value="${prj.id}" /></div>
+    <div class="col-sm-5">NomeProgetto <c:out value="${prj.nome}" /></div>
+    <div class="col-sm-2">
+        <select class="form-control" id="azione">
+          <option>Project Charter</option>
+          <option>Status</option>
+          <option>WBS</option>
+          <option>Attivit&agrave;</option>
+          <option>Scheda</option>
+        </select>
+    </div>
+  </c:forEach>		
 	</div>
 	
 	<br><br>
