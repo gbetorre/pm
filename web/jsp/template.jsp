@@ -10,8 +10,12 @@
     <meta name="creator" content="Universita' degli studi di Verona" />
     <meta name="author" content="Giovanroberto Torre, giovanroberto.torre@univr.it" />
     <link rev="made" href="giovanroberto.torre@univr.it" />
-    <base href="${requestScope.baseHref}" />
-    <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />bootstrap.css" type="text/css" />
+    <meta http-equiv='cache-control' content='no-cache'>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <!-- Latest compiled CSS, just in case -->
+    <%--<base href="${requestScope.baseHref}" />
+    <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />bootstrap.css" type="text/css" />--%>
     <script>
     	function modify(campi){
     		var allcampi = document.getElementsByName("campi");
