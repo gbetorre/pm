@@ -37,6 +37,7 @@
 package it.alma;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.LinkedList;
 
 
@@ -53,6 +54,38 @@ public interface Query extends Serializable {
      * Costante parlante per flag di recupero sessione utente
      */
     public static final boolean IF_EXISTS_DONOT_CREATE_NEW = false;
+    /**
+     * Valori possibili degli attributi di stato di un progetto
+     */
+    static final String[] STATI = {"OK", "POSSIBILI PROBLEMI", "CRITICO"};
+    /**
+     * Lista contenente i possibili valori dei campi di stato del progetto
+     */    
+    public static final LinkedList<String> STATI_AS_LIST = new LinkedList<String>(Arrays.asList(STATI));
+    /**
+     * Valori possibili dell'attributo nome di statoprogetto
+     */
+    static final String[] STATI_PROGETTO = {"APERTO", "IN PROGRESS", "SOSPESO", "CONCLUSO", "ELIMINATO"};
+    /**
+     * Lista contenente i possibili valori del campo nome della classe StatoProgettoBean
+     */    
+    public static final LinkedList<String> STATI_PROGETTO_AS_LIST = new LinkedList<String>(Arrays.asList(STATI_PROGETTO));
+    /**
+     * Valori possibili degli attributi probabilita, impatto, livello di rischio
+     */
+    static final String[] LIVELLI_RISCHIO = {"ALTO", "MEDIO", "BASSO"};
+    /**
+     * Lista contenente i possibili valori degli attributi probabilita, impatto, livello della classe RischioBean
+     */    
+    public static final LinkedList<String> LIVELLI_RISCHIO_AS_LIST = new LinkedList<String>(Arrays.asList(LIVELLI_RISCHIO));
+    /**
+     * Valori possibili dell'attributo stato di rischio
+     */
+    static final String[] STATO_RISCHIO = {"APERTO", "CHIUSO", "IN RISOLUZIONE"};
+    /**
+     * Lista contenente i possibili valori dell'attributo stato della classe RischioBean
+     */    
+    public static final LinkedList<String> STATO_RISCHIO_AS_LIST = new LinkedList<String>(Arrays.asList(STATO_RISCHIO));
     /**
      * Lista Hash contenente tutti i corsi elettivi
      */
