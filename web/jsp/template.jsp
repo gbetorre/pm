@@ -12,6 +12,13 @@
     <link rev="made" href="giovanroberto.torre@univr.it" />
     <base href="${requestScope.baseHref}" />
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />bootstrap.css" type="text/css" />
+    <script>
+    	function modify(campi){
+    		var allcampi = document.getElementsByName("campi");
+    		for(var i = 0; i < allcampi.lenght; i++)
+    			allcampi[i].setAttribute("disable", false);
+    	}
+    </script>
   </head>
   <body>
     <!-- Header -->
