@@ -1,4 +1,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+    <hr class="separatore" />
+    <small>
     <div id="bottom">
       <div id="footer">
         <div class="container_24" id="footerContainer">
@@ -51,3 +53,4 @@
       </div>
     </div>
     <div><a id="toTop" href="#topStripe"></a></div>
+    </small>
