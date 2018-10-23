@@ -40,7 +40,7 @@
     <context-param>
         <description></description>
         <param-name>home</param-name>
-        <param-value>/jsp/index.jsp</param-value>
+        <param-value>home</param-value>
     </context-param>
 
     <context-param>
