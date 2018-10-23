@@ -23,7 +23,7 @@
 
 <input type="button" name="modifica" value="modifica">
 <input type="submit" name="salva" value="salva">
-<input type="reset" name="annulla" value="annulla>
+<input type="reset" name="annulla" value="annulla">
 </form>
 </body>
 </html>
