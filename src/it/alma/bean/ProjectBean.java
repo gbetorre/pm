@@ -134,8 +134,12 @@ public class ProjectBean implements Serializable, Query {
     private String serviziAteneo;
     /** Vincoli del progetto */
     private String vincoli;
+    /** Id del dipartimento del progetto*/
+    private int idDipart;
     /** Dipartimento del progetto */
     private DepartmentBean dipart;
+    /** Id dello stato progetto */
+    private int idStatoProgetto;
     /** Stato progetto */
     private StatoProgettoBean statoProgetto;
     
@@ -159,7 +163,9 @@ public class ProjectBean implements Serializable, Query {
     	fornitoriChiaveInterni =  fornitoriChiaveEsterni = null;
     	serviziAteneo = null; 
     	vincoli = null;
+    	idDipart = -2;
     	dipart = null;
+    	idStatoProgetto = -2;
     	statoProgetto = null;    	
     }
 
@@ -851,9 +857,33 @@ public class ProjectBean implements Serializable, Query {
 		this.vincoli = vincoli;
 	}
 
+	
+	/* ************************************************** *
+     *         Metodi getter e setter per idDipart        *
+     * ************************************************** */
+	/**
+	 * Restituisce l'id del dipartimento del progetto
+	 * @return <code>idDipart</code> - id del dipartimento del progetto
+	 * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e idDipart non 		&egrave; stato valorizzato (&egrave; un dato obbligatorio) 
+	 */
+	public int getIdDipart() throws AttributoNonValorizzatoException {
+		if (idDipart == -2) {
+			throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo idDipart non valorizzato!");
+		}
+		return idDipart;
+	}
+
+	/**
+	 * Imposta l'id del dipartimento del progetto
+	 * @param idDipart - id del dipartimento del progetto
+	 */
+	public void setIdDipart(int idDipart) {
+		this.idDipart = idDipart;
+	}
+
 
 	/* *************************************************** *
-     *         Metodi getter e setter per dipart        *
+     *          Metodi getter e setter per dipart          *
      * *************************************************** */
 	/**
 	 * Restituisce un oggetto DepartmentBean che rappresenta il dipartimento del progetto
@@ -876,8 +906,32 @@ public class ProjectBean implements Serializable, Query {
 	}
 
 	
+	/* ***************************************************** *
+     *       Metodi getter e setter per idStatoProgetto      *
+     * ***************************************************** */
+	/**
+	 * Restituisce l'id dello stato del progetto
+	 * @return <code>idStatoProgetto</code> - id dello stato del progetto
+	 * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e idStatoProgetto non 		&egrave; stato valorizzato (&egrave; un dato obbligatorio) 
+	 */
+	public int getIdStatoProgetto() throws AttributoNonValorizzatoException {
+		if(idStatoProgetto == -2) {
+			throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo idStatoProgetto non valorizzato!");
+		}
+		return idStatoProgetto;
+	}
+
+	/**
+	 * Imposta l'id dello stato del progetto
+	 * @param idStatoProgetto - id dello stato del progetto
+	 */
+	public void setIdStatoProgetto(int idStatoProgetto) {
+		this.idStatoProgetto = idStatoProgetto;
+	}
+
+
 	/* *************************************************** *
-     *      Metodi getter e setter per statoProgetto     *
+     *       Metodi getter e setter per statoProgetto      *
      * *************************************************** */
 	/**
 	 * Restituisce un oggetto StatoProgettoBean che rappresenta lo stato del progetto
@@ -886,7 +940,7 @@ public class ProjectBean implements Serializable, Query {
 	 */
 	public StatoProgettoBean getStatoProgetto() throws AttributoNonValorizzatoException {
 		if(statoProgetto == null) {
-			throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo id_dipart non valorizzato!");
+			throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoProgetto non valorizzato!");
 		}
 		return statoProgetto;
 	}
