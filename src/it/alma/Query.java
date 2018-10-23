@@ -57,7 +57,7 @@ public interface Query extends Serializable {
      * Lista Hash contenente tutti i corsi elettivi
      */
     public LinkedList<String> CORSI_ELETTIVI = new LinkedList<String>();
-    
+
     /**
      *  Carica la lista con i codici U-GOV dei corsi elettivi
      */
@@ -201,7 +201,8 @@ public interface Query extends Serializable {
           + ",\"Oretirocinio\"          AS \"oreTirocinio\""
           + ",\"InizioPerDid\"          AS \"inizioPerDid\""
           + ",\"FinePerDid\"            AS \"finePerDid\""
-          + " FROM \"AD-Semplici-II2017\" AD"
+          //+ " FROM \"AD-Semplici-II2017\" AD"
+          + " FROM \"ADSemplici-2018-I\" AD"
           + " ORDER BY \"codiceFiscaleDocente\", \"codiceADUGOV\", \"codiceCdSUGOV\", \"inizioPerDid\", \"finePerDid\""
           + " --ORDER BY \"id\" "
           + " --LIMIT 30";
