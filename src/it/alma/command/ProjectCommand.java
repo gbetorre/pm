@@ -41,6 +41,8 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import com.oreilly.servlet.ParameterParser;
+
 import it.alma.DBWrapper;
 import it.alma.Main;
 import it.alma.Query;
@@ -70,9 +72,17 @@ public class ProjectCommand extends ItemBean implements Command {
      */
     protected static Logger LOG = Logger.getLogger(Main.class.getName());
     /**
-     * Pagina a cui la servlet reindirizza
+     * Pagina a cui la command reindirizza per mostrare 
      */
-    private static final String nomeFileElenco = "/jsp/progetto.jsp";  
+    private static final String nomeFileElenco = "/jsp/elencoProgetti.jsp"; 
+    /**
+     * Pagina a cui la command fa riferimento per mostrare la Vision del progetto
+     */
+    private static final String nomeFileVision = "/jsp/pcVision.jsp";
+    /**
+     * Pagina a cui la command fa riferimento per mostrare gli Stakeholder del progetto
+     */
+    private static final String nomeFileStakeholder = "/jsp/pcStakeholder.jsp";
     
     
     /** 
@@ -113,19 +123,28 @@ public class ProjectCommand extends ItemBean implements Command {
                  throws CommandException {
         // Databound
         DBWrapper db = null;
-        // Struttura che conterrà tutte le AD dal semilavorato
+        // Parser per la gestione assistita dei parametri di input
+        ParameterParser parser = new ParameterParser(req);
+        // Utente loggato
         PersonBean user = null;
-        // Instanzia nuova classe WebStorage per il recupero dei dati
+        /* ******************************************************************** *
+         *      Instanzia nuova classe WebStorage per il recupero dei dati      *
+         * ******************************************************************** */
         try {
             db = new DBWrapper();
         } catch (WebStorageException wse) {
             throw new CommandException(FOR_NAME + "Non e\' disponibile un collegamento al database\n." + wse.getMessage(), wse);
         }
-        // Recupera la Sessione
+        /* ******************************************************************** *
+         *                         Recupera la Sessione                         *
+         * ******************************************************************** */
         try {
             // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
             HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
             user = (PersonBean) ses.getAttribute("usr");
+            if (user == null) {
+                throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
+            }
         } catch (IllegalStateException ise) {
             String msg = FOR_NAME + "Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n";
             LOG.severe(msg);
@@ -143,13 +162,36 @@ public class ProjectCommand extends ItemBean implements Command {
             LOG.severe(msg);
             throw new CommandException(msg + e.getMessage(), e);
         }
+        /* ******************************************************************** *
+         *                          Recupera i parametri                        *
+         * ******************************************************************** */
+        // Recupera o inizializza 'id progetto'
+        int idPrj = parser.getIntParameter("id", -1); 
+        // Recupera o inizializza 'tipo corsi di studio'
+        String tcs = parser.getStringParameter("tcs", "-");
+        // Recupera o inizializza 'tipo pagina'   
+        String part = parser.getStringParameter("p", "-");
+        // Dichiara la pagina a cui reindirizzare
+        String fileJspT = null;
+        // Decide il valore della pagina
+        if (part.equalsIgnoreCase("pcv")) {
+            fileJspT = nomeFileVision;
+        } else if (part.equalsIgnoreCase("pcs")) {
+            fileJspT = nomeFileStakeholder;
+        } else {
+            fileJspT = nomeFileElenco;
+        }
+        // Recupera il tipo di documento
+        //String tipo = parser.getStringParameter("tipo", "-");
+        // Ricerca il bean della ex-facolta', o del dipartimento, etc.
+        //int idScuDott = parser.getIntParameter("scuoladott", -1);
         
         // Imposta il testo del Titolo da visualizzare prima dell'elenco
-        req.setAttribute("titoloE", "AD Semplici");
+        req.setAttribute("titoloE", "Project Charter");
         // Salva nella request: Titolo pagina (da mostrare nell'HTML)
         req.setAttribute("tP", req.getAttribute("titoloE"));         
         // Imposta la Pagina JSP di forwarding
-        req.setAttribute("fileJsp", nomeFileElenco);
+        req.setAttribute("fileJsp", fileJspT);
         // Salva nella request: utente
         //req.setAttribute("user", user);
     }
