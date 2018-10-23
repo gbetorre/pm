@@ -349,11 +349,22 @@ public interface Query extends Serializable {
     		"	,	PJ.fornitorichiaveesterni	AS \"fornitoriChiaveEsterni\"" + 
     		"	,	PJ.serviziateneo			AS \"serviziAteneo\"" + 
     		"	,	PJ.vincoli					AS \"vincoli\"" + 
-    		"	FROM progetto PJ\r\n" + 
-    		"		INNER JOIN ruologestione RG ON PJ.id = RG.id_progetto\r\n" + 
-    		"		INNER JOIN persona P ON RG.id_persona = P.id\r\n" + 
-    		"		INNER JOIN identita I ON P.id = I.id1_persona\r\n" + 
-    		"		INNER JOIN usr U ON I.id0_usr = U.id\r\n" + 
-    		"	WHERE 	U.id = ?;";
-                    
+    		"	FROM progetto PJ" + 
+    		"		INNER JOIN ruologestione RG ON PJ.id = RG.id_progetto" + 
+    		"		INNER JOIN persona P ON RG.id_persona = P.id" + 
+    		"		INNER JOIN identita I ON P.id = I.id1_persona" + 
+    		"		INNER JOIN usr U ON I.id0_usr = U.id" + 
+    		"	WHERE 	P.id = ?";
+
+    /**
+     * Estrae un dipartimento dato il suo id, passato come parametro
+     */
+    public static final String GET_DIPART = 
+            "SELECT " +
+            "       D.id           " + 
+            "   ,   D.nome                      AS \"nome\"" + 
+            "   ,   D.prefisso                  AS \"prefisso\"" + 
+            "   ,   D.indirizzosede             AS \"indirizzoSede\"" + 
+            "   FROM dipartimento D" + 
+            "   WHERE   D.id = ?";
 }
