@@ -36,6 +36,7 @@
 
 package it.alma.command;
 
+import java.util.Vector;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -48,6 +49,8 @@ import it.alma.Main;
 import it.alma.Query;
 import it.alma.bean.ItemBean;
 import it.alma.bean.PersonBean;
+import it.alma.bean.ProjectBean;
+import it.alma.exception.AttributoNonValorizzatoException;
 import it.alma.exception.CommandException;
 import it.alma.exception.WebStorageException;
 
@@ -121,12 +124,23 @@ public class ProjectCommand extends ItemBean implements Command {
      */
     public void execute(HttpServletRequest req) 
                  throws CommandException {
+        /* ******************************************************************** *
+         *      Crea e inizializza le variabili locali      *
+         * ******************************************************************** */
         // Databound
         DBWrapper db = null;
         // Parser per la gestione assistita dei parametri di input
         ParameterParser parser = new ParameterParser(req);
         // Utente loggato
         PersonBean user = null;
+        // Recupera o inizializza 'id progetto'
+        int idPrj = parser.getIntParameter("id", -1); 
+        // Recupera o inizializza 'tipo pagina'   
+        String part = parser.getStringParameter("p", "-");
+        // Dichiara la pagina a cui reindirizzare
+        String fileJspT = null;
+        // Dichiara elenco di progetti
+        Vector<ProjectBean> v = new Vector<ProjectBean>();
         /* ******************************************************************** *
          *      Instanzia nuova classe WebStorage per il recupero dei dati      *
          * ******************************************************************** */
@@ -163,37 +177,46 @@ public class ProjectCommand extends ItemBean implements Command {
             throw new CommandException(msg + e.getMessage(), e);
         }
         /* ******************************************************************** *
-         *                          Recupera i parametri                        *
+         *                          Corpo del programma                         *
          * ******************************************************************** */
-        // Recupera o inizializza 'id progetto'
-        int idPrj = parser.getIntParameter("id", -1); 
-        // Recupera o inizializza 'tipo corsi di studio'
-        String tcs = parser.getStringParameter("tcs", "-");
-        // Recupera o inizializza 'tipo pagina'   
-        String part = parser.getStringParameter("p", "-");
-        // Dichiara la pagina a cui reindirizzare
-        String fileJspT = null;
         // Decide il valore della pagina
-        if (part.equalsIgnoreCase("pcv")) {
-            fileJspT = nomeFileVision;
-        } else if (part.equalsIgnoreCase("pcs")) {
-            fileJspT = nomeFileStakeholder;
-        } else {
-            fileJspT = nomeFileElenco;
+        try {
+            if (part.equalsIgnoreCase("pcv")) {
+                fileJspT = nomeFileVision;
+            } else if (part.equalsIgnoreCase("pcs")) {
+                fileJspT = nomeFileStakeholder;
+            } else {
+                v = db.getProjects(user.getId());
+                fileJspT = nomeFileElenco;
+            }
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio del bean.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + anve.getMessage(), anve);
+        } catch (WebStorageException wse) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di valori dal db.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + wse.getMessage(), wse);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + npe.getMessage(), npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
         }
-        // Recupera il tipo di documento
-        //String tipo = parser.getStringParameter("tipo", "-");
-        // Ricerca il bean della ex-facolta', o del dipartimento, etc.
-        //int idScuDott = parser.getIntParameter("scuoladott", -1);
-        
+        /* ******************************************************************** *
+         *              Settaggi in request dei valori calcolati                *
+         * ******************************************************************** */
         // Imposta il testo del Titolo da visualizzare prima dell'elenco
         req.setAttribute("titoloE", "Project Charter");
         // Salva nella request: Titolo pagina (da mostrare nell'HTML)
         req.setAttribute("tP", req.getAttribute("titoloE"));         
         // Imposta la Pagina JSP di forwarding
         req.setAttribute("fileJsp", fileJspT);
-        // Salva nella request: utente
-        //req.setAttribute("user", user);
+        // Salva nella request elenco progetti
+        req.setAttribute("progetti", v);
     }
     
 }
