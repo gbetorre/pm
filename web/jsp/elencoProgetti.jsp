@@ -7,13 +7,7 @@
 		<div class="col-sm-1">ID</div>
 		<div class="col-sm-5">Nome</div>
 		<div class="col-sm-2">
-		    <select class="form-control" id="azione">
-		      	<option>Project Charter</option>
-		      	<option>Status</option>
-		      	<option>WBS</option>
-		      	<option>Attivit&agrave;</option>
-		     	<option>Scheda</option>
-			</select>
+		    Funzione
 		</div>
 	</div>
 		
