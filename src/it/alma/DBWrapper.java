@@ -55,6 +55,7 @@ import it.alma.bean.BeanUtil;
 import it.alma.bean.CourseBean;
 import it.alma.bean.ItemBean;
 import it.alma.bean.PersonBean;
+import it.alma.bean.ProjectBean;
 import it.alma.exception.NotFoundException;
 import it.alma.exception.WebStorageException;
 
@@ -267,6 +268,49 @@ public class DBWrapper implements Query {
                 throw new WebStorageException(npe.getMessage());
             } catch (SQLException sqle) {
                 throw new WebStorageException(sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce un Vector di ProjectBean rappresentante i progetti dell'utente loggato .</p>
+     *
+     * @return <code>Vector&lt;ProjectBean&gt;</code> - ProjectBean rappresentante i progetti dell'utente loggato
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    public Vector<ProjectBean> getProjects(int userId)
+    							throws WebStorageException{
+    	
+    	ResultSet rs = null;
+    	Connection con = null;
+        PreparedStatement pst = null;
+        Vector<ProjectBean> projects = new Vector<ProjectBean>();
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_PROJECTS);
+            pst.clearParameters();
+            pst.setInt(1, userId);
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                ProjectBean project = new ProjectBean();
+                BeanUtil.populate(project, rs);
+                projects.add(project);
+            }
+            return projects;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto ProjectBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
             }
         }
     }
