@@ -418,4 +418,34 @@ public interface Query extends Serializable {
     		"	FROM statoprogetto SP" + 
     		"	WHERE SP.id = ?";
      
+    
+    /**
+     * Modifica la tupla della tabella attivit&agrave; identificata dall'id, che &egrave; passato come parametro
+     */
+    /* I ? servono per prelevare i dati modificati dalle form, e settarli quindi nel db (tranne nella clausola where dove sta ad indicare l'id dell'attività da modificare).
+     * Ho considerato che nella tabella attivita i seguenti attributi non possono essere modificati: 
+     *      - id
+     *      - id_progetto
+     *      - id_wbs
+     *      - id_complessita
+     *      - id_stato
+     *      - id_ruolo
+     *      - id_persona
+     * se si possono modificare, basta aggiungere la stringa da settare */
+    public static final String UPDATE_ATTIVITA = 
+            "UPDATE attivita" +
+            "   SET     nome=?" +
+            "   ,       descrizione=?" + 
+            "   ,       datainizio=?" + 
+            "   ,       datafine=?" + 
+            "   ,       datainizioattesa=?" + 
+            "   ,       datafineattesa=?" + 
+            "   ,       datainizioeffettiva=?" + 
+            "   ,       datafineeffettiva=?" + 
+            "   ,       guprevisti=?" + 
+            "   ,       gueffettivi=?" + 
+            "   ,       gurimanenti=?" + 
+            "   ,       noteavanzamento=?" + 
+            "   ,       milestone=?" + 
+            "   WHERE id=?";
 }
