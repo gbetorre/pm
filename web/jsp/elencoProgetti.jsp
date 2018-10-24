@@ -14,7 +14,7 @@
 	<div class="row">
   <c:forEach var="prj" items="${requestScope.progetti}" varStatus="loop">
     <div class="col-sm-1">id progetto <c:out value="${prj.id}" /></div>
-    <div class="col-sm-5">NomeProgetto <c:out value="${prj.nome}" /></div>
+    <div class="col-sm-5">NomeProgetto <c:out value="${prj.titolo}" /></div>
     <div class="col-sm-2">
         <select class="form-control" id="azione">
           <option>Project Charter</option>
