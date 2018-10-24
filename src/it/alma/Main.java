@@ -332,6 +332,10 @@ public class Main extends HttpServlet {
              */
             fileJsp = (String) req.getAttribute("fileJsp");
         } else {
+            // Disabilita Cache
+            res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1
+            res.setHeader("Pragma", "no-cache"); // HTTP 1.0
+            res.setDateHeader("Expires", 0); // Proxies.
             /* 
              * Il template compone il risultato con vari pezzi 
              * (testata, aside, etc.)
