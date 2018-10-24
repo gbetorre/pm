@@ -1,21 +1,30 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <form action="#" method="post">
-<div class="tab-container">
-	<div role="tabpanel">
-	<ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
- 		<li>
- 		 	<a href="#">Vision</a>
-		</li>
- 		<li role="stakeholder" class="active">
- 			<a href="#" role="tab" data-toggle="tab" class="transition">Stakeholder</a>
- 		</li>
- 		<li><a href="#">Del</a></li>
- 		<li><a href="#">Risorse</a></li>
- 		<li><a href="#">Rischi</a></li>
- 		<li><a href="#">Vincoli</a></li>
- 		<li><a href="#">Milestone</a></li>
-	</ul>
+<div class="container mt-3">
+    <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
+      <li role="Vision" class="nav-item">
+        <a href="#" data-toggle="tab" class="nav-link">Vision</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link active" role="tab" data-toggle="tab" href="#">Stakeholder</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#">Deliverable</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#">Risorse</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#">Rischi</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#">Vincoli</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#">Milestone</a>
+      </li>
+    </ul>
 	
 	<div class="tab-content responsive hidden-xs hidden-sm">
 		<div role="tabpanel" class="tab-pane active" id="tab-pcvision">
