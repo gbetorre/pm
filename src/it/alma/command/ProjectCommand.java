@@ -36,6 +36,7 @@
 
 package it.alma.command;
 
+import java.util.HashMap;
 import java.util.Vector;
 import java.util.logging.Logger;
 
@@ -77,15 +78,17 @@ public class ProjectCommand extends ItemBean implements Command {
     /**
      * Pagina a cui la command reindirizza per mostrare 
      */
-    private static final String nomeFileElenco = "/jsp/elencoProgetti.jsp"; 
+    private static final String nomeFileElenco = "/jsp/elencoProgetti.jsp";
     /**
      * Pagina a cui la command fa riferimento per mostrare la Vision del progetto
      */
-    private static final String nomeFileVision = "/jsp/pcVision.jsp";
+    //private static final String nomeFileVision = "/jsp/pcVision.jsp";
     /**
      * Pagina a cui la command fa riferimento per mostrare gli Stakeholder del progetto
      */
-    private static final String nomeFileStakeholder = "/jsp/pcStakeholder.jsp";
+    //private static final String nomeFileStakeholder = "/jsp/pcStakeholder.jsp";
+    
+    private static final HashMap<String, String> nomeFile = new HashMap<String, String>();
     
     
     /** 
@@ -114,6 +117,15 @@ public class ProjectCommand extends ItemBean implements Command {
           String msg = FOR_NAME + "La voce menu' " + this.getNome() + " non ha il campo paginaJsp. Impossibile visualizzare i risultati.\n";
           throw new CommandException(msg);
         }
+        // Carica la hashmap contenente le pagine da includere in funzione dei parametri sulla querystring
+        nomeFile.put("pcv", "/jsp/pcVision.jsp");
+        nomeFile.put("pcs", "/jsp/pcStakeholder.jsp");
+        nomeFile.put("pcd", "");
+        nomeFile.put("pcr", "");
+        nomeFile.put("pck", "");
+        nomeFile.put("pcc", "");
+        nomeFile.put("pcm", "");
+        nomeFile.put("prj", this.getPaginaJsp());
     }  
   
     
@@ -125,7 +137,7 @@ public class ProjectCommand extends ItemBean implements Command {
     public void execute(HttpServletRequest req) 
                  throws CommandException {
         /* ******************************************************************** *
-         *      Crea e inizializza le variabili locali      *
+         *      Crea e inizializza le variabili locali                          *
          * ******************************************************************** */
         // Databound
         DBWrapper db = null;
@@ -181,10 +193,11 @@ public class ProjectCommand extends ItemBean implements Command {
          * ******************************************************************** */
         // Decide il valore della pagina
         try {
-            if (part.equalsIgnoreCase("pcv")) {
-                fileJspT = nomeFileVision;
-            } else if (part.equalsIgnoreCase("pcs")) {
-                fileJspT = nomeFileStakeholder;
+            if (nomeFile.containsKey(part)) {
+                if (idPrj > 0) {
+                    // TODO
+                }
+                fileJspT = nomeFile.get(part);
             } else {
                 v = db.getProjects(user.getId());
                 fileJspT = nomeFileElenco;
