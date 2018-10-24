@@ -353,4 +353,51 @@ public class DBWrapper implements Query {
         }
     }
     
+    
+    /**
+     * <p>Restituisce un ProjectBean rappresentante un progetto dell'utente loggato.</p>
+     *
+     * @return <code>ProjectBean</code> - ProjectBean rappresentante il progetto selezionato
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    public ProjectBean getProject(int projectId) throws WebStorageException {
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        ProjectBean project = null;
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_PROJECT);
+            pst.clearParameters();
+            pst.setInt(1, projectId);
+            rs = pst.executeQuery();
+            if(rs.next()) {
+                project = new ProjectBean();
+                BeanUtil.populate(project, rs);
+            }
+            return project;            
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto ProjectBean non valorizzato; problema nella query dei progetti.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p></p>
+     * 
+     */
+    
+    
 }
