@@ -355,6 +355,45 @@ public interface Query extends Serializable {
     		"		INNER JOIN identita I ON P.id = I.id1_persona" + 
     		"		INNER JOIN usr U ON I.id0_usr = U.id" + 
     		"	WHERE 	P.id = ?";
+    
+    /**
+     * Estrae un progetto di dato id, passato come parametro
+     */
+    public static final String GET_PROJECT = 
+            "SELECT " +
+            "       PJ.id           " + 
+            "   ,   PJ.id_dipart                AS \"idDipart\"" + 
+            "   ,   PJ.titolo                   AS \"titolo\"" + 
+            "   ,   PJ.descrizione              AS \"descrizione\"" + 
+            "   ,   PJ.datainizio               AS \"dataInizio\"" + 
+            "   ,   PJ.datafine                 AS \"dataFine\"" + 
+            "   ,   PJ.id_statoprogetto         AS \"idStatoProgetto\"" + 
+            "   ,   PJ.statotempi               AS \"statoTempi\"" + 
+            "   ,   PJ.statocosti               AS \"statoCosti\"" + 
+            "   ,   PJ.statorischi              AS \"statoRischi\"" + 
+            "   ,   PJ.statorisorse             AS \"statoRisorse\"" + 
+            "   ,   PJ.statoscope               AS \"statoScope\"" + 
+            "   ,   PJ.statocomunicazione       AS \"statoComunicazione\"" + 
+            "   ,   PJ.statoqualita             AS \"statoQualita\"" + 
+            "   ,   PJ.statoapprovvigionamenti  AS \"statoApprovvigionamenti\"" + 
+            "   ,   PJ.statostakeholder         AS \"statoStakeholder\"" + 
+            "   ,   PJ.meseriferimento          AS \"meseRiferimento\"" + 
+            "   ,   PJ.descrizionestatocorrente AS \"descrizioneStatoCorrente\"" + 
+            "   ,   PJ.situazioneattuale        AS \"situazioneAttuale\"" + 
+            "   ,   PJ.situazionefinale         AS \"situazioneFinale\"" + 
+            "   ,   PJ.obiettivimisurabili      AS \"obiettiviMisurabili\"" + 
+            "   ,   PJ.minacce                  AS \"minacce\"" + 
+            "   ,   PJ.stakeholdermarginali     AS \"stakeholderMarginali\"" + 
+            "   ,   PJ.stakeholderoperativi     AS \"stakeholderOperativi\"" + 
+            "   ,   PJ.stakeholderistituzionali AS \"stakeholderIstituzionali\"" + 
+            "   ,   PJ.stakeholderchiave        AS \"stakeholderChiave\"" + 
+            "   ,   PJ.deliverable              AS \"deliverable\"" + 
+            "   ,   PJ.fornitorichiaveinterni   AS \"fornitoriChiaveInterni\"" + 
+            "   ,   PJ.fornitorichiaveesterni   AS \"fornitoriChiaveEsterni\"" + 
+            "   ,   PJ.serviziateneo            AS \"serviziAteneo\"" + 
+            "   ,   PJ.vincoli                  AS \"vincoli\"" + 
+            "   FROM progetto PJ" + 
+            "   WHERE   PJ.id = ?";
 
     /**
      * Estrae un dipartimento dato il suo id, passato come parametro
