@@ -57,6 +57,7 @@ import it.alma.bean.DepartmentBean;
 import it.alma.bean.ItemBean;
 import it.alma.bean.PersonBean;
 import it.alma.bean.ProjectBean;
+import it.alma.bean.StatoProgettoBean;
 import it.alma.exception.AttributoNonValorizzatoException;
 import it.alma.exception.NotFoundException;
 import it.alma.exception.WebStorageException;
@@ -291,7 +292,9 @@ public class DBWrapper implements Query {
         PreparedStatement pst = null;
         ProjectBean project = null;
         DepartmentBean dipart = null;
+        StatoProgettoBean statoProgetto = null;
         int idDipart = -1;
+        int idStatoProgetto = -1;
         Vector<ProjectBean> projects = new Vector<ProjectBean>();
         try {
             con = pol_manager.getConnection();
@@ -312,6 +315,18 @@ public class DBWrapper implements Query {
                     dipart = new DepartmentBean();
                     BeanUtil.populate(dipart, rs2);
                     project.setDipart(dipart);
+                }
+                rs2 = null;
+                //Recupera statoprogetto del progetto
+                idStatoProgetto = project.getIdStatoProgetto();
+                pst = con.prepareStatement(GET_STATOPROGETTO);
+                pst.clearParameters();
+                pst.setInt(1, idStatoProgetto);
+                rs2 = pst.executeQuery();
+                if(rs2.next()) {
+                	statoProgetto = new StatoProgettoBean();
+                	BeanUtil.populate(statoProgetto, rs2);
+                	project.setStatoProgetto(statoProgetto);
                 }
                 // Aggiunge il progetto valorizzato all'elenco
                 projects.add(project);
