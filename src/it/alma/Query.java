@@ -367,4 +367,16 @@ public interface Query extends Serializable {
             "   ,   D.indirizzosede             AS \"indirizzoSede\"" + 
             "   FROM dipartimento D" + 
             "   WHERE   D.id = ?";
+    
+    /** 
+     * Estrae lo stato di un progetto dato il suo id, passato come parametro
+     */
+    public static final String GET_STATOPROGETTO = 
+    		"SELECT " +
+    		"		SP.id		AS \"id\"" +
+    		"	, 	SP.nome		AS \"nome\"" +
+    		"	, 	SP.valore	AS \"valore\"" + 
+    		"	FROM statoprogetto SP" + 
+    		"	WHERE SP.id = ?";
+     
 }
