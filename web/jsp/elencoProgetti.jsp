@@ -16,15 +16,22 @@
     	<c:forEach var="prj" items="${requestScope.progetti}" varStatus="loop">
         <tr>
           <th scope="row"><c:out value="${prj.id}" /></th>
-          <th scope="row"><a href=""><c:out value="${prj.titolo}" /></a></th>
+          <th scope="row"><a href="#"><c:out value="${prj.titolo}" /></a></th>
           <th scope="row"><c:out value="${prj.statoProgetto.getNome()}" /></th>
-          <th scope="row"><div class="container"><a href=""  class="btn btn-primary">Visualizza</a> <a href=""  class="btn btn-primary">Modifica</a></div></th>
+          <th scope="row">
+            <div class="container">
+              <a href="#"  class="btn btn-primary">Project Charter</a>
+              <!-- <a href=""  class="btn btn-primary">Status</a> -->
+              <a href="#"  class="btn btn-primary">WBS</a>
+              <a href="#"  class="btn btn-primary">Attivit&agrave;</a>
+            </div>
+          </th>
         </tr>
       </c:forEach>		
   	</tbody>
   </table>
 	<br><br>
-	<input type="submit" name="visualizza" value="Visualizza">
-	<input type="reset" name="annulla" value="Annulla">
+	<!-- <input type="submit" name="visualizza" value="Visualizza">
+  <input type="reset" name="annulla" value="Annulla"> -->
 
 </form>
