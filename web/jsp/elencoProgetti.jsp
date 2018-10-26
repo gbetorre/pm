@@ -16,7 +16,7 @@
 </c:url>
 <c:choose>
   <c:when test="${requestScope.progetti.size() gt 0}">
-    <form action="#" method="post">
+    <form action="#" method="get">
       <h1>Elenco progetti</h1>
       <table class="table table-hover">
         <thead class="thead-light">
