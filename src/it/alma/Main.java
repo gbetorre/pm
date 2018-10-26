@@ -270,7 +270,7 @@ public class Main extends HttpServlet {
          * Cerca la command associata al parametro 'ent'
          * e, se la trova, ne invoca il metodo execute()
          */
-        JOptionPane.showMessageDialog(null, "Chiamata arrivata dall\'applicazione!", "Main: esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+        //JOptionPane.showMessageDialog(null, "Chiamata arrivata dall\'applicazione!", "Main: esito OK", JOptionPane.INFORMATION_MESSAGE, null);
         try {
             q = req.getParameter(entToken);
         } catch (NullPointerException npe) { // Potrebbe già uscire qui
@@ -356,6 +356,81 @@ public class Main extends HttpServlet {
              */
             req.setAttribute("baseHref", baseHref);
         }
+        final RequestDispatcher rd = getServletContext().getRequestDispatcher(fileJsp + "?" + req.getQueryString());
+        rd.forward(req, res);
+    }
+    
+    /**
+     * <p>Gestisce le richieste del client effettuate con il metodo POST.</p>
+     * 
+     * @param req la HttpServletRequest contenente la richiesta del client
+     * @param res la HttpServletResponse contenente la risposta del server
+     * @throws ServletException eccezione che viene sollevata se si verifica un problema nell'inoltro (forward) della richiesta/risposta
+     * @throws IOException      eccezione che viene sollevata se si verifica un problema nell'inoltro (forward) della richiesta/risposta
+     */
+    public void doPost(HttpServletRequest req, 
+                       HttpServletResponse res) 
+               throws ServletException, IOException {
+        /*
+         * Dichiara la variabile per la pagina in cui riversare l'output prodotto
+         */
+        String fileJsp = null;
+        /*
+         * Dichiara le variabili in base a cui ricercare la Command
+         */
+        String q = null;
+        /*
+         * Cerca la command associata al parametro 'ent'
+         * e, se la trova, ne invoca il metodo execute()
+         */
+        //JOptionPane.showMessageDialog(null, "Chiamata arrivata dall\'applicazione!", "Main: esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+        try {
+            q = req.getParameter(entToken);
+        } catch (NullPointerException npe) { // Potrebbe già uscire qui
+            req.setAttribute("javax.servlet.jsp.jspException", npe);
+            fileJsp = errorJsp;
+            log(FOR_NAME + "Problema di puntamento: applicazione terminata!" + npe);
+            final RequestDispatcher rd = getServletContext().getRequestDispatcher(fileJsp + "?" + req.getQueryString());
+            rd.forward(req, res);
+            return;
+        } catch (NumberFormatException nfe) { // Controllo sull'input
+            req.setAttribute("javax.servlet.jsp.jspException", nfe);
+            fileJsp = errorJsp;
+            log(FOR_NAME + "Parametro in formato non valido: applicazione terminata!" + nfe);
+            final RequestDispatcher rd = getServletContext().getRequestDispatcher(fileJsp + "?" + req.getQueryString());
+            rd.forward(req, res);
+            return;
+        } catch (Exception e) { // Just in case
+            req.setAttribute("javax.servlet.jsp.jspException", e);
+            fileJsp = errorJsp;
+            log(FOR_NAME + "Eccezione generica: " + e);
+            final RequestDispatcher rd = getServletContext().getRequestDispatcher(fileJsp + "?" + req.getQueryString());
+            rd.forward(req, res);
+            return;
+        }
+        try {
+            /*
+             * Cerca la command associata al parametro 'ent'
+             * e, se la trova, ne invoca il metodo execute()
+             */
+            Command cmd = lookupCommand(q);
+            cmd.execute(req);
+        } catch (CommandException e) { // Potrebbe già uscire qui
+            req.setAttribute("javax.servlet.jsp.jspException", e);
+            fileJsp = errorJsp;
+            log("Errore: " + e);
+            final RequestDispatcher rd = getServletContext().getRequestDispatcher(fileJsp + "?" + req.getQueryString());
+            rd.forward(req, res);
+            return;
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        /* 
+         * Il template compone il risultato con vari pezzi 
+         * (testata, aside, etc.)
+         */
+        fileJsp = templateJsp;
         final RequestDispatcher rd = getServletContext().getRequestDispatcher(fileJsp + "?" + req.getQueryString());
         rd.forward(req, res);
     }
