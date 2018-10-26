@@ -48,6 +48,7 @@ import com.oreilly.servlet.ParameterParser;
 import it.alma.DBWrapper;
 import it.alma.Main;
 import it.alma.Query;
+import it.alma.Utils;
 import it.alma.bean.ItemBean;
 import it.alma.bean.PersonBean;
 import it.alma.bean.ProjectBean;
@@ -118,14 +119,14 @@ public class ProjectCommand extends ItemBean implements Command {
           throw new CommandException(msg);
         }
         // Carica la hashmap contenente le pagine da includere in funzione dei parametri sulla querystring
-        nomeFile.put("pcv", "/jsp/pcVision.jsp");
-        nomeFile.put("pcs", "/jsp/pcStakeholder.jsp");
-        nomeFile.put("pcd", "");
-        nomeFile.put("pcr", "");
-        nomeFile.put("pck", "");
-        nomeFile.put("pcc", "");
-        nomeFile.put("pcm", "");
-        nomeFile.put("prj", this.getPaginaJsp());
+        nomeFile.put(Query.PART_PROJECT_CHARTER_VISION, "/jsp/pcVision.jsp");
+        nomeFile.put(Query.PART_PROJECT_CHARTER_STAKEHOLDER, "/jsp/pcStakeholder.jsp");
+        nomeFile.put(Query.PART_PROJECT_CHARTER_DELIVERABLE, "");
+        nomeFile.put(Query.PART_PROJECT_CHARTER_RESOURCE, "");
+        nomeFile.put(Query.PART_PROJECT_CHARTER_RISK, "");
+        nomeFile.put(Query.PART_PROJECT_CHARTER_CONSTRAINT, "");
+        nomeFile.put(Query.PART_PROJECT_CHARTER_MILESTONE, "");
+        nomeFile.put(Query.PART_PROJECT, this.getPaginaJsp());
     }  
   
     
@@ -137,7 +138,7 @@ public class ProjectCommand extends ItemBean implements Command {
     public void execute(HttpServletRequest req) 
                  throws CommandException {
         /* ******************************************************************** *
-         *      Crea e inizializza le variabili locali                          *
+         *              Crea e inizializza le variabili locali                  *
          * ******************************************************************** */
         // Databound
         DBWrapper db = null;
@@ -145,10 +146,44 @@ public class ProjectCommand extends ItemBean implements Command {
         ParameterParser parser = new ParameterParser(req);
         // Utente loggato
         PersonBean user = null;
+        // Progetto di dato id
+        ProjectBean project = null;
         // Recupera o inizializza 'id progetto'
         int idPrj = parser.getIntParameter("id", -1); 
         // Recupera o inizializza 'tipo pagina'   
         String part = parser.getStringParameter("p", "-");
+        // Flag di scrittura
+        boolean write = parser.getBooleanParameter("w", false);
+        // Creazione della tabella valori parametri
+        HashMap<String, HashMap<String, String>> params = new HashMap<String, HashMap<String, String>>();
+        // Recupero e caricamento parametri di project charter/vision
+        HashMap<String, String> pcv = new HashMap<String, String>();
+        pcv.put("pcv-situazione", parser.getStringParameter("pcv-situazione", Utils.VOID_STRING));
+        pcv.put("pcv-descrizione", parser.getStringParameter("pcv-descrizione", Utils.VOID_STRING));
+        pcv.put("pcv-obiettivi", parser.getStringParameter("pcv-obiettivi", Utils.VOID_STRING));
+        pcv.put("pcv-minacce", parser.getStringParameter("pcv-minacce", Utils.VOID_STRING));
+        // Caricamento della tabella valori parametri
+        params.put(Query.PART_PROJECT_CHARTER_VISION, pcv);
+        // Recupero e caricamento parametri di project charter/stakeholder
+        HashMap<String, String> pcs = new HashMap<String, String>();
+        pcs.put("pcs-chiave", parser.getStringParameter("pcs-chiave", Utils.VOID_STRING));
+        pcs.put("pcs-istituzionale", parser.getStringParameter("pcs-istituzionale", Utils.VOID_STRING));
+        pcs.put("pcs-marginale", parser.getStringParameter("pcs-marginale", Utils.VOID_STRING));
+        pcs.put("pcs-operativo", parser.getStringParameter("pcs-operativo", Utils.VOID_STRING));
+        params.put(Query.PART_PROJECT_CHARTER_STAKEHOLDER, pcs);
+        // Recupero e caricamento parametri di project charter/deliverable
+        // TODO ...
+        // Recupero e caricamento parametri di project charter/risorse
+        // TODO ...
+        // Recupero e caricamento parametri di project charter/rischi
+        // TODO ...
+        // Recupero e caricamento parametri di project charter/vincoli
+        // TODO ...
+        // Recupero e caricamento parametri di project charter/milestone
+        // TODO ...
+        // Valorizzazione tabella valori
+        //params.put(key, value);
+
         // Dichiara la pagina a cui reindirizzare
         String fileJspT = null;
         // Dichiara elenco di progetti
@@ -195,7 +230,10 @@ public class ProjectCommand extends ItemBean implements Command {
         try {
             if (nomeFile.containsKey(part)) {
                 if (idPrj > 0) {
-                    // TODO
+                    if (write) {
+                        //db.updateProjectPart(idPrj, params);
+                    }
+                    project = db.getProject(idPrj, user.getId());
                 }
                 fileJspT = nomeFile.get(part);
             } else {
@@ -230,6 +268,8 @@ public class ProjectCommand extends ItemBean implements Command {
         req.setAttribute("fileJsp", fileJspT);
         // Salva nella request elenco progetti
         req.setAttribute("progetti", v);
+        // Salva nella request dettaglio progetto
+        req.setAttribute("progetto", project);
     }
     
 }
