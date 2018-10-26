@@ -41,6 +41,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Vector;
 import java.util.logging.Logger;
 
@@ -399,9 +401,64 @@ public class DBWrapper implements Query {
     
     
     /**
-     * <p></p>
+     * <p>Metodo che controlla la query da eseguire e chiama il metodo opportuno.</p>
      * 
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
      */
-    
+    public void updateProjectPart(int idProj, 
+                                  HashMap<String, HashMap<String, String>>params) throws WebStorageException {
+        
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        HashMap<String, String> paramsVision = params.get(PART_PROJECT_CHARTER_VISION);
+        HashMap<String, String> paramsStakeholder = params.get(PART_PROJECT_CHARTER_STAKEHOLDER);
+        
+        try {
+            con = pol_manager.getConnection();
+            if(!paramsVision.isEmpty()) {
+                pst = con.prepareStatement(UPDATE_VISION);
+                con.setAutoCommit(false);
+                pst.clearParameters();
+                pst.setString(1, paramsVision.get("pcv-situazione"));
+                pst.setString(2, paramsVision.get("pcv-descrizione"));
+                pst.setString(3, paramsVision.get("pcv-obiettivi"));
+                pst.setString(4, paramsVision.get("pcv-minacce"));
+                pst.setInt(5, idProj);
+                JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+                pst.executeUpdate();
+                con.commit();
+            }
+            pst = null;
+            if(!paramsStakeholder.isEmpty()) {
+                pst = con.prepareStatement(UPDATE_STAKEHOLDER);
+                con.setAutoCommit(false);
+                pst.clearParameters();
+                pst.setString(1, paramsVision.get("pcs-marginale"));
+                pst.setString(2, paramsVision.get("pcs-operativo"));
+                pst.setString(3, paramsVision.get("pcs-istituzionale"));
+                pst.setString(4, paramsVision.get("pcs-chiave"));
+                pst.setInt(5, idProj);
+                JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+                pst.executeUpdate();
+                con.commit();
+            }
+            
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il progetto.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
     
 }
