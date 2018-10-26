@@ -276,6 +276,26 @@ public interface Query extends Serializable {
             "   WHERE id = ?";
 
     /**
+     * <p>Modifica i campi della vision di un progetto, identificato tramite l'id , passato come parametro.</p>
+     */
+    public static final String UPDATE_VISION = 
+            "UPDATE progetto" + 
+            "   SET     situazioneattuale = ?" +
+            "   ,       descrizione = ?" +
+            "   ,       obiettivimisurabili = ?" +
+            "   ,       minacce = ? " + 
+            "   WHERE id = ?";
+    /**
+     * <p>Modifica i campi degli stakeholder di un progetto, identificato tramite l'id, passato come parametro.</p>
+     */
+    public static final String UPDATE_STAKEHOLDER = 
+            "UPDATE progetto" + 
+            "   SET     stakeholdermarginali=?" +
+            "   ,       stakeholderoperativi=? " +
+            "   ,       stakeholderistituzionali=?" +
+            "   ,       stakeholderchiave=?" + 
+            "   WHERE id=?";
+    /**
      *  Carica la lista con i codici U-GOV dei corsi elettivi
      */
     public String[] CODICI_CORSI_ELETTIVI = {"4S000766",  
