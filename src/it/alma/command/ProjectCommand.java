@@ -42,6 +42,7 @@ import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.swing.JOptionPane;
 
 import com.oreilly.servlet.ParameterParser;
 
@@ -140,6 +141,8 @@ public class ProjectCommand extends ItemBean implements Command {
         /* ******************************************************************** *
          *              Crea e inizializza le variabili locali                  *
          * ******************************************************************** */
+        
+        JOptionPane.showMessageDialog(null, "Chiamata execute arrivata dall\'applicazione!", "Main: esito OK", JOptionPane.INFORMATION_MESSAGE, null);
         // Databound
         DBWrapper db = null;
         // Parser per la gestione assistita dei parametri di input
@@ -153,7 +156,8 @@ public class ProjectCommand extends ItemBean implements Command {
         // Recupera o inizializza 'tipo pagina'   
         String part = parser.getStringParameter("p", "-");
         // Flag di scrittura
-        boolean write = parser.getBooleanParameter("w", false);
+        //boolean write = parser.getBooleanParameter("w");
+        boolean write = (boolean) req.getAttribute("w");
         // Creazione della tabella valori parametri
         HashMap<String, HashMap<String, String>> params = new HashMap<String, HashMap<String, String>>();
         // Recupero e caricamento parametri di project charter/vision
@@ -231,7 +235,8 @@ public class ProjectCommand extends ItemBean implements Command {
             if (nomeFile.containsKey(part)) {
                 if (idPrj > 0) {
                     if (write) {
-                        //db.updateProjectPart(idPrj, params);
+                        //JOptionPane.showMessageDialog(null, "Chiamata arrivata dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+                        db.updateProjectPart(idPrj, params);
                     }
                     project = db.getProject(idPrj, user.getId());
                 }
