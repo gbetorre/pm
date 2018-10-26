@@ -1,5 +1,5 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-    <hr class="separatore" />
+    <hr class="separatore" style="margin-top:90px;" />
     <small>
     <div id="bottom">
       <div id="footer">
@@ -15,12 +15,6 @@
               <h5>Contatti</h5>
               <ul class="footList">
                 <li><a class="webmail" href="mailto:servizio.orientamento@ateneo.univr.it">Per informazioni e orientamento</a></li>
-              </ul>
-            </div>
-            <div class="grid_6" id="areeRiserv">
-              <h5>Aree riservate</h5>
-              <ul class="footList">
-                <li><a href="https://dberw.univr.it/">Area amministrativa / dbERW</a></li>
               </ul>
             </div>
             <div class="grid_6 omega" id="social">
@@ -42,11 +36,10 @@
         </div>
         <p id="ragSociale"> 
           &copy; 2018 - <c:out value="${requestScope.theCurrentYear}" />&nbsp;
-          Universit&agrave; degli studi di Verona<br />
+          Universit&agrave; degli studi di Verona
           Via dell'Artigliere 8, 37129 Verona &nbsp;|&nbsp; 
           Partita IVA IT01541040232 &nbsp;|&nbsp; 
           Codice Fiscale 93009870234 
-          <br />
           &nbsp;|&nbsp;
           <a href="page=realizzazione">Credits</a>
         </p>
