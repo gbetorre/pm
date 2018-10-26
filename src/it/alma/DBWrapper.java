@@ -279,12 +279,11 @@ public class DBWrapper implements Query {
     /**
      * <p>Restituisce un Vector di ProjectBean rappresentante i progetti dell'utente loggato .</p>
      * 
-     * @param userId identificativo dell'utente di cui si vogliono recuperare i progetti
-     * TODO: verificare se non è meglio passare l'identificativo della persona piuttosto che dell'utente!
+     * @param userId identificativo della persona di cui si vogliono recuperare i progetti
      * @return <code>Vector&lt;ProjectBean&gt;</code> - ProjectBean rappresentante i progetti dell'utente loggato
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
-    @SuppressWarnings("static-method")
+    @SuppressWarnings({ "null", "static-method" })
     public Vector<ProjectBean> getProjects(int userId)
     							    throws WebStorageException{
     	ResultSet rs, rs2 = null;
@@ -356,11 +355,15 @@ public class DBWrapper implements Query {
     
     /**
      * <p>Restituisce un ProjectBean rappresentante un progetto dell'utente loggato.</p>
-     *
+     * 
+     * @param projectId identificativo del progetto che si vuol recuperare
      * @return <code>ProjectBean</code> - ProjectBean rappresentante il progetto selezionato
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
-    public ProjectBean getProject(int projectId) throws WebStorageException {
+    @SuppressWarnings({ "null", "static-method" })
+    public ProjectBean getProject(int projectId,
+                                  int userId) 
+                           throws WebStorageException {
         ResultSet rs = null;
         Connection con = null;
         PreparedStatement pst = null;
@@ -370,6 +373,7 @@ public class DBWrapper implements Query {
             pst = con.prepareStatement(GET_PROJECT);
             pst.clearParameters();
             pst.setInt(1, projectId);
+            pst.setInt(2, userId);
             rs = pst.executeQuery();
             if(rs.next()) {
                 project = new ProjectBean();
@@ -377,7 +381,7 @@ public class DBWrapper implements Query {
             }
             return project;            
         } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Oggetto ProjectBean non valorizzato; problema nella query dei progetti.\n";
+            String msg = FOR_NAME + "Oggetto ProjectBean non valorizzato; problema nella query che recupera il progetto.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
         } finally {
