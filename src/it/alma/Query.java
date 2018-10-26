@@ -44,7 +44,8 @@ import java.util.LinkedList;
 /**
  * <p>Query &egrave; l'interfaccia contenente tutte le query della 
  * web-application &nbsp;<code>Alma on Line</code>.</p>
- * 
+ * <p>Definisce inoltre alcune costanti di utilit&agrave; e 
+ * insiemi di valori ammessi per parametri applicativi.</p> 
  * 
  * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
  */
@@ -55,229 +56,51 @@ public interface Query extends Serializable {
      */
     public static final boolean IF_EXISTS_DONOT_CREATE_NEW = false;
     /**
+     * Costanti corrispondenti ai parametri ammessi sulla querystring
+     */
+    public static final String PART_PROJECT_CHARTER_VISION      = "pcv";
+    public static final String PART_PROJECT_CHARTER_STAKEHOLDER = "pcs";
+    public static final String PART_PROJECT_CHARTER_DELIVERABLE = "pcd";
+    public static final String PART_PROJECT_CHARTER_RESOURCE    = "pcr";
+    public static final String PART_PROJECT_CHARTER_RISK        = "pck";
+    public static final String PART_PROJECT_CHARTER_CONSTRAINT  = "pcc";
+    public static final String PART_PROJECT_CHARTER_MILESTONE   = "pcm";
+    public static final String PART_WBS                         = "wbs";
+    public static final String PART_ACTIVITY                    = "act";
+    public static final String PART_REPORT                      = "rep";
+    public static final String PART_PROJECT                     = "prj";
+    /**
      * Valori possibili degli attributi di stato di un progetto
      */
     static final String[] STATI = {"OK", "POSSIBILI PROBLEMI", "CRITICO"};
-    /**
-     * Lista contenente i possibili valori dei campi di stato del progetto
-     */    
-    public static final LinkedList<String> STATI_AS_LIST = new LinkedList<String>(Arrays.asList(STATI));
     /**
      * Valori possibili dell'attributo nome di statoprogetto
      */
     static final String[] STATI_PROGETTO = {"APERTO", "IN PROGRESS", "SOSPESO", "CONCLUSO", "ELIMINATO"};
     /**
-     * Lista contenente i possibili valori del campo nome della classe StatoProgettoBean
-     */    
-    public static final LinkedList<String> STATI_PROGETTO_AS_LIST = new LinkedList<String>(Arrays.asList(STATI_PROGETTO));
-    /**
      * Valori possibili degli attributi probabilita, impatto, livello di rischio
      */
     static final String[] LIVELLI_RISCHIO = {"ALTO", "MEDIO", "BASSO"};
-    /**
-     * Lista contenente i possibili valori degli attributi probabilita, impatto, livello della classe RischioBean
-     */    
-    public static final LinkedList<String> LIVELLI_RISCHIO_AS_LIST = new LinkedList<String>(Arrays.asList(LIVELLI_RISCHIO));
     /**
      * Valori possibili dell'attributo stato di rischio
      */
     static final String[] STATO_RISCHIO = {"APERTO", "CHIUSO", "IN RISOLUZIONE"};
     /**
+     * Lista contenente i possibili valori dei campi di stato del progetto
+     */    
+    public static final LinkedList<String> STATI_AS_LIST = new LinkedList<String>(Arrays.asList(STATI));
+    /**
+     * Lista contenente i possibili valori del campo nome della classe StatoProgettoBean
+     */    
+    public static final LinkedList<String> STATI_PROGETTO_AS_LIST = new LinkedList<String>(Arrays.asList(STATI_PROGETTO));
+    /**
+     * Lista contenente i possibili valori degli attributi probabilita, impatto, livello della classe RischioBean
+     */    
+    public static final LinkedList<String> LIVELLI_RISCHIO_AS_LIST = new LinkedList<String>(Arrays.asList(LIVELLI_RISCHIO));
+    /**
      * Lista contenente i possibili valori dell'attributo stato della classe RischioBean
      */    
     public static final LinkedList<String> STATO_RISCHIO_AS_LIST = new LinkedList<String>(Arrays.asList(STATO_RISCHIO));
-    /**
-     * Lista Hash contenente tutti i corsi elettivi
-     */
-    public LinkedList<String> CORSI_ELETTIVI = new LinkedList<String>();
-
-    /**
-     *  Carica la lista con i codici U-GOV dei corsi elettivi
-     */
-    public String[] CODICI_CORSI_ELETTIVI = {"4S000766",  
-                                             "0813M",
-                                             "4S004786",
-                                             "4S004102",
-                                             "4S006311",
-                                             "0763M",
-                                             "0783M",
-                                             "4S003529",
-                                             "4S006312",
-                                             "4S00183",
-                                             "0729M",
-                                             "0660M",
-                                             "0699M",
-                                             "0656M",
-                                             "0820M",
-                                             "4S000825",
-                                             "4S006318",
-                                             "4S004785",
-                                             "4S006319",
-                                             "4S001136",
-                                             "4S004783",
-                                             "4S006320",
-                                             "4S000768",
-                                             "4S001459",
-                                             "0828M",
-                                             "4S000823",
-                                             "4S000770",
-                                             "0738M",
-                                             "0728M",
-                                             "4S001137",
-                                             "0758M",
-                                             "4S01927",
-                                             "DF-0022",
-                                             "4S001007",
-                                             "0854M",
-                                             "0760M",
-                                             "4S004103",
-                                             "4S007217",
-                                             "0752M",
-                                             "4S006321",
-                                             "4S006322",
-                                             "4S006422",
-                                             "0808M",
-                                             "4S000771",
-                                             "0810M",
-                                             "0716M",
-                                             "0811M",
-                                             "4S006323",
-                                             "4S001139",
-                                             "0812M",
-                                             "4S001462",
-                                             "4S006324",
-                                             "4S004505",
-                                             "4S001008",
-                                             "0665M",
-                                             "0800M",
-                                             "4S003471",
-                                             "4S004787",
-                                             "0890M",
-                                             "0858M",
-                                             "4S000821",
-                                             "4S000797",
-                                             "4S003472",
-                                             "0775M",
-                                             "0794M",
-                                             "4S006325",
-                                             "4S004105",
-                                             "0903M",
-                                             "DF-0020",
-                                             "0650M",
-                                             "4S004106",
-                                             "0671M",
-                                             "4S003525",
-                                             "0746M",
-                                             "4S003474",
-                                             "0837M",
-                                             "0672M",
-                                             "0889M",
-                                             "0859M",
-                                             "0857M",
-                                             "0855M",
-                                             "0856M",
-                                             "0860M",
-                                             "4S006326",
-                                             "4S001012",
-                                             "DF-0009",
-                                             "4S006327",
-                                             "0781M",
-                                             "4S007166",
-                                             "0648M",
-                                             "4S001013",
-                                             "4S006328",
-                                             "4S006329",
-                                             "4S001014",
-                                             "0649M",
-                                             "4S000794",
-                                             "4S006330",
-                                             "0902M",
-                                             "0891M",
-                                             "4S006331",
-                                             "4S006332",
-                                             "0745M",
-                                             "DF-0023",
-                                             "4S006333"
-                                            };
-
-    /**
-     * Query per estrarre le tuple delle AD Semplici.
-     */
-    public static final String AD_SEMPLICI = 
-            "SELECT " 
-          + " \"row.names\"             AS \"id\""
-          + ",\"CodiceCDSWI\"           AS \"codiceCdSWI\""
-          + ",\"CodiceCDSUGOV\"         AS \"codiceCdSUGOV\""
-          + ",\"NomeCDS\"               AS \"nomeCdSWI\""
-          + ",\"NOMECDS2\"              AS \"nomeCdSUGOV\""
-          + ",\"DipartimentoScuola\"    AS \"dipartimentoScuola\""
-          + ",\"SedePrimariaCDS\"       AS \"sedePrimariaCDS\""
-          + ",\"CodiceADWI\"            AS \"codiceADWI\""
-          + ",\"CodiceADUGOV\"          AS \"codiceADUGOV\""
-          + ",\"AD\"                    AS \"nomeInsegnamento\""
-          + ",\"Modulo\"                AS \"modulo\""
-          + ",\"UL\"                    AS \"ul\""
-          + ",\"Discriminante\"         AS \"discriminante\""
-          + ",\"CFUtotali\"             AS \"crediti\""
-          + ",\"CFUtotali\"             AS \"creditiTotali\""
-          + ",\"CFUlezione\"            AS \"creditiLezione\""
-          + ",\"SSD\"                   AS \"SSD\""
-          + ",\"CognomeDocente\"        AS \"cognomeDocente\""
-          + ",\"NomeDocente\"           AS \"nomeDocente\""
-          + ",\"CodiceFiscaleDocente\"  AS \"codiceFiscaleDocente\""
-          + ",\"Coordinatore\"          AS \"coordinatore\""
-          + ",\"Orelezione\"            AS \"oreLezione\""
-          + ",\"Orelaboratorio\"        AS \"oreLaboratorio\""
-          + ",\"Orealtro\"              AS \"oreAltro\""
-          + ",\"Oreseminario\"          AS \"oreSeminario\""
-          + ",\"Oreesercitazione\"      AS \"oreEsercitazione\""
-          + ",\"Oretirocinio\"          AS \"oreTirocinio\""
-          + ",\"InizioPerDid\"          AS \"inizioPerDid\""
-          + ",\"FinePerDid\"            AS \"finePerDid\""
-          //+ " FROM \"AD-Semplici-II2017\" AD"
-          + " FROM \"ADSemplici-2018-I\" AD"
-          + " ORDER BY \"codiceFiscaleDocente\", \"codiceADUGOV\", \"codiceCdSUGOV\", \"inizioPerDid\", \"finePerDid\""
-          + " --ORDER BY \"id\" "
-          + " --LIMIT 30";
-    
-    /**
-     * Query per estrarre le tuple delle Unit&agrave; Logistiche.
-     */
-    public static final String UL = 
-            "SELECT " 
-          + " \"row.names\"             AS \"id\""
-          + ",\"CodiceCDSWI\"           AS \"codiceCdSWI\""
-          + ",\"CodiceCDSUGOV\"         AS \"codiceCdSUGOV\""
-          + ",\"NomeCDS\"               AS \"nomeCdSWI\""
-          //+ ",\"NOMECDS2\"              AS \"nomeCdSUGOV\""
-          + ",\"DipartimentoScuola\"    AS \"dipartimentoScuola\""
-          + ",\"SedePrimariaCDS\"       AS \"sedePrimariaCDS\""
-          + ",\"CodiceADWI\"            AS \"codiceADWI\""
-          + ",\"CodiceADUGOV\"          AS \"codiceADUGOV\""
-          + ",\"AD\"                    AS \"nomeInsegnamento\""
-          + ",\"Modulo\"                AS \"modulo\""
-          + ",\"UL\"                    AS \"ul\""
-          + ",\"Discriminante\"         AS \"discriminante\""
-          + ",\"CFUtotali\"             AS \"crediti\""
-          + ",\"CFUtotali\"             AS \"creditiTotali\""
-          //+ ",\"CFUlezione\"            AS \"creditiLezione\""
-          + ",\"SSD\"                   AS \"SSD\""
-          + ",\"CognomeDocente\"        AS \"cognomeDocente\""
-          + ",\"NomeDocente\"           AS \"nomeDocente\""
-          + ",\"CodiceFiscaleDocente\"  AS \"codiceFiscaleDocente\""
-          + ",\"Coordinatore\"          AS \"coordinatore\""
-          + ",\"Orelezione\"            AS \"oreLezione\""
-          + ",\"Orelaboratorio\"        AS \"oreLaboratorio\""
-          + ",\"Orealtro\"              AS \"oreAltro\""
-          + ",\"Oreseminario\"          AS \"oreSeminario\""
-          + ",\"Oreesercitazione\"      AS \"oreEsercitazione\""
-          + ",\"Oretirocinio\"          AS \"oreTirocinio\""
-          + ",\"InizioPerDid\"          AS \"inizioPerDid\""
-          + ",\"FinePerDid\"            AS \"finePerDid\""
-          + " FROM \"UL-2018-I\" UL"
-          + " ORDER BY \"codiceFiscaleDocente\", \"codiceADUGOV\", \"codiceCdSUGOV\", \"inizioPerDid\", \"finePerDid\""
-          + " --ORDER BY \"id\" "
-          + " --LIMIT 30";
     
     /**
      * Estrae le classi command previste per l'applicazione
@@ -393,7 +216,10 @@ public interface Query extends Serializable {
             "   ,   PJ.serviziateneo            AS \"serviziAteneo\"" + 
             "   ,   PJ.vincoli                  AS \"vincoli\"" + 
             "   FROM progetto PJ" + 
-            "   WHERE   PJ.id = ?";
+            "       INNER JOIN ruologestione RG ON PJ.id = RG.id_progetto" + 
+            "       INNER JOIN persona P ON RG.id_persona = P.id" + 
+            "   WHERE   PJ.id = ?" +
+            "       AND P.id= ?";
 
     /**
      * Estrae un dipartimento dato il suo id, passato come parametro
@@ -417,35 +243,223 @@ public interface Query extends Serializable {
     		"	, 	SP.valore	AS \"valore\"" + 
     		"	FROM statoprogetto SP" + 
     		"	WHERE SP.id = ?";
-     
     
     /**
-     * Modifica la tupla della tabella attivit&agrave; identificata dall'id, che &egrave; passato come parametro
+     * <p>Modifica la tupla della tabella attivit&agrave; identificata dall'id, che &egrave; passato come parametro.</p>
+     * <p>I ? servono per prelevare i dati modificati dalle form, e settarli quindi nel db 
+     * (tranne nella clausola WHERE dove sta ad indicare l'id dell'attività da modificare).</p>
+     * <p>Ho considerato che nella tabella attivita i seguenti attributi non possono essere modificati: <br />
+     *      - id<br />
+     *      - id_progetto<br />
+     *      - id_wbs<br />
+     *      - id_complessita<br />
+     *      - id_stato<br />
+     *      - id_ruolo<br />
+     *      - id_persona<br />
+     * se si possono modificare, basta aggiungere la stringa da settare.</p>
      */
-    /* I ? servono per prelevare i dati modificati dalle form, e settarli quindi nel db (tranne nella clausola where dove sta ad indicare l'id dell'attività da modificare).
-     * Ho considerato che nella tabella attivita i seguenti attributi non possono essere modificati: 
-     *      - id
-     *      - id_progetto
-     *      - id_wbs
-     *      - id_complessita
-     *      - id_stato
-     *      - id_ruolo
-     *      - id_persona
-     * se si possono modificare, basta aggiungere la stringa da settare */
     public static final String UPDATE_ATTIVITA = 
             "UPDATE attivita" +
-            "   SET     nome=?" +
-            "   ,       descrizione=?" + 
-            "   ,       datainizio=?" + 
-            "   ,       datafine=?" + 
-            "   ,       datainizioattesa=?" + 
-            "   ,       datafineattesa=?" + 
-            "   ,       datainizioeffettiva=?" + 
-            "   ,       datafineeffettiva=?" + 
-            "   ,       guprevisti=?" + 
-            "   ,       gueffettivi=?" + 
-            "   ,       gurimanenti=?" + 
-            "   ,       noteavanzamento=?" + 
-            "   ,       milestone=?" + 
-            "   WHERE id=?";
+            "   SET     nome = ?" +
+            "   ,       descrizione = ?" + 
+            "   ,       datainizio = ?" + 
+            "   ,       datafine = ?" + 
+            "   ,       datainizioattesa = ?" + 
+            "   ,       datafineattesa = ?" + 
+            "   ,       datainizioeffettiva = ?" + 
+            "   ,       datafineeffettiva = ?" + 
+            "   ,       guprevisti = ?" + 
+            "   ,       gueffettivi = ?" + 
+            "   ,       gurimanenti = ?" + 
+            "   ,       noteavanzamento = ?" + 
+            "   ,       milestone = ?" + 
+            "   WHERE id = ?";
+
+    /**
+     *  Carica la lista con i codici U-GOV dei corsi elettivi
+     */
+    public String[] CODICI_CORSI_ELETTIVI = {"4S000766",  
+                                             "0813M",
+                                             "4S004786",
+                                             "4S004102",
+                                             "4S006311",
+                                             "0763M",
+                                             "0783M",
+                                             "4S003529",
+                                             "4S006312",
+                                             "4S00183",
+                                             "0729M",
+                                             "0660M",
+                                             "0699M",
+                                             "0656M",
+                                             "0820M",
+                                             "4S000825",
+                                             "4S006318",
+                                             "4S004785",
+                                             "4S006319",
+                                             "4S001136",
+                                             "4S004783",
+                                             "4S006320",
+                                             "4S000768",
+                                             "4S001459",
+                                             "0828M",
+                                             "4S000823",
+                                             "4S000770",
+                                             "0738M",
+                                             "0728M",
+                                             "4S001137",
+                                             "0758M",
+                                             "4S01927",
+                                             "DF-0022",
+                                             "4S001007",
+                                             "0854M",
+                                             "0760M",
+                                             "4S004103",
+                                             "4S007217",
+                                             "0752M",
+                                             "4S006321",
+                                             "4S006322",
+                                             "4S006422",
+                                             "0808M",
+                                             "4S000771",
+                                             "0810M",
+                                             "0716M",
+                                             "0811M",
+                                             "4S006323",
+                                             "4S001139",
+                                             "0812M",
+                                             "4S001462",
+                                             "4S006324",
+                                             "4S004505",
+                                             "4S001008",
+                                             "0665M",
+                                             "0800M",
+                                             "4S003471",
+                                             "4S004787",
+                                             "0890M",
+                                             "0858M",
+                                             "4S000821",
+                                             "4S000797",
+                                             "4S003472",
+                                             "0775M",
+                                             "0794M",
+                                             "4S006325",
+                                             "4S004105",
+                                             "0903M",
+                                             "DF-0020",
+                                             "0650M",
+                                             "4S004106",
+                                             "0671M",
+                                             "4S003525",
+                                             "0746M",
+                                             "4S003474",
+                                             "0837M",
+                                             "0672M",
+                                             "0889M",
+                                             "0859M",
+                                             "0857M",
+                                             "0855M",
+                                             "0856M",
+                                             "0860M",
+                                             "4S006326",
+                                             "4S001012",
+                                             "DF-0009",
+                                             "4S006327",
+                                             "0781M",
+                                             "4S007166",
+                                             "0648M",
+                                             "4S001013",
+                                             "4S006328",
+                                             "4S006329",
+                                             "4S001014",
+                                             "0649M",
+                                             "4S000794",
+                                             "4S006330",
+                                             "0902M",
+                                             "0891M",
+                                             "4S006331",
+                                             "4S006332",
+                                             "0745M",
+                                             "DF-0023",
+                                             "4S006333"
+                                            };
+    /**
+     * Query per estrarre le tuple delle AD Semplici.
+     */
+    public static final String AD_SEMPLICI = 
+            "SELECT " 
+          + " \"row.names\"             AS \"id\""
+          + ",\"CodiceCDSWI\"           AS \"codiceCdSWI\""
+          + ",\"CodiceCDSUGOV\"         AS \"codiceCdSUGOV\""
+          + ",\"NomeCDS\"               AS \"nomeCdSWI\""
+          + ",\"NOMECDS2\"              AS \"nomeCdSUGOV\""
+          + ",\"DipartimentoScuola\"    AS \"dipartimentoScuola\""
+          + ",\"SedePrimariaCDS\"       AS \"sedePrimariaCDS\""
+          + ",\"CodiceADWI\"            AS \"codiceADWI\""
+          + ",\"CodiceADUGOV\"          AS \"codiceADUGOV\""
+          + ",\"AD\"                    AS \"nomeInsegnamento\""
+          + ",\"Modulo\"                AS \"modulo\""
+          + ",\"UL\"                    AS \"ul\""
+          + ",\"Discriminante\"         AS \"discriminante\""
+          + ",\"CFUtotali\"             AS \"crediti\""
+          + ",\"CFUtotali\"             AS \"creditiTotali\""
+          + ",\"CFUlezione\"            AS \"creditiLezione\""
+          + ",\"SSD\"                   AS \"SSD\""
+          + ",\"CognomeDocente\"        AS \"cognomeDocente\""
+          + ",\"NomeDocente\"           AS \"nomeDocente\""
+          + ",\"CodiceFiscaleDocente\"  AS \"codiceFiscaleDocente\""
+          + ",\"Coordinatore\"          AS \"coordinatore\""
+          + ",\"Orelezione\"            AS \"oreLezione\""
+          + ",\"Orelaboratorio\"        AS \"oreLaboratorio\""
+          + ",\"Orealtro\"              AS \"oreAltro\""
+          + ",\"Oreseminario\"          AS \"oreSeminario\""
+          + ",\"Oreesercitazione\"      AS \"oreEsercitazione\""
+          + ",\"Oretirocinio\"          AS \"oreTirocinio\""
+          + ",\"InizioPerDid\"          AS \"inizioPerDid\""
+          + ",\"FinePerDid\"            AS \"finePerDid\""
+          //+ " FROM \"AD-Semplici-II2017\" AD"
+          + " FROM \"ADSemplici-2018-I\" AD"
+          + " ORDER BY \"codiceFiscaleDocente\", \"codiceADUGOV\", \"codiceCdSUGOV\", \"inizioPerDid\", \"finePerDid\""
+          + " --ORDER BY \"id\" "
+          + " --LIMIT 30";
+    
+    /**
+     * Query per estrarre le tuple delle Unit&agrave; Logistiche.
+     */
+    public static final String UL = 
+            "SELECT " 
+          + " \"row.names\"             AS \"id\""
+          + ",\"CodiceCDSWI\"           AS \"codiceCdSWI\""
+          + ",\"CodiceCDSUGOV\"         AS \"codiceCdSUGOV\""
+          + ",\"NomeCDS\"               AS \"nomeCdSWI\""
+          //+ ",\"NOMECDS2\"              AS \"nomeCdSUGOV\""
+          + ",\"DipartimentoScuola\"    AS \"dipartimentoScuola\""
+          + ",\"SedePrimariaCDS\"       AS \"sedePrimariaCDS\""
+          + ",\"CodiceADWI\"            AS \"codiceADWI\""
+          + ",\"CodiceADUGOV\"          AS \"codiceADUGOV\""
+          + ",\"AD\"                    AS \"nomeInsegnamento\""
+          + ",\"Modulo\"                AS \"modulo\""
+          + ",\"UL\"                    AS \"ul\""
+          + ",\"Discriminante\"         AS \"discriminante\""
+          + ",\"CFUtotali\"             AS \"crediti\""
+          + ",\"CFUtotali\"             AS \"creditiTotali\""
+          //+ ",\"CFUlezione\"            AS \"creditiLezione\""
+          + ",\"SSD\"                   AS \"SSD\""
+          + ",\"CognomeDocente\"        AS \"cognomeDocente\""
+          + ",\"NomeDocente\"           AS \"nomeDocente\""
+          + ",\"CodiceFiscaleDocente\"  AS \"codiceFiscaleDocente\""
+          + ",\"Coordinatore\"          AS \"coordinatore\""
+          + ",\"Orelezione\"            AS \"oreLezione\""
+          + ",\"Orelaboratorio\"        AS \"oreLaboratorio\""
+          + ",\"Orealtro\"              AS \"oreAltro\""
+          + ",\"Oreseminario\"          AS \"oreSeminario\""
+          + ",\"Oreesercitazione\"      AS \"oreEsercitazione\""
+          + ",\"Oretirocinio\"          AS \"oreTirocinio\""
+          + ",\"InizioPerDid\"          AS \"inizioPerDid\""
+          + ",\"FinePerDid\"            AS \"finePerDid\""
+          + " FROM \"UL-2018-I\" UL"
+          + " ORDER BY \"codiceFiscaleDocente\", \"codiceADUGOV\", \"codiceCdSUGOV\", \"inizioPerDid\", \"finePerDid\""
+          + " --ORDER BY \"id\" "
+          + " --LIMIT 30";
+    
 }
