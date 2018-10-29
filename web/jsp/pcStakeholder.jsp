@@ -4,33 +4,38 @@
   <c:param name="p" value="pcv" />
   <c:param name="id" value="" />
 </c:url>
+<c:url var="deliverable" context="/almalaurea" value="/" scope="page">
+  <c:param name="q" value="pol" />
+  <c:param name="p" value="pcd" />
+  <c:param name="id" value="" />
+</c:url>
 <c:set var="p" value="${requestScope.progetto}" scope="page" />
 <form action="#" method="post">
 <div class="container mt-3">
-    <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
-      <li role="Vision" class="nav-item">
-        <a href="${vision}${prj.id}" data-toggle="tab" class="nav-link">Vision</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link active" role="tab" data-toggle="tab" href="#">Stakeholder</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" data-toggle="tab" href="#">Deliverable</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" data-toggle="tab" href="#">Risorse</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" data-toggle="tab" href="#">Rischi</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" data-toggle="tab" href="#">Vincoli</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" data-toggle="tab" href="#">Milestone</a>
-      </li>
-    </ul>
-	
+  <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
+    <li class="nav-item">
+      <a data-toggle="tab" class="nav-link" href="${vision}${p.id}">Vision</a>
+    </li>
+    <li class="nav-item">
+      <a data-toggle="tab" class="nav-link active" href="#">Stakeholder</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="tab"  href="${deliverable}${p.id}">Deliverable</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="tab" href="#">Risorse</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="tab" href="#">Rischi</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="tab" href="#">Vincoli</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="tab" href="#">Milestone</a>
+    </li>
+	</ul>
+	<hr class="separatore" />
 	<div class="tab-content responsive hidden-xs hidden-sm">
 		<div role="tabpanel" class="tab-pane active" id="tab-pcstakeholder">
 		Chiave
@@ -50,10 +55,11 @@
 		<textarea name="pcs-operativo" class="form-control" aria-label="With textarea">${p.stakeholderOperativi}</textarea>
 		<br><br>
 		
-		<input type="button" name="modifica" value="modifica" onclick="modify()">
-		<input type="submit" name="salva" value="salva">
-		<input type="reset" name="annulla" value="annulla">
-	</div>
+		<input type="button" class="btn btn-primary" name="modifica" value="modifica" onclick="modify()">
+		<input type="submit" class="btn btn-primary" name="salva" value="salva">
+		<input type="reset" class="btn btn-primary" name="annulla" value="annulla">
+	  </div>
+  </div>
 </div>
 </form>
 <script>
