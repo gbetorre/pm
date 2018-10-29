@@ -4,7 +4,7 @@
 <html>
   <head>
     <title><c:out value="${requestScope.tP}" escapeXml="false" /></title>
-    <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=utf-8" />
+    <meta charset="utf-8" />
     <meta name="language" content="Italian" />
     <meta name="description" content="${requestScope.advice}" />
     <meta name="creator" content="Universita' degli studi di Verona" />
