@@ -415,6 +415,8 @@ public class DBWrapper implements Query {
         HashMap<String, String> paramsVision = params.get(PART_PROJECT_CHARTER_VISION);
         HashMap<String, String> paramsStakeholder = params.get(PART_PROJECT_CHARTER_STAKEHOLDER);
         HashMap<String, String> paramsDeliverable = params.get(PART_PROJECT_CHARTER_DELIVERABLE);
+        HashMap<String, String> paramsStatus = params.get(PART_PROJECT);
+        
         try {
             con = pol_manager.getConnection();
             if(Utils.voidValues(paramsVision)) {
@@ -451,6 +453,27 @@ public class DBWrapper implements Query {
                 pst.clearParameters();
                 pst.setString(1, paramsDeliverable.get("pcd-descrizione"));
                 pst.setInt(2, idProj);
+                JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+                pst.executeUpdate();
+                con.commit();
+            }
+            pst = null;
+            if(Utils.voidValues(paramsStatus)) {
+                pst = con.prepareStatement(UPDATE_STATUS);
+                con.setAutoCommit(false);
+                pst.clearParameters();
+                pst.setString(1, paramsStatus.get("sMese"));
+                pst.setString(2, paramsStatus.get("sAttuale"));
+                pst.setString(3, paramsStatus.get("sTempi"));
+                pst.setString(4, paramsStatus.get("sCosti"));
+                pst.setString(5, paramsStatus.get("sRischi"));
+                pst.setString(6, paramsStatus.get("sRisorse"));
+                pst.setString(7, paramsStatus.get("sScope"));
+                pst.setString(8, paramsStatus.get("sComunicazione"));
+                pst.setString(9, paramsStatus.get("sQualita"));
+                pst.setString(10, paramsStatus.get("sApprovvigionamenti"));
+                pst.setString(11, paramsStatus.get("sStakeholder"));
+                pst.setInt(12, idProj);
                 JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
                 pst.executeUpdate();
                 con.commit();
