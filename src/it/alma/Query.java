@@ -306,6 +306,25 @@ public interface Query extends Serializable {
             "   WHERE id = ?";
     
     /**
+     * <p>Modifica i campi dello status del progetto identificato tramite l'id, passato come parametro.</p>
+     */
+    public static final String UPDATE_STATUS = 
+            "UPDATE progetto" + 
+            "   SET     meseriferimento = ?" +
+            "   ,       descrizionestatocorrente = ?" +
+            "   ,       statotempi = ?" + 
+            "   ,       statocosti = ?" +
+            "   ,       statorischi = ?" +
+            "   ,       statorisorse = ?" +
+            "   ,       statoscope = ?" +
+            "   ,       statocomunicazione = ?" +
+            "   ,       statoqualita = ?" +
+            "   ,       statoapprovvigionamenti = ?" +
+            "   ,       statostakeholder = ?" +
+            "   WHERE id = ?";
+            
+    
+    /**
      * <p>Modifica i rischi di un progetto, identificato tramite l'id, passato come parametro.</p>
      */
     public static final String UPDATE_RISCHI = 
