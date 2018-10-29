@@ -285,16 +285,33 @@ public interface Query extends Serializable {
             "   ,       obiettivimisurabili = ?" +
             "   ,       minacce = ? " + 
             "   WHERE id = ?";
+    
     /**
      * <p>Modifica i campi degli stakeholder di un progetto, identificato tramite l'id, passato come parametro.</p>
      */
     public static final String UPDATE_STAKEHOLDER = 
             "UPDATE progetto" + 
-            "   SET     stakeholdermarginali=?" +
-            "   ,       stakeholderoperativi=? " +
-            "   ,       stakeholderistituzionali=?" +
-            "   ,       stakeholderchiave=?" + 
-            "   WHERE id=?";
+            "   SET     stakeholdermarginali = ?" +
+            "   ,       stakeholderoperativi = ? " +
+            "   ,       stakeholderistituzionali = ?" +
+            "   ,       stakeholderchiave = ?" + 
+            "   WHERE id = ?";
+    
+    /**
+     * <p>Modifica il campo della deliverable di un progetto, identificato tramite l'id, passato come parametro.</p>
+     */
+    public static final String UPDATE_DELIVERABLE = 
+            "UPDATE progetto" + 
+            "   SET     deliverable = ?" + 
+            "   WHERE id = ?";
+    
+    /**
+     * <p>Modifica i rischi di un progetto, identificato tramite l'id, passato come parametro.</p>
+     */
+    public static final String UPDATE_RISCHI = 
+            "INSERT INTO rischio(descrizione, probabilita, impatto, livello, stato, id_progetto)" +
+            "   VALUES (?, ?, ?, ?, ?, ?)";
+    
     /**
      *  Carica la lista con i codici U-GOV dei corsi elettivi
      */
