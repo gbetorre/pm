@@ -36,26 +36,12 @@
 
 package it.alma;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.GradientPaint;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.MissingResourceException;
-import java.util.Random;
 import java.util.logging.Logger;
-
-import javax.imageio.ImageIO;
-
-import org.apache.commons.lang.RandomStringUtils;
 
 import it.alma.exception.CommandException;
 
@@ -109,90 +95,6 @@ public class Utils {
      */
     public Utils() {
         /*;*/   // It doesn't anything
-    }
-
-    
-    /**
-     * <p>Restituisce una immagine formato <code>png</code> 
-     * per il meccanismo di validazione tramite <code>captcha</code>.</p>
-     * 
-     * @return <code>HashMap&lt;String, String&gt;</code> - oggetto HashMap: chiave - stringa captcha <-> valore - stringa base 64 dell'immagine                        
-     * @throws IOException se si verifica un problema in qualche punto della conversione
-     */
-    public static HashMap <String, String> makeCaptcha() 
-                                               throws IOException {
-        char[] data = RandomStringUtils.randomAlphanumeric(6).toCharArray();
-        String captcha = String.copyValueOf(data);
-        String b64 = "";
-        int width = 150;
-        int height = 50;
-        BufferedImage bufferedImage = new BufferedImage(width, height, 
-                      BufferedImage.TYPE_INT_RGB);
-        Graphics2D g2d = null;
-        try {
-            g2d = bufferedImage.createGraphics();
-        } catch (Throwable ignored) {
-            // throw new CommandException(t.getMessage());
-        }
-        if (g2d != null) {
-            Font font = new Font("Georgia", Font.BOLD, 18);
-            g2d.setFont(font);
-            RenderingHints rh = new RenderingHints(
-                   RenderingHints.KEY_ANTIALIASING,
-                   RenderingHints.VALUE_ANTIALIAS_ON);
-            rh.put(RenderingHints.KEY_RENDERING, 
-                   RenderingHints.VALUE_RENDER_QUALITY);
-            g2d.setRenderingHints(rh);
-            GradientPaint gp = new GradientPaint(0, 0, 
-            Color.red, 0, height/2, Color.black, true);
-            g2d.setPaint(gp);
-            g2d.fillRect(0, 0, width, height);
-            g2d.setColor(new Color(245, 143, 0));
-            Random r = new Random();
-            int x = 0; 
-            int y = 0;
-            for (int i=0; i<data.length; i++) {
-                x += 10 + (Math.abs(r.nextInt()) % 15);
-                y = 20 + Math.abs(r.nextInt()) % 20;
-                g2d.drawChars(data, i, 1, x, y);
-            }
-            g2d.dispose();
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            ImageIO.write(bufferedImage, "png", os);
-            os.flush();
-            byte[] imageInByteArray = os.toByteArray();
-            os.close();
-            b64 = javax.xml.bind.DatatypeConverter.printBase64Binary(imageInByteArray);
-        }
-        HashMap<String, String> coppiaValori = new HashMap<String, String>(4);
-        coppiaValori.put(captcha, b64);
-        return coppiaValori;
-    }
-    
-    
-    /**
-     * <p>Controlla se una matricola, passata come argomento, 
-     * abbia un formato significativo.</p>
-     * 
-     * @param matricola la matricola da controllare
-     * @return <code>true</code> se la matricola ha un formato sensato, false se e' sicuramente una stringa difforme dai formati ammessi
-     */
-    public static boolean matricolaIsConsistent(String matricola){
-        String  matricula = matricola.toUpperCase();
-        if (((
-                (matricula.startsWith("CP") || matricula.startsWith("VR")) 
-                && isInteger(matricula.substring(2))
-             ) 
-             || 
-             (
-                (matricula.startsWith("GSV") || matricula.startsWith("MSV") || matricula.startsWith("SSV")) 
-                && isInteger(matricula.substring(3))
-             ))
-             && (matricola.length() == 8)
-           ) {
-                return true;
-             } 
-        return false;
     }
 
     
@@ -545,7 +447,7 @@ public class Utils {
      * <a href="http://stackoverflow.com/questions/1404210/java-date-vs-calendar">
      * (v.)</a></cite></p>
      * Siccome per motivi di retrocompatibilit&agrave; spesso non va bene
-     * usare un Calendar ma ci vuole una Date (la {@link WebStorage} usa le Date),
+     * usare un Calendar ma ci vuole una Date (la {@link DBWrapper} usa le Date),
      * viene messo a disposizione questo metodo, che implementa la semplice
      * trasformazione da {@link GregorianCalendar} a {@link Date}. 
      * 
