@@ -403,6 +403,8 @@ public class DBWrapper implements Query {
     /**
      * <p>Metodo che controlla la query da eseguire e chiama il metodo opportuno.</p>
      * 
+     * @param idProj 
+     * @param params
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
      */
     public void updateProjectPart(int idProj, 
@@ -413,10 +415,11 @@ public class DBWrapper implements Query {
         PreparedStatement pst = null;
         HashMap<String, String> paramsVision = params.get(PART_PROJECT_CHARTER_VISION);
         HashMap<String, String> paramsStakeholder = params.get(PART_PROJECT_CHARTER_STAKEHOLDER);
+        HashMap<String, String> paramsDeliverable = params.get(PART_PROJECT_CHARTER_DELIVERABLE);
         
         try {
             con = pol_manager.getConnection();
-            if(!paramsVision.isEmpty()) {
+            if(Utils.voidValues(paramsVision)) {
                 pst = con.prepareStatement(UPDATE_VISION);
                 con.setAutoCommit(false);
                 pst.clearParameters();
@@ -430,20 +433,30 @@ public class DBWrapper implements Query {
                 con.commit();
             }
             pst = null;
-            if(!paramsStakeholder.isEmpty()) {
+            if(Utils.voidValues(paramsStakeholder)) {
                 pst = con.prepareStatement(UPDATE_STAKEHOLDER);
                 con.setAutoCommit(false);
                 pst.clearParameters();
-                pst.setString(1, paramsVision.get("pcs-marginale"));
-                pst.setString(2, paramsVision.get("pcs-operativo"));
-                pst.setString(3, paramsVision.get("pcs-istituzionale"));
-                pst.setString(4, paramsVision.get("pcs-chiave"));
+                pst.setString(1, paramsStakeholder.get("pcs-marginale"));
+                pst.setString(2, paramsStakeholder.get("pcs-operativo"));
+                pst.setString(3, paramsStakeholder.get("pcs-istituzionale"));
+                pst.setString(4, paramsStakeholder.get("pcs-chiave"));
                 pst.setInt(5, idProj);
                 JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
                 pst.executeUpdate();
                 con.commit();
             }
-            
+            pst = null;
+            if(Utils.voidValues(paramsDeliverable)) {
+                pst = con.prepareStatement(UPDATE_DELIVERABLE);
+                con.setAutoCommit(false);
+                pst.clearParameters();
+                pst.setString(1, paramsDeliverable.get("pcd-descrizione"));
+                pst.setInt(2, idProj);
+                JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+                pst.executeUpdate();
+                con.commit();
+            }
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il progetto.\n";
             LOG.severe(msg); 
