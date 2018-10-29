@@ -89,6 +89,21 @@ public class Utils {
      * e la data corrente dell'anno prossimo.</p>
      */
     public static final int YEAR_SHIFT = 1; 
+    /**
+     * Il TIMESTAMP dei sistemi corrisponde al numero di secondi trascorsi
+     * da una data convezionale conosciuta come <em>Unix Epoch</em>
+     * (1° gennaio 1970, quando tutto &egrave; cominciato).
+     */
+    public static final String UNIX_EPOCH = "1970-01-01";
+    /**
+     * Il 7 febbraio 2106 il tempo UNIX raggiunger&agrave; la cifra esadecimale
+     * FFFFFFFF16 (corrispondente a 4.294.967.295 secondi) che, per i sistemi
+     * a 32 bit, &egrave; il massimo computabile. Per sistemi del genere,
+     * il successivo secondo sar&agrave; interpretato come: 
+     * 00:00:00 1 January 1970 UTC
+     * (quindi, in pratica, gli orologi verranno resettati a UNIX EPOCH). 
+     */
+    public static final String THE_END_OF_TIME = "2106-02-07";
     
     
     /**
@@ -107,9 +122,9 @@ public class Utils {
      * @return <code>true</code> se la HashMap contiene almeno un valore diverso da stringa vuota
      */
     public static boolean voidValues(HashMap<String, String> params) {
-        Iterator<HashMap.Entry<String, String>> it = params.entrySet().iterator();
+        Iterator<String> it = params.values().iterator();
         while(it.hasNext()) {
-            if(!it.next().getValue().equals(VOID_STRING)) {
+            if(!it.next().equals(VOID_STRING)) {
                 return true;
             }
         }
