@@ -122,7 +122,7 @@ public class ProjectCommand extends ItemBean implements Command {
         // Carica la hashmap contenente le pagine da includere in funzione dei parametri sulla querystring
         nomeFile.put(Query.PART_PROJECT_CHARTER_VISION, "/jsp/pcVision.jsp");
         nomeFile.put(Query.PART_PROJECT_CHARTER_STAKEHOLDER, "/jsp/pcStakeholder.jsp");
-        nomeFile.put(Query.PART_PROJECT_CHARTER_DELIVERABLE, "");
+        nomeFile.put(Query.PART_PROJECT_CHARTER_DELIVERABLE, "/jsp/pcDeliverable.jsp");
         nomeFile.put(Query.PART_PROJECT_CHARTER_RESOURCE, "");
         nomeFile.put(Query.PART_PROJECT_CHARTER_RISK, "");
         nomeFile.put(Query.PART_PROJECT_CHARTER_CONSTRAINT, "");
@@ -176,7 +176,9 @@ public class ProjectCommand extends ItemBean implements Command {
         pcs.put("pcs-operativo", parser.getStringParameter("pcs-operativo", Utils.VOID_STRING));
         params.put(Query.PART_PROJECT_CHARTER_STAKEHOLDER, pcs);
         // Recupero e caricamento parametri di project charter/deliverable
-        // TODO ...
+        HashMap<String, String> pcd = new HashMap<String, String>();
+        pcd.put("pcd-descrizione", parser.getStringParameter("pcd-descrizione", Utils.VOID_STRING));
+        params.put(Query.PART_PROJECT_CHARTER_DELIVERABLE, pcd);
         // Recupero e caricamento parametri di project charter/risorse
         // TODO ...
         // Recupero e caricamento parametri di project charter/rischi
