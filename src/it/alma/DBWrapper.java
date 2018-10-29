@@ -414,6 +414,7 @@ public class DBWrapper implements Query {
         PreparedStatement pst = null;
         HashMap<String, String> paramsVision = params.get(PART_PROJECT_CHARTER_VISION);
         HashMap<String, String> paramsStakeholder = params.get(PART_PROJECT_CHARTER_STAKEHOLDER);
+        HashMap<String, String> paramsDeliverable = params.get(PART_PROJECT_CHARTER_DELIVERABLE);
         try {
             con = pol_manager.getConnection();
             if(Utils.voidValues(paramsVision)) {
@@ -442,6 +443,18 @@ public class DBWrapper implements Query {
                 JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
                 pst.executeUpdate();
                 con.commit();
+            }
+            pst = null;
+            if(Utils.voidValues(paramsDeliverable)) {
+                pst = con.prepareStatement(UPDATE_DELIVERABLE);
+                con.setAutoCommit(false);
+                pst.clearParameters();
+                pst.setString(1, paramsDeliverable.get("pcd-descrizione"));
+                pst.setInt(2, idProj);
+                JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+                pst.executeUpdate();
+                con.commit();
+            }
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il progetto.\n";
             LOG.severe(msg); 
