@@ -36,6 +36,8 @@
 
 package it.alma.command;
 
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Vector;
 import java.util.logging.Logger;
@@ -187,6 +189,22 @@ public class ProjectCommand extends ItemBean implements Command {
         // TODO ...
         // Recupero e caricamento parametri di project charter/milestone
         // TODO ...
+        // Recupero e caricamento parametri di project status
+        GregorianCalendar data = new GregorianCalendar(1970, 1, 1);
+        String dataAsString = Utils.format(data, "yyyy-mm-dd");
+        HashMap<String, String> statusProject = new HashMap<String, String>();
+        statusProject.put("sMese", parser.getStringParameter("sMese", dataAsString));
+        statusProject.put("sAttuale", parser.getStringParameter("sAttuale", Utils.VOID_STRING));
+        statusProject.put("sCosti", parser.getStringParameter("sCosti", Utils.VOID_STRING));
+        statusProject.put("sTempi", parser.getStringParameter("sTempi", Utils.VOID_STRING));
+        statusProject.put("sRischi", parser.getStringParameter("sRischi", Utils.VOID_STRING));
+        statusProject.put("sRisorse", parser.getStringParameter("sRisorse", Utils.VOID_STRING));
+        statusProject.put("sScope", parser.getStringParameter("sScope", Utils.VOID_STRING));
+        statusProject.put("sComunicazione", parser.getStringParameter("sComunicazione", Utils.VOID_STRING));
+        statusProject.put("sQualita", parser.getStringParameter("sQualita", Utils.VOID_STRING));
+        statusProject.put("sApprovvigionamenti", parser.getStringParameter("sApprovvigionamenti", Utils.VOID_STRING));
+        statusProject.put("sStakeholder", parser.getStringParameter("sStakeholder", Utils.VOID_STRING));
+        params.put(Query.PART_PROJECT, statusProject);
         // Valorizzazione tabella valori
         //params.put(key, value);
 
