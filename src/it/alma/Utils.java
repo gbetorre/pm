@@ -40,6 +40,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.MissingResourceException;
 import java.util.logging.Logger;
 
@@ -97,6 +99,23 @@ public class Utils {
         /*;*/   // It doesn't anything
     }
 
+    
+    /**
+     * <p>Controlla se una HashMap, passata come parametro, contiene almeno una stringa non vuota
+     * 
+     * @param params - HashMap da controllare
+     * @return <code>true</code> se la HashMap contiene almeno un valore diverso da stringa vuota
+     */
+    public static boolean voidValues(HashMap<String, String> params) {
+        Iterator<HashMap.Entry<String, String>> it = params.entrySet().iterator();
+        while(it.hasNext()) {
+            if(!it.next().getValue().equals(VOID_STRING)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     
     /**
      * <p>Controlla se una stringa corrisponde a un valore intero.</p>
