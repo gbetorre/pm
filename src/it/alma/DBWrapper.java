@@ -53,13 +53,15 @@ import javax.servlet.ServletException;
 import javax.sql.DataSource;
 import javax.swing.JOptionPane;
 
+import it.alma.bean.ActivityBean;
 import it.alma.bean.BeanUtil;
+import it.alma.bean.CodeBean;
 import it.alma.bean.CourseBean;
 import it.alma.bean.DepartmentBean;
 import it.alma.bean.ItemBean;
 import it.alma.bean.PersonBean;
 import it.alma.bean.ProjectBean;
-import it.alma.bean.StatoProgettoBean;
+import it.alma.bean.SkillBean;
 import it.alma.exception.AttributoNonValorizzatoException;
 import it.alma.exception.NotFoundException;
 import it.alma.exception.WebStorageException;
@@ -197,7 +199,9 @@ public class DBWrapper implements Query {
     
     /**
      * <p>Restituisce un PersonBean rappresentante un utente loggato.</p>
-     *
+     * 
+     * @param username - username della persona che ha eseguito il login
+     * @param password - password della persona che ha eseguito il login
      * @return <code>PersonBean</code> - PersonBean rappresentante l'utente loggato
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
@@ -293,7 +297,7 @@ public class DBWrapper implements Query {
         PreparedStatement pst = null;
         ProjectBean project = null;
         DepartmentBean dipart = null;
-        StatoProgettoBean statoProgetto = null;
+        CodeBean statoProgetto = null;
         int idDipart = -1;
         int idStatoProgetto = -1;
         Vector<ProjectBean> projects = new Vector<ProjectBean>();
@@ -325,7 +329,7 @@ public class DBWrapper implements Query {
                 pst.setInt(1, idStatoProgetto);
                 rs2 = pst.executeQuery();
                 if(rs2.next()) {
-                	statoProgetto = new StatoProgettoBean();
+                	statoProgetto = new CodeBean();
                 	BeanUtil.populate(statoProgetto, rs2);
                 	project.setStatoProgetto(statoProgetto);
                 }
@@ -358,7 +362,8 @@ public class DBWrapper implements Query {
     /**
      * <p>Restituisce un ProjectBean rappresentante un progetto dell'utente loggato.</p>
      * 
-     * @param projectId identificativo del progetto che si vuol recuperare
+     * @param projectId - identificativo del progetto che si vuol recuperare
+     * @param userId - identificativo della persona che si vuol recuperare
      * @return <code>ProjectBean</code> - ProjectBean rappresentante il progetto selezionato
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
@@ -403,6 +408,8 @@ public class DBWrapper implements Query {
     /**
      * <p>Metodo che controlla la query da eseguire e chiama il metodo opportuno.</p>
      * 
+     * @param idProj - id del progetto da aggiornare 
+     * @param params - hashmap che contiene i parametri che si vogliono aggiornare del progetto
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
      */
     @SuppressWarnings("static-method")
@@ -415,6 +422,8 @@ public class DBWrapper implements Query {
         HashMap<String, String> paramsVision = params.get(PART_PROJECT_CHARTER_VISION);
         HashMap<String, String> paramsStakeholder = params.get(PART_PROJECT_CHARTER_STAKEHOLDER);
         HashMap<String, String> paramsDeliverable = params.get(PART_PROJECT_CHARTER_DELIVERABLE);
+        HashMap<String, String> paramsResource = params.get(PART_PROJECT_CHARTER_RESOURCE);
+        HashMap<String, String> paramsConstraint = params.get(PART_PROJECT_CHARTER_CONSTRAINT);
         HashMap<String, String> paramsStatus = params.get(PART_PROJECT);
         
         try {
@@ -458,7 +467,31 @@ public class DBWrapper implements Query {
                 con.commit();
             }
             pst = null;
-            if(Utils.voidValues(paramsStatus)) {
+            if(Utils.voidValues(paramsResource)) {
+                pst = con.prepareStatement(UPDATE_RESOURCE);
+                con.setAutoCommit(false);
+                pst.clearParameters();
+                pst.setString(1, paramsResource.get("pcr-chiaveesterni"));
+                pst.setString(2, paramsResource.get("pcr-chiaveinterni"));
+                pst.setString(3, paramsResource.get("pcr-serviziateneo"));
+                pst.setInt(4, idProj);
+                JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+                pst.executeUpdate();
+                con.commit();
+            }
+            pst = null;
+            if(Utils.voidValues(paramsConstraint)) {
+                pst = con.prepareStatement(UPDATE_CONSTRAINT);
+                con.setAutoCommit(false);
+                pst.clearParameters();
+                pst.setString(1, paramsConstraint.get("pcc-descrizione"));
+                pst.setInt(2, idProj);
+                JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+                pst.executeUpdate();
+                con.commit();
+            }
+            pst = null;
+            if(Utils.voidValues(paramsStatus) && !paramsStatus.containsValue("1970-00-01")) {
                 pst = con.prepareStatement(UPDATE_STATUS);
                 con.setAutoCommit(false);
                 pst.clearParameters();
@@ -480,6 +513,94 @@ public class DBWrapper implements Query {
             }
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il progetto.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce un Vector di ActivityBean rappresentante le attvit&agrave; del progetto attuale</p>
+     * 
+     * @param projId - id del progetto di cui estrarre le attivit&agrave;
+     * @return <code>Vector&lt;AttvitaBean&gt;</code> - ActivityBean rappresentante l'attivit&agrave; del progetto.
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    public Vector<ActivityBean> getActivities(int projId)
+            throws WebStorageException{
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        ActivityBean attivita = null;
+        Vector<ActivityBean> activities = new Vector<ActivityBean>();
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_ACTIVITIES);
+            pst.clearParameters();
+            pst.setInt(1, projId);
+            rs = pst.executeQuery();
+            while(rs.next()) {
+                attivita = new ActivityBean();
+                BeanUtil.populate(attivita, rs);
+                activities.add(attivita);
+            }
+            return activities;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce un Vector di SkillBean rappresentante le competenze del progetto attuale</p>
+     * 
+     * @param projId - id del progetto di cui estrarre le competenze
+     * @return <code>Vector&lt;SkillBean&gt;</code> - SkillBean rappresentante le competenze del progetto.
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    public Vector<SkillBean> getSkills(int projId)
+            throws WebStorageException{
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        SkillBean competenza = null;
+        Vector<SkillBean> skills = new Vector<SkillBean>();
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_SKILLS);
+            pst.clearParameters();
+            pst.setInt(1, projId);
+            rs = pst.executeQuery();
+            while(rs.next()) {
+                competenza = new SkillBean();
+                BeanUtil.populate(competenza, rs);
+                skills.add(competenza);
+            }
+            return skills;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
         } finally {
