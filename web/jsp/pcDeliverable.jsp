@@ -9,6 +9,21 @@
   <c:param name="p" value="pcs" />
   <c:param name="id" value="" />
 </c:url>
+<c:url var="risorse" context="/almalaurea" value="/" scope="page">
+  <c:param name="q" value="pol" />
+  <c:param name="p" value="pcr" />
+  <c:param name="id" value="" />
+</c:url>
+<c:url var="vincoli" context="/almalaurea" value="/" scope="page">
+  <c:param name="q" value="pol" />
+  <c:param name="p" value="pcc" />
+  <c:param name="id" value="" />
+</c:url>
+<c:url var="milestone" context="/almalaurea" value="/" scope="page">
+  <c:param name="q" value="pol" />
+  <c:param name="p" value="pcm" />
+  <c:param name="id" value="" />
+</c:url>
 <c:set var="p" value="${requestScope.progetto}" scope="page" />
 <form action="#" method="post">
   <div class="container mt-3">
@@ -23,16 +38,16 @@
         <a class="nav-link active" data-toggle="tab">Deliverable</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" data-toggle="tab" href="#">Risorse</a>
+        <a class="nav-link" data-toggle="tab" href="${risorse}${p.id}">Risorse</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" data-toggle="tab" href="#">Rischi</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" data-toggle="tab" href="#">Vincoli</a>
+        <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${vincoli}${p.id}">Vincoli</a></li>
       </li>
       <li class="nav-item">
-        <a class="nav-link" data-toggle="tab" href="#">Milestone</a>
+        <a class="nav-link" data-toggle="tab" href="${milestone}${p.id}">Milestone</a>
       </li>
     </ul>
     <hr class="separatore" /> 
@@ -42,8 +57,23 @@
       </div>
     </div>
     <br><br>
-    <input type="button" class="btn btn-primary" name="modifica" value="modifica" onclick="modify()">
-    <input type="submit" class="btn btn-primary" name="salva" value="salva">
-    <input type="reset" class="btn btn-primary" name="annulla" value="annulla">
+    <div id="container-fluid">
+      <div class="row">
+        <div class="col-2">  
+          <span class="float-left">
+            <a class="btn btn-primary" href="${stakeholder}${p.id}">Indietro</a>
+          </span>
+        </div>
+        <div class="col-8 text-center">
+      		<input type="button" class="btn btn-primary" name="modifica" value="Modifica" >
+      		<input type="submit" class="btn btn-primary" name="salva" value="Salva">
+        </div>
+        <div class="col-2">
+          <span class="float-right">
+      		  <a class="btn btn-primary" href="${risorse}${p.id}">Avanti</a>
+          </span>
+        </div>
+      </div>
+	  </div>
   </div>
 </form>
