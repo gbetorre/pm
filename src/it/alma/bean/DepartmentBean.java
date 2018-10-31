@@ -72,6 +72,9 @@ public class DepartmentBean implements Serializable, Query {
     /** Indirizzo della sede del dipartimento */
     private String indirizzoSede;
     
+    /**
+     * <p>Costruttore che inizializza i campi a valori di default.</p>
+     */
     public DepartmentBean() {
     	id = -2;
     	nome = null;
