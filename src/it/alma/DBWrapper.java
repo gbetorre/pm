@@ -61,6 +61,7 @@ import it.alma.bean.DepartmentBean;
 import it.alma.bean.ItemBean;
 import it.alma.bean.PersonBean;
 import it.alma.bean.ProjectBean;
+import it.alma.bean.RiskBean;
 import it.alma.bean.SkillBean;
 import it.alma.exception.AttributoNonValorizzatoException;
 import it.alma.exception.NotFoundException;
@@ -428,7 +429,7 @@ public class DBWrapper implements Query {
         
         try {
             con = pol_manager.getConnection();
-            if(Utils.voidValues(paramsVision)) {
+            if (Utils.voidValues(paramsVision)) {
                 pst = con.prepareStatement(UPDATE_VISION);
                 con.setAutoCommit(false);
                 pst.clearParameters();
@@ -437,12 +438,12 @@ public class DBWrapper implements Query {
                 pst.setString(3, paramsVision.get("pcv-obiettivi"));
                 pst.setString(4, paramsVision.get("pcv-minacce"));
                 pst.setInt(5, idProj);
-                JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+                //JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
                 pst.executeUpdate();
                 con.commit();
             }
             pst = null;
-            if(Utils.voidValues(paramsStakeholder)) {
+            if (Utils.voidValues(paramsStakeholder)) {
                 pst = con.prepareStatement(UPDATE_STAKEHOLDER);
                 con.setAutoCommit(false);
                 pst.clearParameters();
@@ -451,23 +452,23 @@ public class DBWrapper implements Query {
                 pst.setString(3, paramsStakeholder.get("pcs-istituzionale"));
                 pst.setString(4, paramsStakeholder.get("pcs-chiave"));
                 pst.setInt(5, idProj);
-                JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+                //JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
                 pst.executeUpdate();
                 con.commit();
             }
             pst = null;
-            if(Utils.voidValues(paramsDeliverable)) {
+            if (Utils.voidValues(paramsDeliverable)) {
                 pst = con.prepareStatement(UPDATE_DELIVERABLE);
                 con.setAutoCommit(false);
                 pst.clearParameters();
                 pst.setString(1, paramsDeliverable.get("pcd-descrizione"));
                 pst.setInt(2, idProj);
-                JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+                //JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
                 pst.executeUpdate();
                 con.commit();
             }
             pst = null;
-            if(Utils.voidValues(paramsResource)) {
+            if (Utils.voidValues(paramsResource)) {
                 pst = con.prepareStatement(UPDATE_RESOURCE);
                 con.setAutoCommit(false);
                 pst.clearParameters();
@@ -475,23 +476,23 @@ public class DBWrapper implements Query {
                 pst.setString(2, paramsResource.get("pcr-chiaveinterni"));
                 pst.setString(3, paramsResource.get("pcr-serviziateneo"));
                 pst.setInt(4, idProj);
-                JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+                //JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
                 pst.executeUpdate();
                 con.commit();
             }
             pst = null;
-            if(Utils.voidValues(paramsConstraint)) {
+            if (Utils.voidValues(paramsConstraint)) {
                 pst = con.prepareStatement(UPDATE_CONSTRAINT);
                 con.setAutoCommit(false);
                 pst.clearParameters();
                 pst.setString(1, paramsConstraint.get("pcc-descrizione"));
                 pst.setInt(2, idProj);
-                JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+                //JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
                 pst.executeUpdate();
                 con.commit();
             }
             pst = null;
-            if(Utils.voidValues(paramsStatus) && !paramsStatus.containsValue("1970-00-01")) {
+            if (Utils.voidValues(paramsStatus) && !paramsStatus.containsValue("1970-00-01")) {
                 pst = con.prepareStatement(UPDATE_STATUS);
                 con.setAutoCommit(false);
                 pst.clearParameters();
@@ -507,7 +508,7 @@ public class DBWrapper implements Query {
                 pst.setString(10, paramsStatus.get("sApprovvigionamenti"));
                 pst.setString(11, paramsStatus.get("sStakeholder"));
                 pst.setInt(12, idProj);
-                JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+                //JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
                 pst.executeUpdate();
                 con.commit();
             }
@@ -556,7 +557,7 @@ public class DBWrapper implements Query {
             }
             return activities;
         } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
+            String msg = FOR_NAME + "Oggetto ActivityBean non valorizzato; problema nella query dell\'utente.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
         } finally {
@@ -600,7 +601,51 @@ public class DBWrapper implements Query {
             }
             return skills;
         } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
+            String msg = FOR_NAME + "Oggetto SkillBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce un Vector di RiskBean rappresentante i rischi del progetto attuale</p>
+     * 
+     * @param projId - id del progetto di cui estrarre i rischi
+     * @return <code>Vector&lt;RiskBean&gt;</code> - RiskBean rappresentante i rischi del progetto.
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    public Vector<RiskBean> getRisks(int projId)
+            throws WebStorageException{
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        RiskBean rischio = null;
+        Vector<RiskBean> risks = new Vector<RiskBean>();
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_RISKS);
+            pst.clearParameters();
+            pst.setInt(1, projId);
+            rs = pst.executeQuery();
+            while(rs.next()) {
+                rischio = new RiskBean();
+                BeanUtil.populate(rischio, rs);
+                risks.add(rischio);
+            }
+            return risks;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto RiskBean non valorizzato; problema nella query dell\'utente.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
         } finally {
