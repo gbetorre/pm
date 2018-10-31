@@ -1,57 +1,108 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
+<c:url var="vision" context="/almalaurea" value="/" scope="page">
+  <c:param name="q" value="pol" />
+  <c:param name="p" value="pcv" />
+  <c:param name="id" value="" />
+</c:url>
+<c:url var="stakeholder" context="/almalaurea" value="/" scope="page">
+  <c:param name="q" value="pol" />
+  <c:param name="p" value="pcs" />
+  <c:param name="id" value="" />
+</c:url>
+<c:url var="deliverable" context="/almalaurea" value="/" scope="page">
+  <c:param name="q" value="pol" />
+  <c:param name="p" value="pcd" />
+  <c:param name="id" value="" />
+</c:url>
+<c:url var="risorse" context="/almalaurea" value="/" scope="page">
+  <c:param name="q" value="pol" />
+  <c:param name="p" value="pcr" />
+  <c:param name="id" value="" />
+</c:url>
 <c:url var="vincoli" context="/almalaurea" value="/" scope="page">
   <c:param name="q" value="pol" />
   <c:param name="p" value="pcc" />
   <c:param name="id" value="" />
 </c:url>
+<c:url var="milestone" context="/almalaurea" value="/" scope="page">
+  <c:param name="q" value="pol" />
+  <c:param name="p" value="pcm" />
+  <c:param name="id" value="" />
+</c:url>
+<c:set var="p" value="${requestScope.progetto}" scope="page" />
 <form action="#" method="post">
   <div class="container mt-3">
     <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
       <li role="Vision" class="nav-item">
-        <a href="#" data-toggle="tab" class="nav-link">Vision</a>
+        <a class="nav-link" data-toggle="tab" href="${vision}${p.id}">Vision</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" data-toggle="tab" href="#">Stakeholder</a>
+        <a class="nav-link" data-toggle="tab" href="${stakeholder}${p.id}">Stakeholder</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" data-toggle="tab" href="#">Deliverable</a>
+        <a class="nav-link" data-toggle="tab" href="${deliverable}${p.id}">Deliverable</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" data-toggle="tab" href="#">Risorse</a>
+        <a class="nav-link" data-toggle="tab" href="${risorse}${p.id}">Risorse</a>
       </li>
       <li class="nav-item">
         <a class="nav-link active" role="tab" data-toggle="tab" href="#">Rischi</a>
       </li>
       <li class="nav-item">
-        <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${vincoli}${p.id}">Vincoli</a></li>
+        <a class="nav-link" data-toggle="tab" href="${vincoli}${p.id}">Vincoli</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" data-toggle="tab" href="#">Milestone</a>
+        <a class="nav-link" data-toggle="tab" href="${milestone}${p.id}">Milestone</a>
       </li>
     </ul>
-    
+    <hr class="separatore" />
     <div class="tab-content">
       <div id="rischi" class="container tab-pane active">
-        <table class="table table-bordered">
-          <thead>
+        <table class="table table-bordered table-hover">
+          <thead class="thead-light">
             <tr>
-              <th>ID</th>
               <th>Descrizione</th>
+              <th>Probabilit&agrave;</th>
+              <th>Impatto</th>
               <th>Livello</th>
               <th>Stato</th>
             </tr>
           </thead>
           <tbody>
-          <!-- TODO ciclo che mi genera una riga per ogni rischio del progetto -->
-            <tr>
-              <th></th>
-            </tr>
+          <c:forEach var="risk" items="${requestScope.rischi}" varStatus="loop">
+              <tr>
+                <th scope="row"><input type="text" class="form-control" id="rName" value="<c:out value="${risk.nome}" />"></th>
+                <th scope="row"><input type="text" class="form-control" id="rInfo" value="<c:out value="${risk.informativa}" />"></th>
+                <th scope="row"><input type="text" class="form-control" id="rImp" value="<c:out value="${risk.impatto}" />"></th>
+                <th scope="row"><input type="text" class="form-control" id="rLevel" value="<c:out value="${risk.livello}" />"></th>
+                <th scope="row"><input type="text" class="form-control" id="rStatus" value="<c:out value="${risk.stato}" />"></th>             
+              </tr>
+            </c:forEach>
           </tbody>
         </table>
+        <div class="text-center"><input type="button" class="btn btn-primary" name="addRischio" value="Aggiungi" ></div>
+        <hr class="separatore" />
+        <div id="container-fluid">
+          <div class="row">
+            <div class="col-2">  
+              <span class="float-left">
+                <a class="btn btn-primary" href="${risorse}${p.id}">&lt; Indietro</a>
+              </span>
+            </div>
+            <div class="col-8 text-center">
+              <input type="button" class="btn btn-primary" name="modifica" value="Modifica" >
+              <input type="submit" class="btn btn-primary" name="salva" value="Salva">
+              <input type="reset" class="btn btn-primary" name="annulla" value="Annulla">
+            </div>
+            <div class="col-2">
+              <span class="float-right">
+                <a class="btn btn-primary" href="${vincoli}${p.id}">Avanti &gt;</a>
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-  
-
 </form>
