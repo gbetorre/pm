@@ -175,12 +175,8 @@ public class CodeBean implements Serializable {
     /**
      * Restituisce l'ordinale di un raggruppamento rispetto agli altri.
      * @return <code>ordinale</code> - il valore del numero d'ordine del gruppo 
-     * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e questo attributo non &egrave; stato valorizzato (potrebbe essere un dato obbligatorio)
      */
-    public int getOrdinale() throws AttributoNonValorizzatoException {
-        if (ordinale == -2) {
-            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo ordinale non valorizzato!");
-        }
+    public int getOrdinale() {
         return this.ordinale;
     }
     
