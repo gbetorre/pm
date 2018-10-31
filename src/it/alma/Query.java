@@ -359,6 +359,20 @@ public interface Query extends Serializable {
             "   WHERE id_progetto = ?";
     
     /**
+     * <p>Estrae i rischi relativi ad un progetto, identificato tramite l'id, passato come parametro</p>
+     */
+    public static final String GET_RISKS = 
+            "SELECT" +
+            "       R.id            AS \"id\"" +
+            "   ,   R.descrizione   AS \"nome\"" +
+            "   ,   R.probabilita   AS \"informativa\"" + 
+            "   ,   R.impatto       AS \"impatto\"" + 
+            "   ,   R.livello       AS \"livello\"" +
+            "   ,   R.stato         AS \"stato\"" +
+            "   FROM rischio R" +
+            "   WHERE id_progetto = ?";
+    
+    /**
      * <p>Modifica i campi dello status del progetto identificato tramite l'id, passato come parametro.</p>
      */
     public static final String UPDATE_STATUS = 
