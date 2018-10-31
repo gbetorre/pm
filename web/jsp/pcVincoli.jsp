@@ -19,6 +19,11 @@
   <c:param name="p" value="pcr" />
   <c:param name="id" value="" />
 </c:url>
+<c:url var="rischi" context="/almalaurea" value="/" scope="page">
+  <c:param name="q" value="pol" />
+  <c:param name="p" value="pck" />
+  <c:param name="id" value="" />
+</c:url>
 <c:url var="milestone" context="/almalaurea" value="/" scope="page">
   <c:param name="q" value="pol" />
   <c:param name="p" value="pcm" />
@@ -32,7 +37,7 @@
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${stakeholder}${p.id}">Stakeholder</a></li>
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${deliverable}${p.id}">Deliverable</a></li>
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${risorse}${p.id}">Risorse</a></li>
-      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#">Rischi</a></li>
+      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${rischi}${p.id}">Rischi</a></li>
       <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#">Vincoli</a></li>
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${milestone}${p.id}">Milestone</a></li>
     </ul>
@@ -46,7 +51,7 @@
         <div class="row">
           <div class="col-2">  
             <span class="float-left">
-              <a class="btn btn-primary" href="#">Indietro</a>
+              <a class="btn btn-primary" href="${rischi}${p.id}">&lt; Indietro</a>
             </span>
           </div>
           <div class="col-8 text-center">
@@ -55,7 +60,7 @@
           </div>
           <div class="col-2">
             <span class="float-right">
-              <a class="btn btn-primary" href="${milestone}${p.id}">Avanti</a>
+              <a class="btn btn-primary" href="${milestone}${p.id}">Avanti &gt;</a>
             </span>
           </div>
         </div>
