@@ -276,6 +276,7 @@ public class ValuationCommand extends ItemBean implements Command {
      * <p>Gestisce il flusso principale.</p>
      * <p>Prepara i bean.</p>
      * <p>Passa nella Request i valori che verranno utilizzati dall'applicazione.</p>
+     * 
      */
     public void execute(HttpServletRequest req) 
                  throws CommandException {
@@ -317,6 +318,20 @@ public class ValuationCommand extends ItemBean implements Command {
             StackTraceElement[] stackTrace = e.getStackTrace();
             throw new CommandException(FOR_NAME + "Eccezione generica da " + this.getClass().getName() + ": " + e.getMessage() + "\n stack: " + stackTrace[0], e);
         }
+        /*
+         * Il funzionamento dell'algoritmo deve essere il seguente:
+         * 1. Crea 2 liste separate: lista delle AD di area medica/motorie e lista del resto delle AD (con CFU >= 4)
+         * 2. Su entrambe le liste applica gli stessi procedimenti, e cioè:
+         *      a. ordina la lista per id
+         *      b. individua le occorrenze uguali (doppi, tripli, quadrupli...) 
+         *      c. decide quale riga tenere delle righe uguali
+         *      d. elimina le altre e tiene solo quella
+         *      e. controlla delle righe rimaste quali sono uguali in tutto tranne che nel periodo
+         *      f. unisce i periodi
+         *      g. elimina le due righe originali e tiene solo la nuova con i periodi uniti
+         *      h. fa una lista a parte delle AD con i docenti ancora da definire
+         *      
+         */
         // Ottiene i duplicati logici (righe con la stessa chiave e id diversi)
         //duplicates = getLogicalDuplicates(v);
         // Ottiene i duplicati da lavorare (righe con la stessa chiave base, id diversi e periodi uguali o diversi)
@@ -330,56 +345,88 @@ public class ValuationCommand extends ItemBean implements Command {
         /* Individua le Attività Didattiche Semplici da porre in valutazione */
         // Trasforma il Vector di AD semilavorate in un ArrayList
         //ArrayList<CourseBean> vAsArrayList = new ArrayList<CourseBean>(v);
-        
+        /*
+         * LAVORA I CORSI DI AREA MEDICA
+         */
         // Estrapola i corsi di area medica (es. 48)
         ArrayList<CourseBean> medical = getMedicalCourses(v);
         // Li ordina per id
         sortById(medical);
-        // Estrapola i corsi di area NON medica
-        ArrayList<CourseBean> notMedical = discardMedicalCourses(v);
-        // Estrapola i corsi di area NON medica papabili (CFU > 3)
-        ArrayList<CourseBean> notMedicalAndHeavy = getGreatherThan(notMedical, 3);
-        // Estrapola i corsi di area medica che sono presenti in occorrenze multiple (doppie) (es. 22)
+        // Estrapola i corsi di area medica che sono presenti in occorrenze multiple (doppie)
         ArrayList<CourseBean> medicalDuplicates = handleDuplicates(medical, READ_DUPLICATES);
-        // Rimuove (secondo un criterio logico non causale) una copia dei doppi, tenendo l'altra (quindi 11)
+        // Ordina i duplicati trovati
+        sortById(medicalDuplicates);
+        // Rimuove (secondo un criterio logico non causale) una copia dei doppi, tenendo l'altra
         ArrayList<CourseBean> medicalCleaned = handleDuplicates(medical, WRITE_DUPLICATES);
-        // Ordina le AD di area medica per codice fiscale docente (ora sono: 48 - 11 = 37)
+        // Ordina le AD di area medica per codice fiscale docente
         sortByCode(medicalCleaned);
-        // Cerca di unire i periodi dove ci sono occorrenze doppie
+        /* Cerca di unire i periodi dove ci sono occorrenze doppie */
         // Ottiene la lista delle AD mediche uguali in tutto tranne che nel periodo (p. es. 6)
         List<CourseBean> medicalDifferentByPeriod = getCoupletByPeriod(medicalCleaned);
         // Riduce le righe unendo tutti i periodi, ed ottenendo così una lista di AD distinte
-        List<CourseBean> merged = mergeDates(new ArrayList<CourseBean>(medicalDifferentByPeriod));
+        List<CourseBean> medicalMerged = mergeDates(new ArrayList<CourseBean>(medicalDifferentByPeriod));
         // Fa una copia delle AD mediche con i doppioni già ripuliti
         ArrayList<CourseBean> medicalAD = new ArrayList<CourseBean>(medicalCleaned);
         // Toglie dalla lista originale delle AD mediche tutte le AD con i periodi da unire
         medicalAD.removeAll(medicalDifferentByPeriod);
-        // Ci aggiunge i singoli con i periodi uniti (totale: 37 - 6 + 3 = 34) 
-        medicalAD.addAll(merged);
+        // Ci aggiunge i singoli con i periodi uniti 
+        medicalAD.addAll(medicalMerged);
+        /*
+         * LAVORA I CORSI DI AREA NON MEDICA
+         */
+        // Estrapola i corsi di area NON medica
+        ArrayList<CourseBean> notMedical = discardMedicalCourses(v);
+        // Estrapola i corsi di area NON medica papabili (CFU > 3)
+        ArrayList<CourseBean> notMedicalAndHeavy = getGreatherThan(notMedical, 3);
+        // Li ordina per id
+        sortById(notMedicalAndHeavy);
+        // Estrapola i corsi di area NON medica che sono presenti in occorrenze multiple (doppie)
+        ArrayList<CourseBean> duplicates = handleDuplicates(notMedicalAndHeavy, READ_DUPLICATES);
+        // Ordina i duplicati trovati
+        sortById(duplicates);
+        // Rimuove (secondo un criterio logico non causale) una copia dei doppi, tenendo l'altra
+        ArrayList<CourseBean> cleaned = handleDuplicates(notMedicalAndHeavy, WRITE_DUPLICATES);
+        // Ordina le AD di area NON medica per codice fiscale docente
+        sortByCode(cleaned);
+        /* Cerca di unire i periodi dove ci sono occorrenze doppie */
+        // Ottiene la lista delle AD NON mediche uguali in tutto tranne che nel periodo (p. es. 6)
+        List<CourseBean> differentByPeriod = getCoupletByPeriod(cleaned);
+        // Riduce le righe unendo tutti i periodi, ed ottenendo così una lista di AD distinte
+        List<CourseBean> merged = mergeDates(new ArrayList<CourseBean>(differentByPeriod));
+        // Fa una copia delle AD mediche con i doppioni già ripuliti
+        ArrayList<CourseBean> toEvaluate = new ArrayList<CourseBean>(cleaned);
+        // Toglie dalla lista originale delle AD mediche tutte le AD con i periodi da unire
+        toEvaluate.removeAll(differentByPeriod);
+        // Ci aggiunge i singoli con i periodi uniti 
+        toEvaluate.addAll(merged);
         
         // Imposta il testo del Titolo da visualizzare prima dell'elenco
         req.setAttribute("titoloE", "AD Semplici");
         // Salva nella request: Titolo (da mostrare nell'HTML)
-        req.setAttribute("tP", req.getAttribute("titoloE"));         
+        req.setAttribute("tP", req.getAttribute("titoloE"));
         // Imposta la Pagina JSP di forwarding
         req.setAttribute("fileJsp", nomeFileElenco);
-         // Salva nella request: elenco AD Semplici
-        
-        req.setAttribute("adMedicina", medical);
-        req.setAttribute("elenco", notMedical);
-        req.setAttribute("candidati", notMedicalAndHeavy);
-        
+         
+        // Salva nella request: elenco AD Semplici
+        //req.setAttribute("elenco", notMedical);
         //req.setAttribute("senzaDuplicati", medicalAD);
         //req.setAttribute("lista", sda);
-        req.setAttribute("elenco", medicalAD);
-        req.setAttribute("duplicati", medicalDuplicates);
-        req.setAttribute("doppioni", medicalCleaned);
-        req.setAttribute("doppi", medicalDifferentByPeriod);
-        req.setAttribute("periodiUniti", merged);
+        //req.setAttribute("elenco", medicalAD);
+        //req.setAttribute("doppioni", medicalCleaned);
         
-        //req.setAttribute("duplicatiDaAggiungere", refinedDuplicates);
-        //req.setAttribute("duplicatiResidui", equalsButPeriod);
-        //req.setAttribute("duplicatiResiduiPeriodiUniti", mergedDates); */
+        req.setAttribute("adFinal", toEvaluate);
+        req.setAttribute("adDaUnire", differentByPeriod);
+        req.setAttribute("ripuliti", cleaned);
+        req.setAttribute("duplicati", duplicates);
+        req.setAttribute("candidati", notMedicalAndHeavy);
+        
+        req.setAttribute("adMYFinal", medicalAD);
+        req.setAttribute("adMYDaUnire", medicalDifferentByPeriod);
+        req.setAttribute("ripulitiMY", medicalCleaned);
+        req.setAttribute("duplicatiMY", medicalDuplicates);
+        req.setAttribute("adMY", medical);
+
+        req.setAttribute("elenco", v);
     }
     
     
@@ -474,7 +521,8 @@ public class ValuationCommand extends ItemBean implements Command {
             for (int i = 0; i < v.size(); i++) {
                 CourseBean current = v.elementAt(i);
                 // Se il codice corso studio di U-GOV inizia per 'M' sicuramente è un'AD di area medica
-                if (current.getCodiceCdSUGOV().trim().startsWith("M")) {
+                // Se il codice corso studio di U-GOV inizia per 'Y' sicuramente è un'AD di scienze motorie
+                if (current.getCodiceCdSUGOV().trim().startsWith("M") || current.getCodiceCdSUGOV().trim().startsWith("Y")) {
                     // Ma, nel caso di medicina, va aggiunto solo se ha crediti lezione > 0
                     if (current.getCreditiLezione() > 0) {
                         // E inoltre se è un corso elettivo non lo vogliamo
@@ -519,7 +567,7 @@ public class ValuationCommand extends ItemBean implements Command {
             for (int i = 0; i < vAsArrayList.size(); i++) {
                 CourseBean current = vAsArrayList.get(i);
                 // Se il corso di studi dell'AD corrente NON inizia per M l'AD NON è di medicina
-                if (!current.getCodiceCdSUGOV().trim().startsWith("M")) {   
+                if (!current.getCodiceCdSUGOV().trim().startsWith("M") && !current.getCodiceCdSUGOV().trim().startsWith("Y")) {   
                     allButMedicalCourses.add(current);
                 }
             }
@@ -639,9 +687,18 @@ public class ValuationCommand extends ItemBean implements Command {
                                 }
                             }
                             else {
-                                duplicates.add(courseOrd);
+                                // Aggiunge ai duplicati solo se il suo id non è già presente dentro
+                                boolean itIsInHere = false;
+                                for (CourseBean ad : duplicates) {
+                                    if (ad.getId() == courseOrd.getId()) {
+                                        itIsInHere = true;
+                                        break;
+                                    }
+                                }
+                                if (!itIsInHere) {
+                                    duplicates.add(courseOrd);
+                                }   
                             }
-                            
                         }
                     }
                 }
