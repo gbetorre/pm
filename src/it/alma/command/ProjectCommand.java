@@ -56,6 +56,7 @@ import it.alma.bean.ActivityBean;
 import it.alma.bean.ItemBean;
 import it.alma.bean.PersonBean;
 import it.alma.bean.ProjectBean;
+import it.alma.bean.RiskBean;
 import it.alma.bean.SkillBean;
 import it.alma.exception.AttributoNonValorizzatoException;
 import it.alma.exception.CommandException;
@@ -128,7 +129,7 @@ public class ProjectCommand extends ItemBean implements Command {
         nomeFile.put(Query.PART_PROJECT_CHARTER_STAKEHOLDER, "/jsp/pcStakeholder.jsp");
         nomeFile.put(Query.PART_PROJECT_CHARTER_DELIVERABLE, "/jsp/pcDeliverable.jsp");
         nomeFile.put(Query.PART_PROJECT_CHARTER_RESOURCE, "/jsp/pcRisorse.jsp");
-        nomeFile.put(Query.PART_PROJECT_CHARTER_RISK, "");
+        nomeFile.put(Query.PART_PROJECT_CHARTER_RISK, "/jsp/pcRischi.jsp");
         nomeFile.put(Query.PART_PROJECT_CHARTER_CONSTRAINT, "/jsp/pcVincoli.jsp");
         nomeFile.put(Query.PART_PROJECT_CHARTER_MILESTONE, "/jsp/pcMilestone.jsp");
         nomeFile.put(Query.PART_PROJECT, this.getPaginaJsp());
@@ -149,7 +150,7 @@ public class ProjectCommand extends ItemBean implements Command {
          *              Crea e inizializza le variabili locali                  *
          * ******************************************************************** */
         
-        JOptionPane.showMessageDialog(null, "Chiamata execute arrivata dall\'applicazione!", "Main: esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+        //JOptionPane.showMessageDialog(null, "Chiamata execute arrivata dall\'applicazione!", "Main: esito OK", JOptionPane.INFORMATION_MESSAGE, null);
         // Databound
         DBWrapper db = null;
         // Parser per la gestione assistita dei parametri di input
@@ -228,6 +229,8 @@ public class ProjectCommand extends ItemBean implements Command {
         Vector<ActivityBean> vActivities = new Vector<ActivityBean>();
         //Dichiara elenco di competenze
         Vector<SkillBean> vSkills = new Vector<SkillBean>();
+        //Dichiara elenco di rischi
+        Vector<RiskBean> vRisks = new Vector<RiskBean>();
         /* ******************************************************************** *
          *      Instanzia nuova classe WebStorage per il recupero dei dati      *
          * ******************************************************************** */
@@ -277,6 +280,7 @@ public class ProjectCommand extends ItemBean implements Command {
                     project = db.getProject(idPrj, user.getId());
                     vActivities = db.getActivities(idPrj);
                     vSkills = db.getSkills(idPrj);
+                    vRisks = db.getRisks(idPrj);
                 }
                 fileJspT = nomeFile.get(part);
             } else {
@@ -317,6 +321,8 @@ public class ProjectCommand extends ItemBean implements Command {
         req.setAttribute("attivita", vActivities);
         // Salva nella request elenco competenze del progetto
         req.setAttribute("competenze", vSkills);
+        // Salva nella request elenco rischi del progetto
+        req.setAttribute("rischi", vRisks);
     }
     
 }
