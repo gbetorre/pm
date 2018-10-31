@@ -1,4 +1,4 @@
-<%@ page contentType="text/html; charset=UTF-8" %>
+<%@ page contentType="text/html;" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html>
@@ -17,6 +17,7 @@
     <%--base href="${requestScope.baseHref}" /--%>
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />pol.css" type="text/css" />
     <%--link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />bootstrap.css" type="text/css" />--%>
+    <!-- <link href="<c:out value="${initParam.urlDirectoryStili}" />style.css" rel="stylesheet" type="text/css" />  -->
   </head>
   <body>
     <!-- Header -->
