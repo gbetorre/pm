@@ -94,11 +94,11 @@ public interface Query extends Serializable {
      */    
     public static final LinkedList<String> STATI_PROGETTO_AS_LIST = new LinkedList<String>(Arrays.asList(STATI_PROGETTO));
     /**
-     * Lista contenente i possibili valori degli attributi probabilita, impatto, livello della classe RischioBean
+     * Lista contenente i possibili valori degli attributi probabilita, impatto, livello della classe RiskBean
      */    
     public static final LinkedList<String> LIVELLI_RISCHIO_AS_LIST = new LinkedList<String>(Arrays.asList(LIVELLI_RISCHIO));
     /**
-     * Lista contenente i possibili valori dell'attributo stato della classe RischioBean
+     * Lista contenente i possibili valori dell'attributo stato della classe RiskBean
      */    
     public static final LinkedList<String> STATO_RISCHIO_AS_LIST = new LinkedList<String>(Arrays.asList(STATO_RISCHIO));
     
@@ -226,10 +226,10 @@ public interface Query extends Serializable {
      */
     public static final String GET_DIPART = 
             "SELECT " +
-            "       D.id           " + 
-            "   ,   D.nome                      AS \"nome\"" + 
-            "   ,   D.prefisso                  AS \"prefisso\"" + 
-            "   ,   D.indirizzosede             AS \"indirizzoSede\"" + 
+            "       D.id              AS \"id\"" + 
+            "   ,   D.nome            AS \"nome\"" + 
+            "   ,   D.prefisso        AS \"prefisso\"" + 
+            "   ,   D.indirizzosede   AS \"indirizzoSede\"" + 
             "   FROM dipartimento D" + 
             "   WHERE   D.id = ?";
     
@@ -240,7 +240,7 @@ public interface Query extends Serializable {
     		"SELECT " +
     		"		SP.id		AS \"id\"" +
     		"	, 	SP.nome		AS \"nome\"" +
-    		"	, 	SP.valore	AS \"valore\"" + 
+    		"	, 	SP.valore	AS \"informativa\"" + 
     		"	FROM statoprogetto SP" + 
     		"	WHERE SP.id = ?";
     
@@ -306,6 +306,59 @@ public interface Query extends Serializable {
             "   WHERE id = ?";
     
     /**
+     * <p>Modifica i campi delle risorse di un progetto, identificato tramite l'id, passato come parametro.</p>
+     */
+    public static final String UPDATE_RESOURCE = 
+            "UPDATE progetto" +
+            "   SET     fornitorichiaveesterni = ?" +
+            "   ,       fornitorichiaveinterni = ?" +
+            "   ,       serviziateneo = ?" +
+            "   WHERE id = ?";
+    
+    /**
+     * <p>Modifica il campo dei vincoli di un progetto, identificato tramite l'id, passato come parametro.</p>
+     */
+    public static final String UPDATE_CONSTRAINT = 
+            "UPDATE progetto" + 
+            "   SET vincoli = ?" +
+            "   WHERE id = ?";
+    
+    /**
+     * <p>Estrae le attivit&agrave; relative ad un progetto, identificato tramite l'id, passato come parametro</p>
+     */
+    public static final String  GET_ACTIVITIES = 
+            "SELECT " +
+            "       A.id                    AS  \"id\"" +
+            "   ,   A.nome                  AS  \"nome\"" +
+            "   ,   A.descrizione           AS  \"descrizione\"" +
+            "   ,   A.datainizio            AS  \"dataInizio\"" +
+            "   ,   A.datafine              AS  \"dataFine\"" +
+            "   ,   A.datainizioattesa      AS  \"dataInizioAttesa\"" +
+            "   ,   A.datafineattesa        AS  \"dataFineAttesa\"" +
+            "   ,   A.datainizioeffettiva   AS  \"dataInizioEffettiva\"" +
+            "   ,   A.datafineeffettiva     AS  \"dataFineEffettiva\"" +
+            "   ,   A.guprevisti            AS  \"guPrevisti\"" +
+            "   ,   A.gueffettivi           AS  \"guEffettivi\"" +
+            "   ,   A.gurimanenti           AS  \"guRimanenti\"" +
+            "   ,   A.noteavanzamento       AS  \"noteAvanzamento\"" +
+            "   ,   A.milestone             AS  \"milestone\"" +
+            "   FROM attivita A" + 
+            "   WHERE id_progetto = ?";
+    
+    /**
+     * <p>Estrae le competenze relative ad un progetto, identificato tramite l'id, passato come parametro</p>
+     */
+    public static final String GET_SKILLS = 
+            "SELECT" +
+            "       C.id            AS \"id\"" +
+            "   ,   C.descrizione   AS \"nome\"" +
+            "   ,   C.informativa   AS \"informativa\"" + 
+            "   ,   C.presenza      AS \"presenza\"" + 
+            "   ,   C.id_persona    AS \"idPersona\"" +
+            "   FROM competenza C" +
+            "   WHERE id_progetto = ?";
+    
+    /**
      * <p>Modifica i campi dello status del progetto identificato tramite l'id, passato come parametro.</p>
      */
     public static final String UPDATE_STATUS = 
@@ -323,7 +376,6 @@ public interface Query extends Serializable {
             "   ,       statostakeholder = ?" +
             "   WHERE id = ?";
             
-    
     /**
      * <p>Modifica i rischi di un progetto, identificato tramite l'id, passato come parametro.</p>
      */
