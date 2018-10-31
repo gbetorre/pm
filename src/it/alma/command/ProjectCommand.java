@@ -52,9 +52,11 @@ import it.alma.DBWrapper;
 import it.alma.Main;
 import it.alma.Query;
 import it.alma.Utils;
+import it.alma.bean.ActivityBean;
 import it.alma.bean.ItemBean;
 import it.alma.bean.PersonBean;
 import it.alma.bean.ProjectBean;
+import it.alma.bean.SkillBean;
 import it.alma.exception.AttributoNonValorizzatoException;
 import it.alma.exception.CommandException;
 import it.alma.exception.WebStorageException;
@@ -125,10 +127,10 @@ public class ProjectCommand extends ItemBean implements Command {
         nomeFile.put(Query.PART_PROJECT_CHARTER_VISION, "/jsp/pcVision.jsp");
         nomeFile.put(Query.PART_PROJECT_CHARTER_STAKEHOLDER, "/jsp/pcStakeholder.jsp");
         nomeFile.put(Query.PART_PROJECT_CHARTER_DELIVERABLE, "/jsp/pcDeliverable.jsp");
-        nomeFile.put(Query.PART_PROJECT_CHARTER_RESOURCE, "");
+        nomeFile.put(Query.PART_PROJECT_CHARTER_RESOURCE, "/jsp/pcRisorse.jsp");
         nomeFile.put(Query.PART_PROJECT_CHARTER_RISK, "");
-        nomeFile.put(Query.PART_PROJECT_CHARTER_CONSTRAINT, "");
-        nomeFile.put(Query.PART_PROJECT_CHARTER_MILESTONE, "");
+        nomeFile.put(Query.PART_PROJECT_CHARTER_CONSTRAINT, "/jsp/pcVincoli.jsp");
+        nomeFile.put(Query.PART_PROJECT_CHARTER_MILESTONE, "/jsp/pcMilestone.jsp");
         nomeFile.put(Query.PART_PROJECT, this.getPaginaJsp());
     }  
   
@@ -137,6 +139,9 @@ public class ProjectCommand extends ItemBean implements Command {
      * <p>Gestisce il flusso principale.</p>
      * <p>Prepara i bean.</p>
      * <p>Passa nella Request i valori che verranno utilizzati dall'applicazione.</p>
+     * 
+     * @param req TODO
+     * @throws CommandException TODO 
      */
     public void execute(HttpServletRequest req) 
                  throws CommandException {
@@ -182,11 +187,17 @@ public class ProjectCommand extends ItemBean implements Command {
         pcd.put("pcd-descrizione", parser.getStringParameter("pcd-descrizione", Utils.VOID_STRING));
         params.put(Query.PART_PROJECT_CHARTER_DELIVERABLE, pcd);
         // Recupero e caricamento parametri di project charter/risorse
-        // TODO ...
+        HashMap<String, String> pcr = new HashMap<String, String>();
+        pcr.put("pcr-chiaveesterni", parser.getStringParameter("pcr-chiaveesterni", Utils.VOID_STRING));
+        pcr.put("pcr-chiaveinterni", parser.getStringParameter("pcr-chiaveinterni", Utils.VOID_STRING));
+        pcr.put("pcr-serviziateneo", parser.getStringParameter("pcr-serviziateneo", Utils.VOID_STRING));
+        params.put(Query.PART_PROJECT_CHARTER_RESOURCE, pcr);
         // Recupero e caricamento parametri di project charter/rischi
         // TODO ...
         // Recupero e caricamento parametri di project charter/vincoli
-        // TODO ...
+        HashMap<String, String> pcc = new HashMap<String, String>();
+        pcc.put("pcc-descrizione", parser.getStringParameter("pcc-descrizione", Utils.VOID_STRING));
+        params.put(Query.PART_PROJECT_CHARTER_CONSTRAINT, pcc);
         // Recupero e caricamento parametri di project charter/milestone
         // TODO ...
         // Recupero e caricamento parametri di project status
@@ -194,6 +205,7 @@ public class ProjectCommand extends ItemBean implements Command {
         String dataAsString = Utils.format(data, "yyyy-mm-dd");
         HashMap<String, String> statusProject = new HashMap<String, String>();
         statusProject.put("sMese", parser.getStringParameter("sMese", dataAsString));
+        //statusProject.put("sMese", parser.getStringParameter("sMese", Utils.VOID_STRING));
         statusProject.put("sAttuale", parser.getStringParameter("sAttuale", Utils.VOID_STRING));
         statusProject.put("sCosti", parser.getStringParameter("sCosti", Utils.VOID_STRING));
         statusProject.put("sTempi", parser.getStringParameter("sTempi", Utils.VOID_STRING));
@@ -212,6 +224,10 @@ public class ProjectCommand extends ItemBean implements Command {
         String fileJspT = null;
         // Dichiara elenco di progetti
         Vector<ProjectBean> v = new Vector<ProjectBean>();
+        //Dichiara elenco di attività
+        Vector<ActivityBean> vActivities = new Vector<ActivityBean>();
+        //Dichiara elenco di competenze
+        Vector<SkillBean> vSkills = new Vector<SkillBean>();
         /* ******************************************************************** *
          *      Instanzia nuova classe WebStorage per il recupero dei dati      *
          * ******************************************************************** */
@@ -259,6 +275,8 @@ public class ProjectCommand extends ItemBean implements Command {
                         db.updateProjectPart(idPrj, params);
                     }
                     project = db.getProject(idPrj, user.getId());
+                    vActivities = db.getActivities(idPrj);
+                    vSkills = db.getSkills(idPrj);
                 }
                 fileJspT = nomeFile.get(part);
             } else {
@@ -295,6 +313,10 @@ public class ProjectCommand extends ItemBean implements Command {
         req.setAttribute("progetti", v);
         // Salva nella request dettaglio progetto
         req.setAttribute("progetto", project);
+        // Salva nella request elenco attivita del progetto
+        req.setAttribute("attivita", vActivities);
+        // Salva nella request elenco competenze del progetto
+        req.setAttribute("competenze", vSkills);
     }
     
 }
