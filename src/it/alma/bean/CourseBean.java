@@ -446,6 +446,7 @@ public class CourseBean implements Serializable, Comparable<CourseBean> {
                   throws AttributoNonValorizzatoException {
         return this.getCodiceCdSUGOV().trim() + 
                this.getCodiceADUGOV().trim()  + 
+               this.getDiscriminante().trim() +
                this.getCodiceFiscaleDocente().trim() + 
                this.getInizioPerDid().trim() + 
                this.getFinePerDid().trim();
@@ -466,6 +467,7 @@ public class CourseBean implements Serializable, Comparable<CourseBean> {
                   throws AttributoNonValorizzatoException {
         return this.getCodiceCdSUGOV().trim() + 
                this.getCodiceADUGOV().trim()  + 
+               this.getDiscriminante().trim() +
                this.getCodiceFiscaleDocente().trim();
     }
     
