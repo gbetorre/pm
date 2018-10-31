@@ -14,6 +14,11 @@
   <c:param name="p" value="pcd" />
   <c:param name="id" value="" />
 </c:url>
+<c:url var="rischi" context="/almalaurea" value="/" scope="page">
+  <c:param name="q" value="pol" />
+  <c:param name="p" value="pck" />
+  <c:param name="id" value="" />
+</c:url>
 <c:url var="vincoli" context="/almalaurea" value="/" scope="page">
   <c:param name="q" value="pol" />
   <c:param name="p" value="pcc" />
@@ -32,7 +37,7 @@
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${stakeholder}${p.id}">Stakeholder</a></li>
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${deliverable}${p.id}">Deliverable</a></li>
       <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#">Risorse</a></li>
-      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#">Rischi</a></li>
+      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${rischi}${p.id}">Rischi</a></li>
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${vincoli}${p.id}">Vincoli</a></li>
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${milestone}${p.id}">Milestone</a></li>
     </ul>
@@ -40,7 +45,7 @@
     <div class="tab-content responsive hidden-xs hidden-sm">
       <div role="tabpanel" class="tab-pane active" id="tab-pcrisorse">
         <h4>Competenze del progetto</h4>
-        <table class="table table-hover">
+        <table class="table table-bordered table-hover">
           <thead class="thead-light">
           <tr>
             <th scope="col">Descrizione</th>
@@ -51,8 +56,8 @@
           <tbody>
             <c:forEach var="skill" items="${requestScope.competenze}" varStatus="loop">
               <tr>
-                <th scope="row"><c:out value="${skill.nome}" /></th>
-                <th scope="row"><c:out value="${skill.informativa}" /></th>
+                <th scope="row"><input type="text" class="form-control" id="sName" value="<c:out value="${skill.nome}" />"></th>
+                <th scope="row"><input type="text" class="form-control" id="sInfo" value="<c:out value="${skill.informativa}" />"></th>
                 <th scope="row">
                   <c:choose>
                     <c:when test="${skill.presenza==true}">
@@ -71,6 +76,7 @@
             </c:forEach>
           </tbody>
         </table>
+        <div class="text-center"><input type="button" class="btn btn-primary" name="addCompetenza" value="Aggiungi" ></div>
         <hr class="separatore" />
         <h4>Fornitori chiave esterni:</h4>
         <br>
@@ -83,12 +89,12 @@
         <h4>Servizi di ateneo:</h4>
         <br>
         <textarea name="pcr-serviziateneo" class="form-control" aria-label="With textarea">${p.serviziAteneo}</textarea>
-        <br><br>
+        <hr class="separatore" />
         <div id="container-fluid">
         <div class="row">
           <div class="col-2">  
             <span class="float-left">
-              <a class="btn btn-primary" href="${deliverable}${p.id}">Indietro</a>
+              <a class="btn btn-primary" href="${deliverable}${p.id}">&lt; Indietro</a>
             </span>
           </div>
           <div class="col-8 text-center">
@@ -97,7 +103,7 @@
           </div>
           <div class="col-2">
             <span class="float-right">
-              <a class="btn btn-primary" href="#">Avanti</a>
+              <a class="btn btn-primary" href="${rischi}${p.id}">Avanti &gt;</a>
             </span>
           </div>
         </div>

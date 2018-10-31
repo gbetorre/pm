@@ -14,6 +14,11 @@
   <c:param name="p" value="pcr" />
   <c:param name="id" value="" />
 </c:url>
+<c:url var="rischi" context="/almalaurea" value="/" scope="page">
+  <c:param name="q" value="pol" />
+  <c:param name="p" value="pck" />
+  <c:param name="id" value="" />
+</c:url>
 <c:url var="vincoli" context="/almalaurea" value="/" scope="page">
   <c:param name="q" value="pol" />
   <c:param name="p" value="pcc" />
@@ -41,7 +46,7 @@
       <a class="nav-link" data-toggle="tab" href="${risorse}${p.id}">Risorse</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" data-toggle="tab" href="#">Rischi</a>
+      <a class="nav-link" data-toggle="tab" href="${rischi}${p.id}">Rischi</a>
     </li>
     <li class="nav-item">
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${vincoli}${p.id}">Vincoli</a></li>
