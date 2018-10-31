@@ -141,7 +141,7 @@ public class ProjectBean implements Serializable, Query {
     /** Id dello stato progetto */
     private int idStatoProgetto;
     /** Stato progetto */
-    private StatoProgettoBean statoProgetto;
+    private CodeBean statoProgetto;
     
     /**
      * <p>Costruttore: inizializza i campi a valori di default.</p>
@@ -938,7 +938,7 @@ public class ProjectBean implements Serializable, Query {
 	 * @return <code>statoProgetto</code> - stato del progetto
 	 * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e statoProgetto non 		&egrave; stato valorizzato (&egrave; un dato obbligatorio) 
 	 */
-	public StatoProgettoBean getStatoProgetto() throws AttributoNonValorizzatoException {
+	public CodeBean getStatoProgetto() throws AttributoNonValorizzatoException {
 		if(statoProgetto == null) {
 			throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoProgetto non valorizzato!");
 		}
@@ -949,7 +949,7 @@ public class ProjectBean implements Serializable, Query {
 	 * Imposta lo stato di un progetto.
 	 * @param statoProgetto - stato progetto da impostare
 	 */
-	public void setStatoProgetto(StatoProgettoBean statoProgetto) {
+	public void setStatoProgetto(CodeBean statoProgetto) {
 		this.statoProgetto = statoProgetto;
 	}
 	
