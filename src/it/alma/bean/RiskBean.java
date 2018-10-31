@@ -46,7 +46,7 @@ import it.alma.exception.AttributoNonValorizzatoException;
  * 
  * @author <a href="mailto:andrea.tonel@studenti.univr.it">Andrea Tonel</a>
  */
-public class RiskBean implements Serializable, Query{
+public class RiskBean extends CodeBean implements Serializable, Query {
 
 	/**
 	 * La serializzazione necessita di dichiarare una costante di tipo long
@@ -63,109 +63,22 @@ public class RiskBean implements Serializable, Query{
     /* *************************************************************************** *  
      *                      Dati identificativi del rischio                        *
      * *************************************************************************** */
-    /** Attributo identificativo del rischio */
-    private int id;
-    /** Descrizione del rischio */
-    private String descrizione;
-    /** Probabilit&agrave; del rischio */
-    private String probabilita;
     /** Impatto del rischio */
     private String impatto;
     /** Livello del rischio */
     private String livello;
     /** Stato del rischio */
     private String stato;
-    /** Identificativo del progetto a cui fa riferimento il rischio */
-    private int idProgetto;
 	
+    
     /**
      * <p>Costruttore: inizializza i campi a valori di default.</p>
      */
     public RiskBean() {
-    	id = -2;
-    	descrizione = null;
-    	probabilita = impatto = livello = null;
+    	super();
+    	impatto = livello = null;
     	stato = null;
-    	idProgetto = -2;
     }
-
-
-    /* **************************************************** *
-     *           Metodi getter e setter per id              *
-     * **************************************************** */
-    /**
-	 * Restituisce l'id di un rischio
-	 * @return <code>id</code> - l'id del rischio
-     * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e l'id non &egrave; stato valorizzato (&egrave; un dato obbligatorio)
-	 */
-	public int getId() throws AttributoNonValorizzatoException {
-		if (id == -2) {
-			throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo id non valorizzato!");
-		}
-		return id;
-	}
-	
-	/**
-	 * Imposta l'id di un rischio
-	 * @param id - l'identificativo da impostare
-	 */
-	public void setId(int id) {
-		this.id = id;
-	}
-	
-	
-	/* ********************************************************* *
-     *         Metodi getter e setter per descrizione            *
-     * ********************************************************* */
-	/**
-	 * Restituisce la descrizione di un rischio
-	 * @return <code>descrizione</code> - descrizione del rischio
-	 * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e la descrizione non &egrave; stato valorizzato (&egrave; un dato obbligatorio)
-	 */
-	public String getDescrizione() throws AttributoNonValorizzatoException {
-		if (descrizione == null) {
-			throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo nome non valorizzato!");
-		}
-		return descrizione;
-	}
-
-	/**
-	 * Imposta la descrizione di un rischio
-	 * @param descrizione - descrizione da settare
-	 */
-	public void setDescrizione(String descrizione) {
-		this.descrizione = descrizione;
-	}
-
-
-	/* ********************************************************* *
-     *         Metodi getter e setter per probabilità            *
-     * ********************************************************* */
-	/**
-	 * Restituisce la probabilit&agrave; del rischio
-	 * @return <code>probabilita</code> - probabilita del rischio
-	 * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e probabilita non &egrave; stato valorizzato (&egrave; un dato obbligatorio) 
-	 * oppure probabilita non &egrave; stato valorizzato correttamente
-	 */
-	public String getProbabilita() throws AttributoNonValorizzatoException {
-		if (probabilita == null) {
-			throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo probabilita non valorizzato!");
-		}
-		else if (!LIVELLI_RISCHIO_AS_LIST.contains(probabilita)) {
-			throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo probabilita non valorizzato correttamente!");
-		}
-		else {
-			return probabilita;
-		}
-	}
-
-	/**
-	 * Imposta la probabilit&agrave; di rischio
-	 * @param probabilita - probabilita del rischio
-	 */
-	public void setProbabilita(String probabilita) {
-		this.probabilita = probabilita;
-	}
 	
 	
 	/* ********************************************************* *
@@ -256,29 +169,5 @@ public class RiskBean implements Serializable, Query{
 	public void setStato(String stato) {
 		this.stato = stato;
 	}
-
-
-	/* ********************************************************* *
-     *          Metodi getter e setter per idProgetto            *
-     * ********************************************************* */
-    /**
-     * Restituisce l'id del progetto a cui il rischio fa riferimento
-     * @return <code>idProgetto</code> identificativo del progetto a cui il rischio fa riferimento
-     * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e idProgetto non &egrave; stato valorizzato (&egrave; un dato obbligatorio)
-     */
-    public int getIdProgetto() throws AttributoNonValorizzatoException {
-        if (stato == null) {
-            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo stato non valorizzato!");
-        }
-        return idProgetto;
-    }
-
-
-    /**
-     * Imposta l'id del progetto a cui il rischio fa riferimento
-     * @param idProgetto - id del progetto da impostare
-     */
-    public void setIdProgetto(int idProgetto) {
-        this.idProgetto = idProgetto;
-    }
+	
 }
