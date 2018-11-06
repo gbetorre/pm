@@ -287,6 +287,19 @@ public interface Query extends Serializable {
             "   ,       milestone = ?" + 
             "   WHERE id = ?";
 
+    
+    /**
+     * <p>Modifica la tupla della tabella attivit&agrave; identificata dall'id, che &egrave; passato come parametro.</p>
+     * <p>Modifica solo i campi che sono presenti nel Project Charter del progetto.</p>
+     */
+    public static final String UPDATE_ATTIVITA_FROM_PROGETTO =
+            "UPDATE attivita" +
+            "   SET     nome = ?" +
+            "   ,       descrizione = ?" +
+            "   ,       milestone = ?" + 
+            "   WHERE   id = ? " +
+            "       AND id_progetto = ?";
+    
     /**
      * <p>Modifica i campi della vision di un progetto, identificato tramite l'id , passato come parametro.</p>
      */
