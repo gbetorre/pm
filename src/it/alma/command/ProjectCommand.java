@@ -200,7 +200,12 @@ public class ProjectCommand extends ItemBean implements Command {
         pcc.put("pcc-descrizione", parser.getStringParameter("pcc-descrizione", Utils.VOID_STRING));
         params.put(Query.PART_PROJECT_CHARTER_CONSTRAINT, pcc);
         // Recupero e caricamento parametri di project charter/milestone
-        // TODO ...
+        HashMap<String, String> pcm = new HashMap<String, String>();
+        pcm.put("pcm-id", parser.getStringParameter("pcm-id", Utils.VOID_STRING));
+        pcm.put("pcm-nome", parser.getStringParameter("pcm-nome", Utils.VOID_STRING));
+        pcm.put("pcm-descrizione", parser.getStringParameter("pcm-descrizione", Utils.VOID_STRING));
+        pcm.put("pcm-milestone", parser.getStringParameter("pcm-milestone", Utils.VOID_STRING));
+        params.put(Query.PART_PROJECT_CHARTER_MILESTONE, pcm);
         // Recupero e caricamento parametri di project status
         GregorianCalendar data = new GregorianCalendar(1970, 1, 1);
         String dataAsString = Utils.format(data, "yyyy-mm-dd");
