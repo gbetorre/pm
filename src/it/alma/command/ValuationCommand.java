@@ -247,7 +247,7 @@ public class ValuationCommand extends ItemBean implements Command {
     /** 
      * <p>Raccoglie i valori dell'oggetto ItemBean
      * e li passa a questa classe command.</p>
-	 *
+	 * 
 	 * @param voceMenu la VoceMenuBean pari alla Command presente.
 	 * @throws it.alma.exception.CommandException se l'attributo paginaJsp di questa command non e' stato valorizzato.
      */
@@ -276,23 +276,54 @@ public class ValuationCommand extends ItemBean implements Command {
      * <p>Gestisce il flusso principale.</p>
      * <p>Prepara i bean.</p>
      * <p>Passa nella Request i valori che verranno utilizzati dall'applicazione.</p>
+     * <p>Il funzionamento dell'algoritmo deve essere il seguente:
+     * <tt><ol>
+     * <li>Crea 2 liste separate: lista delle AD di area medica/motorie 
+     * e lista del resto delle AD (con CFU >= 4)</li>
+     * <li>Su entrambe le liste applica gli stessi procedimenti, e cioè:</li>
+     *   <ol>
+     *      <li>a. ordina la lista per id</li>
+     *      <li>b. individua le occorrenze uguali (doppi, tripli, quadrupli...)</li> 
+     *      <li>c. decide quale riga tenere delle righe uguali</li>
+     *      <li>d. elimina le altre e tiene solo quella</li>
+     *      <li>e. controlla delle righe rimaste quali sono uguali in tutto tranne che nel periodo</li>
+     *      <li>f. unisce i periodi</li>
+     *      <li>g. elimina le due righe originali e tiene solo la nuova con i periodi uniti</li>
+     *      <li>h. fa una lista a parte delle AD con i docenti ancora da definire</li>
+     *   </ol>
+     * </ol></tt></p>
      * 
+     * @param req 
+     * @throws CommandException 
      */
     public void execute(HttpServletRequest req) 
                  throws CommandException {
         // Databound
         DBWrapper db = null;
-        // Struttura che conterrà tutte le AD dal semilavorato
+        // Struttura che conterrà tutte le AD Semplici dal semilavorato
         Vector<CourseBean> v = new Vector<CourseBean>();
+        // Struttura che conterrà tutte le AD Semplici dal semilavorato
+        Vector<CourseBean> vM = new Vector<CourseBean>();
+        // Struttura che conterrà tutte le AD Semplici dal semilavorato
+        Vector<CourseBean> vUL = new Vector<CourseBean>();
+        // Struttura che conterrà tutte le AD Semplici dal semilavorato
+        Vector<CourseBean> vSM = new Vector<CourseBean>();
+        // Struttura che conterrà tutte le AD Semplici dal semilavorato
+        Vector<CourseBean> vMM = new Vector<CourseBean>();
+        // Struttura che conterrà tutte le AD Semplici dal semilavorato
+        Vector<CourseBean> vULM = new Vector<CourseBean>();
         // Instanzia nuova classe WebStorage per il recupero dei dati
         try {
             db = new DBWrapper();
         } catch (WebStorageException wse) {
             throw new CommandException(FOR_NAME + "Non e\' disponibile un collegamento al database\n." + wse.getMessage(), wse);
         }
+        /* ******************************************************************** *
+         *                     1  -  A D    S E M P L I C I                     *
+         * ******************************************************************** */
         // Recupera Attività Didattiche Semplici
         try {
-            v = db.getADSemplici();
+            v = db.getAD(Query.AD_SEMPLICI);
         } catch (NotFoundException nfe) {
             throw new CommandException(FOR_NAME + ": Impossibile recuperare un attributo obbligatorio.\n" + nfe.getMessage(), nfe);
         } catch (WebStorageException wse) {
@@ -318,88 +349,152 @@ public class ValuationCommand extends ItemBean implements Command {
             StackTraceElement[] stackTrace = e.getStackTrace();
             throw new CommandException(FOR_NAME + "Eccezione generica da " + this.getClass().getName() + ": " + e.getMessage() + "\n stack: " + stackTrace[0], e);
         }
-        /*
-         * Il funzionamento dell'algoritmo deve essere il seguente:
-         * 1. Crea 2 liste separate: lista delle AD di area medica/motorie e lista del resto delle AD (con CFU >= 4)
-         * 2. Su entrambe le liste applica gli stessi procedimenti, e cioè:
-         *      a. ordina la lista per id
-         *      b. individua le occorrenze uguali (doppi, tripli, quadrupli...) 
-         *      c. decide quale riga tenere delle righe uguali
-         *      d. elimina le altre e tiene solo quella
-         *      e. controlla delle righe rimaste quali sono uguali in tutto tranne che nel periodo
-         *      f. unisce i periodi
-         *      g. elimina le due righe originali e tiene solo la nuova con i periodi uniti
-         *      h. fa una lista a parte delle AD con i docenti ancora da definire
-         *      
-         */
-        // Ottiene i duplicati logici (righe con la stessa chiave e id diversi)
-        //duplicates = getLogicalDuplicates(v);
-        // Ottiene i duplicati da lavorare (righe con la stessa chiave base, id diversi e periodi uguali o diversi)
-        //duplicates = getDuplicates(v);
-        // Ordina i duplicati logici per chiave
-        //sortByCode(duplicates);
-        // Ottiene l'elenco del semilavato ripulito dai duplicati da lavorare e riunire una volta puliti
-        //ArrayList<CourseBean> candidates = clean(v);
-        // Individua le Attività Didattiche su cui applicare i criteri
-        //ArrayList<CourseBean> candidates = purge(v, new ArrayList<CourseBean>(duplicates));
-        /* Individua le Attività Didattiche Semplici da porre in valutazione */
-        // Trasforma il Vector di AD semilavorate in un ArrayList
-        //ArrayList<CourseBean> vAsArrayList = new ArrayList<CourseBean>(v);
-        /*
-         * LAVORA I CORSI DI AREA MEDICA
-         */
+        /* ******************************************************************* *
+         *  Individua le Attività Didattiche Semplici da porre in valutazione  *
+         * ******************************************************************* *
+         *       1a. - LAVORA I CORSI DI AREA MEDICA  (parte AD Semplici)      *
+         * ******************************************************************* */
         // Estrapola i corsi di area medica (es. 48)
-        ArrayList<CourseBean> medical = getMedicalCourses(v);
+        ArrayList<CourseBean> sMedical = getMedicalCourses(v);
         // Li ordina per id
-        sortById(medical);
+        sortById(sMedical);
         // Estrapola i corsi di area medica che sono presenti in occorrenze multiple (doppie)
-        ArrayList<CourseBean> medicalDuplicates = handleDuplicates(medical, READ_DUPLICATES);
+        ArrayList<CourseBean> sMedicalDuplicates = handleDuplicates(sMedical, READ_DUPLICATES);
         // Ordina i duplicati trovati
-        sortById(medicalDuplicates);
+        sortById(sMedicalDuplicates);
         // Rimuove (secondo un criterio logico non causale) una copia dei doppi, tenendo l'altra
-        ArrayList<CourseBean> medicalCleaned = handleDuplicates(medical, WRITE_DUPLICATES);
+        ArrayList<CourseBean> sMedicalCleaned = handleDuplicates(sMedical, WRITE_DUPLICATES);
         // Ordina le AD di area medica per codice fiscale docente
-        sortByCode(medicalCleaned);
+        sortByCode(sMedicalCleaned);
         /* Cerca di unire i periodi dove ci sono occorrenze doppie */
         // Ottiene la lista delle AD mediche uguali in tutto tranne che nel periodo (p. es. 6)
-        List<CourseBean> medicalDifferentByPeriod = getCoupletByPeriod(medicalCleaned);
+        List<CourseBean> sMedicalDifferentByPeriod = getCoupletByPeriod(sMedicalCleaned);
         // Riduce le righe unendo tutti i periodi, ed ottenendo così una lista di AD distinte
-        List<CourseBean> medicalMerged = mergeDates(new ArrayList<CourseBean>(medicalDifferentByPeriod));
+        List<CourseBean> sMedicalMerged = mergeDates(new ArrayList<CourseBean>(sMedicalDifferentByPeriod));
         // Fa una copia delle AD mediche con i doppioni già ripuliti
-        ArrayList<CourseBean> medicalAD = new ArrayList<CourseBean>(medicalCleaned);
+        ArrayList<CourseBean> sMedicalToEvaluate = new ArrayList<CourseBean>(sMedicalCleaned);
         // Toglie dalla lista originale delle AD mediche tutte le AD con i periodi da unire
-        medicalAD.removeAll(medicalDifferentByPeriod);
+        sMedicalToEvaluate.removeAll(sMedicalDifferentByPeriod);
         // Ci aggiunge i singoli con i periodi uniti 
-        medicalAD.addAll(medicalMerged);
-        /*
-         * LAVORA I CORSI DI AREA NON MEDICA
-         */
+        sMedicalToEvaluate.addAll(sMedicalMerged);
+        /* ******************************************************************* *
+         *      1b. - LAVORA I CORSI DI AREA NON MEDICA (parte AD Semplici)    *
+         * ******************************************************************* */
         // Estrapola i corsi di area NON medica
-        ArrayList<CourseBean> notMedical = discardMedicalCourses(v);
+        ArrayList<CourseBean> sNotMedical = discardMedicalCourses(v);
         // Estrapola i corsi di area NON medica papabili (CFU > 3)
-        ArrayList<CourseBean> notMedicalAndHeavy = getGreatherThan(notMedical, 3);
+        ArrayList<CourseBean> sNotMedicalAndHeavy = getGreatherOrEquals(sNotMedical, 4);
         // Li ordina per id
-        sortById(notMedicalAndHeavy);
+        sortById(sNotMedicalAndHeavy);
         // Estrapola i corsi di area NON medica che sono presenti in occorrenze multiple (doppie)
-        ArrayList<CourseBean> duplicates = handleDuplicates(notMedicalAndHeavy, READ_DUPLICATES);
+        ArrayList<CourseBean> sDuplicates = handleDuplicates(sNotMedicalAndHeavy, READ_DUPLICATES);
         // Ordina i duplicati trovati
-        sortById(duplicates);
+        sortById(sDuplicates);
         // Rimuove (secondo un criterio logico non causale) una copia dei doppi, tenendo l'altra
-        ArrayList<CourseBean> cleaned = handleDuplicates(notMedicalAndHeavy, WRITE_DUPLICATES);
+        ArrayList<CourseBean> sCleaned = handleDuplicates(sNotMedicalAndHeavy, WRITE_DUPLICATES);
         // Ordina le AD di area NON medica per codice fiscale docente
-        sortByCode(cleaned);
+        sortByCode(sCleaned);
         /* Cerca di unire i periodi dove ci sono occorrenze doppie */
         // Ottiene la lista delle AD NON mediche uguali in tutto tranne che nel periodo (p. es. 6)
-        List<CourseBean> differentByPeriod = getCoupletByPeriod(cleaned);
+        List<CourseBean> sDifferentByPeriod = getCoupletByPeriod(sCleaned);
         // Riduce le righe unendo tutti i periodi, ed ottenendo così una lista di AD distinte
-        List<CourseBean> merged = mergeDates(new ArrayList<CourseBean>(differentByPeriod));
+        List<CourseBean> sMerged = mergeDates(new ArrayList<CourseBean>(sDifferentByPeriod));
         // Fa una copia delle AD mediche con i doppioni già ripuliti
-        ArrayList<CourseBean> toEvaluate = new ArrayList<CourseBean>(cleaned);
+        ArrayList<CourseBean> sToEvaluate = new ArrayList<CourseBean>(sCleaned);
         // Toglie dalla lista originale delle AD mediche tutte le AD con i periodi da unire
-        toEvaluate.removeAll(differentByPeriod);
+        sToEvaluate.removeAll(sDifferentByPeriod);
         // Ci aggiunge i singoli con i periodi uniti 
-        toEvaluate.addAll(merged);
-        
+        sToEvaluate.addAll(sMerged);
+        /* ******************************************************************** *
+         *                          2  -  M O D U L I                           *
+         * ******************************************************************** */
+        // Recupera Attività Didattiche Moduli
+        try {
+            vM = db.getAD(Query.AD_MODULI);
+        } catch (NotFoundException nfe) {
+            throw new CommandException(FOR_NAME + ": Impossibile recuperare un attributo obbligatorio.\n" + nfe.getMessage(), nfe);
+        } catch (WebStorageException wse) {
+            StackTraceElement[] stackTrace = wse.getStackTrace();
+            StringBuffer sb = new StringBuffer();
+            for (int i = 0; i<stackTrace.length; i++) {
+                StackTraceElement ste = stackTrace[i];
+                sb.append(ste.getClassName());
+                sb.append(".");
+                sb.append(ste.getMethodName());
+                sb.append(" (");
+                sb.append(ste.getClassName());
+                sb.append(":");
+                sb.append(ste.getLineNumber());
+                sb.append(")");
+                sb.append("\n\t");
+            }
+            throw new CommandException(FOR_NAME + "Si e\' verificato un problema nel recuperare i dati relativi all'elenco delle AD.\n" + wse.getMessage() + "\n stack: " + sb, wse);
+        } catch (NullPointerException npe) {
+            StackTraceElement[] stackTrace = npe.getStackTrace();
+            throw new CommandException(FOR_NAME + "Si e\' verificato un puntamento a null in " + this.getClass().getName() + ": " + npe.getMessage() + "\n stack: " + stackTrace[0], npe);            
+        } catch (Exception e) {
+            StackTraceElement[] stackTrace = e.getStackTrace();
+            throw new CommandException(FOR_NAME + "Eccezione generica da " + this.getClass().getName() + ": " + e.getMessage() + "\n stack: " + stackTrace[0], e);
+        }
+        /* ******************************************************************* *
+         *   Individua le Attività Didattiche MODULI da porre in valutazione   *
+         * ******************************************************************* *
+         *          1a. - LAVORA I CORSI DI AREA MEDICA (parte MODULI)         *
+         * ******************************************************************* */
+        // Estrapola i corsi di area medica (es. 48)
+        ArrayList<CourseBean> mMedical = getMedicalCourses(vM);
+        // Li ordina per id
+        sortById(mMedical);
+        // Estrapola i corsi di area medica che sono presenti in occorrenze multiple (doppie)
+        ArrayList<CourseBean> mMedicalDuplicates = handleDuplicates(mMedical, READ_DUPLICATES);
+        // Ordina i duplicati trovati
+        sortById(mMedicalDuplicates);
+        // Rimuove (secondo un criterio logico non causale) una copia dei doppi, tenendo l'altra
+        ArrayList<CourseBean> mMedicalCleaned = handleDuplicates(mMedical, WRITE_DUPLICATES);
+        // Ordina le AD di area medica per codice fiscale docente
+        sortByCode(mMedicalCleaned);
+        /* Cerca di unire i periodi dove ci sono occorrenze doppie */
+        // Ottiene la lista delle AD mediche uguali in tutto tranne che nel periodo (p. es. 6)
+        List<CourseBean> mMedicalDifferentByPeriod = getCoupletByPeriod(mMedicalCleaned);
+        // Riduce le righe unendo tutti i periodi, ed ottenendo così una lista di AD distinte
+        List<CourseBean> mMedicalMerged = mergeDates(new ArrayList<CourseBean>(mMedicalDifferentByPeriod));
+        // Fa una copia delle AD mediche con i doppioni già ripuliti
+        ArrayList<CourseBean> mMedicalToEvaluate = new ArrayList<CourseBean>(mMedicalCleaned);
+        // Toglie dalla lista originale delle AD mediche tutte le AD con i periodi da unire
+        mMedicalToEvaluate.removeAll(mMedicalDifferentByPeriod);
+        // Ci aggiunge i singoli con i periodi uniti 
+        mMedicalToEvaluate.addAll(mMedicalMerged);
+        /* ******************************************************************* *
+         *         1b. - LAVORA I CORSI DI AREA NON MEDICA (parte MODULI)      *
+         * ******************************************************************* */
+        // Estrapola i corsi di area NON medica
+        ArrayList<CourseBean> mNotMedical = discardMedicalCourses(v);
+        // Estrapola i corsi di area NON medica papabili (CFU > 3)
+        ArrayList<CourseBean> mNotMedicalAndHeavy = getGreatherOrEquals(mNotMedical, 4);
+        // Li ordina per id
+        sortById(mNotMedicalAndHeavy);
+        // Estrapola i corsi di area NON medica che sono presenti in occorrenze multiple (doppie)
+        ArrayList<CourseBean> mDuplicates = handleDuplicates(mNotMedicalAndHeavy, READ_DUPLICATES);
+        // Ordina i duplicati trovati
+        sortById(mDuplicates);
+        // Rimuove (secondo un criterio logico non causale) una copia dei doppi, tenendo l'altra
+        ArrayList<CourseBean> mCleaned = handleDuplicates(mNotMedicalAndHeavy, WRITE_DUPLICATES);
+        // Ordina le AD di area NON medica per codice fiscale docente
+        sortByCode(mCleaned);
+        /* Cerca di unire i periodi dove ci sono occorrenze doppie */
+        // Ottiene la lista delle AD NON mediche uguali in tutto tranne che nel periodo (p. es. 6)
+        List<CourseBean> mDifferentByPeriod = getCoupletByPeriod(mCleaned);
+        // Riduce le righe unendo tutti i periodi, ed ottenendo così una lista di AD distinte
+        List<CourseBean> mMerged = mergeDates(new ArrayList<CourseBean>(mDifferentByPeriod));
+        // Fa una copia delle AD mediche con i doppioni già ripuliti
+        ArrayList<CourseBean> mToEvaluate = new ArrayList<CourseBean>(mCleaned);
+        // Toglie dalla lista originale delle AD mediche tutte le AD con i periodi da unire
+        mToEvaluate.removeAll(mDifferentByPeriod);
+        // Ci aggiunge i singoli con i periodi uniti 
+        mToEvaluate.addAll(mMerged);
+        /* ******************************************************************** *
+         *              Passaggio in Request di valori e attributi              *
+         * ******************************************************************** */
         // Imposta il testo del Titolo da visualizzare prima dell'elenco
         req.setAttribute("titoloE", "AD Semplici");
         // Salva nella request: Titolo (da mostrare nell'HTML)
@@ -414,17 +509,17 @@ public class ValuationCommand extends ItemBean implements Command {
         //req.setAttribute("elenco", medicalAD);
         //req.setAttribute("doppioni", medicalCleaned);
         
-        req.setAttribute("adFinal", toEvaluate);
-        req.setAttribute("adDaUnire", differentByPeriod);
-        req.setAttribute("ripuliti", cleaned);
-        req.setAttribute("duplicati", duplicates);
-        req.setAttribute("candidati", notMedicalAndHeavy);
+        req.setAttribute("adFinal", mToEvaluate);
+        req.setAttribute("adDaUnire", mDifferentByPeriod);
+        req.setAttribute("ripuliti", mCleaned);
+        req.setAttribute("duplicati", mDuplicates);
+        req.setAttribute("candidati", mNotMedicalAndHeavy);
         
-        req.setAttribute("adMYFinal", medicalAD);
-        req.setAttribute("adMYDaUnire", medicalDifferentByPeriod);
-        req.setAttribute("ripulitiMY", medicalCleaned);
-        req.setAttribute("duplicatiMY", medicalDuplicates);
-        req.setAttribute("adMY", medical);
+        req.setAttribute("adMYFinal", mMedicalToEvaluate);
+        req.setAttribute("adMYDaUnire", mMedicalDifferentByPeriod);
+        req.setAttribute("ripulitiMY", mMedicalCleaned);
+        req.setAttribute("duplicatiMY", mMedicalDuplicates);
+        req.setAttribute("adMY", mMedical);
 
         req.setAttribute("elenco", v);
     }
@@ -594,7 +689,7 @@ public class ValuationCommand extends ItemBean implements Command {
      * con un numero di crediti totali strettamente maggiori 
      * di quelli di un intero passato come argomento.</p>
      * 
-     * @param l lista di AD in cui cercare le AD in base al criterio che abbiano un peso maggiore strettamente maggiore di <code>credits</code>
+     * @param l lista di AD in cui cercare le AD in base al criterio che abbiano un peso strettamente maggiore di <code>credits</code>
      * @param credits criterio di pesatura in base a cui tenere o scartare ciascuna AD passata al vaglio
      * @return <code>ArrayList&lt;CourseBean&gt;</code> - lista delle AD rispondenti al criterio
      * @throws CommandException se si verifica un problema nello scorrimento di liste o in qualche altro tipo di puntamento
@@ -627,6 +722,47 @@ public class ValuationCommand extends ItemBean implements Command {
         }        
         return greatherThan;
     }   
+    
+    
+    /**
+     * <p>Partendo da una lista di AD (p.es. dalla lista delle 
+     * AD semplici non di medicina) restituisce tutte le AD 
+     * con un numero di crediti totali maggiori o uguali 
+     * di quelli di un intero passato come argomento.</p>
+     * 
+     * @param l lista di AD in cui cercare le AD in base al criterio che abbiano un peso maggiore o uguale di <code>credits</code>
+     * @param credits criterio di pesatura in base a cui tenere o scartare ciascuna AD passata al vaglio
+     * @return <code>ArrayList&lt;CourseBean&gt;</code> - lista delle AD rispondenti al criterio
+     * @throws CommandException se si verifica un problema nello scorrimento di liste o in qualche altro tipo di puntamento
+     */
+    private static ArrayList<CourseBean> getGreatherOrEquals(ArrayList<CourseBean> l, 
+                                                             int credits)
+                                                      throws CommandException {
+        ArrayList<CourseBean> greatherThan = new ArrayList<CourseBean>();
+        try {
+            for (int i = 0; i < l.size(); i++) {
+                CourseBean current = l.get(i);
+                // Se i crediti totali sono maggiori di credits...
+                if (current.getCreditiTotali() >= credits) {
+                    // ...conserva l'AD
+                    greatherThan.add(current);
+                }
+            }
+        } catch (IndexOutOfBoundsException iobe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nello scorrimento della lista delle AD grezze o di quelle duplicate.\n" + iobe.getMessage();
+            throw new CommandException(msg, iobe);
+        } catch (ClassCastException cce) {
+            String msg = FOR_NAME + "Si e\' verificato un problema in qualche conversione di tipo.\n" + cce.getMessage();
+            throw new CommandException(msg, cce);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n" + npe.getMessage();
+            throw new CommandException(msg, npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
+            throw new CommandException(msg, e);
+        }        
+        return greatherThan;
+    }
     
     
     /**

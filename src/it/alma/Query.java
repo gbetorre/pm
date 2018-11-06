@@ -546,6 +546,44 @@ public interface Query extends Serializable {
           + " --LIMIT 30";
     
     /**
+     * Query per estrarre le tuple delle AD Semplici.
+     */
+    public static final String AD_MODULI = 
+            "SELECT " 
+          + " \"row.names\"             AS \"id\""
+          + ",\"CodiceCDSWI\"           AS \"codiceCdSWI\""
+          + ",\"CodiceCDSUGOV\"         AS \"codiceCdSUGOV\""
+          + ",\"NomeCDS\"               AS \"nomeCdSWI\""
+          + ",\"NOMECDS2\"              AS \"nomeCdSUGOV\""
+          + ",\"DipartimentoScuola\"    AS \"dipartimentoScuola\""
+          + ",\"SedePrimariaCDS\"       AS \"sedePrimariaCDS\""
+          + ",\"CodiceADWI\"            AS \"codiceADWI\""
+          + ",\"CodiceADUGOV\"          AS \"codiceADUGOV\""
+          + ",\"AD\"                    AS \"nomeInsegnamento\""
+          + ",\"Modulo\"                AS \"nomeModulo\""
+          + ",\"MODULO2\"               AS \"motivo\""
+          + ",\"UL\"                    AS \"nomeUl\""
+          + ",\"Discriminante\"         AS \"discriminante\""
+          + ",\"CFUtotali\"             AS \"crediti\""
+          + ",\"CFUtotali\"             AS \"creditiTotali\""
+          + ",\"CFUlezione\"            AS \"creditiLezione\""
+          + ",\"SSD\"                   AS \"SSD\""
+          + ",\"CognomeDocente\"        AS \"cognomeDocente\""
+          + ",\"NomeDocente\"           AS \"nomeDocente\""
+          + ",\"CodiceFiscaleDocente\"  AS \"codiceFiscaleDocente\""
+          + ",\"Coordinatore\"          AS \"coordinatore\""
+          + ",\"Orelezione\"            AS \"oreLezione\""
+          + ",\"Orelaboratorio\"        AS \"oreLaboratorio\""
+          + ",\"Orealtro\"              AS \"oreAltro\""
+          + ",\"Oreseminario\"          AS \"oreSeminario\""
+          + ",\"Oreesercitazione\"      AS \"oreEsercitazione\""
+          + ",\"Oretirocinio\"          AS \"oreTirocinio\""
+          + ",\"InizioPerDid\"          AS \"inizioPerDid\""
+          + ",\"FinePerDid\"            AS \"finePerDid\""
+          + " FROM \"ADModuli-2018-I\" MOD"
+          + " ORDER BY \"codiceFiscaleDocente\", \"codiceADUGOV\", \"codiceCdSUGOV\", \"inizioPerDid\", \"finePerDid\"";
+    
+    /**
      * Query per estrarre le tuple delle Unit&agrave; Logistiche.
      */
     public static final String UL = 
