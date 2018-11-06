@@ -62,12 +62,12 @@
                   <c:choose>
                     <c:when test="${skill.presenza==true}">
                       <div class="form-check text-center">
-                        <input type="checkbox" class="form-check-input" id="cPresenza" name="cPresenza" value="" checked disabled="true">
+                        <input type="checkbox" class="form-check-input" id="cPresenza" name="cPresenza" value="" checked disabled>
                       </div>
                     </c:when>
                     <c:otherwise>
                       <div class="form-check text-center">
-                        <input type="checkbox" class="form-check-input" id="cPresenza" name="cPresenza" value="" disabled="true">
+                        <input type="checkbox" class="form-check-input" id="cPresenza" name="cPresenza" value="" disabled>
                       </div>
                     </c:otherwise>
                   </c:choose>
