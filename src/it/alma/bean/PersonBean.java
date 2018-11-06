@@ -234,6 +234,10 @@ public class PersonBean implements Serializable {
     //private Vector<QualificaBean> qualificheAfferenzeSecondarie;
     /** Flag specificante se trattasi di un tecnico di ex-facolt&agrave; */
     private boolean isTAFacolta;
+    /* ************************************************************** *  
+     *                       Ruolo della persona                      *
+     * ************************************************************** */
+    private Vector<CodeBean> ruoli;
     
     
     /**
@@ -270,6 +274,7 @@ public class PersonBean implements Serializable {
         url=null;
         isTAFacolta = false;
         idTipoBiblioCR = peso1 = peso2 = -2;
+        ruoli = null;
     }
     
 
@@ -1888,6 +1893,25 @@ public class PersonBean implements Serializable {
      */
     public void setPresentazione(String presentazione) {
         this.presentazione = presentazione;
+    }
+
+    /* ******************************************************* *
+     *           Metodi getter e setter per ruoli              *
+     * ******************************************************* */
+    /**
+     * Restituisce un vector contenente i ruoli della persona
+     * @return <code>ruoli</code> - ruoli della persona nei vari progetti
+     */
+    public Vector<CodeBean> getRuoli() {
+        return ruoli;
+    }
+
+    /**
+     * Imposta i ruoli che una persona ha nei progetti
+     * @param ruoli - ruoli da impostare
+     */
+    public void setRuoli(Vector<CodeBean> ruoli) {
+        this.ruoli = ruoli;
     }
 
 }
