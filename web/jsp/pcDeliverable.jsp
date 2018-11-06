@@ -58,7 +58,7 @@
     <hr class="separatore" /> 
     <div class="tab-content responsive hidden-xs hidden-sm">
       <div role="tabpanel" class="tab-pane active" id="tab-pcdeliverable">
-        <textarea name="pcd-descrizione" class="form-control" aria-label="With textarea">${p.deliverable}</textarea>
+        <textarea name="pcd-descrizione" class="form-control" aria-label="With textarea" readonly>${p.deliverable}</textarea>
       </div>
     </div>
     <br><br>
@@ -70,8 +70,7 @@
           </span>
         </div>
         <div class="col-8 text-center">
-      		<input type="button" class="btn btn-primary" name="modifica" value="Modifica" >
-      		<input type="submit" class="btn btn-primary" name="salva" value="Salva">
+          <%@ include file="panel.jspf" %>
         </div>
         <div class="col-2">
           <span class="float-right">

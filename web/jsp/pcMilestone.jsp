@@ -60,18 +60,18 @@
           <tbody>
           <c:forEach var="act" items="${requestScope.attivita}" varStatus="loop">
             <tr>
-              <th scope="row"><input type="text" class="form-control" id="aName" value="<c:out value="${act.nome}" />"></th>
-              <th scope="row"><input type="text" class="form-control" id="aDesc" value="<c:out value="${act.descrizione}" />"></th>
+              <th scope="row"><input type="text" class="form-control" id="aName" value="<c:out value="${act.nome}"/>" readonly></th>
+              <th scope="row"><input type="text" class="form-control" id="aDesc" value="<c:out value="${act.descrizione}"/>" readonly></th>
               <th scope="row">
                 <c:choose>
                   <c:when test="${act.milestone==true}">
                     <div class="form-check text-center">
-                      <input type="checkbox" class="form-check-input" id="cMilestone" name="cMilestone" value="" checked>
+                      <input type="checkbox" class="form-check-input" id="cMilestone" name="cMilestone" value="" checked disabled="true">
                     </div>
                   </c:when>
                   <c:otherwise>
                     <div class="form-check text-center">
-                      <input type="checkbox" class="form-check-input" id="cMilestone" name="cMilestone" value="">
+                      <input type="checkbox" class="form-check-input" id="cMilestone" name="cMilestone" value="" disabled="true">
                     </div>
                   </c:otherwise>
                 </c:choose>
@@ -80,7 +80,7 @@
           </c:forEach>
           </tbody>
         </table>
-        <div class="text-center"><input type="button" class="btn btn-primary" name="addAttivita" value="Aggiungi" ></div>
+        <div class="text-center"><input type="button" class="btn btn-primary" name="addAttivita" value="Aggiungi"></div>
         <hr class="separatore" />
         <div id="container-fluid">
           <div class="row">
@@ -90,8 +90,7 @@
               </span>
             </div>
             <div class="col-8 text-center">
-              <input type="button" class="btn btn-primary" name="modifica" value="Modifica" >
-              <input type="submit" class="btn btn-primary" name="salva" value="Salva">
+              <%@ include file="panel.jspf" %>
             </div>
             <div class="col-2">
               <span class="float-right">

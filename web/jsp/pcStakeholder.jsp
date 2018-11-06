@@ -60,19 +60,19 @@
 		<div role="tabpanel" class="tab-pane active" id="tab-pcstakeholder">
 		Chiave
 		<br>
-		<textarea name="pcs-chiave" class="form-control" aria-label="With textarea">${p.stakeholderChiave}</textarea>
+		<textarea name="pcs-chiave" class="form-control" aria-label="With textarea" readonly>${p.stakeholderChiave}</textarea>
 		<br><br>
 		Istituzionale
 		<br>
-		<textarea name="pcs-istituzionale" class="form-control" aria-label="With textarea">${p.stakeholderIstituzionali}</textarea>
+		<textarea name="pcs-istituzionale" class="form-control" aria-label="With textarea" readonly>${p.stakeholderIstituzionali}</textarea>
 		<br><br>
 		Marginale
 		<br>
-		<textarea name="pcs-marginale" class="form-control" aria-label="With textarea">${p.stakeholderMarginali}</textarea>
+		<textarea name="pcs-marginale" class="form-control" aria-label="With textarea" readonly>${p.stakeholderMarginali}</textarea>
 		<br><br>
 		Operativo
 		<br>
-		<textarea name="pcs-operativo" class="form-control" aria-label="With textarea">${p.stakeholderOperativi}</textarea>
+		<textarea name="pcs-operativo" class="form-control" aria-label="With textarea" readonly>${p.stakeholderOperativi}</textarea>
 		<br><br>
 		
 		<div id="container-fluid">
@@ -83,9 +83,7 @@
           </span>
         </div>
         <div class="col-8 text-center">
-      		<input type="button" class="btn btn-primary" name="modifica" value="Modifica" >
-      		<input type="submit" class="btn btn-primary" name="salva" value="Salva">
-          <input type="reset" class="btn btn-primary" name="annulla" value="Annulla">
+          <%@ include file="panel.jspf" %>
         </div>
         <div class="col-2">
           <span class="float-right">
@@ -98,14 +96,3 @@
   </div>
 </div>
 </form>
-<script>
-	function modify(){
-		$('#textarea').editable({
-            type:  'textarea',
-            pk:    1,
-            name:  'comments',
-            url:   'post.php',  
-            title: 'Enter comments'
-         });
-	}
-</script>

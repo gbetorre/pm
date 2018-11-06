@@ -56,18 +56,18 @@
           <tbody>
             <c:forEach var="skill" items="${requestScope.competenze}" varStatus="loop">
               <tr>
-                <th scope="row"><input type="text" class="form-control" id="sName" value="<c:out value="${skill.nome}" />"></th>
-                <th scope="row"><input type="text" class="form-control" id="sInfo" value="<c:out value="${skill.informativa}" />"></th>
+                <th scope="row"><input type="text" class="form-control" id="sName" value="<c:out value="${skill.nome}" />" readonly></th>
+                <th scope="row"><input type="text" class="form-control" id="sInfo" value="<c:out value="${skill.informativa}" />" readonly></th>
                 <th scope="row">
                   <c:choose>
                     <c:when test="${skill.presenza==true}">
                       <div class="form-check text-center">
-                        <input type="checkbox" class="form-check-input" id="cPresenza" name="cPresenza" value="" checked>
+                        <input type="checkbox" class="form-check-input" id="cPresenza" name="cPresenza" value="" checked disabled="true">
                       </div>
                     </c:when>
                     <c:otherwise>
                       <div class="form-check text-center">
-                        <input type="checkbox" class="form-check-input" id="cPresenza" name="cPresenza" value="">
+                        <input type="checkbox" class="form-check-input" id="cPresenza" name="cPresenza" value="" disabled="true">
                       </div>
                     </c:otherwise>
                   </c:choose>
@@ -80,15 +80,15 @@
         <hr class="separatore" />
         <h4>Fornitori chiave esterni:</h4>
         <br>
-        <textarea name="pcr-chiaveesterni" class="form-control" aria-label="With textarea">${p.fornitoriChiaveEsterni}</textarea>
+        <textarea name="pcr-chiaveesterni" class="form-control" aria-label="With textarea" readonly>${p.fornitoriChiaveEsterni}</textarea>
         <hr class="separatore" />
         <h4>Fornitori chiave interni:</h4>
         <br>
-        <textarea name="pcr-chiaveinterni" class="form-control" aria-label="With textarea">${p.fornitoriChiaveInterni}</textarea>
+        <textarea name="pcr-chiaveinterni" class="form-control" aria-label="With textarea" readonly>${p.fornitoriChiaveInterni}</textarea>
         <hr class="separatore" />
         <h4>Servizi di ateneo:</h4>
         <br>
-        <textarea name="pcr-serviziateneo" class="form-control" aria-label="With textarea">${p.serviziAteneo}</textarea>
+        <textarea name="pcr-serviziateneo" class="form-control" aria-label="With textarea" readonly>${p.serviziAteneo}</textarea>
         <hr class="separatore" />
         <div id="container-fluid">
         <div class="row">
@@ -98,8 +98,7 @@
             </span>
           </div>
           <div class="col-8 text-center">
-            <input type="button" class="btn btn-primary" name="modifica" value="Modifica" >
-            <input type="submit" class="btn btn-primary" name="salva" value="Salva">
+            <%@ include file="panel.jspf" %>
           </div>
           <div class="col-2">
             <span class="float-right">
