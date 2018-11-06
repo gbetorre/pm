@@ -72,11 +72,11 @@
           <tbody>
           <c:forEach var="risk" items="${requestScope.rischi}" varStatus="loop">
               <tr>
-                <th scope="row"><input type="text" class="form-control" id="rName" value="<c:out value="${risk.nome}" />"></th>
-                <th scope="row"><input type="text" class="form-control" id="rInfo" value="<c:out value="${risk.informativa}" />"></th>
-                <th scope="row"><input type="text" class="form-control" id="rImp" value="<c:out value="${risk.impatto}" />"></th>
-                <th scope="row"><input type="text" class="form-control" id="rLevel" value="<c:out value="${risk.livello}" />"></th>
-                <th scope="row"><input type="text" class="form-control" id="rStatus" value="<c:out value="${risk.stato}" />"></th>             
+                <th scope="row"><input type="text" class="form-control" id="rName" value="<c:out value="${risk.nome}" />" readonly></th>
+                <th scope="row"><input type="text" class="form-control" id="rInfo" value="<c:out value="${risk.informativa}" />" readonly></th>
+                <th scope="row"><input type="text" class="form-control" id="rImp" value="<c:out value="${risk.impatto}" />" readonly></th>
+                <th scope="row"><input type="text" class="form-control" id="rLevel" value="<c:out value="${risk.livello}" />" readonly></th>
+                <th scope="row"><input type="text" class="form-control" id="rStatus" value="<c:out value="${risk.stato}" />" readonly></th>             
               </tr>
             </c:forEach>
           </tbody>
@@ -91,9 +91,7 @@
               </span>
             </div>
             <div class="col-8 text-center">
-              <input type="button" class="btn btn-primary" name="modifica" value="Modifica" >
-              <input type="submit" class="btn btn-primary" name="salva" value="Salva">
-              <input type="reset" class="btn btn-primary" name="annulla" value="Annulla">
+              <%@ include file="panel.jspf" %>
             </div>
             <div class="col-2">
               <span class="float-right">
