@@ -74,19 +74,19 @@
             </span>
           </div>
           <div class="col-8 text-center">
-        		<input type="button" class="btn btn-primary" name="modifica" value="Modifica" >
             <c:set var="ruoli" value="${sessionScope.usr.ruoli}" scope="page" />
             <c:set var="ruolo" value="" scope="page" />
-            <!-- <c:set var="found" value="${ruoli.size()}" scope="page" /> -->
-            <!--  <c:set var="found" value="${fn:length(ruoli)}" scope="page" /> -->
+            <%-- <c:set var="found" value="${ruoli.size()}" scope="page" /> --%>
+            <%--  <c:set var="found" value="${fn:length(ruoli)}" scope="page" /> --%>
             <fmt:parseNumber var="found" type="number" value="${fn:length(ruoli)}" />
-            <c:forEach var="c" items="${ruoli}" varStatus="loop" begin="0" end="found">    <!-- testare -->
+            <c:forEach var="c" items="${ruoli}" varStatus="loop" begin="0" end="${found}">    <!-- testare -->
               <c:if test="${c.id eq p.id}">                                <!-- testare -->
                 <c:set var="ruolo" value="${c.nome}" scope="page" />
                 <c:set var="found" value="${loop.getIndex()}" scope="page" />    <!-- testare -->
               </c:if>
             </c:forEach>
             <c:if test="${ruolo eq 'PMOATE'}">
+              <input type="button" class="btn btn-primary" name="modifica" value="Modifica" >
         		  <input type="submit" class="btn btn-primary" name="salva" value="Salva">
             </c:if>
           </div>
