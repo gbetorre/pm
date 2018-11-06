@@ -36,20 +36,17 @@
 
 package it.alma;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Vector;
 import java.util.logging.Logger;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.servlet.ServletException;
 import javax.sql.DataSource;
 import javax.swing.JOptionPane;
 
@@ -64,7 +61,6 @@ import it.alma.bean.ProjectBean;
 import it.alma.bean.RiskBean;
 import it.alma.bean.SkillBean;
 import it.alma.exception.AttributoNonValorizzatoException;
-import it.alma.exception.NotFoundException;
 import it.alma.exception.WebStorageException;
 
 
@@ -198,6 +194,9 @@ public class DBWrapper implements Query {
     }
     
     
+    /* ********************************************************** *
+     *                        Metodi di POL                       *
+     * ********************************************************** */
     /**
      * <p>Restituisce un PersonBean rappresentante un utente loggato.</p>
      * 
@@ -242,45 +241,6 @@ public class DBWrapper implements Query {
             }
         }
     }    
-    
-    
-    /**
-     * <p>Restituisce un Vector di CourseBean di tipo "AD Semplice".</p>
-     *
-     * @return <code>Vector&lt;CourseBean&gt;</code> - lista di CourseBean rappresentanti ciascuno un'AD Semplice
-     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
-     */
-    @SuppressWarnings({ "null", "static-method" })
-    public Vector<CourseBean> getADSemplici()
-                                     throws WebStorageException {
-        ResultSet rs = null;
-        Connection con = null;
-        PreparedStatement pst = null;
-        CourseBean course = null;
-        Vector<CourseBean> lista = new Vector<CourseBean>();
-        try {
-            con = alma_manager.getConnection();
-            pst = con.prepareStatement(AD_SEMPLICI);
-            pst.clearParameters();
-            rs = pst.executeQuery();
-            while (rs.next()) {
-                course = new CourseBean();
-                BeanUtil.populate(course, rs);
-                lista.add(course);
-            }
-            return lista;
-        } catch (SQLException sqle) {
-            throw new WebStorageException(sqle.getMessage());
-        } finally {
-            try {
-                con.close();
-            } catch (NullPointerException npe) {
-                throw new WebStorageException(npe.getMessage());
-            } catch (SQLException sqle) {
-                throw new WebStorageException(sqle.getMessage());
-            }
-        }
-    }
     
     
     /**
@@ -413,7 +373,7 @@ public class DBWrapper implements Query {
      * @param params - hashmap che contiene i parametri che si vogliono aggiornare del progetto
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
      */
-    @SuppressWarnings("static-method")
+    @SuppressWarnings({ "null", "static-method" })
     public void updateProjectPart(int idProj, 
                                   HashMap<String, HashMap<String, String>>params) 
                            throws WebStorageException {
@@ -537,6 +497,7 @@ public class DBWrapper implements Query {
      * @return <code>Vector&lt;AttvitaBean&gt;</code> - ActivityBean rappresentante l'attivit&agrave; del progetto.
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
+    @SuppressWarnings({ "null", "static-method" })
     public Vector<ActivityBean> getActivities(int projId)
             throws WebStorageException{
         ResultSet rs = null;
@@ -581,6 +542,7 @@ public class DBWrapper implements Query {
      * @return <code>Vector&lt;SkillBean&gt;</code> - SkillBean rappresentante le competenze del progetto.
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
+    @SuppressWarnings({ "null", "static-method" })
     public Vector<SkillBean> getSkills(int projId)
             throws WebStorageException{
         ResultSet rs = null;
@@ -625,6 +587,7 @@ public class DBWrapper implements Query {
      * @return <code>Vector&lt;RiskBean&gt;</code> - RiskBean rappresentante i rischi del progetto.
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
+    @SuppressWarnings({ "null", "static-method" })
     public Vector<RiskBean> getRisks(int projId)
             throws WebStorageException{
         ResultSet rs = null;
@@ -657,6 +620,49 @@ public class DBWrapper implements Query {
                 throw new WebStorageException(msg + npe.getMessage());
             } catch (SQLException sqle) {
                 throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /* ********************************************************** *
+     *                        Metodi di QOL                       *
+     *                          (ValDid)                          *
+     * ********************************************************** */
+    /**
+     * <p>Restituisce un Vector di CourseBean di tipo "AD Semplice".</p>
+     *
+     * @return <code>Vector&lt;CourseBean&gt;</code> - lista di CourseBean rappresentanti ciascuno un'AD Semplice
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public Vector<CourseBean> getAD(String query)
+                             throws WebStorageException {
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        CourseBean course = null;
+        Vector<CourseBean> lista = new Vector<CourseBean>();
+        try {
+            con = alma_manager.getConnection();
+            pst = con.prepareStatement(query);
+            pst.clearParameters();
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                course = new CourseBean();
+                BeanUtil.populate(course, rs);
+                lista.add(course);
+            }
+            return lista;
+        } catch (SQLException sqle) {
+            throw new WebStorageException(sqle.getMessage());
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                throw new WebStorageException(npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(sqle.getMessage());
             }
         }
     }
