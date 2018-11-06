@@ -401,8 +401,8 @@ public class DBWrapper implements Query {
         HashMap<String, String> paramsDeliverable = params.get(PART_PROJECT_CHARTER_DELIVERABLE);
         HashMap<String, String> paramsResource = params.get(PART_PROJECT_CHARTER_RESOURCE);
         HashMap<String, String> paramsConstraint = params.get(PART_PROJECT_CHARTER_CONSTRAINT);
+        HashMap<String, String> paramsMilestone = params.get(PART_PROJECT_CHARTER_MILESTONE);        
         HashMap<String, String> paramsStatus = params.get(PART_PROJECT);
-        
         try {
             con = pol_manager.getConnection();
             if (Utils.voidValues(paramsVision)) {
@@ -468,6 +468,20 @@ public class DBWrapper implements Query {
                 con.commit();
             }
             pst = null;
+            if (Utils.voidValues(paramsMilestone)) {
+                pst = con.prepareStatement(UPDATE_ATTIVITA_FROM_PROGETTO);
+                con.setAutoCommit(false);
+                pst.clearParameters();
+                pst.setString(1, paramsMilestone.get("pcm-nome"));
+                pst.setString(2, paramsMilestone.get("pcm-descrizione"));
+                pst.setBoolean(3, Boolean.parseBoolean(paramsMilestone.get("pcm-milestone")));
+                pst.setInt(4, Integer.parseInt(paramsMilestone.get("pcm-id")));
+                pst.setInt(5, idProj);
+                //JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+                pst.executeUpdate();
+                con.commit();
+            }
+            pst = null;
             if (Utils.voidValues(paramsStatus) && !paramsStatus.containsValue("1970-00-01")) {
                 pst = con.prepareStatement(UPDATE_STATUS);
                 con.setAutoCommit(false);
@@ -492,7 +506,13 @@ public class DBWrapper implements Query {
             String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il progetto.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        } finally {
+        } catch (NumberFormatException nfe) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il progetto.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + nfe.getMessage(), nfe);
+        } 
+        //TODO catch boolean
+        finally {
             try {
                 con.close();
             } catch (NullPointerException npe) {
