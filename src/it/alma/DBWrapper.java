@@ -204,15 +204,17 @@ public class DBWrapper implements Query {
      * @param password - password della persona che ha eseguito il login
      * @return <code>PersonBean</code> - PersonBean rappresentante l'utente loggato
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e l'id della persona non &egrave; stato valorizzato (&egrave; un dato obbligatorio) 
      */
     @SuppressWarnings({ "null", "static-method" })
     public PersonBean getUser(String username,
                               String password)
-                       throws WebStorageException {
-        ResultSet rs = null;
+                       throws WebStorageException, AttributoNonValorizzatoException {
+        ResultSet rs, rs2 = null;
         Connection con = null;
         PreparedStatement pst = null;
         PersonBean usr = null;
+        Vector<CodeBean> vRuoli = new Vector<CodeBean>();
         try {
             con = pol_manager.getConnection();
             pst = con.prepareStatement(GET_USR);
@@ -224,9 +226,23 @@ public class DBWrapper implements Query {
                 usr = new PersonBean();
                 BeanUtil.populate(usr, rs);
             }
+            pst = con.prepareStatement(GET_RUOLIPERSONA);
+            pst.clearParameters();
+            pst.setInt(1, usr.getId());
+            rs2 = pst.executeQuery();
+            while(rs2.next()) {
+                CodeBean ruolo = new CodeBean();
+                BeanUtil.populate(ruolo, rs2);
+                vRuoli.add(ruolo);
+            }
+            usr.setRuoli(vRuoli);
             return usr;
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } catch (AttributoNonValorizzatoException sqle) {
+            String msg = FOR_NAME + "Oggetto id della persona non valorizzato; problema nella query dell\'utente.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
         } finally {

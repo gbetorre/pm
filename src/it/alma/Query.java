@@ -135,7 +135,19 @@ public interface Query extends Serializable {
             "   WHERE   login = ?" +
             "       AND passwd = ?"
             ;
-    
+        
+    /**
+     * 
+     */
+    public static final String GET_RUOLIPERSONA = 
+            "SELECT " +
+            "       RG.id_progetto  AS \"id\"" +
+            "   ,   RG.id_ruolo     AS \"ordinale\"" +
+            "   ,   R.nome          AS \"nome\"" +
+            "   FROM ruologestione RG " +
+            "       INNER JOIN ruolo R on RG.id_ruolo = R.id " +
+            "   WHERE RG.id_persona = ?";
+        
     /**
      * Estrae i progetti dell'utente passato come parametro
      */
