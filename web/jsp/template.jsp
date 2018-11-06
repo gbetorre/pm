@@ -18,6 +18,10 @@
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />pol.css" type="text/css" />
     <%--link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />bootstrap.css" type="text/css" />--%>
     <!-- <link href="<c:out value="${initParam.urlDirectoryStili}" />style.css" rel="stylesheet" type="text/css" />  -->
+    <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script>
+      window.jQuery || document.write('<script src="javascript/jquery-1.11.3.min.js"><\/script>');
+    </script>
   </head>
   <body>
     <!-- Header -->
@@ -31,10 +35,14 @@
     <%@ include file="footer.jspf" %>
     </div>
     <script>
-      function modify(campi){
-        var allcampi = document.getElementsByName("campi");
-        for(var i = 0; i < allcampi.lenght; i++)
-          allcampi[i].setAttribute("disable", false);
+      function modify(){
+        $('textarea').prop('readonly', false);
+        //$('#aName').prop('readonly', false);
+        //$('#pcv-obiettivi').prop('readonly', false);
+        //$('#pcv-minacce').prop('readonly', false);
+        $('input[type=\'text\']').prop('readonly', false);
+        $('input[type=\'checkbox\']').prop('disabled', false);
+        $('select').prop('disabled', false);
       }
     </script>
   </body>
