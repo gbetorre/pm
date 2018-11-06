@@ -60,22 +60,23 @@
           <tbody>
           <c:forEach var="act" items="${requestScope.attivita}" varStatus="loop">
             <tr>
-              <th scope="row"><input type="text" class="form-control" id="aName" value="<c:out value="${act.nome}"/>" readonly></th>
-              <th scope="row"><input type="text" class="form-control" id="aDesc" value="<c:out value="${act.descrizione}"/>" readonly></th>
-              <th scope="row">
+              <td><input type="hidden" id="pcm-id" name="pcm-id" value="<c:out value="${act.id}"/>"></td>
+              <td scope="row"><input type="text" class="form-control" id="pcm-nome" name="pcm-nome" value="<c:out value="${act.nome}"/>" readonly></td>
+              <td scope="row"><input type="text" class="form-control" id="pcm-descrizione" name="pcm-descrizione" value="<c:out value="${act.descrizione}"/>" readonly></td>
+              <td scope="row">
                 <c:choose>
-                  <c:when test="${act.milestone==true}">
+                  <c:when test="${act.milestone}">
                     <div class="form-check text-center">
-                      <input type="checkbox" class="form-check-input" id="cMilestone" name="cMilestone" value="" checked disabled="true">
+                      <input type="checkbox" class="form-check-input" id="pcm-milestone" name="pcm-milestone" value="" checked disabled>
                     </div>
                   </c:when>
                   <c:otherwise>
                     <div class="form-check text-center">
-                      <input type="checkbox" class="form-check-input" id="cMilestone" name="cMilestone" value="" disabled="true">
+                      <input type="checkbox" class="form-check-input" id="pcm-milestone" name="pcm-milestone" value="" disabled>
                     </div>
                   </c:otherwise>
                 </c:choose>
-              </th>
+              </td>
             </tr>
           </c:forEach>
           </tbody>
