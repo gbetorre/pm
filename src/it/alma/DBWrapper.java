@@ -510,9 +510,11 @@ public class DBWrapper implements Query {
             String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il progetto.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + nfe.getMessage(), nfe);
-        } 
-        //TODO catch boolean
-        finally {
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il progetto.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + npe.getMessage(), npe);
+        } finally {
             try {
                 con.close();
             } catch (NullPointerException npe) {
