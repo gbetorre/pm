@@ -393,16 +393,36 @@ public class DBWrapper implements Query {
     public void updateProjectPart(int idProj, 
                                   HashMap<String, HashMap<String, String>>params) 
                            throws WebStorageException {
-        ResultSet rs = null;
         Connection con = null;
         PreparedStatement pst = null;
-        HashMap<String, String> paramsVision = params.get(PART_PROJECT_CHARTER_VISION);
-        HashMap<String, String> paramsStakeholder = params.get(PART_PROJECT_CHARTER_STAKEHOLDER);
-        HashMap<String, String> paramsDeliverable = params.get(PART_PROJECT_CHARTER_DELIVERABLE);
-        HashMap<String, String> paramsResource = params.get(PART_PROJECT_CHARTER_RESOURCE);
-        HashMap<String, String> paramsConstraint = params.get(PART_PROJECT_CHARTER_CONSTRAINT);
-        HashMap<String, String> paramsMilestone = params.get(PART_PROJECT_CHARTER_MILESTONE);        
-        HashMap<String, String> paramsStatus = params.get(PART_PROJECT);
+        HashMap<String, String> paramsVision = null;
+        HashMap<String, String> paramsStakeholder = null;
+        HashMap<String, String> paramsDeliverable = null;
+        HashMap<String, String> paramsResource = null;
+        HashMap<String, String> paramsConstraint = null;
+        HashMap<String, String> paramsMilestone = null;
+        HashMap<String, String> paramsStatus = null;
+        if (params.containsKey(PART_PROJECT_CHARTER_VISION)) {
+            paramsVision = params.get(PART_PROJECT_CHARTER_VISION);
+        }
+        else if (params.containsKey(PART_PROJECT_CHARTER_STAKEHOLDER)) {
+            paramsStakeholder = params.get(PART_PROJECT_CHARTER_STAKEHOLDER);
+        }
+        else if (params.containsKey(PART_PROJECT_CHARTER_DELIVERABLE)) {
+            paramsDeliverable = params.get(PART_PROJECT_CHARTER_DELIVERABLE);
+        }
+        else if (params.containsKey(PART_PROJECT_CHARTER_RESOURCE)) {
+            paramsResource = params.get(PART_PROJECT_CHARTER_RESOURCE);
+        }
+        else if (params.containsKey(PART_PROJECT_CHARTER_CONSTRAINT)) {
+            paramsConstraint = params.get(PART_PROJECT_CHARTER_CONSTRAINT);
+        }
+        else if (params.containsKey(PART_PROJECT_CHARTER_MILESTONE)) {
+            paramsMilestone = params.get(PART_PROJECT_CHARTER_MILESTONE);
+        }
+        else if (params.containsKey(PART_PROJECT)) {
+            paramsStatus = params.get(PART_PROJECT);
+        }
         try {
             con = pol_manager.getConnection();
             if (Utils.voidValues(paramsVision)) {
@@ -418,8 +438,7 @@ public class DBWrapper implements Query {
                 pst.executeUpdate();
                 con.commit();
             }
-            pst = null;
-            if (Utils.voidValues(paramsStakeholder)) {
+            else if (Utils.voidValues(paramsStakeholder)) {
                 pst = con.prepareStatement(UPDATE_STAKEHOLDER);
                 con.setAutoCommit(false);
                 pst.clearParameters();
@@ -432,8 +451,7 @@ public class DBWrapper implements Query {
                 pst.executeUpdate();
                 con.commit();
             }
-            pst = null;
-            if (Utils.voidValues(paramsDeliverable)) {
+            else if (Utils.voidValues(paramsDeliverable)) {
                 pst = con.prepareStatement(UPDATE_DELIVERABLE);
                 con.setAutoCommit(false);
                 pst.clearParameters();
@@ -443,8 +461,7 @@ public class DBWrapper implements Query {
                 pst.executeUpdate();
                 con.commit();
             }
-            pst = null;
-            if (Utils.voidValues(paramsResource)) {
+            else if (Utils.voidValues(paramsResource)) {
                 pst = con.prepareStatement(UPDATE_RESOURCE);
                 con.setAutoCommit(false);
                 pst.clearParameters();
@@ -456,8 +473,7 @@ public class DBWrapper implements Query {
                 pst.executeUpdate();
                 con.commit();
             }
-            pst = null;
-            if (Utils.voidValues(paramsConstraint)) {
+            else if (Utils.voidValues(paramsConstraint)) {
                 pst = con.prepareStatement(UPDATE_CONSTRAINT);
                 con.setAutoCommit(false);
                 pst.clearParameters();
@@ -467,8 +483,7 @@ public class DBWrapper implements Query {
                 pst.executeUpdate();
                 con.commit();
             }
-            pst = null;
-            if (Utils.voidValues(paramsMilestone)) {
+            else if (Utils.voidValues(paramsMilestone)) {
                 pst = con.prepareStatement(UPDATE_ATTIVITA_FROM_PROGETTO);
                 con.setAutoCommit(false);
                 pst.clearParameters();
@@ -481,8 +496,7 @@ public class DBWrapper implements Query {
                 pst.executeUpdate();
                 con.commit();
             }
-            pst = null;
-            if (Utils.voidValues(paramsStatus) && !paramsStatus.containsValue("1970-00-01")) {
+            else if (Utils.voidValues(paramsStatus) && !paramsStatus.containsValue("1970-00-01")) {
                 pst = con.prepareStatement(UPDATE_STATUS);
                 con.setAutoCommit(false);
                 pst.clearParameters();
@@ -510,10 +524,6 @@ public class DBWrapper implements Query {
             String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il progetto.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + nfe.getMessage(), nfe);
-        } catch (NullPointerException npe) {
-            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il progetto.\n";
-            LOG.severe(msg); 
-            throw new WebStorageException(msg + npe.getMessage(), npe);
         } finally {
             try {
                 con.close();
