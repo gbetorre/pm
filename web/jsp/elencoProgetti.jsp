@@ -1,19 +1,4 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<c:url var="status" context="/almalaurea" value="/" scope="page">
-  <c:param name="q" value="pol" />
-  <c:param name="p" value="prj" />
-  <c:param name="id" value="" />
-</c:url>
-<c:url var="vision" context="/almalaurea" value="/" scope="page">
-  <c:param name="q" value="pol" />
-  <c:param name="p" value="pcv" />
-  <c:param name="id" value="" />
-</c:url>
-<c:url var="wbs" context="/almalaurea" value="/" scope="page">
-  <c:param name="q" value="pol" />
-  <c:param name="p" value="wbs" />
-  <c:param name="id" value="" />
-</c:url>
+<%@ include file="pcURL.jspf" %>
 <c:choose>
   <c:when test="${requestScope.progetti.size() gt 0}">
     <form action="#" method="get">

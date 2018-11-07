@@ -1,40 +1,5 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ include file="pcURL.jspf" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<c:url var="stakeholder" context="/almalaurea" value="/" scope="page">
-  <c:param name="q" value="pol" />
-  <c:param name="p" value="pcs" />
-  <c:param name="id" value="" />
-</c:url>
-<c:url var="deliverable" context="/almalaurea" value="/" scope="page">
-  <c:param name="q" value="pol" />
-  <c:param name="p" value="pcd" />
-  <c:param name="id" value="" />
-</c:url>
-<c:url var="project" context="/almalaurea" value="/" scope="page">
-  <c:param name="q" value="pol" />
-  <c:param name="id" value="" />
-</c:url>
-<c:url var="risorse" context="/almalaurea" value="/" scope="page">
-  <c:param name="q" value="pol" />
-  <c:param name="p" value="pcr" />
-  <c:param name="id" value="" />
-</c:url>
-<c:url var="rischi" context="/almalaurea" value="/" scope="page">
-  <c:param name="q" value="pol" />
-  <c:param name="p" value="pck" />
-  <c:param name="id" value="" />
-</c:url>
-<c:url var="vincoli" context="/almalaurea" value="/" scope="page">
-  <c:param name="q" value="pol" />
-  <c:param name="p" value="pcc" />
-  <c:param name="id" value="" />
-</c:url>
-<c:url var="milestone" context="/almalaurea" value="/" scope="page">
-  <c:param name="q" value="pol" />
-  <c:param name="p" value="pcm" />
-  <c:param name="id" value="" />
-</c:url>
-<c:set var="p" value="${requestScope.progetto}" scope="page" />
 <c:set var="paramsAsTokens" value="${param}" scope="page" />
 <c:set var="distinguishingSubmitName" value="" scope="page" />
 <c:forTokens var="paramAsToken" items="${paramsAsTokens}" delims=",">
