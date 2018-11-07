@@ -200,11 +200,14 @@ public class ProjectCommand extends ItemBean implements Command {
         pcc.put("pcc-descrizione", parser.getStringParameter("pcc-descrizione", Utils.VOID_STRING));
         params.put(Query.PART_PROJECT_CHARTER_CONSTRAINT, pcc);
         // Recupero e caricamento parametri di project charter/milestone
+        int tot = Integer.parseInt(parser.getStringParameter("pcm-loop-status", Utils.VOID_STRING));
         HashMap<String, String> pcm = new HashMap<String, String>();
-        pcm.put("pcm-id", parser.getStringParameter("pcm-id", Utils.VOID_STRING));
-        pcm.put("pcm-nome", parser.getStringParameter("pcm-nome", Utils.VOID_STRING));
-        pcm.put("pcm-descrizione", parser.getStringParameter("pcm-descrizione", Utils.VOID_STRING));
-        pcm.put("pcm-milestone", parser.getStringParameter("pcm-milestone", Utils.VOID_STRING));
+        for (int i = 0; i < tot; i++) {
+            pcm.put("pcm-id" + String.valueOf(i), parser.getStringParameter("pcm-id" + String.valueOf(i), Utils.VOID_STRING));
+            pcm.put("pcm-nome" + String.valueOf(i), parser.getStringParameter("pcm-nome" + String.valueOf(i), Utils.VOID_STRING));
+            pcm.put("pcm-descrizione" + String.valueOf(i), parser.getStringParameter("pcm-descrizione" + String.valueOf(i), Utils.VOID_STRING));
+            pcm.put("pcm-milestone" + String.valueOf(i), parser.getStringParameter("pcm-milestone" + String.valueOf(i), Utils.VOID_STRING));
+        }
         params.put(Query.PART_PROJECT_CHARTER_MILESTONE, pcm);
         // Recupero e caricamento parametri di project status
         GregorianCalendar data = new GregorianCalendar(1970, 1, 1);
@@ -280,6 +283,7 @@ public class ProjectCommand extends ItemBean implements Command {
                 if (idPrj > 0) {
                     if (write) {
                         //JOptionPane.showMessageDialog(null, "Chiamata arrivata dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+                        JOptionPane.showMessageDialog(null, "Valore di milestone: " + params.get(pcm.get("pcm-nome")), FOR_NAME + "", JOptionPane.INFORMATION_MESSAGE, null); 
                         db.updateProjectPart(idPrj, params);
                     }
                     project = db.getProject(idPrj, user.getId());
