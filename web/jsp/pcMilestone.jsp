@@ -58,21 +58,28 @@
           </tr>
           </thead>
           <tbody>
+          <c:set var="status" value="" scope="page" />
           <c:forEach var="act" items="${requestScope.attivita}" varStatus="loop">
+            <c:set var="status" value="${loop.index}" scope="page" />+
+            <input type="hidden" id="pcm-loop-status" name="pcm-loop-status" value="${status}">
+            <input type="hidden" id="pcm-id${status}" name="pcm-id${status}" value="<c:out value="${act.id}"/>">
             <tr>
-              <td><input type="hidden" id="pcm-id" name="pcm-id" value="<c:out value="${act.id}"/>"></td>
-              <td scope="row"><input type="text" class="form-control" id="pcm-nome" name="pcm-nome" value="<c:out value="${act.nome}"/>" readonly></td>
-              <td scope="row"><input type="text" class="form-control" id="pcm-descrizione" name="pcm-descrizione" value="<c:out value="${act.descrizione}"/>" readonly></td>
+              <td scope="row">
+                <input type="text" class="form-control" id="pcm-nome${status}" name="pcm-nome${status}" value="<c:out value="${act.nome}"/>" readonly>
+              </td>
+              <td scope="row">
+                <input type="text" class="form-control" id="pcm-descrizione${status}" name="pcm-descrizione${status}" value="<c:out value="${act.descrizione}"/>" readonly>
+              </td>
               <td scope="row">
                 <c:choose>
                   <c:when test="${act.milestone}">
                     <div class="form-check text-center">
-                      <input type="checkbox" class="form-check-input" id="pcm-milestone" name="pcm-milestone" value="" checked disabled>
+                      <input type="checkbox" class="form-check-input" id="pcm-milestone${status}" name="pcm-milestone${status}" value="" checked disabled>
                     </div>
                   </c:when>
                   <c:otherwise>
                     <div class="form-check text-center">
-                      <input type="checkbox" class="form-check-input" id="pcm-milestone" name="pcm-milestone" value="" disabled>
+                      <input type="checkbox" class="form-check-input" id="pcm-milestone${status}" name="pcm-milestone${status}" value="" disabled>
                     </div>
                   </c:otherwise>
                 </c:choose>
