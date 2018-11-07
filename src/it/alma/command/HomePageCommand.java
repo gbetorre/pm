@@ -36,6 +36,7 @@
 
 package it.alma.command;
 
+import java.util.Enumeration;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -191,6 +192,71 @@ public class HomePageCommand extends ItemBean implements Command {
         req.setAttribute("fileJsp", nomeFileElenco);
         // Salva nella request: utente
         //req.setAttribute("user", user);
+    }
+    
+    /* ************************************************************************ *
+     *                            Metodi di utilita'                            *
+     * ************************************************************************ */
+    
+    /**
+     * <p>Restituisce i nomi e i valori degli attributi presenti in Request
+     * in un dato momento e in un dato contesto, rappresentati dallo
+     * stato del chiamante.</p>
+     * <p>Pu&ograve; essere utilizzato per verificare rapidamente 
+     * quali attributi sono presenti in Request onde evitare duplicazioni
+     * o ridondanze.</p>
+     * </p>
+     * Ad esempio, richiamando questo metodo dal ramo "didattica" del sito web
+     * di ateneo, metodo <code>requestByPage</code>
+     * e.g.: <pre>req.setAttribute("reqAttr", getAttributes(req));</pre>
+     * e richiamandolo dalla pagina relativa, con la semplice:
+     * <pre>${reqAttr}</pre>
+     * si ottiene:
+     * <pre style="border:solid gray;border-width:2px;padding:8px;">
+     * <strong>dipartimento</strong> = it.univr.di.uol.bean.DipartimentoBean@518dd094
+     * <strong>mO</strong> = {it.univr.di.uol.bean.SegnalibroBean@1ef0921d=[it.univr.di.uol.MenuVerticale@5ab38d6b, it.univr.di.uol.MenuVerticale@42099a52], it.univr.di.uol.bean.SegnalibroBean@4408bdc9=[it.univr.di.uol.MenuVerticale@4729f5d], it.univr.di.uol.bean.SegnalibroBean@19e3fa04=[it.univr.di.uol.MenuVerticale@13c94f3], it.univr.di.uol.bean.SegnalibroBean@463329e3=[it.univr.di.uol.MenuVerticale@3056de27]}
+     * <strong>lingue</strong> = it.univr.di.uol.Lingue@3578ce60
+     * <strong>FirstLanguage</strong> = it
+     * <strong>flagsUrl</strong> = ent=home&page=didattica
+     * <strong>SecondLanguage</strong> = en
+     * <strong>logoFileDoc</strong> = [[it.univr.di.uol.bean.FileDocBean@5b11bbf9]]
+     * <strong>currentYear</strong> = 2015
+     * </pre></p>
+     * 
+     * @param req HttpServletRequest contenente gli attributi che si vogliono conoscere
+     * @return un unico oggetto contenente tutti i valori e i nomi degli attributi settati in request nel momento in cui lo chiede il chiamante
+     */
+    public static String getAttributes(HttpServletRequest req) {
+        Enumeration<String> attributes = req.getAttributeNames();
+        StringBuffer attributesName = new StringBuffer("<pre>");
+        while (attributes.hasMoreElements()) {
+            String attributeName = attributes.nextElement();
+            attributesName.append("<strong><u>");
+            attributesName.append(attributeName);
+            attributesName.append("</u></strong>");
+            attributesName.append(" = ");
+            attributesName.append(req.getAttribute(attributeName));
+            attributesName.append("<br />");
+        }
+        attributesName.append("</pre>");
+        return String.valueOf(attributesName);
+    }
+    
+    // TODO COMMENTO
+    public static String getParameters(HttpServletRequest req) {
+        Enumeration<String> parameters = req.getParameterNames();
+        StringBuffer parametersName = new StringBuffer("<pre>");
+        while (parameters.hasMoreElements()) {
+            String parameterName = parameters.nextElement();
+            parametersName.append("<strong><u>");
+            parametersName.append(parameterName);
+            parametersName.append("</u></strong>");
+            parametersName.append(" = ");
+            parametersName.append(req.getParameter(parameterName));
+            parametersName.append("<br />");
+        }
+        parametersName.append("</pre>");
+        return String.valueOf(parametersName);
     }
     
 }
