@@ -1,35 +1,4 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<c:url var="vision" context="/almalaurea" value="/" scope="page">
-  <c:param name="q" value="pol" />
-  <c:param name="p" value="pcv" />
-  <c:param name="id" value="" />
-</c:url>
-<c:url var="deliverable" context="/almalaurea" value="/" scope="page">
-  <c:param name="q" value="pol" />
-  <c:param name="p" value="pcd" />
-  <c:param name="id" value="" />
-</c:url>
-<c:url var="risorse" context="/almalaurea" value="/" scope="page">
-  <c:param name="q" value="pol" />
-  <c:param name="p" value="pcr" />
-  <c:param name="id" value="" />
-</c:url>
-<c:url var="rischi" context="/almalaurea" value="/" scope="page">
-  <c:param name="q" value="pol" />
-  <c:param name="p" value="pck" />
-  <c:param name="id" value="" />
-</c:url>
-<c:url var="vincoli" context="/almalaurea" value="/" scope="page">
-  <c:param name="q" value="pol" />
-  <c:param name="p" value="pcc" />
-  <c:param name="id" value="" />
-</c:url>
-<c:url var="milestone" context="/almalaurea" value="/" scope="page">
-  <c:param name="q" value="pol" />
-  <c:param name="p" value="pcm" />
-  <c:param name="id" value="" />
-</c:url>
-<c:set var="p" value="${requestScope.progetto}" scope="page" />
+<%@ include file="pcURL.jspf" %>
 <form action="#" method="post">
 <div class="container mt-3">
   <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
@@ -83,7 +52,7 @@
           </span>
         </div>
         <div class="col-8 text-center">
-          <%@ include file="panel.jspf" %>
+          <%@ include file="subPanel.jspf" %>
         </div>
         <div class="col-2">
           <span class="float-right">
