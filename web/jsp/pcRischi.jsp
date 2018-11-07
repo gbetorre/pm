@@ -72,11 +72,11 @@
           <tbody>
           <c:forEach var="risk" items="${requestScope.rischi}" varStatus="loop">
               <tr>
-                <th scope="row"><input type="text" class="form-control" id="rName" value="<c:out value="${risk.nome}" />" readonly></th>
-                <th scope="row"><input type="text" class="form-control" id="rInfo" value="<c:out value="${risk.informativa}" />" readonly></th>
-                <th scope="row"><input type="text" class="form-control" id="rImp" value="<c:out value="${risk.impatto}" />" readonly></th>
-                <th scope="row"><input type="text" class="form-control" id="rLevel" value="<c:out value="${risk.livello}" />" readonly></th>
-                <th scope="row"><input type="text" class="form-control" id="rStatus" value="<c:out value="${risk.stato}" />" readonly></th>             
+                <th scope="row"><input type="text" class="form-control" id="pck-nome" name="pck-nome" value="<c:out value="${risk.nome}" />" readonly></th>
+                <th scope="row"><input type="text" class="form-control" id="pck-informativa" name="pck-informativa" value="<c:out value="${risk.informativa}" />" readonly></th>
+                <th scope="row"><input type="text" class="form-control" id="pck-impatto" name="pck-impatto" value="<c:out value="${risk.impatto}" />" readonly></th>
+                <th scope="row"><input type="text" class="form-control" id="pck-livello" name="pck-livello" value="<c:out value="${risk.livello}" />" readonly></th>
+                <th scope="row"><input type="text" class="form-control" id="pck-stato" name="pck-stato" value="<c:out value="${risk.stato}" />" readonly></th>             
               </tr>
             </c:forEach>
           </tbody>
