@@ -61,6 +61,7 @@ import it.alma.bean.ProjectBean;
 import it.alma.bean.RiskBean;
 import it.alma.bean.SkillBean;
 import it.alma.exception.AttributoNonValorizzatoException;
+import it.alma.exception.NotFoundException;
 import it.alma.exception.WebStorageException;
 
 
@@ -114,6 +115,18 @@ public class DBWrapper implements Query {
      * <p>Connessione db oracle ESSE3.</p>
      */
     protected static DataSource pol_manager = null;
+    /**
+     * <p>Connessione db postgres univr.</p>
+     */
+    protected static DataSource univr_manager = null;
+    /**
+     * 
+     */
+    protected static final String nomeFile = "/whoami";
+    /**
+     * 
+     */
+    public static String auth = Utils.getContent(nomeFile);
 
     
     /**
@@ -148,6 +161,18 @@ public class DBWrapper implements Query {
                 JOptionPane.showMessageDialog(null, "Accesso al DB di POL", "Inizializzazione Completata", 0, null);
             } catch (NamingException ne) {
                 throw new WebStorageException(FOR_NAME + "Problema nel recuperare la risorsa jdbc/pol per problemi di naming: " + ne.getMessage());
+            } catch (Exception e) {
+                throw new WebStorageException(FOR_NAME + "Errore generico nel costruttore: " + e.getMessage(), e);
+            }
+        }
+        if (univr_manager == null && auth.contains("Authenticated")) {
+            try {
+                univr_manager = (DataSource) ((Context) new InitialContext()).lookup("java:comp/env/jdbc/univr");
+                if (univr_manager == null)
+                    throw new WebStorageException(FOR_NAME + "La risorsa `jdbc/univr' non e\' disponibile. Verificare configurazione e collegamenti.\n");
+                JOptionPane.showMessageDialog(null, "Accesso al DB di univr", "Inizializzazione Completata", 0, null);
+            } catch (NamingException ne) {
+                throw new WebStorageException(FOR_NAME + "Problema nel recuperare la risorsa jdbc/univr per problemi di naming: " + ne.getMessage());
             } catch (Exception e) {
                 throw new WebStorageException(FOR_NAME + "Errore generico nel costruttore: " + e.getMessage(), e);
             }
@@ -394,128 +419,126 @@ public class DBWrapper implements Query {
                                   HashMap<String, HashMap<String, String>>params) 
                            throws WebStorageException {
         Connection con = null;
-        PreparedStatement pst = null;
-        HashMap<String, String> paramsVision = null;
-        HashMap<String, String> paramsStakeholder = null;
-        HashMap<String, String> paramsDeliverable = null;
-        HashMap<String, String> paramsResource = null;
-        HashMap<String, String> paramsConstraint = null;
-        HashMap<String, String> paramsMilestone = null;
-        HashMap<String, String> paramsStatus = null;
-        if (params.containsKey(PART_PROJECT_CHARTER_VISION)) {
-            paramsVision = params.get(PART_PROJECT_CHARTER_VISION);
-        }
-        else if (params.containsKey(PART_PROJECT_CHARTER_STAKEHOLDER)) {
-            paramsStakeholder = params.get(PART_PROJECT_CHARTER_STAKEHOLDER);
-        }
-        else if (params.containsKey(PART_PROJECT_CHARTER_DELIVERABLE)) {
-            paramsDeliverable = params.get(PART_PROJECT_CHARTER_DELIVERABLE);
-        }
-        else if (params.containsKey(PART_PROJECT_CHARTER_RESOURCE)) {
-            paramsResource = params.get(PART_PROJECT_CHARTER_RESOURCE);
-        }
-        else if (params.containsKey(PART_PROJECT_CHARTER_CONSTRAINT)) {
-            paramsConstraint = params.get(PART_PROJECT_CHARTER_CONSTRAINT);
-        }
-        else if (params.containsKey(PART_PROJECT_CHARTER_MILESTONE)) {
-            paramsMilestone = params.get(PART_PROJECT_CHARTER_MILESTONE);
-        }
-        else if (params.containsKey(PART_PROJECT)) {
-            paramsStatus = params.get(PART_PROJECT);
-        }
+        PreparedStatement pst = null;        
         try {
+            // Ottiene la connessione
             con = pol_manager.getConnection();
-            if (Utils.voidValues(paramsVision)) {
-                pst = con.prepareStatement(UPDATE_VISION);
-                con.setAutoCommit(false);
-                pst.clearParameters();
-                pst.setString(1, paramsVision.get("pcv-situazione"));
-                pst.setString(2, paramsVision.get("pcv-descrizione"));
-                pst.setString(3, paramsVision.get("pcv-obiettivi"));
-                pst.setString(4, paramsVision.get("pcv-minacce"));
-                pst.setInt(5, idProj);
-                //JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
-                pst.executeUpdate();
-                con.commit();
+            /* **************************************************************** *
+             * Gestisce gli update delle varie funzionalita' del ProjectCharter *
+             * **************************************************************** */
+            if (params.containsKey(PART_PROJECT_CHARTER_VISION)) {
+                HashMap<String, String> paramsVision = params.get(PART_PROJECT_CHARTER_VISION);
+                if (Utils.containsValues(paramsVision)) {
+                    pst = con.prepareStatement(UPDATE_VISION);
+                    con.setAutoCommit(false);
+                    pst.clearParameters();
+                    pst.setString(1, paramsVision.get("pcv-situazione"));
+                    pst.setString(2, paramsVision.get("pcv-descrizione"));
+                    pst.setString(3, paramsVision.get("pcv-obiettivi"));
+                    pst.setString(4, paramsVision.get("pcv-minacce"));
+                    pst.setInt(5, idProj);
+                    pst.executeUpdate();
+                    con.commit();
+                }
             }
-            else if (Utils.voidValues(paramsStakeholder)) {
-                pst = con.prepareStatement(UPDATE_STAKEHOLDER);
-                con.setAutoCommit(false);
-                pst.clearParameters();
-                pst.setString(1, paramsStakeholder.get("pcs-marginale"));
-                pst.setString(2, paramsStakeholder.get("pcs-operativo"));
-                pst.setString(3, paramsStakeholder.get("pcs-istituzionale"));
-                pst.setString(4, paramsStakeholder.get("pcs-chiave"));
-                pst.setInt(5, idProj);
-                //JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
-                pst.executeUpdate();
-                con.commit();
+            if (params.containsKey(PART_PROJECT_CHARTER_STAKEHOLDER)) {
+                HashMap<String, String> paramsStakeholder = params.get(PART_PROJECT_CHARTER_STAKEHOLDER);
+                if (Utils.containsValues(paramsStakeholder)) {
+                    pst = con.prepareStatement(UPDATE_STAKEHOLDER);
+                    con.setAutoCommit(false);
+                    pst.clearParameters();
+                    pst.setString(1, paramsStakeholder.get("pcs-marginale"));
+                    pst.setString(2, paramsStakeholder.get("pcs-operativo"));
+                    pst.setString(3, paramsStakeholder.get("pcs-istituzionale"));
+                    pst.setString(4, paramsStakeholder.get("pcs-chiave"));
+                    pst.setInt(5, idProj);
+                    pst.executeUpdate();
+                    con.commit();
+                }
             }
-            else if (Utils.voidValues(paramsDeliverable)) {
-                pst = con.prepareStatement(UPDATE_DELIVERABLE);
-                con.setAutoCommit(false);
-                pst.clearParameters();
-                pst.setString(1, paramsDeliverable.get("pcd-descrizione"));
-                pst.setInt(2, idProj);
-                //JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
-                pst.executeUpdate();
-                con.commit();
+            if (params.containsKey(PART_PROJECT_CHARTER_DELIVERABLE)) {
+                HashMap<String, String> paramsDeliverable = params.get(PART_PROJECT_CHARTER_DELIVERABLE);
+                if (Utils.containsValues(paramsDeliverable)) {
+                    pst = con.prepareStatement(UPDATE_DELIVERABLE);
+                    con.setAutoCommit(false);
+                    pst.clearParameters();
+                    pst.setString(1, paramsDeliverable.get("pcd-descrizione"));
+                    pst.setInt(2, idProj);
+                    pst.executeUpdate();
+                    con.commit();
+                }
             }
-            else if (Utils.voidValues(paramsResource)) {
-                pst = con.prepareStatement(UPDATE_RESOURCE);
-                con.setAutoCommit(false);
-                pst.clearParameters();
-                pst.setString(1, paramsResource.get("pcr-chiaveesterni"));
-                pst.setString(2, paramsResource.get("pcr-chiaveinterni"));
-                pst.setString(3, paramsResource.get("pcr-serviziateneo"));
-                pst.setInt(4, idProj);
-                //JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
-                pst.executeUpdate();
-                con.commit();
+            if (params.containsKey(PART_PROJECT_CHARTER_RESOURCE)) {
+                HashMap<String, String> paramsResource = params.get(PART_PROJECT_CHARTER_RESOURCE);
+                if (Utils.containsValues(paramsResource)) {
+                    pst = con.prepareStatement(UPDATE_RESOURCE);
+                    con.setAutoCommit(false);
+                    pst.clearParameters();
+                    pst.setString(1, paramsResource.get("pcr-chiaveesterni"));
+                    pst.setString(2, paramsResource.get("pcr-chiaveinterni"));
+                    pst.setString(3, paramsResource.get("pcr-serviziateneo"));
+                    pst.setInt(4, idProj);
+                    //JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+                    pst.executeUpdate();
+                    con.commit();
+                }
             }
-            else if (Utils.voidValues(paramsConstraint)) {
-                pst = con.prepareStatement(UPDATE_CONSTRAINT);
-                con.setAutoCommit(false);
-                pst.clearParameters();
-                pst.setString(1, paramsConstraint.get("pcc-descrizione"));
-                pst.setInt(2, idProj);
-                //JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
-                pst.executeUpdate();
-                con.commit();
+            if (params.containsKey(PART_PROJECT_CHARTER_CONSTRAINT)) {
+                HashMap<String, String> paramsConstraint = params.get(PART_PROJECT_CHARTER_CONSTRAINT);
+                if (Utils.containsValues(paramsConstraint)) {
+                    pst = con.prepareStatement(UPDATE_CONSTRAINT);
+                    con.setAutoCommit(false);
+                    pst.clearParameters();
+                    pst.setString(1, paramsConstraint.get("pcc-descrizione"));
+                    pst.setInt(2, idProj);
+                    //JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+                    pst.executeUpdate();
+                    con.commit();
+                }
             }
-            else if (Utils.voidValues(paramsMilestone)) {
-                pst = con.prepareStatement(UPDATE_ATTIVITA_FROM_PROGETTO);
-                con.setAutoCommit(false);
-                pst.clearParameters();
-                pst.setString(1, paramsMilestone.get("pcm-nome"));
-                pst.setString(2, paramsMilestone.get("pcm-descrizione"));
-                pst.setBoolean(3, Boolean.parseBoolean(paramsMilestone.get("pcm-milestone")));
-                pst.setInt(4, Integer.parseInt(paramsMilestone.get("pcm-id")));
-                pst.setInt(5, idProj);
-                //JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
-                pst.executeUpdate();
-                con.commit();
+            if (params.containsKey(PART_PROJECT_CHARTER_MILESTONE)) {
+                HashMap<String, String> paramsMilestone = params.get(PART_PROJECT_CHARTER_MILESTONE);
+                if (Utils.containsValues(paramsMilestone)) {
+                    pst = con.prepareStatement(UPDATE_ATTIVITA_FROM_PROGETTO);
+                    con.setAutoCommit(false);
+                    pst.clearParameters();
+                    pst.setString(1, paramsMilestone.get("pcm-nome"));
+                    pst.setString(2, paramsMilestone.get("pcm-descrizione"));
+                    pst.setBoolean(3, Boolean.parseBoolean(paramsMilestone.get("pcm-milestone")));
+                    pst.setInt(4, Integer.parseInt(paramsMilestone.get("pcm-id")));
+                    pst.setInt(5, idProj);
+                    //JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+                    pst.executeUpdate();
+                    con.commit();
+                }
             }
-            else if (Utils.voidValues(paramsStatus) && !paramsStatus.containsValue("1970-00-01")) {
-                pst = con.prepareStatement(UPDATE_STATUS);
-                con.setAutoCommit(false);
-                pst.clearParameters();
-                pst.setString(1, paramsStatus.get("sMese"));
-                pst.setString(2, paramsStatus.get("sAttuale"));
-                pst.setString(3, paramsStatus.get("sTempi"));
-                pst.setString(4, paramsStatus.get("sCosti"));
-                pst.setString(5, paramsStatus.get("sRischi"));
-                pst.setString(6, paramsStatus.get("sRisorse"));
-                pst.setString(7, paramsStatus.get("sScope"));
-                pst.setString(8, paramsStatus.get("sComunicazione"));
-                pst.setString(9, paramsStatus.get("sQualita"));
-                pst.setString(10, paramsStatus.get("sApprovvigionamenti"));
-                pst.setString(11, paramsStatus.get("sStakeholder"));
-                pst.setInt(12, idProj);
-                //JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
-                pst.executeUpdate();
-                con.commit();
+            if (params.containsKey(PART_PROJECT)) {
+                HashMap<String, String> paramsStatus = params.get(PART_PROJECT);
+                if (Utils.containsValues(paramsStatus) && !paramsStatus.containsValue(Utils.UNIX_EPOCH)) {
+                    pst = con.prepareStatement(UPDATE_STATUS);
+                    con.setAutoCommit(false);
+                    pst.clearParameters();
+                    pst.setString(1, paramsStatus.get("sMese"));
+                    pst.setString(2, paramsStatus.get("sAttuale"));
+                    pst.setString(3, paramsStatus.get("sTempi"));
+                    pst.setString(4, paramsStatus.get("sCosti"));
+                    pst.setString(5, paramsStatus.get("sRischi"));
+                    pst.setString(6, paramsStatus.get("sRisorse"));
+                    pst.setString(7, paramsStatus.get("sScope"));
+                    pst.setString(8, paramsStatus.get("sComunicazione"));
+                    pst.setString(9, paramsStatus.get("sQualita"));
+                    pst.setString(10, paramsStatus.get("sApprovvigionamenti"));
+                    pst.setString(11, paramsStatus.get("sStakeholder"));
+                    pst.setInt(12, idProj);
+                    //JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+                    pst.executeUpdate();
+                    con.commit();
+                }
             }
+        } catch (NotFoundException nfe) {
+            String msg = FOR_NAME + "Probabile problema nel puntamento alla HashMap dei parametri.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + nfe.getMessage(), nfe);            
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il progetto.\n";
             LOG.severe(msg); 
