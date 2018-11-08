@@ -61,6 +61,7 @@ import it.alma.bean.ProjectBean;
 import it.alma.bean.RiskBean;
 import it.alma.bean.SkillBean;
 import it.alma.exception.AttributoNonValorizzatoException;
+import it.alma.exception.CommandException;
 import it.alma.exception.NotFoundException;
 import it.alma.exception.WebStorageException;
 
@@ -122,11 +123,24 @@ public class DBWrapper implements Query {
     /**
      * 
      */
-    protected static final String nomeFile = "/whoami";
+    private static final String nomeFile = "http://localhost:8080/whoami";
     /**
      * 
-     */
-    public static String auth = Utils.getContent(nomeFile);
+     *
+    static String auth = null;
+    static {
+        try {
+            auth = Utils.getContent(nomeFile);
+        } catch (NotFoundException nfe) {
+            String msg = FOR_NAME + "Probabile problema nel puntamento alla HashMap dei parametri.\n";
+            LOG.severe(msg); 
+            nfe.printStackTrace();
+        } catch (CommandException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }*/
+    
 
     
     /**
@@ -165,7 +179,7 @@ public class DBWrapper implements Query {
                 throw new WebStorageException(FOR_NAME + "Errore generico nel costruttore: " + e.getMessage(), e);
             }
         }
-        if (univr_manager == null && auth.contains("Authenticated")) {
+        if (univr_manager == null && false /*&& auth.contains("Authenticated")*/) {
             try {
                 univr_manager = (DataSource) ((Context) new InitialContext()).lookup("java:comp/env/jdbc/univr");
                 if (univr_manager == null)
@@ -431,6 +445,7 @@ public class DBWrapper implements Query {
                 if (Utils.containsValues(paramsVision)) {
                     pst = con.prepareStatement(UPDATE_VISION);
                     con.setAutoCommit(false);
+                    // TODO implementare controllo sulla concorrenza sulla vision
                     pst.clearParameters();
                     pst.setString(1, paramsVision.get("pcv-situazione"));
                     pst.setString(2, paramsVision.get("pcv-descrizione"));
@@ -499,12 +514,16 @@ public class DBWrapper implements Query {
             if (params.containsKey(PART_PROJECT_CHARTER_MILESTONE)) {
                 HashMap<String, String> paramsMilestone = params.get(PART_PROJECT_CHARTER_MILESTONE);
                 if (Utils.containsValues(paramsMilestone)) {
+                    String isMilestoneAsString = paramsMilestone.get("pcm-milestone");
+                    if ( (!isMilestoneAsString.equalsIgnoreCase("true")) || (!isMilestoneAsString.equalsIgnoreCase("false"))  ) {
+                        throw new ClassCastException("Attenzione: il valore del parametro \'pcm-milestone\' non e\' riconducibile a un valore boolean!\n");
+                    }
                     pst = con.prepareStatement(UPDATE_ATTIVITA_FROM_PROGETTO);
                     con.setAutoCommit(false);
                     pst.clearParameters();
                     pst.setString(1, paramsMilestone.get("pcm-nome"));
                     pst.setString(2, paramsMilestone.get("pcm-descrizione"));
-                    pst.setBoolean(3, Boolean.parseBoolean(paramsMilestone.get("pcm-milestone")));
+                    pst.setBoolean(3, Boolean.parseBoolean(isMilestoneAsString));
                     pst.setInt(4, Integer.parseInt(paramsMilestone.get("pcm-id")));
                     pst.setInt(5, idProj);
                     //JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
@@ -538,7 +557,7 @@ public class DBWrapper implements Query {
         } catch (NotFoundException nfe) {
             String msg = FOR_NAME + "Probabile problema nel puntamento alla HashMap dei parametri.\n";
             LOG.severe(msg); 
-            throw new WebStorageException(msg + nfe.getMessage(), nfe);            
+            throw new WebStorageException(msg + nfe.getMessage(), nfe);
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il progetto.\n";
             LOG.severe(msg); 
