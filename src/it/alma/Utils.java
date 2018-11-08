@@ -39,6 +39,8 @@ package it.alma;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -46,10 +48,12 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.MissingResourceException;
+import java.util.Scanner;
 import java.util.logging.Logger;
 
 import it.alma.exception.CommandException;
 import it.alma.exception.NotFoundException;
+import it.alma.exception.WebStorageException;
 
 
 /**
@@ -165,28 +169,43 @@ public class Utils {
         return true;
     }
     
-    // TODO COMMENTO e perfezionare codice
-    public static String getContent(String filename) {
-        File file = new File(filename);
-        FileInputStream fis = null;
+
+    /**
+     * 
+     * @param path
+     * @return
+     */
+    public static String getContent(String path)
+                             throws NotFoundException, CommandException {
         StringBuffer content = new StringBuffer();
+        Scanner sc = null;
         try {
-            fis = new FileInputStream(file);
-            int stream = -3;
-            while ((stream = fis.read()) != -1) {
-                // Convert to char and display it
-                content.append((char) stream);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
+            URL file = new URL(path);
             try {
-                if (fis != null)
-                    fis.close();
-            } catch (IOException ex) {
-                ex.printStackTrace();
+                sc = new Scanner(file.openStream());
+                while (sc.hasNext()) {
+                    // Unnecessary Cast: Already returns a String
+                    content.append(/*(String)*/ sc.next());
+                }
+            } catch (IOException ioe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nel puntamento al file remoto.\n";
+                log.severe(msg);
+                throw new NotFoundException(msg, ioe);
+            } finally {
+                try {
+                    if (sc != null)
+                        sc.close();
+                } catch (IllegalStateException ise) {
+                    String msg = FOR_NAME + "Probabile problema nel tentare di eseguire l\'operazione dopo che lo scanner e\' stato chiuso.\n";
+                    log.severe(msg); 
+                    throw new CommandException(msg, ise);
+                }
             }
-        }
+        } catch (MalformedURLException mue) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento all\'url, probabilmente il percorso e\' errato o il browsing non abilitato.\n";
+            log.severe(msg);
+            throw new NotFoundException("Attenzione: controllare che la risorsa sia raggiungibile!\n" + mue.getMessage(), mue);
+        }        
         return new String(content);
     }
     
