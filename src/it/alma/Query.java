@@ -52,58 +52,97 @@ import java.util.LinkedList;
 public interface Query extends Serializable {
 
     /**
-     * Costante parlante per flag di recupero sessione utente
+     * <p>Costante parlante per flag di recupero sessione utente.</p>
      */
     public static final boolean IF_EXISTS_DONOT_CREATE_NEW = false;
+    /* ************************************************************************ *
+     *      Costanti corrispondenti ai parametri ammessi sulla querystring      *
+     * ************************************************************************ */
     /**
-     * Costanti corrispondenti ai parametri ammessi sulla querystring
+     * <p>Costante per il parametro identificante la pagina della Vision di un progetto.</p>
      */
     public static final String PART_PROJECT_CHARTER_VISION      = "pcv";
-    public static final String PART_PROJECT_CHARTER_STAKEHOLDER = "pcs";
-    public static final String PART_PROJECT_CHARTER_DELIVERABLE = "pcd";
-    public static final String PART_PROJECT_CHARTER_RESOURCE    = "pcr";
-    public static final String PART_PROJECT_CHARTER_RISK        = "pck";
-    public static final String PART_PROJECT_CHARTER_CONSTRAINT  = "pcc";
-    public static final String PART_PROJECT_CHARTER_MILESTONE   = "pcm";
-    public static final String PART_WBS                         = "wbs";
-    public static final String PART_ACTIVITY                    = "act";
-    public static final String PART_REPORT                      = "rep";
-    public static final String PART_PROJECT                     = "prj";
     /**
-     * Valori possibili degli attributi di stato di un progetto
+     * <p>Costante per il parametro identificante la pagina degli Stakeholder di un progetto.</p>
+     */
+    public static final String PART_PROJECT_CHARTER_STAKEHOLDER = "pcs";
+    /**
+     * <p>Costante per il parametro identificante la pagina dei Deliverable di un progetto.</p>
+     */
+    public static final String PART_PROJECT_CHARTER_DELIVERABLE = "pcd";
+    /**
+     * <p>Costante per il parametro identificante la pagina delle Risorse di un progetto.</p>
+     */
+    public static final String PART_PROJECT_CHARTER_RESOURCE    = "pcr";
+    /**
+     * <p>Costante per il parametro identificante la pagina dei Rischi di un progetto.</p>
+     */
+    public static final String PART_PROJECT_CHARTER_RISK        = "pck";
+    /**
+     * <p>Costante per il parametro identificante la pagina dei Vincoli di un progetto.</p>
+     */
+    public static final String PART_PROJECT_CHARTER_CONSTRAINT  = "pcc";
+    /**
+     * <p>Costante per il parametro identificante la pagina delle Milestone di un progetto.</p>
+     */
+    public static final String PART_PROJECT_CHARTER_MILESTONE   = "pcm";
+    /**
+     * <p>Costante per il parametro identificante la pagina delle WBS di un progetto.</p>
+     */
+    public static final String PART_WBS                         = "wbs";
+    /**
+     * <p>Costante per il parametro identificante la pagina delle Attivit&agrave; di un progetto.</p>
+     */
+    public static final String PART_ACTIVITY                    = "act";
+    /**
+     * <p>Costante per il parametro identificante la pagina del Report di un progetto.</p>
+     */
+    public static final String PART_REPORT                      = "rep";
+    /**
+     * <p>Costante per il parametro identificante la pagina dello Status di un progetto.</p>
+     */
+    public static final String PART_PROJECT                     = "prj";
+    /* ************************************************************************ *
+     *   Enumerativi statici per incapsulare i valori di enumerativi dinamici   *
+     * ************************************************************************ */
+    /**
+     * <p>Valori possibili degli attributi di stato di un progetto.</p>
      */
     static final String[] STATI = {"OK", "POSSIBILI PROBLEMI", "CRITICO"};
     /**
-     * Valori possibili dell'attributo nome di statoprogetto
+     * <p>Valori possibili dell'attributo nome di statoprogetto.</p>
      */
     static final String[] STATI_PROGETTO = {"APERTO", "IN PROGRESS", "SOSPESO", "CONCLUSO", "ELIMINATO"};
     /**
-     * Valori possibili degli attributi probabilita, impatto, livello di rischio
+     * <p>Valori possibili degli attributi probabilita, impatto, livello di rischio.</p>
      */
     static final String[] LIVELLI_RISCHIO = {"ALTO", "MEDIO", "BASSO"};
     /**
-     * Valori possibili dell'attributo stato di rischio
+     * <p>Valori possibili dell'attributo stato di rischio.</p>
      */
     static final String[] STATO_RISCHIO = {"APERTO", "CHIUSO", "IN RISOLUZIONE"};
     /**
-     * Lista contenente i possibili valori dei campi di stato del progetto
+     * <p>Lista contenente i possibili valori dei campi di stato del progetto.</p>
      */    
     public static final LinkedList<String> STATI_AS_LIST = new LinkedList<String>(Arrays.asList(STATI));
     /**
-     * Lista contenente i possibili valori del campo nome della classe StatoProgettoBean
+     * <p>Lista contenente i possibili valori del campo nome della classe StatoProgettoBean.</p>
      */    
     public static final LinkedList<String> STATI_PROGETTO_AS_LIST = new LinkedList<String>(Arrays.asList(STATI_PROGETTO));
     /**
-     * Lista contenente i possibili valori degli attributi probabilita, impatto, livello della classe RiskBean
+     * <p>Lista contenente i possibili valori degli attributi probabilita, impatto, livello della classe RiskBean.</p>
      */    
     public static final LinkedList<String> LIVELLI_RISCHIO_AS_LIST = new LinkedList<String>(Arrays.asList(LIVELLI_RISCHIO));
     /**
-     * Lista contenente i possibili valori dell'attributo stato della classe RiskBean
+     * <p>Lista contenente i possibili valori dell'attributo stato della classe RiskBean.</p>
      */    
     public static final LinkedList<String> STATO_RISCHIO_AS_LIST = new LinkedList<String>(Arrays.asList(STATO_RISCHIO));
     
+    /* ************************************************************************ *
+     *                   Query comuni a tutte le applicazioni                   *
+     * ************************************************************************ */
     /**
-     * Estrae le classi command previste per l'applicazione
+     * <p>Estrae le classi Command previste per l'applicazione.</p>
      */
     public static final String LOOKUP_COMMAND =
             "SELECT " +
@@ -116,8 +155,13 @@ public interface Query extends Serializable {
             "   ,   informativa AS \"informativa\"" + 
             "  FROM command";
     
+    /* ************************************************************************ *
+     *                               Query di POL                               *
+     * ************************************************************************ *
+     *                            Query di selezione                            *
+     * ************************************************************************ */    
     /**
-     * Estrae l'utente con username e password passati come parametri
+     * <p>Estrae l'utente con username e password passati come parametri.</p>
      */
     public static final String GET_USR =
             "SELECT " +
@@ -137,7 +181,8 @@ public interface Query extends Serializable {
             ;
         
     /**
-     * 
+     * <p>Estrae i ruoli di una persona passata 
+     * avente identificativo passato come parametro.</p>
      */
     public static final String GET_RUOLIPERSONA = 
             "SELECT " +
@@ -149,7 +194,7 @@ public interface Query extends Serializable {
             "   WHERE RG.id_persona = ?";
         
     /**
-     * Estrae i progetti dell'utente passato come parametro
+     * <p>Estrae i progetti dell'utente passato come parametro.</p>
      */
     public static final String GET_PROJECTS = 
     		"SELECT " +
@@ -192,7 +237,7 @@ public interface Query extends Serializable {
     		"	WHERE 	P.id = ?";
     
     /**
-     * Estrae un progetto di dato id, passato come parametro
+     * <p>Estrae un progetto di dato id, passato come parametro.</p>
      */
     public static final String GET_PROJECT = 
             "SELECT " +
@@ -257,99 +302,8 @@ public interface Query extends Serializable {
     		"	WHERE SP.id = ?";
     
     /**
-     * <p>Modifica la tupla della tabella attivit&agrave; identificata dall'id, che &egrave; passato come parametro.</p>
-     * <p>I ? servono per prelevare i dati modificati dalle form, e settarli quindi nel db 
-     * (tranne nella clausola WHERE dove sta ad indicare l'id dell'attività da modificare).</p>
-     * <p>Ho considerato che nella tabella attivita i seguenti attributi non possono essere modificati: <br />
-     *      - id<br />
-     *      - id_progetto<br />
-     *      - id_wbs<br />
-     *      - id_complessita<br />
-     *      - id_stato<br />
-     *      - id_ruolo<br />
-     *      - id_persona<br />
-     * se si possono modificare, basta aggiungere la stringa da settare.</p>
-     */
-    public static final String UPDATE_ATTIVITA = 
-            "UPDATE attivita" +
-            "   SET     nome = ?" +
-            "   ,       descrizione = ?" + 
-            "   ,       datainizio = ?" + 
-            "   ,       datafine = ?" + 
-            "   ,       datainizioattesa = ?" + 
-            "   ,       datafineattesa = ?" + 
-            "   ,       datainizioeffettiva = ?" + 
-            "   ,       datafineeffettiva = ?" + 
-            "   ,       guprevisti = ?" + 
-            "   ,       gueffettivi = ?" + 
-            "   ,       gurimanenti = ?" + 
-            "   ,       noteavanzamento = ?" + 
-            "   ,       milestone = ?" + 
-            "   WHERE id = ?";
-
-    
-    /**
-     * <p>Modifica la tupla della tabella attivit&agrave; identificata dall'id, che &egrave; passato come parametro.</p>
-     * <p>Modifica solo i campi che sono presenti nel Project Charter del progetto.</p>
-     */
-    public static final String UPDATE_ATTIVITA_FROM_PROGETTO =
-            "UPDATE attivita" +
-            "   SET     nome = ?" +
-            "   ,       descrizione = ?" +
-            "   ,       milestone = ?" + 
-            "   WHERE   id = ? " +
-            "       AND id_progetto = ?";
-    
-    /**
-     * <p>Modifica i campi della vision di un progetto, identificato tramite l'id , passato come parametro.</p>
-     */
-    public static final String UPDATE_VISION = 
-            "UPDATE progetto" + 
-            "   SET     situazioneattuale = ?" +
-            "   ,       descrizione = ?" +
-            "   ,       obiettivimisurabili = ?" +
-            "   ,       minacce = ? " + 
-            "   WHERE id = ?";
-    
-    /**
-     * <p>Modifica i campi degli stakeholder di un progetto, identificato tramite l'id, passato come parametro.</p>
-     */
-    public static final String UPDATE_STAKEHOLDER = 
-            "UPDATE progetto" + 
-            "   SET     stakeholdermarginali = ?" +
-            "   ,       stakeholderoperativi = ? " +
-            "   ,       stakeholderistituzionali = ?" +
-            "   ,       stakeholderchiave = ?" + 
-            "   WHERE id = ?";
-    
-    /**
-     * <p>Modifica il campo della deliverable di un progetto, identificato tramite l'id, passato come parametro.</p>
-     */
-    public static final String UPDATE_DELIVERABLE = 
-            "UPDATE progetto" + 
-            "   SET     deliverable = ?" + 
-            "   WHERE id = ?";
-    
-    /**
-     * <p>Modifica i campi delle risorse di un progetto, identificato tramite l'id, passato come parametro.</p>
-     */
-    public static final String UPDATE_RESOURCE = 
-            "UPDATE progetto" +
-            "   SET     fornitorichiaveesterni = ?" +
-            "   ,       fornitorichiaveinterni = ?" +
-            "   ,       serviziateneo = ?" +
-            "   WHERE id = ?";
-    
-    /**
-     * <p>Modifica il campo dei vincoli di un progetto, identificato tramite l'id, passato come parametro.</p>
-     */
-    public static final String UPDATE_CONSTRAINT = 
-            "UPDATE progetto" + 
-            "   SET vincoli = ?" +
-            "   WHERE id = ?";
-    
-    /**
-     * <p>Estrae le attivit&agrave; relative ad un progetto, identificato tramite l'id, passato come parametro</p>
+     * <p>Estrae le attivit&agrave; relative ad un progetto, identificato 
+     * tramite l'id, passato come parametro.</p>
      */
     public static final String  GET_ACTIVITIES = 
             "SELECT " +
@@ -371,7 +325,8 @@ public interface Query extends Serializable {
             "   WHERE id_progetto = ?";
     
     /**
-     * <p>Estrae le competenze relative ad un progetto, identificato tramite l'id, passato come parametro</p>
+     * <p>Estrae le competenze relative ad un progetto, identificato 
+     * tramite l'id, passato come parametro.</p>
      */
     public static final String GET_SKILLS = 
             "SELECT" +
@@ -384,7 +339,8 @@ public interface Query extends Serializable {
             "   WHERE id_progetto = ?";
     
     /**
-     * <p>Estrae i rischi relativi ad un progetto, identificato tramite l'id, passato come parametro</p>
+     * <p>Estrae i rischi relativi ad un progetto, identificato 
+     * tramite l'id, passato come parametro.</p>
      */
     public static final String GET_RISKS = 
             "SELECT" +
@@ -397,8 +353,116 @@ public interface Query extends Serializable {
             "   FROM rischio R" +
             "   WHERE id_progetto = ?";
     
+    /* ************************************************************************ *
+     *                               Query di POL                               *
+     * ************************************************************************ *
+     *                          Query di aggiornamento                          *
+     * ************************************************************************ */ 
     /**
-     * <p>Modifica i campi dello status del progetto identificato tramite l'id, passato come parametro.</p>
+     * <p>Modifica la tupla della tabella attivit&agrave; identificata dall'id, 
+     * che &egrave; passato come parametro.</p>
+     * <p>I ? servono per prelevare i dati modificati dalle form, 
+     * e settarli quindi nel db 
+     * (tranne nella clausola WHERE dove il question mark sta ad indicare 
+     * l'id dell'attività da modificare).</p>
+     * <p>Ho considerato che nella tabella attivita i seguenti attributi 
+     * non possono essere modificati: <br />
+     *      - id<br />
+     *      - id_progetto<br />
+     *      - id_wbs<br />
+     *      - id_complessita<br />
+     *      - id_stato<br />
+     *      - id_ruolo<br />
+     *      - id_persona<br />
+     * Se potessero essere modificati, baster&agrave; aggiungere 
+     * la stringa da settare.</p>
+     */
+    public static final String UPDATE_ATTIVITA = 
+            "UPDATE attivita" +
+            "   SET     nome = ?" +
+            "   ,       descrizione = ?" + 
+            "   ,       datainizio = ?" + 
+            "   ,       datafine = ?" + 
+            "   ,       datainizioattesa = ?" + 
+            "   ,       datafineattesa = ?" + 
+            "   ,       datainizioeffettiva = ?" + 
+            "   ,       datafineeffettiva = ?" + 
+            "   ,       guprevisti = ?" + 
+            "   ,       gueffettivi = ?" + 
+            "   ,       gurimanenti = ?" + 
+            "   ,       noteavanzamento = ?" + 
+            "   ,       milestone = ?" + 
+            "   WHERE id = ?";
+
+    /**
+     * <p>Modifica la tupla della tabella attivit&agrave; identificata dall'id, 
+     * che &egrave; passato come parametro.</p>
+     * <p>Modifica solo i campi che sono presenti nel Project Charter del progetto.</p>
+     */
+    public static final String UPDATE_ATTIVITA_FROM_PROGETTO =
+            "UPDATE attivita" +
+            "   SET     nome = ?" +
+            "   ,       descrizione = ?" +
+            "   ,       milestone = ?" + 
+            "   WHERE   id = ? " +
+            "       AND id_progetto = ?";
+    
+    /**
+     * <p>Modifica i campi della vision di un progetto, identificato 
+     * tramite l'id, passato come parametro.</p>
+     */
+    public static final String UPDATE_VISION = 
+            "UPDATE progetto" + 
+            "   SET     situazioneattuale = ?" +
+            "   ,       descrizione = ?" +
+            "   ,       obiettivimisurabili = ?" +
+            "   ,       minacce = ? " + 
+            "   WHERE id = ?";
+    
+    /**
+     * <p>Modifica i campi degli stakeholder di un progetto, identificato 
+     * tramite l'id, passato come parametro.</p>
+     */
+    public static final String UPDATE_STAKEHOLDER = 
+            "UPDATE progetto" + 
+            "   SET     stakeholdermarginali = ?" +
+            "   ,       stakeholderoperativi = ? " +
+            "   ,       stakeholderistituzionali = ?" +
+            "   ,       stakeholderchiave = ?" + 
+            "   WHERE id = ?";
+    
+    /**
+     * <p>Modifica il campo della deliverable di un progetto, identificato 
+     * tramite l'id, passato come parametro.</p>
+     */
+    public static final String UPDATE_DELIVERABLE = 
+            "UPDATE progetto" + 
+            "   SET     deliverable = ?" + 
+            "   WHERE id = ?";
+    
+    /**
+     * <p>Modifica i campi delle risorse di un progetto, identificato 
+     * tramite l'id, passato come parametro.</p>
+     */
+    public static final String UPDATE_RESOURCE = 
+            "UPDATE progetto" +
+            "   SET     fornitorichiaveesterni = ?" +
+            "   ,       fornitorichiaveinterni = ?" +
+            "   ,       serviziateneo = ?" +
+            "   WHERE id = ?";
+    
+    /**
+     * <p>Modifica il campo dei vincoli di un progetto, identificato 
+     * tramite l'id, passato come parametro.</p>
+     */
+    public static final String UPDATE_CONSTRAINT = 
+            "UPDATE progetto" + 
+            "   SET vincoli = ?" +
+            "   WHERE id = ?";
+    
+    /**
+     * <p>Modifica i campi dello status del progetto identificato 
+     * tramite l'id, passato come parametro.</p>
      */
     public static final String UPDATE_STATUS = 
             "UPDATE progetto" + 
@@ -416,14 +480,18 @@ public interface Query extends Serializable {
             "   WHERE id = ?";
             
     /**
-     * <p>Modifica i rischi di un progetto, identificato tramite l'id, passato come parametro.</p>
+     * <p>Modifica i rischi di un progetto, identificato tramite l'id, 
+     * passato come parametro.</p>
      */
     public static final String UPDATE_RISCHI = 
             "INSERT INTO rischio(descrizione, probabilita, impatto, livello, stato, id_progetto)" +
             "   VALUES (?, ?, ?, ?, ?, ?)";
     
+    /* ************************************************************************ *
+     *                  Costanti per applicazione QOL (ValDid)                  *
+     * ************************************************************************ */
     /**
-     *  Carica la lista con i codici U-GOV dei corsi elettivi
+     *  Carica la lista con i codici U-GOV dei corsi elettivi.
      */
     public String[] CODICI_CORSI_ELETTIVI = {"4S000766",  
                                              "0813M",
@@ -530,6 +598,7 @@ public interface Query extends Serializable {
                                              "DF-0023",
                                              "4S006333"
                                             };
+    
     /**
      * Query per estrarre le tuple delle AD Semplici.
      */
@@ -571,7 +640,7 @@ public interface Query extends Serializable {
           + " --LIMIT 30";
     
     /**
-     * Query per estrarre le tuple delle AD Semplici.
+     * Query per estrarre le tuple delle AD Moduli.
      */
     public static final String AD_MODULI = 
             "SELECT " 
