@@ -31,7 +31,7 @@
     <!-- Corpo pagina -->
     <jsp:include page="${fileJsp}" />
     <!-- Footer -->
-    <div style="background:#ffcccc">
+    <div style="background:#99ff99">
     <%@ include file="footer.jspf" %>
     </div>
     <script>
