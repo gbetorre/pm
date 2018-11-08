@@ -158,7 +158,7 @@ public interface Query extends Serializable {
     /* ************************************************************************ *
      *                               Query di POL                               *
      * ************************************************************************ *
-     *                            Query di selezione                            *
+     *                          1. Query di selezione                           *
      * ************************************************************************ */    
     /**
      * <p>Estrae l'utente con username e password passati come parametri.</p>
@@ -353,10 +353,27 @@ public interface Query extends Serializable {
             "   FROM rischio R" +
             "   WHERE id_progetto = ?";
     
+    /**
+     * <p>Estrae i valori dei campi relativi alla vision di un progetto, 
+     * identificato tramite l'id, passato come parametro.</p>
+     */
+    public static final String GET_PROJECT_VISION = 
+            "SELECT " +
+            "       PJ.id           " + 
+            "   ,   PJ.descrizione              AS \"descrizione\"" + 
+            "   ,   PJ.situazioneattuale        AS \"situazioneAttuale\"" + 
+            "   ,   PJ.obiettivimisurabili      AS \"obiettiviMisurabili\"" + 
+            "   ,   PJ.minacce                  AS \"minacce\"" + 
+            "   FROM progetto PJ" + 
+            "       INNER JOIN ruologestione RG ON PJ.id = RG.id_progetto" + 
+            "       INNER JOIN persona P ON RG.id_persona = P.id" + 
+            "   WHERE   PJ.id = ?" +
+            "       AND P.id= ?";
+    
     /* ************************************************************************ *
      *                               Query di POL                               *
      * ************************************************************************ *
-     *                          Query di aggiornamento                          *
+     *                       2.  Query di aggiornamento                         *
      * ************************************************************************ */ 
     /**
      * <p>Modifica la tupla della tabella attivit&agrave; identificata dall'id, 
@@ -364,9 +381,9 @@ public interface Query extends Serializable {
      * <p>I ? servono per prelevare i dati modificati dalle form, 
      * e settarli quindi nel db 
      * (tranne nella clausola WHERE dove il question mark sta ad indicare 
-     * l'id dell'attività da modificare).</p>
-     * <p>Ho considerato che nella tabella attivita i seguenti attributi 
-     * non possono essere modificati: <br />
+     * l'id dell'attivit&agrave; da modificare).</p>
+     * <p>Ho considerato che nella tabella <code>attivita</code> 
+     * i seguenti attributi non possono essere modificati: <br />
      *      - id<br />
      *      - id_progetto<br />
      *      - id_wbs<br />
@@ -459,6 +476,7 @@ public interface Query extends Serializable {
             "UPDATE progetto" + 
             "   SET vincoli = ?" +
             "   WHERE id = ?";
+
     
     /**
      * <p>Modifica i campi dello status del progetto identificato 
