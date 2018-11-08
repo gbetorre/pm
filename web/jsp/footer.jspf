@@ -5,23 +5,11 @@
       <div id="footer">
         <div class="container_24" id="footerContainer">
           <div class="grid_24" id="footerContent">
-            <div class="grid_6 alpha" id="noteLegali">
-              <h5>Note legali</h5>
-              <ul class="footList">
-                <li><a href="#4112">Privacy</a></li>
-              </ul>
-            </div>
-            <div class="grid_6" id="contatti">
-              <h5>Contatti</h5>
-              <ul class="footList">
-                <li><a class="webmail" href="mailto:servizio.orientamento@ateneo.univr.it">Per informazioni e orientamento</a></li>
-              </ul>
-            </div>
             <div class="grid_6 omega" id="social">
               <hr class="hrclear" />
-              <div id="accFederato">
-                <a id="idem" href="http://www.univr.it/main?ent=servizi&idDest=2&serv=285&lang=it" title="IDEntity Management per l'accesso federato">Idem</a>
-                <a id="eduroam" href="http://www.univr.it/main?ent=servizioaol&idDest=1&sServ=284&serv=39&lang=it" title="EDUcation ROAMing per l'accesso wireless federato">EduRoam</a>                             
+              <div id="accFederato">&nbsp;
+                <a href="#4112">Privacy</a> | 
+                <a id="eduroam" href="http://www.univr.it/main?ent=servizioaol&idDest=1&sServ=284&serv=39&lang=it" title="EDUcation ROAMing per l'accesso wireless federato">Policy</a>                             
               </div>
             </div>
           </div>
@@ -29,11 +17,6 @@
       </div>
       <hr class="hrclear" />
       <div id="bottomStripe">
-        <div id="btMenuBox">
-          <ul id="btMenu">  
-            <li><a id="btHome" href="${baseHref}${paramLang}"><span title="void"></span> Home</a></li>
-          </ul>
-        </div>
         <p id="ragSociale"> 
           &copy; 2018 - <c:out value="${requestScope.theCurrentYear}" />&nbsp;
           Universit&agrave; degli studi di Verona
