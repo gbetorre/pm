@@ -36,6 +36,9 @@
 
 package it.alma;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -46,10 +49,11 @@ import java.util.MissingResourceException;
 import java.util.logging.Logger;
 
 import it.alma.exception.CommandException;
+import it.alma.exception.NotFoundException;
 
 
 /**
- * <p>Classe contenitore di metodi di utilit&agrave; e costanti
+ * <p>Classe contenitore di metodi di utilit&agrave; e alcune costanti
  * di uso comune</p>
  * 
  * @author  <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
@@ -116,15 +120,26 @@ public class Utils {
 
     
     /**
-     * <p>Controlla se una HashMap, passata come parametro, contiene almeno una stringa non vuota
+     * <p>Controlla se una HashMap, passata come argomento, 
+     * contiene almeno una stringa non vuota.</p>
+     * <p>Restituisce il valore boolean <code> true</code> se la HashMap 
+     * contiene almeno un valore significativo, <code> false</code> altrimenti.</p>
      * 
      * @param params - HashMap da controllare
      * @return <code>true</code> se la HashMap contiene almeno un valore diverso da stringa vuota
+     * @throws NotFoundException se il valore dell'argomento vale null
      */
-    public static boolean voidValues(HashMap<String, String> params) {
+    public static boolean containsValues(HashMap<String, String> params)
+                                  throws NotFoundException {
+        // Controllo sull'input
+        if (params == null) {
+            String msg = FOR_NAME + "Si e\' tentato di invocare il metodo di controllo su un oggetto non pronto. Controllare il valore dell\'argomento.\n";
+            throw new NotFoundException(msg);
+        }
+        // Algoritmo decisionale
         Iterator<String> it = params.values().iterator();
-        while(it.hasNext()) {
-            if(!it.next().equals(VOID_STRING)) {
+        while (it.hasNext()) {
+            if (!it.next().equals(VOID_STRING)) {
                 return true;
             }
         }
@@ -148,6 +163,31 @@ public class Utils {
         }
         // Only got here if we didn't return false
         return true;
+    }
+    
+    // TODO COMMENTO e perfezionare codice
+    public static String getContent(String filename) {
+        File file = new File(filename);
+        FileInputStream fis = null;
+        StringBuffer content = new StringBuffer();
+        try {
+            fis = new FileInputStream(file);
+            int stream = -3;
+            while ((stream = fis.read()) != -1) {
+                // Convert to char and display it
+                content.append((char) stream);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (fis != null)
+                    fis.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+        return new String(content);
     }
     
     /* ************************************************************************ *
