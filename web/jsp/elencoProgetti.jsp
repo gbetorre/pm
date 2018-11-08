@@ -2,7 +2,7 @@
 <c:choose>
   <c:when test="${requestScope.progetti.size() gt 0}">
     <form action="#" method="get">
-      <h1>Elenco progetti</h1>
+      <h2>Elenco dei progetti</h2>
       <table class="table table-hover">
         <thead class="thead-light">
           <tr>
