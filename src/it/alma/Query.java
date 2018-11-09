@@ -368,6 +368,53 @@ public interface Query extends Serializable {
             "       INNER JOIN ruologestione RG ON PJ.id = RG.id_progetto" + 
             "       INNER JOIN persona P ON RG.id_persona = P.id" + 
             "   WHERE   PJ.id = ?" +
+            "       AND P.id = ?";
+    
+    /**
+     * <p>Estrae i valori dei campi relativi agli stakeholder di un progetto, 
+     * identificato tramite l'id, passato come parametro.</p>
+     */
+    public static final String GET_PROJECT_STAKEHOLDER = 
+            "SELECT " +
+            "       PJ.id           " +
+            "   ,   PJ.stakeholdermarginali     AS \"stakeholderMarginali\"" + 
+            "   ,   PJ.stakeholderoperativi     AS \"stakeholderOperativi\"" + 
+            "   ,   PJ.stakeholderistituzionali AS \"stakeholderIstituzionali\"" + 
+            "   ,   PJ.stakeholderchiave        AS \"stakeholderChiave\"" +
+            "   FROM progetto PJ" + 
+            "       INNER JOIN ruologestione RG ON PJ.id = RG.id_progetto" + 
+            "       INNER JOIN persona P ON RG.id_persona = P.id" + 
+            "   WHERE   PJ.id = ?" +
+            "       AND P.id= ?";
+    
+    /**
+     * <p>Estrae i valori dei campi relativi alla deliverable di un progetto, 
+     * identificato tramite l'id, passato come parametro.</p>
+     */
+    public static final String GET_PROJECT_DELIVERABLE = 
+            "SELECT " +
+            "       PJ.id           " + 
+            "   ,   PJ.deliverable              AS \"deliverable\"" + 
+            "   FROM progetto PJ" + 
+            "       INNER JOIN ruologestione RG ON PJ.id = RG.id_progetto" + 
+            "       INNER JOIN persona P ON RG.id_persona = P.id" + 
+            "   WHERE   PJ.id = ?" +
+            "       AND P.id= ?";
+    
+    /**
+     * <p>Estrae i valori dei campi relativi alle risorse di un progetto, 
+     * identificato tramite l'id, passato come parametro.</p>
+     */
+    public static final String GET_PROJECT_RESOURCE = 
+            "SELECT " +
+            "       PJ.id           " + 
+            "   ,   PJ.fornitorichiaveinterni   AS \"fornitoriChiaveInterni\"" + 
+            "   ,   PJ.fornitorichiaveesterni   AS \"fornitoriChiaveEsterni\"" + 
+            "   ,   PJ.serviziateneo            AS \"serviziAteneo\"" + 
+            "   FROM progetto PJ" + 
+            "       INNER JOIN ruologestione RG ON PJ.id = RG.id_progetto" + 
+            "       INNER JOIN persona P ON RG.id_persona = P.id" + 
+            "   WHERE   PJ.id = ?" +
             "       AND P.id= ?";
     
     /* ************************************************************************ *
