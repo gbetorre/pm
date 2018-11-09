@@ -425,13 +425,18 @@ public class DBWrapper implements Query {
      * <p>Metodo che controlla la query da eseguire e chiama il metodo opportuno.</p>
      * 
      * @param idProj - id del progetto da aggiornare 
+     * @param userId - id dell'utente che ha eseguito il login
+     * @param project - progetto che ho in memoria
      * @param params - hashmap che contiene i parametri che si vogliono aggiornare del progetto
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
      */
     @SuppressWarnings({ "null", "static-method" })
-    public void updateProjectPart(int idProj, 
+    public void updateProjectPart(int idProj,
+                                  int userId,
+                                  ProjectBean project, 
                                   HashMap<String, HashMap<String, String>>params) 
                            throws WebStorageException {
+        ResultSet rs = null;
         Connection con = null;
         PreparedStatement pst = null;        
         try {
@@ -443,59 +448,127 @@ public class DBWrapper implements Query {
             if (params.containsKey(PART_PROJECT_CHARTER_VISION)) {
                 HashMap<String, String> paramsVision = params.get(PART_PROJECT_CHARTER_VISION);
                 if (Utils.containsValues(paramsVision)) {
-                    pst = con.prepareStatement(UPDATE_VISION);
                     con.setAutoCommit(false);
-                    // TODO implementare controllo sulla concorrenza sulla vision
+                    // Controllo che la vision del progetto non abbia subito modifiche non visualizzate dall'utente
+                    pst = con.prepareStatement(GET_PROJECT_VISION);
                     pst.clearParameters();
-                    pst.setString(1, paramsVision.get("pcv-situazione"));
-                    pst.setString(2, paramsVision.get("pcv-descrizione"));
-                    pst.setString(3, paramsVision.get("pcv-obiettivi"));
-                    pst.setString(4, paramsVision.get("pcv-minacce"));
-                    pst.setInt(5, idProj);
-                    pst.executeUpdate();
+                    pst.setInt(1, idProj);
+                    pst.setInt(2, userId);
+                    rs = pst.executeQuery();
                     con.commit();
+                    if (rs.next()) {
+                        if ( (rs.getString("situazioneAttuale").equals(project.getSituazioneAttuale())) &&
+                             (rs.getString("descrizione").equals(project.getDescrizione())) &&
+                             (rs.getString("obiettiviMisurabili").equals(project.getObiettiviMisurabili())) &&
+                             (rs.getString("minacce").equals(project.getMinacce())) ) {
+                            pst = null;
+                            pst = con.prepareStatement(UPDATE_VISION);
+                            pst.clearParameters();
+                            pst.setString(1, paramsVision.get("pcv-situazione"));
+                            pst.setString(2, paramsVision.get("pcv-descrizione"));
+                            pst.setString(3, paramsVision.get("pcv-obiettivi"));
+                            pst.setString(4, paramsVision.get("pcv-minacce"));
+                            pst.setInt(5, idProj);
+                            pst.executeUpdate();
+                            con.commit();
+                        }
+                        else {
+                            JOptionPane.showMessageDialog(null, "I dati non sono stati salvati, in quanto sono stati modificati da un altro utente.", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+                            return;
+                        }
+                    }
                 }
             }
             if (params.containsKey(PART_PROJECT_CHARTER_STAKEHOLDER)) {
                 HashMap<String, String> paramsStakeholder = params.get(PART_PROJECT_CHARTER_STAKEHOLDER);
                 if (Utils.containsValues(paramsStakeholder)) {
-                    pst = con.prepareStatement(UPDATE_STAKEHOLDER);
                     con.setAutoCommit(false);
+                    // Controllo che gli stakeholder del progetto non abbiano subito modifiche non visualizzate dall'utente
+                    pst = con.prepareStatement(GET_PROJECT_STAKEHOLDER);
                     pst.clearParameters();
-                    pst.setString(1, paramsStakeholder.get("pcs-marginale"));
-                    pst.setString(2, paramsStakeholder.get("pcs-operativo"));
-                    pst.setString(3, paramsStakeholder.get("pcs-istituzionale"));
-                    pst.setString(4, paramsStakeholder.get("pcs-chiave"));
-                    pst.setInt(5, idProj);
-                    pst.executeUpdate();
-                    con.commit();
+                    pst.setInt(1, idProj);
+                    pst.setInt(2, userId);
+                    rs = pst.executeQuery();
+                    if (rs.next()) {
+                        if ( (rs.getString("stakeholderMarginali").equals(project.getStakeholderMarginali())) &&
+                                (rs.getString("stakeholderOperativi").equals(project.getStakeholderOperativi())) &&
+                                (rs.getString("stakeholderIstituzionali").equals(project.getStakeholderIstituzionali())) &&
+                                (rs.getString("stakeholderChiave").equals(project.getStakeholderChiave())) ) {
+                               pst = null;
+                               pst = con.prepareStatement(UPDATE_STAKEHOLDER);
+                               pst.clearParameters();
+                               pst.setString(1, paramsStakeholder.get("pcs-marginale"));
+                               pst.setString(2, paramsStakeholder.get("pcs-operativo"));
+                               pst.setString(3, paramsStakeholder.get("pcs-istituzionale"));
+                               pst.setString(4, paramsStakeholder.get("pcs-chiave"));
+                               pst.setInt(5, idProj);
+                               pst.executeUpdate();
+                               con.commit();
+                        }
+                        else {
+                            JOptionPane.showMessageDialog(null, "I dati non sono stati salvati, in quanto sono stati modificati da un altro utente.", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+                            return;
+                        }
+                    }
                 }
             }
             if (params.containsKey(PART_PROJECT_CHARTER_DELIVERABLE)) {
                 HashMap<String, String> paramsDeliverable = params.get(PART_PROJECT_CHARTER_DELIVERABLE);
                 if (Utils.containsValues(paramsDeliverable)) {
-                    pst = con.prepareStatement(UPDATE_DELIVERABLE);
                     con.setAutoCommit(false);
+                    // Controllo che la deliverable del progetto non abbia subito modifiche non visualizzate dall'utente
+                    pst = con.prepareStatement(GET_PROJECT_DELIVERABLE);
                     pst.clearParameters();
-                    pst.setString(1, paramsDeliverable.get("pcd-descrizione"));
-                    pst.setInt(2, idProj);
-                    pst.executeUpdate();
-                    con.commit();
+                    pst.setInt(1, idProj);
+                    pst.setInt(2, userId);
+                    rs = pst.executeQuery();
+                    if (rs.next()) {
+                        if ( (rs.getString("deliverable").equals(project.getDeliverable())) ) {
+                            pst = null;
+                            pst = con.prepareStatement(UPDATE_DELIVERABLE);
+                            pst.clearParameters();
+                            pst.setString(1, paramsDeliverable.get("pcd-descrizione"));
+                            pst.setInt(2, idProj);
+                            pst.executeUpdate();
+                            con.commit();
+                        }
+                        else {
+                            JOptionPane.showMessageDialog(null, "I dati non sono stati salvati, in quanto sono stati modificati da un altro utente.", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+                            return;
+                        }
+                    }
                 }
             }
             if (params.containsKey(PART_PROJECT_CHARTER_RESOURCE)) {
                 HashMap<String, String> paramsResource = params.get(PART_PROJECT_CHARTER_RESOURCE);
                 if (Utils.containsValues(paramsResource)) {
-                    pst = con.prepareStatement(UPDATE_RESOURCE);
                     con.setAutoCommit(false);
+                    // Controllo che la deliverable del progetto non abbia subito modifiche non visualizzate dall'utente
+                    pst = con.prepareStatement(GET_PROJECT_RESOURCE);
                     pst.clearParameters();
-                    pst.setString(1, paramsResource.get("pcr-chiaveesterni"));
-                    pst.setString(2, paramsResource.get("pcr-chiaveinterni"));
-                    pst.setString(3, paramsResource.get("pcr-serviziateneo"));
-                    pst.setInt(4, idProj);
-                    //JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
-                    pst.executeUpdate();
-                    con.commit();
+                    pst.setInt(1, idProj);
+                    pst.setInt(2, userId);
+                    rs = pst.executeQuery();
+                    if (rs.next()) {
+                        if ( (rs.getString("fornitoriChiaveInterni").equals(project.getFornitoriChiaveInterni())) &&
+                             (rs.getString("fornitoriChiaveEsterni").equals(project.getFornitoriChiaveEsterni())) &&
+                             (rs.getString("serviziAteneo").equals(project.getServiziAteneo())) ) {
+                            pst = null;
+                            pst = con.prepareStatement(UPDATE_RESOURCE);
+                            pst.clearParameters();
+                            pst.setString(1, paramsResource.get("pcr-chiaveesterni"));
+                            pst.setString(2, paramsResource.get("pcr-chiaveinterni"));
+                            pst.setString(3, paramsResource.get("pcr-serviziateneo"));
+                            pst.setInt(4, idProj);
+                            //JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+                            pst.executeUpdate();
+                            con.commit();
+                        }
+                    }
+                }
+                else {
+                    JOptionPane.showMessageDialog(null, "I dati non sono stati salvati, in quanto sono stati modificati da un altro utente.", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+                    return;
                 }
             }
             if (params.containsKey(PART_PROJECT_CHARTER_CONSTRAINT)) {
