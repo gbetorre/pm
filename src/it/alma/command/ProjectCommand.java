@@ -89,6 +89,10 @@ public class ProjectCommand extends ItemBean implements Command {
      * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutti gli attributi del progetto
      */    
     private static final HashMap<String, String> nomeFile = new HashMap<String, String>();
+    /**
+     *  Progetto di dato id
+     */
+    ProjectBean runtimeProject = null;
     
     
     /** 
@@ -149,8 +153,6 @@ public class ProjectCommand extends ItemBean implements Command {
         ParameterParser parser = new ParameterParser(req);
         // Utente loggato
         PersonBean user = null;
-        // Progetto di dato id
-        ProjectBean project = null;
         // Recupera o inizializza 'id progetto'
         int idPrj = parser.getIntParameter("id", -1); 
         // Recupera o inizializza 'tipo pagina'   
@@ -209,7 +211,6 @@ public class ProjectCommand extends ItemBean implements Command {
         try {
             if (nomeFile.containsKey(part)) {
                 if (idPrj > 0) {
-                    project = db.getProject(idPrj, user.getId());
                     if (write) {
                         // Creazione della tabella valori parametri
                         HashMap<String, HashMap<String, String>> params = new HashMap<String, HashMap<String, String>>();
@@ -313,9 +314,9 @@ public class ProjectCommand extends ItemBean implements Command {
                         /* **************************************************** *
                          *                   UPDATE Project Part                *
                          * **************************************************** */
-                        db.updateProjectPart(idPrj, user.getId(), project, params);
+                        db.updateProjectPart(idPrj, user.getId(), runtimeProject, params);
                     }
-                    project = db.getProject(idPrj, user.getId());
+                    runtimeProject = db.getProject(idPrj, user.getId());
                     vActivities = db.getActivities(idPrj);
                     vSkills = db.getSkills(idPrj);
                     vRisks = db.getRisks(idPrj);
@@ -354,7 +355,7 @@ public class ProjectCommand extends ItemBean implements Command {
         // Salva nella request elenco progetti
         req.setAttribute("progetti", v);
         // Salva nella request dettaglio progetto
-        req.setAttribute("progetto", project);
+        req.setAttribute("progetto", runtimeProject);
         // Salva nella request elenco attivita del progetto
         req.setAttribute("attivita", vActivities);
         // Salva nella request elenco competenze del progetto
