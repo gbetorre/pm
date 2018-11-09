@@ -209,6 +209,7 @@ public class ProjectCommand extends ItemBean implements Command {
         try {
             if (nomeFile.containsKey(part)) {
                 if (idPrj > 0) {
+                    project = db.getProject(idPrj, user.getId());
                     if (write) {
                         // Creazione della tabella valori parametri
                         HashMap<String, HashMap<String, String>> params = new HashMap<String, HashMap<String, String>>();
@@ -312,7 +313,7 @@ public class ProjectCommand extends ItemBean implements Command {
                         /* **************************************************** *
                          *                   UPDATE Project Part                *
                          * **************************************************** */
-                        db.updateProjectPart(idPrj, params);
+                        db.updateProjectPart(idPrj, user.getId(), project, params);
                     }
                     project = db.getProject(idPrj, user.getId());
                     vActivities = db.getActivities(idPrj);
