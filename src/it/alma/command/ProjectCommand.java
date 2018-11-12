@@ -38,6 +38,7 @@ package it.alma.command;
 
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Vector;
 import java.util.logging.Logger;
 
@@ -214,116 +215,57 @@ public class ProjectCommand extends ItemBean implements Command {
                     if (write) {
                         // Creazione della tabella valori parametri
                         HashMap<String, HashMap<String, String>> params = new HashMap<String, HashMap<String, String>>();
-                        /* **************************************************** *
-                         *        Ramo di Project Charter (PC) - Vision         *
-                         * **************************************************** */
-                        //String parameters = HomePageCommand.getParameters(req);
-                        //System.out.println(parameters);
-                        if (part.equalsIgnoreCase(Query.PART_PROJECT_CHARTER_VISION)) {
-                            // Recupero e caricamento parametri di project charter/vision
-                            HashMap<String, String> pcv = new HashMap<String, String>();
-                            pcv.put("pcv-situazione", parser.getStringParameter("pcv-situazione", Utils.VOID_STRING));
-                            pcv.put("pcv-descrizione", parser.getStringParameter("pcv-descrizione", Utils.VOID_STRING));
-                            pcv.put("pcv-obiettivi", parser.getStringParameter("pcv-obiettivi", Utils.VOID_STRING));
-                            pcv.put("pcv-minacce", parser.getStringParameter("pcv-minacce", Utils.VOID_STRING));
-                            // Caricamento della tabella valori parametri
-                            params.put(Query.PART_PROJECT_CHARTER_VISION, pcv);
-                        }
-                        /* **************************************************** *
-                         *        Ramo di Project Charter - Stakeholder         *
-                         * **************************************************** */
-                        else if (part.equalsIgnoreCase(Query.PART_PROJECT_CHARTER_STAKEHOLDER)) {
-                            // Recupero e caricamento parametri di project charter/stakeholder
-                            HashMap<String, String> pcs = new HashMap<String, String>();
-                            pcs.put("pcs-chiave", parser.getStringParameter("pcs-chiave", Utils.VOID_STRING));
-                            pcs.put("pcs-istituzionale", parser.getStringParameter("pcs-istituzionale", Utils.VOID_STRING));
-                            pcs.put("pcs-marginale", parser.getStringParameter("pcs-marginale", Utils.VOID_STRING));
-                            pcs.put("pcs-operativo", parser.getStringParameter("pcs-operativo", Utils.VOID_STRING));
-                            params.put(Query.PART_PROJECT_CHARTER_STAKEHOLDER, pcs);
-                        }
-                        /* **************************************************** *
-                         *         Ramo di Project Charter - Deliverable        *
-                         * **************************************************** */
-                        else if (part.equalsIgnoreCase(Query.PART_PROJECT_CHARTER_DELIVERABLE)) {
-                            // Recupero e caricamento parametri di project charter/deliverable
-                            HashMap<String, String> pcd = new HashMap<String, String>();
-                            pcd.put("pcd-descrizione", parser.getStringParameter("pcd-descrizione", Utils.VOID_STRING));
-                            params.put(Query.PART_PROJECT_CHARTER_DELIVERABLE, pcd);
-                        }
-                        /* **************************************************** *
-                         *           Ramo di Project Charter - Risorse          *
-                         * **************************************************** */
-                        else if (part.equalsIgnoreCase(Query.PART_PROJECT_CHARTER_RESOURCE)) {
-                            // Recupero e caricamento parametri di project charter/risorse
-                            HashMap<String, String> pcr = new HashMap<String, String>();
-                            pcr.put("pcr-chiaveesterni", parser.getStringParameter("pcr-chiaveesterni", Utils.VOID_STRING));
-                            pcr.put("pcr-chiaveinterni", parser.getStringParameter("pcr-chiaveinterni", Utils.VOID_STRING));
-                            pcr.put("pcr-serviziateneo", parser.getStringParameter("pcr-serviziateneo", Utils.VOID_STRING));
-                            params.put(Query.PART_PROJECT_CHARTER_RESOURCE, pcr);
-                        }
-                        /* **************************************************** *
-                         *              Ramo di Project Charter - Rischi        *
-                         * **************************************************** */
-                        // Recupero e caricamento parametri di project charter/rischi
-                        // TODO ...
-                        /* **************************************************** *
-                         *            Ramo di Project Charter - Vincoli         *
-                         * **************************************************** */
-                        else if (part.equalsIgnoreCase(Query.PART_PROJECT_CHARTER_CONSTRAINT)) {
-                            // Recupero e caricamento parametri di project charter/vincoli
-                            HashMap<String, String> pcc = new HashMap<String, String>();
-                            pcc.put("pcc-descrizione", parser.getStringParameter("pcc-descrizione", Utils.VOID_STRING));
-                            params.put(Query.PART_PROJECT_CHARTER_CONSTRAINT, pcc);
-                        }
-                        /* **************************************************** *
-                         *          Ramo di Project Charter - Milestone         *
-                         * **************************************************** */
-                        else if (part.equalsIgnoreCase(Query.PART_PROJECT_CHARTER_MILESTONE)) {
-                            // Recupero e caricamento parametri di project charter/milestone
-                            int tot = Integer.parseInt(parser.getStringParameter("pcm-loop-status", Utils.VOID_STRING));
-                            HashMap<String, String> pcm = new HashMap<String, String>();
-                            for (int i = 0; i < tot; i++) {
-                                pcm.put("pcm-id" + String.valueOf(i), parser.getStringParameter("pcm-id" + String.valueOf(i), Utils.VOID_STRING));
-                                pcm.put("pcm-nome" + String.valueOf(i), parser.getStringParameter("pcm-nome" + String.valueOf(i), Utils.VOID_STRING));
-                                pcm.put("pcm-descrizione" + String.valueOf(i), parser.getStringParameter("pcm-descrizione" + String.valueOf(i), Utils.VOID_STRING));
-                                pcm.put("pcm-milestone" + String.valueOf(i), parser.getStringParameter("pcm-milestone" + String.valueOf(i), Utils.VOID_STRING));
-                            }
-                            params.put(Query.PART_PROJECT_CHARTER_MILESTONE, pcm);
-                        }
-                        /* **************************************************** *
-                         *                Ramo di Status Progetto               *
-                         * **************************************************** */
-                        else if (part.equalsIgnoreCase(Query.PART_PROJECT)) {
-                            // Recupero e caricamento parametri di project status
-                            GregorianCalendar data = new GregorianCalendar(1970, 1, 1);
-                            String dataAsString = Utils.format(data, "yyyy-mm-dd");
-                            HashMap<String, String> statusProject = new HashMap<String, String>();
-                            statusProject.put("sMese", parser.getStringParameter("sMese", dataAsString));
-                            statusProject.put("sAttuale", parser.getStringParameter("sAttuale", Utils.VOID_STRING));
-                            statusProject.put("sCosti", parser.getStringParameter("sCosti", Utils.VOID_STRING));
-                            statusProject.put("sTempi", parser.getStringParameter("sTempi", Utils.VOID_STRING));
-                            statusProject.put("sRischi", parser.getStringParameter("sRischi", Utils.VOID_STRING));
-                            statusProject.put("sRisorse", parser.getStringParameter("sRisorse", Utils.VOID_STRING));
-                            statusProject.put("sScope", parser.getStringParameter("sScope", Utils.VOID_STRING));
-                            statusProject.put("sComunicazione", parser.getStringParameter("sComunicazione", Utils.VOID_STRING));
-                            statusProject.put("sQualita", parser.getStringParameter("sQualita", Utils.VOID_STRING));
-                            statusProject.put("sApprovvigionamenti", parser.getStringParameter("sApprovvigionamenti", Utils.VOID_STRING));
-                            statusProject.put("sStakeholder", parser.getStringParameter("sStakeholder", Utils.VOID_STRING));
-                            params.put(Query.PART_PROJECT, statusProject);
-                        }
+                        loadParams(part, parser, params);
                         /* **************************************************** *
                          *                   UPDATE Project Part                *
                          * **************************************************** */
-                        db.updateProjectPart(idPrj, user.getId(), runtimeProject, params);
+                        try {
+                            // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
+                            HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
+                            Vector<ProjectBean> writablePrj = (Vector<ProjectBean>) ses.getAttribute("writableProjects");
+                            if (writablePrj == null) {
+                                throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
+                            }
+                            HashMap<Integer, ProjectBean> writableProjects = decant(writablePrj);
+                            db.updateProjectPart(idPrj, user.getId(), writableProjects, params);
+                            Vector<ProjectBean> userWritableProjects = db.getProjects(user.getId(), Query.GET_ONLY_WRITABLE_PROJECTS);
+                            // Aggiorna i progetti dell'utente in sessione
+                            ses.removeAttribute("writableProjects");
+                            ses.setAttribute("writableProjects", userWritableProjects);
+                        } catch (AttributoNonValorizzatoException anve) {
+                            String msg = FOR_NAME + "Impossibile recuperare un attributo obbligatorio, probabilmente l\'id dell\'utente.\n";
+                            LOG.severe(msg);
+                            throw new CommandException(msg + anve.getMessage(), anve);
+                        } catch (IllegalStateException ise) {
+                            String msg = FOR_NAME + "Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n";
+                            LOG.severe(msg);
+                            throw new CommandException(msg + ise.getMessage(), ise);
+                        } catch (ClassCastException cce) {
+                            String msg = FOR_NAME + ": Si e\' verificato un problema in una conversione di tipo.\n";
+                            LOG.severe(msg);
+                            throw new CommandException(msg + cce.getMessage(), cce);
+                        } catch (NullPointerException npe) {
+                            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null, probabilmente nel tentativo di recuperare i progetti dell\'utente.\n";
+                            LOG.severe(msg);
+                            throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n" + npe.getMessage(), npe);
+                        } catch (Exception e) {
+                            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+                            LOG.severe(msg);
+                            throw new CommandException(msg + e.getMessage(), e);
+                        }
                     }
                     runtimeProject = db.getProject(idPrj, user.getId());
-                    vActivities = db.getActivities(idPrj);
-                    vSkills = db.getSkills(idPrj);
-                    vRisks = db.getRisks(idPrj);
+                    // Se part vale PART_PROJECT (cioè 'prj') non serve fare le altre query 
+                    if (!part.equals(Query.PART_PROJECT)) {
+                        // Per ottimizzare
+                        vActivities = db.getActivities(idPrj);
+                        vSkills = db.getSkills(idPrj);
+                        vRisks = db.getRisks(idPrj);
+                    }
                 }
                 fileJspT = nomeFile.get(part);
             } else {
-                v = db.getProjects(user.getId());
+                v = db.getProjects(user.getId(), Query.GET_ALL);
                 fileJspT = nomeFileElenco;
             }
         } catch (AttributoNonValorizzatoException anve) {
@@ -362,6 +304,165 @@ public class ProjectCommand extends ItemBean implements Command {
         req.setAttribute("competenze", vSkills);
         // Salva nella request elenco rischi del progetto
         req.setAttribute("rischi", vRisks);
+    }
+    
+    
+    /**
+     * <p>Valorizza per riferimento una mappa contenente i valori relativi  
+     * ad un progetto eventualmente da aggiornare.</p> 
+     * 
+     * @param part la sezione del sito che si vuole aggiornare
+     * @param parser oggetto per la gestione assistita dei parametri di input, gia' pronto all'uso
+     * @param params mappa da valorizzare per riferimento (ByRef)
+     * @throws CommandException se si verifica un problema nella gestione degli oggetti data o in qualche tipo di puntamento
+     */
+    private static void loadParams(String part, 
+                                   ParameterParser parser,
+                                   HashMap<String, HashMap<String, String>> params)
+                            throws CommandException {
+        /* **************************************************** *
+         *        Ramo di Project Charter (PC) - Vision         *
+         * **************************************************** */
+        //String parameters = HomePageCommand.getParameters(req);
+        //System.out.println(parameters);
+        if (part.equalsIgnoreCase(Query.PART_PROJECT_CHARTER_VISION)) {
+            // Recupero e caricamento parametri di project charter/vision
+            HashMap<String, String> pcv = new HashMap<String, String>();
+            pcv.put("pcv-situazione", parser.getStringParameter("pcv-situazione", Utils.VOID_STRING));
+            pcv.put("pcv-descrizione", parser.getStringParameter("pcv-descrizione", Utils.VOID_STRING));
+            pcv.put("pcv-obiettivi", parser.getStringParameter("pcv-obiettivi", Utils.VOID_STRING));
+            pcv.put("pcv-minacce", parser.getStringParameter("pcv-minacce", Utils.VOID_STRING));
+            // Caricamento della tabella valori parametri
+            params.put(Query.PART_PROJECT_CHARTER_VISION, pcv);
+        }
+        /* **************************************************** *
+         *        Ramo di Project Charter - Stakeholder         *
+         * **************************************************** */
+        else if (part.equalsIgnoreCase(Query.PART_PROJECT_CHARTER_STAKEHOLDER)) {
+            // Recupero e caricamento parametri di project charter/stakeholder
+            HashMap<String, String> pcs = new HashMap<String, String>();
+            pcs.put("pcs-chiave", parser.getStringParameter("pcs-chiave", Utils.VOID_STRING));
+            pcs.put("pcs-istituzionale", parser.getStringParameter("pcs-istituzionale", Utils.VOID_STRING));
+            pcs.put("pcs-marginale", parser.getStringParameter("pcs-marginale", Utils.VOID_STRING));
+            pcs.put("pcs-operativo", parser.getStringParameter("pcs-operativo", Utils.VOID_STRING));
+            params.put(Query.PART_PROJECT_CHARTER_STAKEHOLDER, pcs);
+        }
+        /* **************************************************** *
+         *         Ramo di Project Charter - Deliverable        *
+         * **************************************************** */
+        else if (part.equalsIgnoreCase(Query.PART_PROJECT_CHARTER_DELIVERABLE)) {
+            // Recupero e caricamento parametri di project charter/deliverable
+            HashMap<String, String> pcd = new HashMap<String, String>();
+            pcd.put("pcd-descrizione", parser.getStringParameter("pcd-descrizione", Utils.VOID_STRING));
+            params.put(Query.PART_PROJECT_CHARTER_DELIVERABLE, pcd);
+        }
+        /* **************************************************** *
+         *           Ramo di Project Charter - Risorse          *
+         * **************************************************** */
+        else if (part.equalsIgnoreCase(Query.PART_PROJECT_CHARTER_RESOURCE)) {
+            // Recupero e caricamento parametri di project charter/risorse
+            HashMap<String, String> pcr = new HashMap<String, String>();
+            pcr.put("pcr-chiaveesterni", parser.getStringParameter("pcr-chiaveesterni", Utils.VOID_STRING));
+            pcr.put("pcr-chiaveinterni", parser.getStringParameter("pcr-chiaveinterni", Utils.VOID_STRING));
+            pcr.put("pcr-serviziateneo", parser.getStringParameter("pcr-serviziateneo", Utils.VOID_STRING));
+            params.put(Query.PART_PROJECT_CHARTER_RESOURCE, pcr);
+        }
+        /* **************************************************** *
+         *              Ramo di Project Charter - Rischi        *
+         * **************************************************** */
+        // Recupero e caricamento parametri di project charter/rischi
+        // TODO ...
+        /* **************************************************** *
+         *            Ramo di Project Charter - Vincoli         *
+         * **************************************************** */
+        else if (part.equalsIgnoreCase(Query.PART_PROJECT_CHARTER_CONSTRAINT)) {
+            // Recupero e caricamento parametri di project charter/vincoli
+            HashMap<String, String> pcc = new HashMap<String, String>();
+            pcc.put("pcc-descrizione", parser.getStringParameter("pcc-descrizione", Utils.VOID_STRING));
+            params.put(Query.PART_PROJECT_CHARTER_CONSTRAINT, pcc);
+        }
+        /* **************************************************** *
+         *          Ramo di Project Charter - Milestone         *
+         * **************************************************** */
+        else if (part.equalsIgnoreCase(Query.PART_PROJECT_CHARTER_MILESTONE)) {
+            // Recupero e caricamento parametri di project charter/milestone
+            int tot = Integer.parseInt(parser.getStringParameter("pcm-loop-status", Utils.VOID_STRING));
+            HashMap<String, String> pcm = new HashMap<String, String>();
+            for (int i = 0; i < tot; i++) {
+                pcm.put("pcm-id" + String.valueOf(i), parser.getStringParameter("pcm-id" + String.valueOf(i), Utils.VOID_STRING));
+                pcm.put("pcm-nome" + String.valueOf(i), parser.getStringParameter("pcm-nome" + String.valueOf(i), Utils.VOID_STRING));
+                pcm.put("pcm-descrizione" + String.valueOf(i), parser.getStringParameter("pcm-descrizione" + String.valueOf(i), Utils.VOID_STRING));
+                pcm.put("pcm-milestone" + String.valueOf(i), parser.getStringParameter("pcm-milestone" + String.valueOf(i), Utils.VOID_STRING));
+            }
+            params.put(Query.PART_PROJECT_CHARTER_MILESTONE, pcm);
+        }
+        /* **************************************************** *
+         *                Ramo di Status Progetto               *
+         * **************************************************** */
+        else if (part.equalsIgnoreCase(Query.PART_PROJECT)) {
+            // Recupero e caricamento parametri di project status
+            GregorianCalendar data = new GregorianCalendar(1970, 1, 1);
+            String dataAsString = Utils.format(data, "yyyy-mm-dd");
+            HashMap<String, String> statusProject = new HashMap<String, String>();
+            statusProject.put("sMese", parser.getStringParameter("sMese", dataAsString));
+            statusProject.put("sAttuale", parser.getStringParameter("sAttuale", Utils.VOID_STRING));
+            statusProject.put("sCosti", parser.getStringParameter("sCosti", Utils.VOID_STRING));
+            statusProject.put("sTempi", parser.getStringParameter("sTempi", Utils.VOID_STRING));
+            statusProject.put("sRischi", parser.getStringParameter("sRischi", Utils.VOID_STRING));
+            statusProject.put("sRisorse", parser.getStringParameter("sRisorse", Utils.VOID_STRING));
+            statusProject.put("sScope", parser.getStringParameter("sScope", Utils.VOID_STRING));
+            statusProject.put("sComunicazione", parser.getStringParameter("sComunicazione", Utils.VOID_STRING));
+            statusProject.put("sQualita", parser.getStringParameter("sQualita", Utils.VOID_STRING));
+            statusProject.put("sApprovvigionamenti", parser.getStringParameter("sApprovvigionamenti", Utils.VOID_STRING));
+            statusProject.put("sStakeholder", parser.getStringParameter("sStakeholder", Utils.VOID_STRING));
+            params.put(Query.PART_PROJECT, statusProject);
+        }
+    }
+    
+    
+    /**
+     * <p>Travasa un Vector di ProjectBean in una corrispondente struttura di 
+     * tipo Dictionary, LinkedHashMap, in cui le chiavi sono rappresentate
+     * da oggetti Wrapper di tipi primitivi interi (Integer) e i valori
+     * sono rappresentati dai corrispettivi elementi del Vector.</p>
+     * <p>&Egrave; utile per un accesso pi&uacute; diretto agli oggetti
+     * memorizzati nella struttura rispetto a quanto garantito dai Vector.</p>
+     * 
+     * @param projects Vector di ProjectBean da travasare in HashMap
+     * @return <code>LinkedHashMap&lt;Integer&comma; ProjectBean&gt;</code> - Struttura di tipo Dictionary, o Mappa ordinata, avente per chiave un Wrapper dell'identificativo dell'oggetto, e per valore quest'ultimo
+     * @throws CommandException se si verifica un problema nell'accesso all'id di un oggetto, nello scorrimento di liste o in qualche altro tipo di puntamento
+     */
+    private static LinkedHashMap<Integer, ProjectBean> decant(Vector<ProjectBean> projects)
+                                                       throws CommandException {
+        LinkedHashMap<Integer, ProjectBean> userProjects = new LinkedHashMap<Integer, ProjectBean>(7);
+        for (int i = 0; i < projects.size(); i++) {
+            try {
+                ProjectBean project = projects.elementAt(i);
+                Integer projectIdAsInteger = new Integer(project.getId());
+                userProjects.put(projectIdAsInteger, project);
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di un attributo obbligatorio del bean, probabilmente l\'id.\n" + anve.getMessage();
+                LOG.severe(msg);
+                throw new CommandException(msg, anve);
+            } catch (ArrayIndexOutOfBoundsException aiobe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema di puntamento fuori tabella.\n" + aiobe.getMessage();
+                LOG.severe(msg);
+                throw new CommandException(msg, aiobe);
+            } catch (ClassCastException cce) {
+                String msg = FOR_NAME + "Si e\' verificato un problema di conversione di tipo.\n" + cce.getMessage();
+                LOG.severe(msg);
+                throw new CommandException(msg, cce);
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema di puntamento.\n" + npe.getMessage();
+                LOG.severe(msg);
+                throw new CommandException(msg, npe);
+            } catch (Exception e) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nel travaso di un Vector in un Dictionary.\n" + e.getMessage();
+                LOG.severe(msg);
+                throw new CommandException(msg, e);
+            }
+        }
+        return userProjects;
     }
     
 }
