@@ -302,12 +302,14 @@ public class DBWrapper implements Query {
      * <p>Restituisce un Vector di ProjectBean rappresentante i progetti dell'utente loggato .</p>
      * 
      * @param userId identificativo della persona di cui si vogliono recuperare i progetti
+     * @param nip TODO
      * @return <code>Vector&lt;ProjectBean&gt;</code> - ProjectBean rappresentante i progetti dell'utente loggato
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
     @SuppressWarnings({ "null", "static-method" })
-    public Vector<ProjectBean> getProjects(int userId)
-    							    throws WebStorageException{
+    public Vector<ProjectBean> getProjects(int userId, 
+                                           boolean getAll)
+    							    throws WebStorageException {
     	ResultSet rs, rs2 = null;
     	Connection con = null;
         PreparedStatement pst = null;
@@ -317,9 +319,11 @@ public class DBWrapper implements Query {
         int idDipart = -1;
         int idStatoProgetto = -1;
         Vector<ProjectBean> projects = new Vector<ProjectBean>();
+        // Decide quale query deve fare
+        String query = getAll ? GET_PROJECTS : GET_WRITABLE_PROJECTS_BY_USER_ID;
         try {
             con = pol_manager.getConnection();
-            pst = con.prepareStatement(GET_PROJECTS);
+            pst = con.prepareStatement(query);
             pst.clearParameters();
             pst.setInt(1, userId);
             rs = pst.executeQuery();
@@ -375,6 +379,83 @@ public class DBWrapper implements Query {
     }
     
     
+    /**
+     * TODO
+     * 
+     * @param userName
+     * @return
+     * @throws WebStorageException
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public Vector<ProjectBean> getWritableProjects(String userName)
+                                            throws WebStorageException {
+        ResultSet rs, rs2 = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        ProjectBean project = null;
+        DepartmentBean dipart = null;
+        CodeBean statoProgetto = null;
+        int idDipart = -1;
+        int idStatoProgetto = -1;
+        Vector<ProjectBean> projects = new Vector<ProjectBean>();
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_WRITABLE_PROJECTS_BY_USER_NAME);
+            pst.clearParameters();
+            pst.setString(1, userName);
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                project = new ProjectBean();
+                BeanUtil.populate(project, rs);
+                // Recupera dipartimento del progetto
+                idDipart = project.getIdDipart();
+                pst = con.prepareStatement(GET_DIPART);
+                pst.clearParameters();
+                pst.setInt(1, idDipart);
+                rs2 = pst.executeQuery();
+                if (rs2.next()) {
+                    dipart = new DepartmentBean();
+                    BeanUtil.populate(dipart, rs2);
+                    project.setDipart(dipart);
+                }
+                rs2 = null;
+                //Recupera statoprogetto del progetto
+                idStatoProgetto = project.getIdStatoProgetto();
+                pst = con.prepareStatement(GET_STATOPROGETTO);
+                pst.clearParameters();
+                pst.setInt(1, idStatoProgetto);
+                rs2 = pst.executeQuery();
+                if(rs2.next()) {
+                    statoProgetto = new CodeBean();
+                    BeanUtil.populate(statoProgetto, rs2);
+                    project.setStatoProgetto(statoProgetto);
+                }
+                // Aggiunge il progetto valorizzato all'elenco
+                projects.add(project);
+            }
+            return projects;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Oggetto ProjectBean.idDipart non valorizzato; problema nella query dei progetti su cui l\'utente ha diritti di scrittura.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto ProjectBean non valorizzato; problema nella query dei progetti su cui l\'utente ha diritti di scrittura.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }        
+    }
+    
+        
     /**
      * <p>Restituisce un ProjectBean rappresentante un progetto dell'utente loggato.</p>
      * 
@@ -433,13 +514,15 @@ public class DBWrapper implements Query {
     @SuppressWarnings({ "null", "static-method" })
     public void updateProjectPart(int idProj,
                                   int userId,
-                                  ProjectBean project, 
+                                  HashMap<Integer, ProjectBean> projects, 
                                   HashMap<String, HashMap<String, String>>params) 
                            throws WebStorageException {
         ResultSet rs = null;
         Connection con = null;
         PreparedStatement pst = null;        
         try {
+            // Ottiene il progetto precaricato quando l'utente si è loggato corrispondente al progetto che vuole aggiornare
+            ProjectBean project = projects.get(new Integer(idProj));
             // Ottiene la connessione
             con = pol_manager.getConnection();
             /* **************************************************************** *
