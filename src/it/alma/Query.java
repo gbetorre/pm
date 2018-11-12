@@ -51,10 +51,23 @@ import java.util.LinkedList;
  */
 public interface Query extends Serializable {
 
+    /* ************************************************************************ *
+     *                  Costanti parlanti per valori boolean                    *
+     * ************************************************************************ */
     /**
      * <p>Costante parlante per flag di recupero sessione utente.</p>
      */
     public static final boolean IF_EXISTS_DONOT_CREATE_NEW = false;
+    /**
+     * <p>Costante parlante per flag di recupero progetti utente che lo stesso pu&ograve; editaere.</p>
+     */
+    public static final boolean GET_ONLY_WRITABLE_PROJECTS = false;
+    /**
+     * <p>Costante parlante per flag di recupero progetti utente 
+     * indipendentemente dal livello di autorizzazione 
+     * che l'utente ha sui progetti stessi.</p>
+     */
+    public static final boolean GET_ALL = true;
     /* ************************************************************************ *
      *      Costanti corrispondenti ai parametri ammessi sulla querystring      *
      * ************************************************************************ */
@@ -181,7 +194,7 @@ public interface Query extends Serializable {
             ;
         
     /**
-     * <p>Estrae i ruoli di una persona passata 
+     * <p>Estrae i ruoli di una persona  
      * avente identificativo passato come parametro.</p>
      */
     public static final String GET_RUOLIPERSONA = 
@@ -194,7 +207,8 @@ public interface Query extends Serializable {
             "   WHERE RG.id_persona = ?";
         
     /**
-     * <p>Estrae i progetti dell'utente passato come parametro.</p>
+     * <p>Estrae i progetti dell'utente 
+     * avente identificativo passato come parametro.</p>
      */
     public static final String GET_PROJECTS = 
     		"SELECT " +
@@ -237,6 +251,100 @@ public interface Query extends Serializable {
     		"	WHERE 	P.id = ?";
     
     /**
+     * <p>Estrae i progetti dell'utente avente <code>username</code> 
+     * passato come parametro e nel contesto dei quali lo stesso risulta essere 
+     * un utente che pu&ograve; modificare i dati del progetto.</p>
+     */
+    public static final String GET_WRITABLE_PROJECTS_BY_USER_NAME = 
+            "SELECT " +
+            "       PJ.id           " + 
+            "   ,   PJ.id_dipart                AS \"idDipart\"" + 
+            "   ,   PJ.titolo                   AS \"titolo\"" + 
+            "   ,   PJ.descrizione              AS \"descrizione\"" + 
+            "   ,   PJ.datainizio               AS \"dataInizio\"" + 
+            "   ,   PJ.datafine                 AS \"dataFine\"" + 
+            "   ,   PJ.id_statoprogetto         AS \"idStatoProgetto\"" + 
+            "   ,   PJ.statotempi               AS \"statoTempi\"" + 
+            "   ,   PJ.statocosti               AS \"statoCosti\"" + 
+            "   ,   PJ.statorischi              AS \"statoRischi\"" + 
+            "   ,   PJ.statorisorse             AS \"statoRisorse\"" + 
+            "   ,   PJ.statoscope               AS \"statoScope\"" + 
+            "   ,   PJ.statocomunicazione       AS \"statoComunicazione\"" + 
+            "   ,   PJ.statoqualita             AS \"statoQualita\"" + 
+            "   ,   PJ.statoapprovvigionamenti  AS \"statoApprovvigionamenti\"" + 
+            "   ,   PJ.statostakeholder         AS \"statoStakeholder\"" + 
+            "   ,   PJ.meseriferimento          AS \"meseRiferimento\"" + 
+            "   ,   PJ.descrizionestatocorrente AS \"descrizioneStatoCorrente\"" + 
+            "   ,   PJ.situazioneattuale        AS \"situazioneAttuale\"" + 
+            "   ,   PJ.situazionefinale         AS \"situazioneFinale\"" + 
+            "   ,   PJ.obiettivimisurabili      AS \"obiettiviMisurabili\"" + 
+            "   ,   PJ.minacce                  AS \"minacce\"" + 
+            "   ,   PJ.stakeholdermarginali     AS \"stakeholderMarginali\"" + 
+            "   ,   PJ.stakeholderoperativi     AS \"stakeholderOperativi\"" + 
+            "   ,   PJ.stakeholderistituzionali AS \"stakeholderIstituzionali\"" + 
+            "   ,   PJ.stakeholderchiave        AS \"stakeholderChiave\"" + 
+            "   ,   PJ.deliverable              AS \"deliverable\"" + 
+            "   ,   PJ.fornitorichiaveinterni   AS \"fornitoriChiaveInterni\"" + 
+            "   ,   PJ.fornitorichiaveesterni   AS \"fornitoriChiaveEsterni\"" + 
+            "   ,   PJ.serviziateneo            AS \"serviziAteneo\"" + 
+            "   ,   PJ.vincoli                  AS \"vincoli\"" + 
+            "   FROM progetto PJ" + 
+            "       INNER JOIN ruologestione RG ON PJ.id = RG.id_progetto" + 
+            "       INNER JOIN ruolo R ON RG.id_ruolo = R.id" +
+            "       INNER JOIN persona P ON RG.id_persona = P.id" + 
+            "       INNER JOIN identita I ON P.id = I.id1_persona" + 
+            "       INNER JOIN usr U ON I.id0_usr = U.id" + 
+            "   WHERE   U.login = ?" + 
+            "       AND R.nome IN ('PM', 'TL', 'PMOATE', 'PMODIP')";
+    
+    /**
+     * <p>Estrae i progetti dell'utente avente <code>user id</code> 
+     * passato come parametro e nel contesto dei quali lo stesso risulta essere 
+     * un utente che pu&ograve; modificare i dati del progetto.</p>
+     */
+    public static final String GET_WRITABLE_PROJECTS_BY_USER_ID = 
+            "SELECT " +
+            "       PJ.id           " + 
+            "   ,   PJ.id_dipart                AS \"idDipart\"" + 
+            "   ,   PJ.titolo                   AS \"titolo\"" + 
+            "   ,   PJ.descrizione              AS \"descrizione\"" + 
+            "   ,   PJ.datainizio               AS \"dataInizio\"" + 
+            "   ,   PJ.datafine                 AS \"dataFine\"" + 
+            "   ,   PJ.id_statoprogetto         AS \"idStatoProgetto\"" + 
+            "   ,   PJ.statotempi               AS \"statoTempi\"" + 
+            "   ,   PJ.statocosti               AS \"statoCosti\"" + 
+            "   ,   PJ.statorischi              AS \"statoRischi\"" + 
+            "   ,   PJ.statorisorse             AS \"statoRisorse\"" + 
+            "   ,   PJ.statoscope               AS \"statoScope\"" + 
+            "   ,   PJ.statocomunicazione       AS \"statoComunicazione\"" + 
+            "   ,   PJ.statoqualita             AS \"statoQualita\"" + 
+            "   ,   PJ.statoapprovvigionamenti  AS \"statoApprovvigionamenti\"" + 
+            "   ,   PJ.statostakeholder         AS \"statoStakeholder\"" + 
+            "   ,   PJ.meseriferimento          AS \"meseRiferimento\"" + 
+            "   ,   PJ.descrizionestatocorrente AS \"descrizioneStatoCorrente\"" + 
+            "   ,   PJ.situazioneattuale        AS \"situazioneAttuale\"" + 
+            "   ,   PJ.situazionefinale         AS \"situazioneFinale\"" + 
+            "   ,   PJ.obiettivimisurabili      AS \"obiettiviMisurabili\"" + 
+            "   ,   PJ.minacce                  AS \"minacce\"" + 
+            "   ,   PJ.stakeholdermarginali     AS \"stakeholderMarginali\"" + 
+            "   ,   PJ.stakeholderoperativi     AS \"stakeholderOperativi\"" + 
+            "   ,   PJ.stakeholderistituzionali AS \"stakeholderIstituzionali\"" + 
+            "   ,   PJ.stakeholderchiave        AS \"stakeholderChiave\"" + 
+            "   ,   PJ.deliverable              AS \"deliverable\"" + 
+            "   ,   PJ.fornitorichiaveinterni   AS \"fornitoriChiaveInterni\"" + 
+            "   ,   PJ.fornitorichiaveesterni   AS \"fornitoriChiaveEsterni\"" + 
+            "   ,   PJ.serviziateneo            AS \"serviziAteneo\"" + 
+            "   ,   PJ.vincoli                  AS \"vincoli\"" + 
+            "   FROM progetto PJ" + 
+            "       INNER JOIN ruologestione RG ON PJ.id = RG.id_progetto" + 
+            "       INNER JOIN ruolo R ON RG.id_ruolo = R.id" +
+            "       INNER JOIN persona P ON RG.id_persona = P.id" + 
+            "       INNER JOIN identita I ON P.id = I.id1_persona" + 
+            "       INNER JOIN usr U ON I.id0_usr = U.id" + 
+            "   WHERE   U.id = ?" + 
+            "       AND R.nome IN ('PM', 'TL', 'PMOATE', 'PMODIP')";
+    
+    /**
      * <p>Estrae un progetto di dato id, passato come parametro.</p>
      */
     public static final String GET_PROJECT = 
@@ -277,7 +385,7 @@ public interface Query extends Serializable {
             "       INNER JOIN persona P ON RG.id_persona = P.id" + 
             "   WHERE   PJ.id = ?" +
             "       AND P.id= ?";
-
+    
     /**
      * Estrae un dipartimento dato il suo id, passato come parametro
      */
