@@ -38,7 +38,7 @@ package it.alma.exception;
 
 /**
  * <p>Questa eccezione viene ritornata quando si verifica un generico errore
- * SQL. In questo modo si machera agli strati superiori dell'applicazione
+ * SQL. In questo modo si maschera agli strati superiori dell'applicazione
  * il fatto che si sta usando un database relazionale.</p>
  * <cite id="horton">
  * <p>Tutte le eccezioni personalizzate devono sempre avere <code>Throwable</code> 
@@ -122,7 +122,6 @@ public class WebStorageException extends Exception {
      * 
      * @param msg   una String che verr&agrave; aggiunta a tempo di esecuzione al nome della classe per formare il messaggio memorizzato nell'eccezione
      * @param e     l'eccezione che si &egrave; verificata per l'aggiunta al messaggio della traccia dello stack
-     * @since       1.0
      */
     public WebStorageException(String msg, Throwable e) {
         super(msg + getLocalizedMessage(e));
@@ -136,7 +135,6 @@ public class WebStorageException extends Exception {
      * 
      * @param e     un'eccezione di cui si vuol recuperare la traccia dello stack di esecuzione
      * @return      una String contenente la traccia dello stack di esecuzione dell'oggetto Throwable passato come argomento
-     * @since       1.0
      */
     public static String getLocalizedMessage(Throwable e) {
         StringBuffer trace = new StringBuffer("\n");
