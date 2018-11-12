@@ -37,6 +37,7 @@
 package it.alma;
 
 import java.io.IOException;
+import java.util.Vector;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletConfig;
@@ -49,6 +50,7 @@ import javax.servlet.http.HttpSession;
 import com.oreilly.servlet.ParameterParser;
 
 import it.alma.bean.PersonBean;
+import it.alma.bean.ProjectBean;
 import it.alma.exception.AttributoNonValorizzatoException;
 import it.alma.exception.CommandException;
 import it.alma.exception.WebStorageException;
@@ -176,6 +178,8 @@ public class SessionManager extends HttpServlet {
                 req.getRequestDispatcher("/jsp/login.jsp").include(req, res);
             }
             else {
+                Vector<ProjectBean> userWritableProjects = db.getWritableProjects(username);
+                session.setAttribute("writableProjects", userWritableProjects);
                 res.sendRedirect(res.encodeRedirectURL("/almalaurea/?q=pol"));
             }
         } catch (IllegalStateException e) {
@@ -183,16 +187,10 @@ public class SessionManager extends HttpServlet {
         } catch (NullPointerException e) {
             throw new ServletException("Errore nell'estrazione dei dipartimenti che gestiscono il corso.\n" + e.getMessage(), e);
         } catch (Exception e) {
-            //msg += "il corso di studi associato alla matricola inserita non ha associato alcun dipartimento";
-            //msg += bundle.getString("NoCorsoNoMatricola");
-            //ent= "cs";
-            //data="matricola=" + matricola;
             //session.setAttribute("error", true);
             //session.setAttribute("msg", msg);
-            //Redirect alla pagina del corso frequentato dalla matricola
-            //res.sendRedirect(res.encodeRedirectURL(StringEscapeUtils.unescapeHtml(dataUrl.getUrl(ent, data, true))));
             //Log dell'evento
-            LOG.severe("Oggetto Vector<elencoDipartCs> non valorizzato; il corso di studi associato alla matricola inserita non ha associato alcun dipartimento"); 
+            LOG.severe("Oggetto Vector<elencoDipartCs> non valorizzato; L'username passato come parametro non ha associato alcun progetto"); 
         }
         //final RequestDispatcher rd = getServletContext().getRequestDispatcher(fileJsp + "?" + req.getQueryString());
         //rd.forward(req, res);
