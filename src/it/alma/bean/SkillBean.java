@@ -89,7 +89,7 @@ public class SkillBean extends CodeBean implements Serializable {
      * Restituisce la presenza della competenza
      * @return <code>presenza</code> - presenza della competenza
      */
-    public boolean getPresenza() {
+    public boolean isPresenza() {
         return presenza;
     }
 
