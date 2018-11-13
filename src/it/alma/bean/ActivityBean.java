@@ -47,7 +47,7 @@ import it.alma.exception.AttributoNonValorizzatoException;
  * 
  * @author <a href="mailto:andrea.tonel@studenti.univr.it">Andrea Tonel</a>
  */
-public class ActivityBean implements Serializable, Query {
+public class ActivityBean extends CodeBean implements Serializable, Query {
 
 	/**
      * La serializzazione necessita di dichiarare una costante di tipo long
