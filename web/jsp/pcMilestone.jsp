@@ -13,7 +13,7 @@
     <hr class="separatore" />
     <div class="tab-content responsive hidden-xs hidden-sm">
       <div role="tabpanel" class="tab-pane active" id="tab-pcvision">
-      <h4>Attività del progetto</h4>
+      <h4>Attivit&agrave; del progetto</h4>
         <table class="table table-bordered table-hover">
           <thead class="thead-light">
           <tr>
@@ -25,8 +25,7 @@
           <tbody>
           <c:set var="status" value="" scope="page" />
           <c:forEach var="act" items="${requestScope.attivita}" varStatus="loop">
-            <c:set var="status" value="${loop.index}" scope="page" />+
-            <input type="hidden" id="pcm-loop-status" name="pcm-loop-status" value="${status}">
+            <c:set var="status" value="${loop.index}" scope="page" />
             <input type="hidden" id="pcm-id${status}" name="pcm-id${status}" value="<c:out value="${act.id}"/>">
             <tr>
               <td scope="row">
@@ -39,12 +38,12 @@
                 <c:choose>
                   <c:when test="${act.milestone}">
                     <div class="form-check text-center">
-                      <input type="checkbox" class="form-check-input" id="pcm-milestone${status}" name="pcm-milestone${status}" value="" checked disabled>
+                      <input type="checkbox" class="form-check-input" id="pcm-milestone${status}" name="pcm-milestone${status}" checked disabled>
                     </div>
                   </c:when>
                   <c:otherwise>
                     <div class="form-check text-center">
-                      <input type="checkbox" class="form-check-input" id="pcm-milestone${status}" name="pcm-milestone${status}" value="" disabled>
+                      <input type="checkbox" class="form-check-input" id="pcm-milestone${status}" name="pcm-milestone${status}" disabled>
                     </div>
                   </c:otherwise>
                 </c:choose>
@@ -53,6 +52,7 @@
           </c:forEach>
           </tbody>
         </table>
+        <input type="hidden" id="pcm-loop-status" name="pcm-loop-status" value="<c:out value="${status}"/>">
         <div class="text-center"><input type="button" class="btn btn-primary" name="addAttivita" value="Aggiungi"></div>
         <hr class="separatore" />
         <div id="container-fluid">
