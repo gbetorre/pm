@@ -54,6 +54,7 @@ import it.alma.Main;
 import it.alma.Query;
 import it.alma.Utils;
 import it.alma.bean.ActivityBean;
+import it.alma.bean.CodeBean;
 import it.alma.bean.ItemBean;
 import it.alma.bean.PersonBean;
 import it.alma.bean.ProjectBean;
@@ -228,11 +229,16 @@ public class ProjectCommand extends ItemBean implements Command {
                                 throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
                             }
                             HashMap<Integer, ProjectBean> writableProjects = decant(writablePrj);
-                            db.updateProjectPart(idPrj, user.getId(), writableProjects, params);
+                            LinkedHashMap<Integer, Vector<CodeBean>> userWritableActivitiesByProjectId =  (LinkedHashMap<Integer, Vector<CodeBean>>) ses.getAttribute("writableActivity");
+                            LinkedHashMap<Integer, Vector<CodeBean>> userWritableSkillsByProjectId =  (LinkedHashMap<Integer, Vector<CodeBean>>) ses.getAttribute("writableSkills");
+                            LinkedHashMap<Integer, Vector<CodeBean>> userWritableRisksByProjectId =  (LinkedHashMap<Integer, Vector<CodeBean>>) ses.getAttribute("writableRisks");
+                            LinkedHashMap<String, HashMap<Integer, Vector<CodeBean>>> objectsMap = decant(userWritableActivitiesByProjectId, userWritableSkillsByProjectId, userWritableRisksByProjectId);
+                            db.updateProjectPart(idPrj, user.getId(), writableProjects, objectsMap, params);
                             Vector<ProjectBean> userWritableProjects = db.getProjects(user.getId(), Query.GET_ONLY_WRITABLE_PROJECTS);
                             // Aggiorna i progetti dell'utente in sessione
                             ses.removeAttribute("writableProjects");
                             ses.setAttribute("writableProjects", userWritableProjects);
+                            // TODO
                         } catch (AttributoNonValorizzatoException anve) {
                             String msg = FOR_NAME + "Impossibile recuperare un attributo obbligatorio, probabilmente l\'id dell\'utente.\n";
                             LOG.severe(msg);
@@ -470,6 +476,19 @@ public class ProjectCommand extends ItemBean implements Command {
             }
         }
         return userProjects;
+    }
+    
+    
+    private static LinkedHashMap<String, HashMap<Integer, Vector<CodeBean>>> decant(LinkedHashMap<Integer, Vector<CodeBean>> activitiesByProject,
+                                                                             LinkedHashMap<Integer, Vector<CodeBean>> skillsByProject ,
+                                                                             LinkedHashMap<Integer, Vector<CodeBean>> risksByProject)
+                                                                      throws CommandException {
+        LinkedHashMap<String, HashMap<Integer, Vector<CodeBean>>> map =  new LinkedHashMap<String, HashMap<Integer, Vector<CodeBean>>>();
+        map.put(Query.PART_PROJECT_CHARTER_MILESTONE, activitiesByProject);
+        map.put(Query.PART_PROJECT_CHARTER_RESOURCE, skillsByProject);
+        map.put(Query.PART_PROJECT_CHARTER_RISK, risksByProject);
+        return map;
+        
     }
     
 }
