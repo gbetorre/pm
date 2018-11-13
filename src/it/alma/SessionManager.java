@@ -37,6 +37,7 @@
 package it.alma;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.Vector;
 import java.util.logging.Logger;
 
@@ -49,8 +50,11 @@ import javax.servlet.http.HttpSession;
 
 import com.oreilly.servlet.ParameterParser;
 
+import it.alma.bean.ActivityBean;
 import it.alma.bean.PersonBean;
 import it.alma.bean.ProjectBean;
+import it.alma.bean.RiskBean;
+import it.alma.bean.SkillBean;
 import it.alma.exception.AttributoNonValorizzatoException;
 import it.alma.exception.CommandException;
 import it.alma.exception.WebStorageException;
@@ -179,7 +183,23 @@ public class SessionManager extends HttpServlet {
             }
             else {
                 Vector<ProjectBean> userWritableProjects = db.getWritableProjects(username);
+                LinkedHashMap<Integer, Vector<ActivityBean>> userWritableActivitiesByProject = new LinkedHashMap<Integer, Vector<ActivityBean>>();
+                LinkedHashMap<Integer, Vector<SkillBean>> userWritableSkillsByProject = new LinkedHashMap<Integer, Vector<SkillBean>>();
+                LinkedHashMap<Integer, Vector<RiskBean>> userWritableARisksByProject = new LinkedHashMap<Integer, Vector<RiskBean>>();
+                for (ProjectBean writablePrj : userWritableProjects) {
+                    int idPrj = writablePrj.getId();
+                    Integer key = new Integer(idPrj);
+                    Vector<ActivityBean> userWritableActivities = db.getActivities(idPrj);
+                    userWritableActivitiesByProject.put(key, userWritableActivities);
+                    Vector<SkillBean> userWritableSkills = db.getSkills(idPrj);
+                    userWritableSkillsByProject.put(key, userWritableSkills);
+                    Vector<RiskBean> userWritableRisks = db.getRisks(idPrj);
+                    userWritableARisksByProject.put(key, userWritableRisks);
+                }
                 session.setAttribute("writableProjects", userWritableProjects);
+                session.setAttribute("writableActivity", userWritableActivitiesByProject);
+                session.setAttribute("writableSkills", userWritableSkillsByProject);
+                session.setAttribute("writableRisks", userWritableARisksByProject);
                 res.sendRedirect(res.encodeRedirectURL("/almalaurea/?q=pol"));
             }
         } catch (IllegalStateException e) {
