@@ -41,6 +41,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Vector;
 import java.util.logging.Logger;
 
@@ -507,7 +508,7 @@ public class DBWrapper implements Query {
      * 
      * @param idProj - id del progetto da aggiornare 
      * @param userId - id dell'utente che ha eseguito il login
-     * @param project - progetto che ho in memoria
+     * @param projects - Map contenente la lista dei progetti su cui l'utente corrente e' abilitato alla modifica
      * @param params - hashmap che contiene i parametri che si vogliono aggiornare del progetto
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
      */
@@ -515,6 +516,7 @@ public class DBWrapper implements Query {
     public void updateProjectPart(int idProj,
                                   int userId,
                                   HashMap<Integer, ProjectBean> projects, 
+                                  HashMap<String, HashMap<Integer, Vector<CodeBean>>> objectsRelatedToProject, 
                                   HashMap<String, HashMap<String, String>>params) 
                            throws WebStorageException {
         ResultSet rs = null;
@@ -522,7 +524,9 @@ public class DBWrapper implements Query {
         PreparedStatement pst = null;        
         try {
             // Ottiene il progetto precaricato quando l'utente si è loggato corrispondente al progetto che vuole aggiornare
-            ProjectBean project = projects.get(new Integer(idProj));
+            Integer key = new Integer(idProj);
+            ProjectBean project = projects.get(key);
+            // Recuperare le liste di attività, skill e rischi
             // Ottiene la connessione
             con = pol_manager.getConnection();
             /* **************************************************************** *
@@ -670,7 +674,8 @@ public class DBWrapper implements Query {
             if (params.containsKey(PART_PROJECT_CHARTER_MILESTONE)) {
                 HashMap<String, String> paramsMilestone = params.get(PART_PROJECT_CHARTER_MILESTONE);
                 if (Utils.containsValues(paramsMilestone)) {
-                    for(int i = 0; i <= (paramsMilestone.size()/4)-1; i++) {
+                    // 4 è il numero di campi che compongono un'attività
+                    for (int i = 0; i <= (paramsMilestone.size() / 4) - 1; i++) {
                         String isMilestoneAsString = paramsMilestone.get("pcm-milestone" + String.valueOf(i));
                         if ( (!isMilestoneAsString.equalsIgnoreCase("true")) && (!isMilestoneAsString.equalsIgnoreCase("false"))  ) {
                             throw new ClassCastException("Attenzione: il valore del parametro \'pcm-milestone\' non e\' riconducibile a un valore boolean!\n");
