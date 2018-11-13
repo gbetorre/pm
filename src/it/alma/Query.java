@@ -624,6 +624,20 @@ public interface Query extends Serializable {
             "   WHERE id = ?";
     
     /**
+     * <p>Modifica i rischi di un progetto, identificato tramite l'id, 
+     * passato come parametro.</p>
+     */
+    public static final String UPDATE_RISK = 
+            "UPDATE rischio" +
+            "   SET     descrizione = ?" + 
+            "   ,       probabilita = ?" + 
+            "   ,       impatto = ?" + 
+            "   ,       livello = ?" + 
+            "   ,       stato = ?" +
+            "   WHERE id = ?" + 
+            "       AND id_progetto = ?";
+    
+    /**
      * <p>Modifica il campo dei vincoli di un progetto, identificato 
      * tramite l'id, passato come parametro.</p>
      */
@@ -631,7 +645,6 @@ public interface Query extends Serializable {
             "UPDATE progetto" + 
             "   SET vincoli = ?" +
             "   WHERE id = ?";
-
     
     /**
      * <p>Modifica i campi dello status del progetto identificato 
@@ -652,13 +665,6 @@ public interface Query extends Serializable {
             "   ,       statostakeholder = ?" +
             "   WHERE id = ?";
             
-    /**
-     * <p>Modifica i rischi di un progetto, identificato tramite l'id, 
-     * passato come parametro.</p>
-     */
-    public static final String UPDATE_RISCHI = 
-            "INSERT INTO rischio(descrizione, probabilita, impatto, livello, stato, id_progetto)" +
-            "   VALUES (?, ?, ?, ?, ?, ?)";
     
     /* ************************************************************************ *
      *                  Costanti per applicazione QOL (ValDid)                  *
