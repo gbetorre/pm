@@ -670,21 +670,23 @@ public class DBWrapper implements Query {
             if (params.containsKey(PART_PROJECT_CHARTER_MILESTONE)) {
                 HashMap<String, String> paramsMilestone = params.get(PART_PROJECT_CHARTER_MILESTONE);
                 if (Utils.containsValues(paramsMilestone)) {
-                    String isMilestoneAsString = paramsMilestone.get("pcm-milestone");
-                    if ( (!isMilestoneAsString.equalsIgnoreCase("true")) || (!isMilestoneAsString.equalsIgnoreCase("false"))  ) {
-                        throw new ClassCastException("Attenzione: il valore del parametro \'pcm-milestone\' non e\' riconducibile a un valore boolean!\n");
+                    for(int i = 0; i <= (paramsMilestone.size()/4)-1; i++) {
+                        String isMilestoneAsString = paramsMilestone.get("pcm-milestone" + String.valueOf(i));
+                        if ( (!isMilestoneAsString.equalsIgnoreCase("true")) && (!isMilestoneAsString.equalsIgnoreCase("false"))  ) {
+                            throw new ClassCastException("Attenzione: il valore del parametro \'pcm-milestone\' non e\' riconducibile a un valore boolean!\n");
+                        }
+                        pst = con.prepareStatement(UPDATE_ATTIVITA_FROM_PROGETTO);
+                        con.setAutoCommit(false);
+                        pst.clearParameters();
+                        pst.setString(1, paramsMilestone.get("pcm-nome" + String.valueOf(i)));
+                        pst.setString(2, paramsMilestone.get("pcm-descrizione" + String.valueOf(i)));
+                        pst.setBoolean(3, Boolean.parseBoolean(isMilestoneAsString));
+                        pst.setInt(4, Integer.parseInt(paramsMilestone.get("pcm-id" + String.valueOf(i))));
+                        pst.setInt(5, idProj);
+                        //JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+                        pst.executeUpdate();
+                        con.commit();
                     }
-                    pst = con.prepareStatement(UPDATE_ATTIVITA_FROM_PROGETTO);
-                    con.setAutoCommit(false);
-                    pst.clearParameters();
-                    pst.setString(1, paramsMilestone.get("pcm-nome"));
-                    pst.setString(2, paramsMilestone.get("pcm-descrizione"));
-                    pst.setBoolean(3, Boolean.parseBoolean(isMilestoneAsString));
-                    pst.setInt(4, Integer.parseInt(paramsMilestone.get("pcm-id")));
-                    pst.setInt(5, idProj);
-                    //JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
-                    pst.executeUpdate();
-                    con.commit();
                 }
             }
             if (params.containsKey(PART_PROJECT)) {
