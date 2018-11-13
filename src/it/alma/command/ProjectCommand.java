@@ -46,6 +46,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.swing.JOptionPane;
 
+import com.oreilly.servlet.ParameterNotFoundException;
 import com.oreilly.servlet.ParameterParser;
 
 import it.alma.DBWrapper;
@@ -315,11 +316,12 @@ public class ProjectCommand extends ItemBean implements Command {
      * @param parser oggetto per la gestione assistita dei parametri di input, gia' pronto all'uso
      * @param params mappa da valorizzare per riferimento (ByRef)
      * @throws CommandException se si verifica un problema nella gestione degli oggetti data o in qualche tipo di puntamento
+     * @throws ParameterNotFoundException  - 
      */
     private static void loadParams(String part, 
                                    ParameterParser parser,
                                    HashMap<String, HashMap<String, String>> params)
-                            throws CommandException {
+                            throws CommandException, ParameterNotFoundException {
         /* **************************************************** *
          *        Ramo di Project Charter (PC) - Vision         *
          * **************************************************** */
@@ -386,13 +388,18 @@ public class ProjectCommand extends ItemBean implements Command {
          * **************************************************** */
         else if (part.equalsIgnoreCase(Query.PART_PROJECT_CHARTER_MILESTONE)) {
             // Recupero e caricamento parametri di project charter/milestone
+            String milestone = "false";
             int tot = Integer.parseInt(parser.getStringParameter("pcm-loop-status", Utils.VOID_STRING));
             HashMap<String, String> pcm = new HashMap<String, String>();
-            for (int i = 0; i < tot; i++) {
+            for (int i = 0; i <= tot; i++) {
                 pcm.put("pcm-id" + String.valueOf(i), parser.getStringParameter("pcm-id" + String.valueOf(i), Utils.VOID_STRING));
                 pcm.put("pcm-nome" + String.valueOf(i), parser.getStringParameter("pcm-nome" + String.valueOf(i), Utils.VOID_STRING));
                 pcm.put("pcm-descrizione" + String.valueOf(i), parser.getStringParameter("pcm-descrizione" + String.valueOf(i), Utils.VOID_STRING));
-                pcm.put("pcm-milestone" + String.valueOf(i), parser.getStringParameter("pcm-milestone" + String.valueOf(i), Utils.VOID_STRING));
+               // String prova = parser.getStringParameter("pcm-milestone" + String.valueOf(i), Utils.VOID_STRING);
+                if((parser.getStringParameter("pcm-milestone" + String.valueOf(i), Utils.VOID_STRING)) != "") {
+                    milestone = "true";
+                }
+                pcm.put("pcm-milestone" + String.valueOf(i), milestone);
             }
             params.put(Query.PART_PROJECT_CHARTER_MILESTONE, pcm);
         }
