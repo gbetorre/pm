@@ -229,16 +229,17 @@ public class ProjectCommand extends ItemBean implements Command {
                                 throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
                             }
                             HashMap<Integer, ProjectBean> writableProjects = decant(writablePrj);
-                            LinkedHashMap<Integer, Vector<CodeBean>> userWritableActivitiesByProjectId =  (LinkedHashMap<Integer, Vector<CodeBean>>) ses.getAttribute("writableActivity");
-                            LinkedHashMap<Integer, Vector<CodeBean>> userWritableSkillsByProjectId =  (LinkedHashMap<Integer, Vector<CodeBean>>) ses.getAttribute("writableSkills");
-                            LinkedHashMap<Integer, Vector<CodeBean>> userWritableRisksByProjectId =  (LinkedHashMap<Integer, Vector<CodeBean>>) ses.getAttribute("writableRisks");
-                            LinkedHashMap<String, HashMap<Integer, Vector<CodeBean>>> objectsMap = decant(userWritableActivitiesByProjectId, userWritableSkillsByProjectId, userWritableRisksByProjectId);
+                            LinkedHashMap<Integer, Vector> userWritableActivitiesByProjectId =  (LinkedHashMap<Integer, Vector>) ses.getAttribute("writableActivity");
+                            LinkedHashMap<Integer, Vector> userWritableSkillsByProjectId =  (LinkedHashMap<Integer, Vector>) ses.getAttribute("writableSkills");
+                            LinkedHashMap<Integer, Vector> userWritableRisksByProjectId =  (LinkedHashMap<Integer, Vector>) ses.getAttribute("writableRisks");
+                            LinkedHashMap<String, HashMap<Integer, Vector>> objectsMap = decant(userWritableActivitiesByProjectId, userWritableSkillsByProjectId, userWritableRisksByProjectId);
                             db.updateProjectPart(idPrj, user.getId(), writableProjects, objectsMap, params);
                             Vector<ProjectBean> userWritableProjects = db.getProjects(user.getId(), Query.GET_ONLY_WRITABLE_PROJECTS);
-                            // Aggiorna i progetti dell'utente in sessione
+                            // Aggiorna i progetti, le attività dell'utente in sessione
                             ses.removeAttribute("writableProjects");
+                            ses.removeAttribute("writableActivity");
                             ses.setAttribute("writableProjects", userWritableProjects);
-                            // TODO
+                            ses.setAttribute("writableActivity", userWritableActivitiesByProjectId);
                         } catch (AttributoNonValorizzatoException anve) {
                             String msg = FOR_NAME + "Impossibile recuperare un attributo obbligatorio, probabilmente l\'id dell\'utente.\n";
                             LOG.severe(msg);
@@ -369,7 +370,18 @@ public class ProjectCommand extends ItemBean implements Command {
          * **************************************************** */
         else if (part.equalsIgnoreCase(Query.PART_PROJECT_CHARTER_RESOURCE)) {
             // Recupero e caricamento parametri di project charter/risorse
+            int totSkills = Integer.parseInt(parser.getStringParameter("pcr-loop-status", Utils.VOID_STRING));
             HashMap<String, String> pcr = new HashMap<String, String>();
+            for (int i = 0; i <= totSkills; i++) {
+                String presenza = "false";
+                pcr.put("pcr-id" + String.valueOf(i), parser.getStringParameter("pcr-id" + String.valueOf(i), Utils.VOID_STRING));
+                pcr.put("pcr-nome" + String.valueOf(i), parser.getStringParameter("pcr-nome" + String.valueOf(i), Utils.VOID_STRING));
+                pcr.put("pcr-informativa" + String.valueOf(i), parser.getStringParameter("pcr-informativa" + String.valueOf(i), Utils.VOID_STRING));
+                if((parser.getStringParameter("pcr-presenza" + String.valueOf(i), Utils.VOID_STRING)) != "") {
+                    presenza = "true";
+                }
+                pcr.put("pcr-presenza" + String.valueOf(i), presenza);
+            }
             pcr.put("pcr-chiaveesterni", parser.getStringParameter("pcr-chiaveesterni", Utils.VOID_STRING));
             pcr.put("pcr-chiaveinterni", parser.getStringParameter("pcr-chiaveinterni", Utils.VOID_STRING));
             pcr.put("pcr-serviziateneo", parser.getStringParameter("pcr-serviziateneo", Utils.VOID_STRING));
@@ -378,8 +390,20 @@ public class ProjectCommand extends ItemBean implements Command {
         /* **************************************************** *
          *              Ramo di Project Charter - Rischi        *
          * **************************************************** */
-        // Recupero e caricamento parametri di project charter/rischi
-        // TODO ...
+        else if (part.equalsIgnoreCase(Query.PART_PROJECT_CHARTER_RISK)) {
+            // Recupero e caricamento parametri di project charter/risorse
+            int totRisks = Integer.parseInt(parser.getStringParameter("pck-loop-status", Utils.VOID_STRING));
+            HashMap<String, String> pck = new HashMap<String, String>();
+            for (int i = 0; i <= totRisks; i++) {
+                pck.put("pck-id" + String.valueOf(i), parser.getStringParameter("pck-id" + String.valueOf(i), Utils.VOID_STRING));
+                pck.put("pck-nome" + String.valueOf(i), parser.getStringParameter("pck-nome" + String.valueOf(i), Utils.VOID_STRING));
+                pck.put("pck-informativa" + String.valueOf(i), parser.getStringParameter("pck-informativa" + String.valueOf(i), Utils.VOID_STRING));
+                pck.put("pck-impatto" + String.valueOf(i), parser.getStringParameter("pck-impatto" + String.valueOf(i), Utils.VOID_STRING));
+                pck.put("pck-livello" + String.valueOf(i), parser.getStringParameter("pck-livello" + String.valueOf(i), Utils.VOID_STRING));
+                pck.put("pck-stato" + String.valueOf(i), parser.getStringParameter("pck-stato" + String.valueOf(i), Utils.VOID_STRING));
+            }
+            params.put(Query.PART_PROJECT_CHARTER_RISK, pck);
+        }
         /* **************************************************** *
          *            Ramo di Project Charter - Vincoli         *
          * **************************************************** */
@@ -394,14 +418,13 @@ public class ProjectCommand extends ItemBean implements Command {
          * **************************************************** */
         else if (part.equalsIgnoreCase(Query.PART_PROJECT_CHARTER_MILESTONE)) {
             // Recupero e caricamento parametri di project charter/milestone
-            String milestone = "false";
-            int tot = Integer.parseInt(parser.getStringParameter("pcm-loop-status", Utils.VOID_STRING));
+            int totActivities = Integer.parseInt(parser.getStringParameter("pcm-loop-status", Utils.VOID_STRING));
             HashMap<String, String> pcm = new HashMap<String, String>();
-            for (int i = 0; i <= tot; i++) {
+            for (int i = 0; i <= totActivities; i++) {
+                String milestone = "false";
                 pcm.put("pcm-id" + String.valueOf(i), parser.getStringParameter("pcm-id" + String.valueOf(i), Utils.VOID_STRING));
                 pcm.put("pcm-nome" + String.valueOf(i), parser.getStringParameter("pcm-nome" + String.valueOf(i), Utils.VOID_STRING));
                 pcm.put("pcm-descrizione" + String.valueOf(i), parser.getStringParameter("pcm-descrizione" + String.valueOf(i), Utils.VOID_STRING));
-               // String prova = parser.getStringParameter("pcm-milestone" + String.valueOf(i), Utils.VOID_STRING);
                 if((parser.getStringParameter("pcm-milestone" + String.valueOf(i), Utils.VOID_STRING)) != "") {
                     milestone = "true";
                 }
@@ -479,11 +502,18 @@ public class ProjectCommand extends ItemBean implements Command {
     }
     
     
-    private static LinkedHashMap<String, HashMap<Integer, Vector<CodeBean>>> decant(LinkedHashMap<Integer, Vector<CodeBean>> activitiesByProject,
-                                                                             LinkedHashMap<Integer, Vector<CodeBean>> skillsByProject ,
-                                                                             LinkedHashMap<Integer, Vector<CodeBean>> risksByProject)
+    /**
+     * @param activitiesByProject
+     * @param skillsByProject
+     * @param risksByProject
+     * @return
+     * @throws CommandException
+     */
+    private static LinkedHashMap<String, HashMap<Integer, Vector>> decant(LinkedHashMap<Integer, Vector> activitiesByProject,
+                                                                             LinkedHashMap<Integer, Vector> skillsByProject ,
+                                                                             LinkedHashMap<Integer, Vector> risksByProject)
                                                                       throws CommandException {
-        LinkedHashMap<String, HashMap<Integer, Vector<CodeBean>>> map =  new LinkedHashMap<String, HashMap<Integer, Vector<CodeBean>>>();
+        LinkedHashMap<String, HashMap<Integer, Vector>> map =  new LinkedHashMap<String, HashMap<Integer, Vector>>();
         map.put(Query.PART_PROJECT_CHARTER_MILESTONE, activitiesByProject);
         map.put(Query.PART_PROJECT_CHARTER_RESOURCE, skillsByProject);
         map.put(Query.PART_PROJECT_CHARTER_RISK, risksByProject);
