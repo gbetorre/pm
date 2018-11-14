@@ -23,20 +23,23 @@
           </tr>
           </thead>
           <tbody>
+            <c:set var="status" value="" scope="page" />
             <c:forEach var="skill" items="${requestScope.competenze}" varStatus="loop">
+              <c:set var="status" value="${loop.index}" scope="page" />
+              <input type="hidden" id="pcr-id${status}" name="pcr-id${status}" value="<c:out value="${skill.id}"/>">
               <tr>
-                <th scope="row"><input type="text" class="form-control" id="sName" value="<c:out value="${skill.nome}" />" readonly></th>
-                <th scope="row"><input type="text" class="form-control" id="sInfo" value="<c:out value="${skill.informativa}" />" readonly></th>
+                <th scope="row"><input type="text" class="form-control" id="pcr-nome${status}" name="pcr-nome${status}" value="<c:out value="${skill.nome}" />" readonly></th>
+                <th scope="row"><input type="text" class="form-control" id="pcr-informativa${status}" name="pcr-informativa${status}" value="<c:out value="${skill.informativa}" />" readonly></th>
                 <th scope="row">
                   <c:choose>
-                    <c:when test="${skill.presenza==true}">
+                    <c:when test="${skill.presenza}">
                       <div class="form-check text-center">
-                        <input type="checkbox" class="form-check-input" id="cPresenza" name="cPresenza" value="" checked disabled>
+                        <input type="checkbox" class="form-check-input" id="pcr-presenza${status}" name="pcr-presenza${status}" checked disabled>
                       </div>
                     </c:when>
                     <c:otherwise>
                       <div class="form-check text-center">
-                        <input type="checkbox" class="form-check-input" id="cPresenza" name="cPresenza" value="" disabled>
+                        <input type="checkbox" class="form-check-input" id="pcr-presenza${status}" name="pcr-presenza${status}" disabled>
                       </div>
                     </c:otherwise>
                   </c:choose>
@@ -45,6 +48,7 @@
             </c:forEach>
           </tbody>
         </table>
+        <input type="hidden" id="pcr-loop-status" name="pcr-loop-status" value="<c:out value="${status}"/>">
         <div class="text-center"><input type="button" class="btn btn-primary" name="addCompetenza" value="Aggiungi" ></div>
         <hr class="separatore" />
         <h4>Fornitori chiave esterni:</h4>
