@@ -509,6 +509,7 @@ public class DBWrapper implements Query {
      * @param idProj - id del progetto da aggiornare 
      * @param userId - id dell'utente che ha eseguito il login
      * @param projects - Map contenente la lista dei progetti su cui l'utente corrente e' abilitato alla modifica
+     * @param objectsRelatedToProject - Map contenente le hashmap che contengono le attività, i rischi e le competenze su cui l'utente e' abilitato alla modifica
      * @param params - hashmap che contiene i parametri che si vogliono aggiornare del progetto
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
      */
@@ -516,7 +517,7 @@ public class DBWrapper implements Query {
     public void updateProjectPart(int idProj,
                                   int userId,
                                   HashMap<Integer, ProjectBean> projects, 
-                                  HashMap<String, HashMap<Integer, Vector<CodeBean>>> objectsRelatedToProject, 
+                                  HashMap<String, HashMap<Integer, Vector>> objectsRelatedToProject,
                                   HashMap<String, HashMap<String, String>>params) 
                            throws WebStorageException {
         ResultSet rs = null;
@@ -527,6 +528,8 @@ public class DBWrapper implements Query {
             Integer key = new Integer(idProj);
             ProjectBean project = projects.get(key);
             // Recuperare le liste di attività, skill e rischi
+            HashMap<Integer, Vector> activitiesOfProject = objectsRelatedToProject.get(Query.PART_PROJECT_CHARTER_MILESTONE);
+            Vector<ActivityBean> activities = (Vector<ActivityBean>) activitiesOfProject.get(key);
             // Ottiene la connessione
             con = pol_manager.getConnection();
             /* **************************************************************** *
@@ -576,6 +579,7 @@ public class DBWrapper implements Query {
                     pst.setInt(1, idProj);
                     pst.setInt(2, userId);
                     rs = pst.executeQuery();
+                    con.commit();
                     if (rs.next()) {
                         if ( (rs.getString("stakeholderMarginali").equals(project.getStakeholderMarginali())) &&
                                 (rs.getString("stakeholderOperativi").equals(project.getStakeholderOperativi())) &&
@@ -609,6 +613,7 @@ public class DBWrapper implements Query {
                     pst.setInt(1, idProj);
                     pst.setInt(2, userId);
                     rs = pst.executeQuery();
+                    con.commit();
                     if (rs.next()) {
                         if ( (rs.getString("deliverable").equals(project.getDeliverable())) ) {
                             pst = null;
@@ -629,59 +634,136 @@ public class DBWrapper implements Query {
             if (params.containsKey(PART_PROJECT_CHARTER_RESOURCE)) {
                 HashMap<String, String> paramsResource = params.get(PART_PROJECT_CHARTER_RESOURCE);
                 if (Utils.containsValues(paramsResource)) {
-                    con.setAutoCommit(false);
-                    // Controllo che la deliverable del progetto non abbia subito modifiche non visualizzate dall'utente
-                    pst = con.prepareStatement(GET_PROJECT_RESOURCE);
-                    pst.clearParameters();
-                    pst.setInt(1, idProj);
-                    pst.setInt(2, userId);
-                    rs = pst.executeQuery();
-                    if (rs.next()) {
-                        if ( (rs.getString("fornitoriChiaveInterni").equals(project.getFornitoriChiaveInterni())) &&
-                             (rs.getString("fornitoriChiaveEsterni").equals(project.getFornitoriChiaveEsterni())) &&
-                             (rs.getString("serviziAteneo").equals(project.getServiziAteneo())) ) {
-                            pst = null;
-                            pst = con.prepareStatement(UPDATE_RESOURCE);
-                            pst.clearParameters();
-                            pst.setString(1, paramsResource.get("pcr-chiaveesterni"));
-                            pst.setString(2, paramsResource.get("pcr-chiaveinterni"));
-                            pst.setString(3, paramsResource.get("pcr-serviziateneo"));
-                            pst.setInt(4, idProj);
-                            //JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
-                            pst.executeUpdate();
-                            con.commit();
+                    // 3 - Numero di campi fissi presenti in paramsResource (fornitoriChiaveEsterni, fornitoriChiaveInterni, ServiziAteneo)
+                    // 4 - Numero di campi che contengono una competenza (id, nome, informativa, presenza)
+                    for(int i = 0; i < ((paramsResource.size() - 3) / 4); i++) {
+                        con.setAutoCommit(false);
+                        String isPresenzaAsString = paramsResource.get("pcr-presenza" + String.valueOf(i));
+                        if ( (!isPresenzaAsString.equalsIgnoreCase("true")) && (!isPresenzaAsString.equalsIgnoreCase("false"))  ) {
+                            throw new ClassCastException("Attenzione: il valore del parametro \'pcr-presenza\' non e\' riconducibile a un valore boolean!\n");
                         }
+                        pst = null;
+                        pst = con.prepareStatement(UPDATE_SKILL_FROM_PROJECT);
+                        pst.clearParameters();
+                        pst.setString(1, paramsResource.get("pcr-nome" + String.valueOf(i)));
+                        pst.setString(2, paramsResource.get("pcr-informativa" + String.valueOf(i)));
+                        pst.setBoolean(3, Boolean.parseBoolean(paramsResource.get("pcr-presenza" + String.valueOf(i))));
+                        pst.setInt(4, Integer.parseInt(paramsResource.get("pcr-id" + String.valueOf(i))));
+                        pst.setInt(5, idProj);
+                        pst.executeUpdate();
+                        con.commit();
                     }
-                }
-                else {
-                    JOptionPane.showMessageDialog(null, "I dati non sono stati salvati, in quanto sono stati modificati da un altro utente.", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
-                    return;
+                    //Controllo che i campi (fornitoriChiaveEsterni, fornitoriChiaveInterni, ServiziAteneo) non siano stati modificati da altri utenti
+                    /*  TODO
+                     * pst = null;
+                     * pst = con.prepareStatement(GET_PROJECT_RESOURCE);
+                     * pst.clearParameters();
+                     * pst.setInt(1, idProj);
+                     * pst.setInt(2, userId);
+                     * rs = pst.executeQuery();
+                     * con.commit();
+                     * if (rs.next()) {
+                     *     if ( (rs.getString("fornitoriChiaveInterni").equals(project.getFornitoriChiaveInterni())) &&
+                     *          (rs.getString("fornitoriChiaveEsterni").equals(project.getFornitoriChiaveEsterni())) &&
+                     *          (rs.getString("serviziAteneo").equals(project.getServiziAteneo())) ) {
+                     *         pst = null;
+                     */
+                    pst = con.prepareStatement(UPDATE_RESOURCE);
+                    pst.clearParameters();
+                    pst.setString(1, paramsResource.get("pcr-chiaveesterni"));
+                    pst.setString(2, paramsResource.get("pcr-chiaveinterni"));
+                    pst.setString(3, paramsResource.get("pcr-serviziateneo"));
+                    pst.setInt(4, idProj);
+                    //JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+                    pst.executeUpdate();
+                    con.commit();
+                    /* }
+                     * else {
+                     *     JOptionPane.showMessageDialog(null, "I dati non sono stati salvati, in quanto sono stati modificati da un altro utente.", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+                     *     return;
+                     * }
+                     * }
+                     */
+                } 
+            }
+            if (params.containsKey(PART_PROJECT_CHARTER_RISK)) {
+                HashMap<String, String> paramsRisk = params.get(PART_PROJECT_CHARTER_RISK);
+                if (Utils.containsValues(paramsRisk)) {
+                    con.setAutoCommit(false);
+                    for (int i = 0; i < ((paramsRisk.size()) / 6); i++) {
+                        pst = con.prepareStatement(UPDATE_RISK);
+                        pst.clearParameters();
+                        pst.setString(1, paramsRisk.get("pck-nome" + String.valueOf(i)));
+                        pst.setString(2, paramsRisk.get("pck-informativa" + String.valueOf(i)));
+                        pst.setString(3, paramsRisk.get("pck-impatto" + String.valueOf(i)));
+                        pst.setString(4, paramsRisk.get("pck-livello" + String.valueOf(i)));
+                        pst.setString(5, paramsRisk.get("pck-stato" + String.valueOf(i)));
+                        pst.setInt(6, Integer.parseInt(paramsRisk.get("pck-id" + String.valueOf(i))));
+                        pst.setInt(7, idProj);
+                        //JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+                        pst.executeUpdate();
+                        con.commit();
+                    }
                 }
             }
             if (params.containsKey(PART_PROJECT_CHARTER_CONSTRAINT)) {
                 HashMap<String, String> paramsConstraint = params.get(PART_PROJECT_CHARTER_CONSTRAINT);
                 if (Utils.containsValues(paramsConstraint)) {
-                    pst = con.prepareStatement(UPDATE_CONSTRAINT);
                     con.setAutoCommit(false);
+                    pst = con.prepareStatement(GET_PROJECT_CONSTRAINT);
                     pst.clearParameters();
-                    pst.setString(1, paramsConstraint.get("pcc-descrizione"));
-                    pst.setInt(2, idProj);
-                    //JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
-                    pst.executeUpdate();
+                    pst.setInt(1, idProj);
+                    pst.setInt(2, userId);
+                    rs = pst.executeQuery();
                     con.commit();
+                    if (rs.next()) {
+                        if ( (rs.getString("vincoli").equals(project.getVincoli())) ) {
+                            pst = null;
+                            pst = con.prepareStatement(UPDATE_CONSTRAINT);
+                            con.setAutoCommit(false);
+                            pst.clearParameters();
+                            pst.setString(1, paramsConstraint.get("pcc-descrizione"));
+                            pst.setInt(2, idProj);
+                            //JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+                            pst.executeUpdate();
+                            con.commit();
+                        }
+                        else {
+                            JOptionPane.showMessageDialog(null, "I dati non sono stati salvati, in quanto sono stati modificati da un altro utente.", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+                            return;
+                        }
+                    }
                 }
             }
             if (params.containsKey(PART_PROJECT_CHARTER_MILESTONE)) {
                 HashMap<String, String> paramsMilestone = params.get(PART_PROJECT_CHARTER_MILESTONE);
                 if (Utils.containsValues(paramsMilestone)) {
+                    con.setAutoCommit(false);
                     // 4 è il numero di campi che compongono un'attività
-                    for (int i = 0; i <= (paramsMilestone.size() / 4) - 1; i++) {
+                    for (int i = 0; i < (paramsMilestone.size() / 4); i++) {
                         String isMilestoneAsString = paramsMilestone.get("pcm-milestone" + String.valueOf(i));
                         if ( (!isMilestoneAsString.equalsIgnoreCase("true")) && (!isMilestoneAsString.equalsIgnoreCase("false"))  ) {
                             throw new ClassCastException("Attenzione: il valore del parametro \'pcm-milestone\' non e\' riconducibile a un valore boolean!\n");
                         }
+                        // Controllo che le attività del progetto non abbiano subito modifiche non visualizzate dall'utente
+                        /* TODO
+                         * Controllo di concorrenza da implementare
+                        pst = con.prepareStatement(GET_ACTIVITY);
+                        pst.clearParameters();
+                        pst.setInt(1, idProj);
+                        pst.setInt(2, Integer.parseInt(paramsMilestone.get("pcm-id" + String.valueOf(i)))); 
+                        rs = pst.executeQuery();
+                        if(rs.next()) {
+                            if ( (rs.getString("id").equals(activities.get(i).getId())) &&
+                                 (rs.getString("nome").equals(activities.get(i).getNome())) &&
+                                 (rs.getString("descrizione").equals(activities.get(i).getDescrizione())) &&
+                                 (rs.getBoolean("milestone") (activities.get(i).isMilestone())) ) {
+                                
+                            }
+                            
+                        }*/
+                        pst = null;
                         pst = con.prepareStatement(UPDATE_ATTIVITA_FROM_PROGETTO);
-                        con.setAutoCommit(false);
                         pst.clearParameters();
                         pst.setString(1, paramsMilestone.get("pcm-nome" + String.valueOf(i)));
                         pst.setString(2, paramsMilestone.get("pcm-descrizione" + String.valueOf(i)));
