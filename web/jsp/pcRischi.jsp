@@ -38,17 +38,21 @@
             </tr>
           </thead>
           <tbody>
+          <c:set var="status" value="" scope="page" />
           <c:forEach var="risk" items="${requestScope.rischi}" varStatus="loop">
+          <c:set var="status" value="${loop.index}" scope="page" />
+          <input type="hidden" id="pck-id${status}" name="pck-id${status}" value="<c:out value="${risk.id}"/>">
               <tr>
-                <th scope="row"><input type="text" class="form-control" id="pck-nome" name="pck-nome" value="<c:out value="${risk.nome}" />" readonly></th>
-                <th scope="row"><input type="text" class="form-control" id="pck-informativa" name="pck-informativa" value="<c:out value="${risk.informativa}" />" readonly></th>
-                <th scope="row"><input type="text" class="form-control" id="pck-impatto" name="pck-impatto" value="<c:out value="${risk.impatto}" />" readonly></th>
-                <th scope="row"><input type="text" class="form-control" id="pck-livello" name="pck-livello" value="<c:out value="${risk.livello}" />" readonly></th>
-                <th scope="row"><input type="text" class="form-control" id="pck-stato" name="pck-stato" value="<c:out value="${risk.stato}" />" readonly></th>             
+                <th scope="row"><input type="text" class="form-control" id="pck-nome${status}" name="pck-nome${status}" value="<c:out value="${risk.nome}" />" readonly></th>
+                <th scope="row"><input type="text" class="form-control" id="pck-informativa${status}" name="pck-informativa${status}" value="<c:out value="${risk.informativa}" />" readonly></th>
+                <th scope="row"><input type="text" class="form-control" id="pck-impatto${status}" name="pck-impatto${status}" value="<c:out value="${risk.impatto}" />" readonly></th>
+                <th scope="row"><input type="text" class="form-control" id="pck-livello${status}" name="pck-livello${status}" value="<c:out value="${risk.livello}" />" readonly></th>
+                <th scope="row"><input type="text" class="form-control" id="pck-stato${status}" name="pck-stato${status}" value="<c:out value="${risk.stato}" />" readonly></th>             
               </tr>
             </c:forEach>
           </tbody>
         </table>
+        <input type="hidden" id="pck-loop-status" name="pck-loop-status" value="<c:out value="${status}"/>">
         <div class="text-center"><input type="button" class="btn btn-primary" name="addRischio" value="Aggiungi" ></div>
         <hr class="separatore" />
         <div id="container-fluid">
