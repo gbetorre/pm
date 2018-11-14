@@ -433,6 +433,30 @@ public interface Query extends Serializable {
             "   WHERE id_progetto = ?";
     
     /**
+     * <p>Estrae l'attivit&agrave; specificata tramite id relativa ad un progetto, identificato 
+     * tramite l'id, passato come parametro.</p>
+     */
+    public static final String GET_ACTIVITY = 
+            "SELECT " +
+            "       A.id                    AS  \"id\"" +
+            "   ,   A.nome                  AS  \"nome\"" +
+            "   ,   A.descrizione           AS  \"descrizione\"" +
+            "   ,   A.datainizio            AS  \"dataInizio\"" +
+            "   ,   A.datafine              AS  \"dataFine\"" +
+            "   ,   A.datainizioattesa      AS  \"dataInizioAttesa\"" +
+            "   ,   A.datafineattesa        AS  \"dataFineAttesa\"" +
+            "   ,   A.datainizioeffettiva   AS  \"dataInizioEffettiva\"" +
+            "   ,   A.datafineeffettiva     AS  \"dataFineEffettiva\"" +
+            "   ,   A.guprevisti            AS  \"guPrevisti\"" +
+            "   ,   A.gueffettivi           AS  \"guEffettivi\"" +
+            "   ,   A.gurimanenti           AS  \"guRimanenti\"" +
+            "   ,   A.noteavanzamento       AS  \"noteAvanzamento\"" +
+            "   ,   A.milestone             AS  \"milestone\"" +
+            "   FROM attivita A" + 
+            "   WHERE id_progetto = ?" +
+            "       AND id = ? ";
+    
+    /**
      * <p>Estrae le competenze relative ad un progetto, identificato 
      * tramite l'id, passato come parametro.</p>
      */
@@ -525,6 +549,20 @@ public interface Query extends Serializable {
             "   WHERE   PJ.id = ?" +
             "       AND P.id= ?";
     
+    /**
+     * <p>Estrae i valori dei campi relativi ai vincoli di un progetto, 
+     * identificato tramite l'id, passato come parametro.</p>
+     */
+    public static final String GET_PROJECT_CONSTRAINT = 
+            "SELECT " +
+            "       PJ.id           " + 
+            "   ,   PJ.vincoli   AS \"vincoli\"" +
+            "   FROM progetto PJ" + 
+            "       INNER JOIN ruologestione RG ON PJ.id = RG.id_progetto" + 
+            "       INNER JOIN persona P ON RG.id_persona = P.id" + 
+            "   WHERE   PJ.id = ?" +
+            "       AND P.id= ?";
+    
     /* ************************************************************************ *
      *                               Query di POL                               *
      * ************************************************************************ *
@@ -611,6 +649,18 @@ public interface Query extends Serializable {
             "UPDATE progetto" + 
             "   SET     deliverable = ?" + 
             "   WHERE id = ?";
+    
+    /**
+     * <p>Modifica i campi della competenza, identificata tramite id, di un progetto, identificato 
+     * tramite l'id, passato come parametro.</p>
+     */
+    public static final String UPDATE_SKILL_FROM_PROJECT = 
+            "UPDATE competenza" +
+            "   SET     descrizione = ?" +
+            "   ,       informativa = ?" +
+            "   ,       presenza = ?" +
+            "   WHERE id = ?" +
+            "       AND id_progetto = ?";
     
     /**
      * <p>Modifica i campi delle risorse di un progetto, identificato 
