@@ -40,6 +40,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Vector;
@@ -303,7 +306,7 @@ public class DBWrapper implements Query {
      * <p>Restituisce un Vector di ProjectBean rappresentante i progetti dell'utente loggato .</p>
      * 
      * @param userId identificativo della persona di cui si vogliono recuperare i progetti
-     * @param nip TODO
+     * @param getAll flag che definisce si devono recuperare tutti i progetti, oppure solo un sottoinsieme dei progetti che possono essere modificati
      * @return <code>Vector&lt;ProjectBean&gt;</code> - ProjectBean rappresentante i progetti dell'utente loggato
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
@@ -834,7 +837,7 @@ public class DBWrapper implements Query {
      */
     @SuppressWarnings({ "null", "static-method" })
     public Vector<ActivityBean> getActivities(int projId)
-            throws WebStorageException{
+                                       throws WebStorageException{
         ResultSet rs = null;
         Connection con = null;
         PreparedStatement pst = null;
@@ -879,7 +882,7 @@ public class DBWrapper implements Query {
      */
     @SuppressWarnings({ "null", "static-method" })
     public Vector<SkillBean> getSkills(int projId)
-            throws WebStorageException{
+                                throws WebStorageException{
         ResultSet rs = null;
         Connection con = null;
         PreparedStatement pst = null;
@@ -924,7 +927,7 @@ public class DBWrapper implements Query {
      */
     @SuppressWarnings({ "null", "static-method" })
     public Vector<RiskBean> getRisks(int projId)
-            throws WebStorageException{
+                              throws WebStorageException{
         ResultSet rs = null;
         Connection con = null;
         PreparedStatement pst = null;
@@ -942,6 +945,186 @@ public class DBWrapper implements Query {
                 risks.add(rischio);
             }
             return risks;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto RiskBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Metodo per fare un nuovo inserimento di una nuova attivit&agrave;.</p>
+     * 
+     * @param idProj - identificativo del progetto, al quale l'attivit&agrave; fa riferimento
+     * @param userId - identificativo dell'utente loggato
+     * @param valuesActivity - vector contenente tutti i valori che l'utente inserisce per la nuova attivit&agrave;
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     * @throws ParseException - se si verifica un problema nel cast da String a Date
+     */
+    public void insertActivity (int idProj,
+                                int userId, 
+                                Vector<String> valuesActivity) 
+                         throws WebStorageException, ParseException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        try {
+            // Ottiene il progetto precaricato quando l'utente si è loggato corrispondente al progetto sul quale aggiungere un'attività
+            Integer key = new Integer(idProj);
+            con = pol_manager.getConnection();
+            con.setAutoCommit(false);
+            pst = con.prepareStatement(INSERT_ACTIVITY);
+            pst.clearParameters();
+            /*
+             //per rendere i set più dinamici
+             for (int i = 0; i < valuesActivity.size(); i++) {
+                try {
+                    int valore = Integer.parseInt(valuesActivity.get(i));
+                } catch (NumberFormatException nfe) {
+                    try {
+                        SimpleDateFormat data = new SimpleDateFormat("dd-MM-yyy");
+                        Date valuesAsDate = data.parse(valuesActivity.get(i)); 
+                    } catch (NullPointerException npe) {
+                        try {
+                            Boolean valuesAsBoolean = Boolean.parseBoolean(valuesActivity.get(i));
+                        } catch ()
+                    }
+                }
+            }*/
+            //6 è il numero di date che ci sono in un'attività
+            //3 è l'indice di posizione della prima data
+            Date[] valuesAsDate = new Date[6];
+            SimpleDateFormat formatDate = new SimpleDateFormat("dd-MM-yyyy");
+            for ( int i = 0; i < 6; i++ ) {
+                valuesAsDate[i] = formatDate.parse(valuesActivity.get(3 + i));
+            }
+            pst.setInt(1, Integer.parseInt(valuesActivity.get(0)));
+            pst.setString(2, valuesActivity.get(1));
+            pst.setString(3, valuesActivity.get(2));
+            pst.setDate(4, Utils.convert(valuesAsDate[0])); //errore, non accetta una data java.util.Date, ma java.sql.Date
+            pst.setDate(5, Utils.convert(valuesAsDate[1])); //errore, non accetta una data java.util.Date, ma java.sql.Date
+            pst.setDate(6, Utils.convert(valuesAsDate[2])); //errore, non accetta una data java.util.Date, ma java.sql.Date
+            pst.setDate(7, Utils.convert(valuesAsDate[3])); //errore, non accetta una data java.util.Date, ma java.sql.Date
+            pst.setDate(8, Utils.convert(valuesAsDate[4])); //errore, non accetta una data java.util.Date, ma java.sql.Date
+            pst.setDate(9, Utils.convert(valuesAsDate[5])); //errore, non accetta una data java.util.Date, ma java.sql.Date*/
+            pst.setInt(10, Integer.parseInt(valuesActivity.get(9)));
+            pst.setInt(11, Integer.parseInt(valuesActivity.get(10)));
+            pst.setInt(12, Integer.parseInt(valuesActivity.get(11)));
+            pst.setString(13, valuesActivity.get(12));
+            pst.setBoolean(14, Boolean.parseBoolean(valuesActivity.get(13)));
+            pst.setInt(15, Integer.parseInt(valuesActivity.get(14)));
+            pst.setInt(16, Integer.parseInt(valuesActivity.get(15)));
+            pst.setInt(17, Integer.parseInt(valuesActivity.get(16)));
+            pst.setInt(18, Integer.parseInt(valuesActivity.get(17)));
+            pst.setInt(19, Integer.parseInt(valuesActivity.get(18)));
+            pst.setInt(20, Integer.parseInt(valuesActivity.get(19)));
+            pst.executeQuery();
+            con.commit();
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto RiskBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Metodo per fare un nuovo inserimento di un nuovo rischio relativo al progetto.</p>
+     * 
+     * @param idProj  - identificativo del progetto, al quale l'attivit&agrave; fa riferimento
+     * @param userId - identificativo dell'utente loggato
+     * @param valuesRisk - vector contenente i valori inseriti dall'utente per inserimento nuovo rischio
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    public void insertRisk (int idProj,
+                            int userId, 
+                            Vector<String> valuesRisk)
+                     throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        try {
+            // Ottiene il progetto precaricato quando l'utente si è loggato corrispondente al progetto sul quale aggiungere un'attività
+            Integer key = new Integer(idProj);
+            con = pol_manager.getConnection();
+            con.setAutoCommit(false);
+            pst = con.prepareStatement(INSERT_RISK);
+            pst.clearParameters();
+            pst.setInt(1, Integer.parseInt(valuesRisk.get(0)));
+            pst.setString(2, valuesRisk.get(1));
+            pst.setString(3, valuesRisk.get(2));
+            pst.setString(4, valuesRisk.get(3));
+            pst.setString(5, valuesRisk.get(4));
+            pst.setString(6, valuesRisk.get(5));
+            pst.setInt(7, key);
+            pst.executeQuery();
+            con.commit();
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto RiskBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Metodo per fare un nuovo inserimento di una nuova competenza relativa al progetto.</p>
+     * 
+     * @param idProj  - identificativo del progetto, al quale l'attivit&agrave; fa riferimento
+     * @param userId - identificativo dell'utente loggato
+     * @param valuesSkill - vector contenente i valori inseriti dall'utente per inserimento nuovo rischio
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    public void insertSkill (int idProj,
+                            int userId, 
+                            Vector<String> valuesSkill)
+                     throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        try {
+            // Ottiene il progetto precaricato quando l'utente si è loggato corrispondente al progetto sul quale aggiungere un'attività
+            Integer key = new Integer(idProj);
+            con = pol_manager.getConnection();
+            con.setAutoCommit(false);
+            pst = con.prepareStatement(INSERT_SKILL);
+            pst.clearParameters();
+            pst.setInt(1, Integer.parseInt(valuesSkill.get(0)));
+            pst.setString(2, valuesSkill.get(1));
+            pst.setString(3, valuesSkill.get(2));
+            pst.setBoolean(4, Boolean.parseBoolean(valuesSkill.get(3)));
+            pst.setInt(5, key);
+            pst.setInt(6, Integer.parseInt(valuesSkill.get(5)));
+            pst.executeQuery();
+            con.commit();
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto RiskBean non valorizzato; problema nella query dell\'utente.\n";
             LOG.severe(msg); 
