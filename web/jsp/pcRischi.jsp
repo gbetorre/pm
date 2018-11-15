@@ -53,7 +53,10 @@
           </tbody>
         </table>
         <input type="hidden" id="pck-loop-status" name="pck-loop-status" value="<c:out value="${status}"/>">
-        <div class="text-center"><input type="button" class="btn btn-primary" name="addRischio" value="Aggiungi" ></div>
+        <div class="text-center">
+          <!-- <button class="btn btn-primary" id="addRischio" name="addRischio" onclick="window.open('http://localhost:8080/almalaurea/jsp/pcRischio.jsp', 'newRischio', true)" disabled>Aggiungi</button> -->
+          <a href="javascript:window.open('http://localhost:8080/almalaurea/jsp/pcRischio.jsp', 'newRischio', true)">Aggiungi</a>
+        </div>
         <hr class="separatore" />
         <div id="container-fluid">
           <div class="row">
