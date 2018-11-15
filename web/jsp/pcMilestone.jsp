@@ -53,7 +53,10 @@
           </tbody>
         </table>
         <input type="hidden" id="pcm-loop-status" name="pcm-loop-status" value="<c:out value="${status}"/>">
-        <div class="text-center"><input type="button" class="btn btn-primary" name="addAttivita" value="Aggiungi"></div>
+        <div class="text-center">
+          <!-- <button class="btn btn-primary" id="addAttivita" name="addAttivita"  onclick="window.open('http://localhost:8080/almalaurea/jsp/pcAttivita.jsp', 'newActivity', true)" disabled> Aggiungi </button> -->
+          <a href="javascript:window.open('http://localhost:8080/almalaurea/jsp/pcAttivita.jsp', 'newAttivita', true)">Aggiungi</a>
+        </div>
         <hr class="separatore" />
         <div id="container-fluid">
           <div class="row">
