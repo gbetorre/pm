@@ -43,6 +43,7 @@
         $('input[type=\'text\']').prop('readonly', false);
         $('input[type=\'checkbox\']').prop('disabled', false);
         $('select').prop('disabled', false);
+        $('button').prop('disabled', false);
       }
     </script>
   </body>
