@@ -384,7 +384,7 @@ public class Main extends HttpServlet {
          * Cerca la command associata al parametro 'ent'
          * e, se la trova, ne invoca il metodo execute()
          */
-        JOptionPane.showMessageDialog(null, "Chiamata POST arrivata dall\'applicazione!", "Main: esito OK", JOptionPane.INFORMATION_MESSAGE, null);
+        //JOptionPane.showMessageDialog(null, "Chiamata POST arrivata dall\'applicazione!", "Main: esito OK", JOptionPane.INFORMATION_MESSAGE, null);
         try {
             q = req.getParameter(entToken);
         } catch (NullPointerException npe) { // Potrebbe già uscire qui
