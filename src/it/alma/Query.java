@@ -115,6 +115,10 @@ public interface Query extends Serializable {
      * <p>Costante per il parametro identificante la pagina dello Status di un progetto.</p>
      */
     public static final String PART_PROJECT                     = "prj";
+    /**
+     * <p>Costante per il parametro identificante la pagina di inserimento di un'Attivit&agrave; di un progetto.</p>
+     */
+    public static final String ADD_ACTIVITY_TO_PROJECT          = "addAct";
     /* ************************************************************************ *
      *   Enumerativi statici per incapsulare i valori di enumerativi dinamici   *
      * ************************************************************************ */
@@ -715,6 +719,62 @@ public interface Query extends Serializable {
             "   ,       statostakeholder = ?" +
             "   WHERE id = ?";
             
+    
+    /* ************************************************************************ *
+     *                               Query di POL                               *
+     * ************************************************************************ *
+     *                        2.  Query di inserimento                          *
+     * ************************************************************************ */
+    /**
+     * <p>Query per inserimento di una nuova attivit&agrave;.</p>
+     */
+    public static final String INSERT_ACTIVITY = 
+            "INSERT INTO attivita" +
+            "   VALUES (? " +          //id
+            "   ,       ? " +          //nome
+            "   ,       ? " +          //descrizione
+            "   ,       ? " +          //data inizio attività
+            "   ,       ? " +          //data fine attività
+            "   ,       ? " +          //data inizio attesa
+            "   ,       ? " +          //data fine attesa
+            "   ,       ? " +          //data inizio effettiva
+            "   ,       ? " +          //data fine effettiva
+            "   ,       ? " +          //giorni/uomo previsti
+            "   ,       ? " +          //giorni/uomo effettivi
+            "   ,       ? " +          //giorni/uomo rimanenti
+            "   ,       ? " +          //note di avanzamento
+            "   ,       ? " +          //milestone
+            "   ,       ? " +          //id progetto
+            "   ,       ? " +          //id wbs
+            "   ,       ? " +          //id complessità
+            "   ,       ? " +          //id stato attività
+            "   ,       ? " +          //id ruolo
+            "   ,       ? )" ;         //id persona
+    
+    /**
+     * <p>Query per inserimento di una nuova competenza.</p>
+     */
+    public static final String INSERT_SKILL = 
+            "INSERT INTO competenza" +
+            "   VALUES (? " +          //id
+            "   ,       ? " +          //descrizione
+            "   ,       ? " +          //informativa
+            "   ,       ? " +          //presenza
+            "   ,       ? " +          //id progetto
+            "   ,       ? )" ;         //id persona
+    
+    /**
+     * <p>Query per inserimento di un nuovo rischio.</p>
+     */
+    public static final String INSERT_RISK = 
+            "INSERT INTO rischio" +
+            "   VALUES (? " +          //id
+            "   ,       ? " +          //descrizione
+            "   ,       ? " +          //probabilità
+            "   ,       ? " +          //impatto
+            "   ,       ? " +          //livello
+            "   ,       ? " +          //stato
+            "   ,       ? )" ;         //id progetto
     
     /* ************************************************************************ *
      *                  Costanti per applicazione QOL (ValDid)                  *
