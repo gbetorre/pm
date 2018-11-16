@@ -48,7 +48,7 @@
   <c:param name="p" value="wbs" />
   <c:param name="id" value="" />
 </c:url>
-<c:url var="act" context="/almalaurea" value="/" scope="page">
+<c:url var="act" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="pol" />
   <c:param name="p" value="act" />
   <c:param name="id" value="" />
