@@ -64,6 +64,7 @@ import it.alma.bean.PersonBean;
 import it.alma.bean.ProjectBean;
 import it.alma.bean.RiskBean;
 import it.alma.bean.SkillBean;
+import it.alma.bean.WbsBean;
 import it.alma.exception.AttributoNonValorizzatoException;
 import it.alma.exception.CommandException;
 import it.alma.exception.NotFoundException;
@@ -962,6 +963,52 @@ public class DBWrapper implements Query {
         }
     }
     
+    
+    /**
+     * <p>Restituisce un vector contenente tutte le Wbs di un dato progetto.</p>
+     * 
+     * @param idProj - id del progetto di cui caricare le wbs
+     * @return vectorWbs - vettore contenente tutte le Wbs di un progetto
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    public Vector<WbsBean> getWbs (int idProj) 
+                 throws WebStorageException {
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        WbsBean wbs = null;
+        Vector<WbsBean> vectorWbs = new Vector<WbsBean>();
+        try {
+            // Ottiene il progetto precaricato quando l'utente si è loggato corrispondente al progetto sul quale aggiungere un'attività
+            Integer key = new Integer(idProj);
+            con = pol_manager.getConnection();
+            con.setAutoCommit(false);
+            pst = con.prepareStatement(GET_WBS_OF_PROJECT);
+            pst.clearParameters();
+            pst.setInt(1, key);
+            rs = pst.executeQuery();
+            while(rs.next()) {
+                wbs = new WbsBean();
+                BeanUtil.populate(wbs, rs);
+                vectorWbs.add(wbs);
+            }
+            return vectorWbs;
+        }  catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto RiskBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
     
     /**
      * <p>Metodo per fare un nuovo inserimento di una nuova attivit&agrave;.</p>
