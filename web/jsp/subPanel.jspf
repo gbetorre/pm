@@ -10,7 +10,7 @@
     <c:set var="found" value="${loop.getIndex()}" scope="page" />
   </c:if>
 </c:forEach>
-<c:if test="${ruolo eq 'PMOATE' or ruolo eq 'PMODIP'}">
+<c:if test="${ruolo eq 'PMOATE' or ruolo eq 'PMODIP' or ruolo eq 'PM' or ruolo eq 'TL'}">
   <input type="button" class="btn btn-primary" name="modifica" value="Modifica" onclick="modify()">
   <input type="submit" class="btn btn-primary" name="${distinguishingSubmitName}" value="Salva">
 </c:if>
