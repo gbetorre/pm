@@ -41,6 +41,7 @@ import java.util.LinkedHashMap;
 import java.util.Vector;
 import java.util.logging.Logger;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -129,6 +130,8 @@ public class SessionManager extends HttpServlet {
             // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
             HttpSession session = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
             session.invalidate();
+            final RequestDispatcher rd = getServletContext().getRequestDispatcher("/jsp/login.jsp");
+            rd.forward(req, res);
         } catch (IllegalStateException e) {
             throw new ServletException("Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n" + e.getMessage(), e);
         } catch (NullPointerException e) {
@@ -200,7 +203,7 @@ public class SessionManager extends HttpServlet {
                 session.setAttribute("writableActivity", userWritableActivitiesByProject);
                 session.setAttribute("writableSkills", userWritableSkillsByProject);
                 session.setAttribute("writableRisks", userWritableARisksByProject);
-                res.sendRedirect(res.encodeRedirectURL("/almalaurea/?q=pol"));
+                res.sendRedirect(res.encodeRedirectURL(getServletContext().getInitParameter("appName") + "/?q=pol"));
             }
         } catch (IllegalStateException e) {
             throw new ServletException("Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n" + e.getMessage(), e);
