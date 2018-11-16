@@ -60,6 +60,7 @@ import it.alma.bean.PersonBean;
 import it.alma.bean.ProjectBean;
 import it.alma.bean.RiskBean;
 import it.alma.bean.SkillBean;
+import it.alma.bean.WbsBean;
 import it.alma.exception.AttributoNonValorizzatoException;
 import it.alma.exception.CommandException;
 import it.alma.exception.WebStorageException;
@@ -132,6 +133,8 @@ public class ProjectCommand extends ItemBean implements Command {
         nomeFile.put(Query.PART_PROJECT_CHARTER_RISK, "/jsp/pcRischi.jsp");
         nomeFile.put(Query.PART_PROJECT_CHARTER_CONSTRAINT, "/jsp/pcVincoli.jsp");
         nomeFile.put(Query.PART_PROJECT_CHARTER_MILESTONE, "/jsp/pcMilestone.jsp");
+        nomeFile.put(Query.PART_WBS, "/jsp/projWBS.jsp");
+        nomeFile.put(Query.PART_ACTIVITY, "/jsp/projActivities.jsp");
         nomeFile.put(Query.PART_PROJECT, this.getPaginaJsp());
     }  
   
@@ -172,6 +175,8 @@ public class ProjectCommand extends ItemBean implements Command {
         Vector<SkillBean> vSkills = new Vector<SkillBean>();
         //Dichiara elenco di rischi
         Vector<RiskBean> vRisks = new Vector<RiskBean>();
+        //Dichiara elenco di wbs
+        Vector<WbsBean> vWBS = new Vector<WbsBean>();
         /* ******************************************************************** *
          *      Instanzia nuova classe WebStorage per il recupero dei dati      *
          * ******************************************************************** */
@@ -263,12 +268,15 @@ public class ProjectCommand extends ItemBean implements Command {
                         }
                     }
                     runtimeProject = db.getProject(idPrj, user.getId());
-                    // Se part vale PART_PROJECT (cioè 'prj') non serve fare le altre query 
+                    // Se part vale PART_PROJECT (cioè 'prj') non serve fare le altre query
                     if (!part.equals(Query.PART_PROJECT)) {
                         // Per ottimizzare
                         vActivities = db.getActivities(idPrj);
                         vSkills = db.getSkills(idPrj);
                         vRisks = db.getRisks(idPrj);
+                    }
+                    if(part.equals(Query.PART_WBS)) {
+                        vWBS = db.getWbs(idPrj);
                     }
                 }
                 fileJspT = nomeFile.get(part);
@@ -312,6 +320,8 @@ public class ProjectCommand extends ItemBean implements Command {
         req.setAttribute("competenze", vSkills);
         // Salva nella request elenco rischi del progetto
         req.setAttribute("rischi", vRisks);
+        // Salva nella request elenco delle wbs di un progetto
+        req.setAttribute("wbs", vWBS);
     }
     
     

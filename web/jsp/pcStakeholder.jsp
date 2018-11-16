@@ -45,22 +45,30 @@
 		<br><br>
 		
 		<div id="container-fluid">
-      <div class="row">
-        <div class="col-2">  
-          <span class="float-left">
-            <a class="btn btn-primary" href="${vision}${p.id}">&lt; Indietro</a>
-          </span>
+          <div class="row">
+            <div class="col-2">  
+              <span class="float-left">
+                <a class="btn btn-primary" href="${vision}${p.id}">&lt; Indietro</a>
+              </span>
+            </div>
+            <div class="col-8 text-center">
+              <%@ include file="subPanel.jspf" %>
+            </div>
+            <div class="col-2">
+              <span class="float-right">
+          		  <a class="btn btn-primary" href="${deliverable}${p.id}">Avanti &gt;</a>
+              </span>
+            </div>
+          </div>
         </div>
-        <div class="col-8 text-center">
-          <%@ include file="subPanel.jspf" %>
+        <hr class="separatore" /> 
+        <div class="row">
+          <div class="col-2">
+            <span class="float-left">
+              <a class="btn btn-primary" href="${project}${p.id}">Torna all'elenco progetti</a>
+            </span>
+          </div>
         </div>
-        <div class="col-2">
-          <span class="float-right">
-      		  <a class="btn btn-primary" href="${deliverable}${p.id}">Avanti &gt;</a>
-          </span>
-        </div>
-      </div>
-    </div>
 	  </div>
   </div>
 </div>

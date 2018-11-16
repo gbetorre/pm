@@ -48,4 +48,9 @@
   <c:param name="p" value="wbs" />
   <c:param name="id" value="" />
 </c:url>
+<c:url var="act" context="/almalaurea" value="/" scope="page">
+  <c:param name="q" value="pol" />
+  <c:param name="p" value="act" />
+  <c:param name="id" value="" />
+</c:url>
 <c:set var="p" value="${requestScope.progetto}" scope="page" />

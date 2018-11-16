@@ -37,24 +37,24 @@
       		<br>
       		<textarea id="pcv-minacce" name="pcv-minacce" class="form-control" aria-label="With textarea" readonly>${p.minacce}</textarea>
       		<br><br>
-          <div id="container-fluid">
-            <div class="row">
-              <div class="col-2">  
-                <span class="float-left">
-                  <a class="btn btn-primary" href="${project}${p.id}">Chiudi</a>
-                </span>
-              </div>
-              <div class="col-8 text-center">
-                <%@ include file="subPanel.jspf" %>
-              </div>
-              <div class="col-2">
-                <span class="float-right">
-            		  <a class="btn btn-primary" href="${stakeholder}${p.id}">Avanti &gt;</a>
-                </span>
+            <div id="container-fluid">
+              <div class="row">
+                <div class="col-2">
+                  <span class="float-left">
+                    <a class="btn btn-primary" href="${project}${p.id}">Torna all'elenco progetti</a>
+                  </span>
+                </div>
+                <div class="col-8 text-center">
+                  <%@ include file="subPanel.jspf" %>
+                </div>
+                <div class="col-2">
+                  <span class="float-right">
+              		  <a class="btn btn-primary" href="${stakeholder}${p.id}">Avanti &gt;</a>
+                  </span>
+                </div>
               </div>
             </div>
-    	    </div>
-          </div>
+            </div>
         </div>
       </div>
     </form>
