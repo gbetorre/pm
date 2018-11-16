@@ -975,7 +975,7 @@ public class DBWrapper implements Query {
     public void insertActivity (int idProj,
                                 int userId, 
                                 Vector<String> valuesActivity) 
-                         throws WebStorageException, ParseException {
+                         throws WebStorageException {
         Connection con = null;
         PreparedStatement pst = null;
         try {
@@ -985,51 +985,69 @@ public class DBWrapper implements Query {
             con.setAutoCommit(false);
             pst = con.prepareStatement(INSERT_ACTIVITY);
             pst.clearParameters();
-            /*
-             //per rendere i set più dinamici
-             for (int i = 0; i < valuesActivity.size(); i++) {
-                try {
-                    int valore = Integer.parseInt(valuesActivity.get(i));
-                } catch (NumberFormatException nfe) {
-                    try {
-                        SimpleDateFormat data = new SimpleDateFormat("dd-MM-yyy");
-                        Date valuesAsDate = data.parse(valuesActivity.get(i)); 
-                    } catch (NullPointerException npe) {
-                        try {
-                            Boolean valuesAsBoolean = Boolean.parseBoolean(valuesActivity.get(i));
-                        } catch ()
-                    }
+            // 6 è il numero di date che ci sono in un'attività
+            // 3 è l'indice di posizione della prima data
+            try {
+                Date[] valuesAsDate = new Date[6];
+                SimpleDateFormat formatDate = new SimpleDateFormat("dd-MM-yyyy");
+                for ( int i = 0; i < 6; i++ ) {
+                    valuesAsDate[i] = formatDate.parse(valuesActivity.get(3 + i));
                 }
-            }*/
-            //6 è il numero di date che ci sono in un'attività
-            //3 è l'indice di posizione della prima data
-            Date[] valuesAsDate = new Date[6];
-            SimpleDateFormat formatDate = new SimpleDateFormat("dd-MM-yyyy");
-            for ( int i = 0; i < 6; i++ ) {
-                valuesAsDate[i] = formatDate.parse(valuesActivity.get(3 + i));
+                pst.setInt(1, Integer.parseInt(valuesActivity.get(0)));
+                pst.setString(2, valuesActivity.get(1));
+                pst.setString(3, valuesActivity.get(2));
+                pst.setDate(4, Utils.convert(valuesAsDate[0])); // non accetta una data java.util.Date, ma java.sql.Date
+                pst.setDate(5, Utils.convert(valuesAsDate[1])); // non accetta una data java.util.Date, ma java.sql.Date
+                pst.setDate(6, Utils.convert(valuesAsDate[2])); // non accetta una data java.util.Date, ma java.sql.Date
+                pst.setDate(7, Utils.convert(valuesAsDate[3])); // non accetta una data java.util.Date, ma java.sql.Date
+                pst.setDate(8, Utils.convert(valuesAsDate[4])); // non accetta una data java.util.Date, ma java.sql.Date
+                pst.setDate(9, Utils.convert(valuesAsDate[5])); // non accetta una data java.util.Date, ma java.sql.Date
+                pst.setInt(10, Integer.parseInt(valuesActivity.get(9)));
+                pst.setInt(11, Integer.parseInt(valuesActivity.get(10)));
+                pst.setInt(12, Integer.parseInt(valuesActivity.get(11)));
+                pst.setString(13, valuesActivity.get(12));
+                pst.setBoolean(14, Boolean.parseBoolean(valuesActivity.get(13)));
+                pst.setInt(15, Integer.parseInt(valuesActivity.get(14)));
+                pst.setInt(16, Integer.parseInt(valuesActivity.get(15)));
+                pst.setInt(17, Integer.parseInt(valuesActivity.get(16)));
+                pst.setInt(18, Integer.parseInt(valuesActivity.get(17)));
+                pst.setInt(19, Integer.parseInt(valuesActivity.get(18)));
+                pst.setInt(20, Integer.parseInt(valuesActivity.get(19)));
+                pst.executeQuery();
+                con.commit();
+            } catch (ParseException pe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di date.\n" + pe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, pe);
+            } catch (NumberFormatException nfe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di interi.\n" + nfe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, nfe);
+            } catch (ClassCastException cce) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di tipo.\n" + cce.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, cce);
+            } catch (ArrayIndexOutOfBoundsException aiobe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nello scorrimento di liste.\n" + aiobe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, aiobe);
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema in un puntamento a null.\n" + npe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, npe);
+            } catch (RuntimeException re) { // A scopo didattico
+                String msg = FOR_NAME + "Si e\' verificato un problema a tempo di esecuzione.\n" + re.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, re);
+            } catch (Exception e) {
+                String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, e);
+            } catch (Throwable t) { // A scopo didattico
+                String msg = FOR_NAME + "Si e\' verificato un qualcosa.\n" + t.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, t);
             }
-            pst.setInt(1, Integer.parseInt(valuesActivity.get(0)));
-            pst.setString(2, valuesActivity.get(1));
-            pst.setString(3, valuesActivity.get(2));
-            pst.setDate(4, Utils.convert(valuesAsDate[0])); //errore, non accetta una data java.util.Date, ma java.sql.Date
-            pst.setDate(5, Utils.convert(valuesAsDate[1])); //errore, non accetta una data java.util.Date, ma java.sql.Date
-            pst.setDate(6, Utils.convert(valuesAsDate[2])); //errore, non accetta una data java.util.Date, ma java.sql.Date
-            pst.setDate(7, Utils.convert(valuesAsDate[3])); //errore, non accetta una data java.util.Date, ma java.sql.Date
-            pst.setDate(8, Utils.convert(valuesAsDate[4])); //errore, non accetta una data java.util.Date, ma java.sql.Date
-            pst.setDate(9, Utils.convert(valuesAsDate[5])); //errore, non accetta una data java.util.Date, ma java.sql.Date*/
-            pst.setInt(10, Integer.parseInt(valuesActivity.get(9)));
-            pst.setInt(11, Integer.parseInt(valuesActivity.get(10)));
-            pst.setInt(12, Integer.parseInt(valuesActivity.get(11)));
-            pst.setString(13, valuesActivity.get(12));
-            pst.setBoolean(14, Boolean.parseBoolean(valuesActivity.get(13)));
-            pst.setInt(15, Integer.parseInt(valuesActivity.get(14)));
-            pst.setInt(16, Integer.parseInt(valuesActivity.get(15)));
-            pst.setInt(17, Integer.parseInt(valuesActivity.get(16)));
-            pst.setInt(18, Integer.parseInt(valuesActivity.get(17)));
-            pst.setInt(19, Integer.parseInt(valuesActivity.get(18)));
-            pst.setInt(20, Integer.parseInt(valuesActivity.get(19)));
-            pst.executeQuery();
-            con.commit();
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto RiskBean non valorizzato; problema nella query dell\'utente.\n";
             LOG.severe(msg); 
