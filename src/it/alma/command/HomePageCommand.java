@@ -142,7 +142,9 @@ public class HomePageCommand extends ItemBean implements Command {
         try {
             // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
             HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
-            user = (PersonBean) ses.getAttribute("usr");
+            if (ses == null) {
+                return;
+            } 
         } catch (IllegalStateException ise) {
             String msg = FOR_NAME + "Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n";
             LOG.severe(msg);
