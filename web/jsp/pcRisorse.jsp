@@ -51,7 +51,7 @@
         <input type="hidden" id="pcr-loop-status" name="pcr-loop-status" value="<c:out value="${status}"/>">
         <div class="text-center">
           <!-- <button class="btn btn-primary" id="addCompetenza" name="addCompetenza" onclick="window.open('http://localhost:8080/almalaurea/jsp/pcCompetenza.jsp', 'newCompetenza', true)" disabled>Aggiungi</button>  -->
-          <a href="javascript:window.open('http://localhost:8080/almalaurea/jsp/pcCompetenza.jsp', 'newCompetenza', true)">Aggiungi</a>
+          <a href="javascript:window.open('${initParam.appName}/jsp/pcCompetenza.jsp', 'newCompetenza', true)">Aggiungi</a>
         </div>
         <hr class="separatore" />
         <h4>Fornitori chiave esterni:</h4>
