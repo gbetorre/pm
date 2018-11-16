@@ -72,6 +72,12 @@
         <param-name>urlDirectoryScript</param-name>
         <param-value>js/</param-value>
     </context-param>
+    
+    <context-param>
+        <description>Root dell'applicazione</description>
+        <param-name>appName</param-name>
+        <param-value>/almalaurea</param-value>
+    </context-param>
 
     <resource-ref>
         <description>
