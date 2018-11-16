@@ -119,6 +119,14 @@ public interface Query extends Serializable {
      * <p>Costante per il parametro identificante la pagina di inserimento di un'Attivit&agrave; di un progetto.</p>
      */
     public static final String ADD_ACTIVITY_TO_PROJECT          = "addAct";
+    /**
+     * <p>Costante per il parametro identificante la pagina di inserimento di un rischio di un progetto.</p>
+     */
+    public static final String ADD_RISK_TO_PROJECT              = "addRisk";
+    /**
+     * <p>Costante per il parametro identificante la pagina di inserimento di una competenza di un progetto.</p>
+     */
+    public static final String ADD_SKILL_TO_PROJECT             = "addSkill";
     /* ************************************************************************ *
      *   Enumerativi statici per incapsulare i valori di enumerativi dinamici   *
      * ************************************************************************ */
@@ -567,6 +575,18 @@ public interface Query extends Serializable {
             "   WHERE   PJ.id = ?" +
             "       AND P.id= ?";
     
+    /**
+     * <p>Estrae le wbs relative ad un progetto, identificato tramite id, passato come parametro</p>
+     */
+    public static final String GET_WBS_OF_PROJECT =
+            "SELECT " +
+            "       W.id            AS \"id\"" + 
+            "   ,   W.nome          AS \"nome\"" + 
+            "   ,   W.descrizione   AS \"descrizione\"" + 
+            "   ,   W.workpackage   AS \"workPackage\"" + 
+            "   FROM wbs W" +
+            "   WHERE id_progetto = ?";
+    
     /* ************************************************************************ *
      *                               Query di POL                               *
      * ************************************************************************ *
@@ -730,6 +750,26 @@ public interface Query extends Serializable {
      */
     public static final String INSERT_ACTIVITY = 
             "INSERT INTO attivita" +
+            "   (   id" +
+            "   ,   nome" +
+            "   ,   descrizione" +
+            "   ,   datainizio" +
+            "   ,   datafine" +
+            "   ,   datainizioattesa" +
+            "   ,   datafineattesa" +
+            "   ,   datainizioeffettiva" +
+            "   ,   datafineeffettiva" +
+            "   ,   guprevisti" +
+            "   ,   gueffettivi" +
+            "   ,   gurimanenti" +
+            "   ,   noteavanzamento" +
+            "   ,   milestone" +
+            "   ,   id_progetto" +
+            "   ,   id_wbs" +
+            "   ,   id_complessita" +
+            "   ,   id_stato" +
+            "   ,   id_ruolo" +
+            "   ,   id_persona )" +
             "   VALUES (? " +          //id
             "   ,       ? " +          //nome
             "   ,       ? " +          //descrizione
@@ -756,6 +796,12 @@ public interface Query extends Serializable {
      */
     public static final String INSERT_SKILL = 
             "INSERT INTO competenza" +
+            "   (   id" +
+            "   ,   descrizione" +
+            "   ,   informativa" +
+            "   ,   presenza" +
+            "   ,   id_progetto" +
+            "   ,   id_persona )" +    
             "   VALUES (? " +          //id
             "   ,       ? " +          //descrizione
             "   ,       ? " +          //informativa
@@ -768,6 +814,13 @@ public interface Query extends Serializable {
      */
     public static final String INSERT_RISK = 
             "INSERT INTO rischio" +
+            "   (   id" +
+            "   ,   descrizione" +
+            "   ,   probabilita" +
+            "   ,   impatto" +
+            "   ,   livello" +
+            "   ,   stato" +
+            "   ,   id_progetto" +
             "   VALUES (? " +          //id
             "   ,       ? " +          //descrizione
             "   ,       ? " +          //probabilità

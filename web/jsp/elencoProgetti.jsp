@@ -2,7 +2,7 @@
 <c:choose>
   <c:when test="${requestScope.progetti.size() gt 0}">
     <form action="#" method="get">
-      <h2>Elenco dei progetti</h2>
+      <h2>Elenco dei progetti di ${sessionScope.usr.nome} ${sessionScope.usr.cognome}</h2>
       <table class="table table-hover">
         <thead class="thead-light">
           <tr>
@@ -22,8 +22,8 @@
                 <div class="container">
                   <a href="<c:out value= "${vision}${prj.id}" />"  class="btn btn-primary">Project Charter</a>
                   <!-- <a href=""  class="btn btn-primary">Status</a> -->
-                  <a href="#"  class="btn btn-primary">WBS</a>
-                  <a href="#"  class="btn btn-primary">Attivit&agrave;</a>
+                  <a href="<c:out value= "${wbs}${prj.id}" />"  class="btn btn-primary">WBS</a>
+                  <a href="<c:out value= "${act}${prj.id}" />" class="btn btn-primary">Attivit&agrave;</a>
                 </div>
               </th>
             </tr>

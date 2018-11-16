@@ -9,5 +9,8 @@
 	<classpathentry kind="lib" path="C:/Program Files/Apache Software Foundation/Tomcat 8.5/ext-lib/commons-beanutils-core.jar"/>
 	<classpathentry kind="lib" path="C:/Program Files/Apache Software Foundation/Tomcat 8.5/ext-lib/commons-logging-api.jar"/>
 	<classpathentry kind="lib" path="C:/Program Files/Apache Software Foundation/Tomcat 8.5/ext-lib/cos.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Program Files/Apache Software Foundation/Tomcat 8.5/ext-lib/debugger-app-2.0.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Program Files/Apache Software Foundation/Tomcat 8.5/ext-lib/pdfbox-app-2.0.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Program Files/Apache Software Foundation/Tomcat 8.5/ext-lib/preflight-app-2.0.12.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

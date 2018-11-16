@@ -25,7 +25,7 @@
   </head>
   <body>
     <!-- Header -->
-    <div style="background:#ffff99">
+    <div style="background:#ccff66">
       <%@ include file="header.jspf"%>
     </div>
     <!-- Corpo pagina -->

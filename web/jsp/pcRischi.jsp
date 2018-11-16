@@ -74,6 +74,14 @@
               </span>
             </div>
           </div>
+          <hr class="separatore" /> 
+          <div class="row">
+            <div class="col-2">
+              <span class="float-left">
+                <a class="btn btn-primary" href="${project}${p.id}">Torna all'elenco progetti</a>
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
