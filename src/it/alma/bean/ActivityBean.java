@@ -38,6 +38,7 @@ package it.alma.bean;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Vector;
 
 import it.alma.Query;
 import it.alma.exception.AttributoNonValorizzatoException;
@@ -95,6 +96,11 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
     private String noteAvanzamento;
     /** Milestone attivit&agrave; */
     private boolean milestone;
+    /* *********************************************** *
+     *              Persone dell'attività              *
+     * *********************************************** */
+    /** Vector di persone che partecipano all'attivit&agrave; */
+    private Vector<PersonBean> persone;
     
     
     /**
@@ -108,6 +114,7 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
     	guPrevisti = guEffettivi = guRimanenti = -2;
     	noteAvanzamento = null;
     	milestone = false;
+    	persone = null;
     };
     
     /* **************************************************** *
@@ -115,6 +122,7 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
      * **************************************************** */
     /**
 	 * Restituisce l'id di un'attivit&agrave;
+	 * 
 	 * @return <code>id</code> - l'id dell'attivit&agrave;
      * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e l'id non &egrave; stato valorizzato (&egrave; un dato obbligatorio)
 	 */
@@ -127,6 +135,7 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
 	
 	/**
 	 * Imposta l'id di un'attivit&agrave;
+	 * 
 	 * @param id - l'identificativo da impostare
 	 */
 	public void setId(int id) {
@@ -139,6 +148,7 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
      * ****************************************************** */
 	/**
 	 * Restituisce il nome di un'attivit&agrave;
+	 * 
 	 * @return <code>nome</code> - nome dell'attivit&agrave;
 	 * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e il nome non &egrave; stato valorizzato (&egrave; un dato obbligatorio)
 	 */
@@ -151,6 +161,7 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
 	
 	/**
 	 * Imposta il nome di un'attivit&agrave;
+	 * 
 	 * @param nome - nome da impostare
 	 */
 	public void setNome(String nome) {
@@ -163,6 +174,7 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
      * ************************************************************* */
 	/**
 	 * Restituisce la descrizione di un'attivit&agrave;
+	 * 
 	 * @return <code>descrizione</code> - descrizione dell'attivit&agrave;
 	 */
 	public String getDescrizione() {
@@ -171,6 +183,7 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
 
 	/**
 	 * Imposta la descrizione di un'attivit&agrave;
+	 * 
 	 * @param descrizione - descrizione da settare
 	 */
 	public void setDescrizione(String descrizione) {
@@ -183,6 +196,7 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
      * ************************************************************* */
 	/**
 	 * Restituisce la data inizio di un'attivit&agrave;
+	 * 
 	 * @return <code>dataInizio</code> - data inizio di un'attivit&agrave;
 	 */
 	public Date getDataInizio() {
@@ -191,6 +205,7 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
 
 	/**
 	 * Imposta la data di inizio di un'attivit&agrave;
+	 * 
 	 * @param dataInizio - data di inizio da impostare
 	 */
 	public void setDataInizio(Date dataInizio) {
@@ -203,6 +218,7 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
      * ************************************************************* */
 	/**
 	 * Restituisce la data fine di un'attivit&agrave;
+	 * 
 	 * @return <code>dataFine</code> - data di fine di un'attivit&agrave;
 	 * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e dataFine non &egrave; stato valorizzato (&egrave; un dato obbligatorio)
 	 */
@@ -215,6 +231,7 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
 
 	/**
 	 * Imposta la data di fine di un'attivit&agrave;
+	 * 
 	 * @param dataFine - data di fine da impostare
 	 */
 	public void setDataFine(Date dataFine) {
@@ -227,6 +244,7 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
      * ************************************************************* */
 	/**
 	 * Restituisce la data di inizio attesa di un'attivit&agrave;
+	 * 
 	 * @return <code>dataInizioAttesa</code> - data inizio di attesa di un'attivit&agrave;
 	 */
 	public Date getDataInizioAttesa() {
@@ -235,6 +253,7 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
 
 	/**
 	 * Imposta la data di inizio attesa di un'attivit&agrave;
+	 * 
 	 * @param dataInizioAttesa - data di inizio di un'attivit&agrave;
 	 */
 	public void setDataInizioAttesa(Date dataInizioAttesa) {
@@ -247,6 +266,7 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
      * ************************************************************* */
 	/**
 	 * Restituisce la data di fine attesa di un'attivit&agrave;
+	 * 
 	 * @return <code>dataFineAttesa</code> - data fine di attesa di un'attivit&agrave;
 	 */
 	public Date getDataFineAttesa() {
@@ -255,6 +275,7 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
 
 	/**
 	 * Imposta la data di fine attesa di un'attivit&agrave;
+	 * 
 	 * @param dataFineAttesa - data di fine attesa di un'attivit&agrave;
 	 */
 	public void setDataFineAttesa(Date dataFineAttesa) {
@@ -267,6 +288,7 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
      * ************************************************************** */
 	/**
 	 * Restituisce la data inizio effettiva di un'attivit&agrave;
+	 * 
 	 * @return <code>dataInizioEffettiva</code> - data di inizio effettiva di un'attivit&agrave;
 	 */
 	public Date getDataInizioEffettiva() {
@@ -275,6 +297,7 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
 
 	/**
 	 * Imposta la data inizio effettiva di un'attivit&agrave;
+	 * 
 	 * @param dataInizioEffettiva - data di inizio effettiva da impostare
 	 */
 	public void setDataInizioEffettiva(Date dataInizioEffettiva) {
@@ -287,6 +310,7 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
      * ************************************************************** */
 	/**
 	 * Restituisce la data fine effettiva di un'attivit&agrave;
+	 * 
 	 * @return <code>dataFineEffettiva</code> - data di fine effettiva di un'attivit&agrave;
 	 */
 	public Date getDataFineEffettiva() {
@@ -295,6 +319,7 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
 
 	/**
 	 * Imposta la data fine effettiva di un'attivit&agrave;
+	 * 
 	 * @param dataFineEffettiva - data di fine effettiva da impostare
 	 */
 	public void setDataFineEffettiva(Date dataFineEffettiva) {
@@ -307,6 +332,7 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
      * ********************************************************* */
 	/**
 	 * Restituisce i giorni uomo previsti per l'attivit&agrave;
+	 * 
 	 * @return <code>guPrevisti</code> - giorni uomo previsti per l'attivit&agrave;
 	 */
 	public int getGuPrevisti() {
@@ -315,6 +341,7 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
 
 	/**
 	 * Imposta i giorni uomo previsti per l'attivit&agrave;
+	 * 
 	 * @param guPrevisti - giorni uomo previsti da impostare
 	 */
 	public void setGuPrevisti(int guPrevisti) {
@@ -327,6 +354,7 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
      * ********************************************************* */
 	/**
 	 * Restituisce i giorni uomo effettivi per l'attivit&agrave;
+	 * 
 	 * @return <code>guEffettivi</code> - giorni uomo effettivi per l'attivit&agrave;
 	 */
 	public int getGuEffettivi() {
@@ -335,6 +363,7 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
 
 	/**
 	 * Imposta i giorni uomo effettivi per l'attivit&agrave;
+	 * 
 	 * @param guEffettivi - giorni uomo effettivi da impostare
 	 */
 	public void setGuEffettivi(int guEffettivi) {
@@ -347,6 +376,7 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
      * ********************************************************* */
 	/**
 	 * Restituisce i giorni uomo rimanenti per l'attivit&agrave;
+	 * 
 	 * @return <code>guRimanenti</code> - giorni uomo rimanenti per l'attivit&agrave;
 	 */
 	public int getGuRimanenti() {
@@ -355,6 +385,7 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
 
 	/**
 	 * Imposta i giorni uomo rimanenti per l'attivit&agrave;
+	 * 
 	 * @param guRimanenti - giorni uomo rimanenti da impostare
 	 */
 	public void setGuRimanenti(int guRimanenti) {
@@ -367,6 +398,7 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
      * ********************************************************* */
 	/**
 	 * Restituisce le note di avanzamento dell'attivit&agrave;
+	 * 
 	 * @return <code>noteAvanzamento</code> - note di avanzamento dell'attvit&agrave;
 	 */
 	public String getNoteAvanzamento() {
@@ -375,6 +407,7 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
 
 	/**
 	 * Imposta le note di avanzamento di un'attivit&agrave;
+	 * 
 	 * @param noteAvanzamento - note di avanzamento da impostare
 	 */
 	public void setNoteAvanzamento(String noteAvanzamento) {
@@ -387,6 +420,7 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
      * ********************************************************* */
 	/**
 	 * Restituisce true se l'attivit&agrave; &egrave; milestone - false (default) se non lo &egrave;
+	 * 
 	 * @return <code>milestone</code> - true/false attivit&agrave; milestone
 	 */
 	public boolean isMilestone() {
@@ -394,11 +428,34 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
 	}
 
 	/**
-	 * Imposta milestone l'attivit&agrave; 
+	 * Imposta milestone l'attivit&agrave;
+	 *  
 	 * @param milestone - milestone true/false da impostare
 	 */
 	public void setMilestone(boolean milestone) {
 		this.milestone = milestone;
 	}
+
+	
+	/* ********************************************************* *
+     *           Metodi getter e setter per persone              *
+     * ********************************************************* */
+    /**
+     * Restituisce il vector contenente le persone partecipanti all'attivit&agrave;
+     * 
+     * @return <code>persone</code> - Vector contenente le persone che partecipano all'attivit&agrave;
+     */
+    public Vector<PersonBean> getPersone() {
+        return persone;
+    }
+
+    /**
+     * Imposta le persone che partecipano all'attivit&agrave;
+     * 
+     * @param persone - Vector da impostare
+     */
+    public void setPersone(Vector<PersonBean> persone) {
+        this.persone = persone;
+    }
 	
 }
