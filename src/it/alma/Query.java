@@ -231,17 +231,6 @@ public interface Query extends Serializable {
     		"	,	PJ.datainizio				AS \"dataInizio\"" + 
     		"	,	PJ.datafine					AS \"dataFine\"" + 
     		"	,	PJ.id_statoprogetto			AS \"idStatoProgetto\"" + 
-    		"	,	PJ.statotempi				AS \"statoTempi\"" + 
-    		"	,	PJ.statocosti				AS \"statoCosti\"" + 
-    		"	,	PJ.statorischi				AS \"statoRischi\"" + 
-    		"	,	PJ.statorisorse				AS \"statoRisorse\"" + 
-    		"	,	PJ.statoscope				AS \"statoScope\"" + 
-    		"	,	PJ.statocomunicazione		AS \"statoComunicazione\"" + 
-    		"	,	PJ.statoqualita				AS \"statoQualita\"" + 
-    		"	,	PJ.statoapprovvigionamenti	AS \"statoApprovvigionamenti\"" + 
-    		"	,	PJ.statostakeholder			AS \"statoStakeholder\"" + 
-    		"	,	PJ.meseriferimento			AS \"meseRiferimento\"" + 
-    		"	,	PJ.descrizionestatocorrente	AS \"descrizioneStatoCorrente\"" + 
     		"	,	PJ.situazioneattuale		AS \"situazioneAttuale\"" + 
     		"	,	PJ.situazionefinale			AS \"situazioneFinale\"" + 
     		"	,	PJ.obiettivimisurabili		AS \"obiettiviMisurabili\"" + 
@@ -276,17 +265,6 @@ public interface Query extends Serializable {
             "   ,   PJ.datainizio               AS \"dataInizio\"" + 
             "   ,   PJ.datafine                 AS \"dataFine\"" + 
             "   ,   PJ.id_statoprogetto         AS \"idStatoProgetto\"" + 
-            "   ,   PJ.statotempi               AS \"statoTempi\"" + 
-            "   ,   PJ.statocosti               AS \"statoCosti\"" + 
-            "   ,   PJ.statorischi              AS \"statoRischi\"" + 
-            "   ,   PJ.statorisorse             AS \"statoRisorse\"" + 
-            "   ,   PJ.statoscope               AS \"statoScope\"" + 
-            "   ,   PJ.statocomunicazione       AS \"statoComunicazione\"" + 
-            "   ,   PJ.statoqualita             AS \"statoQualita\"" + 
-            "   ,   PJ.statoapprovvigionamenti  AS \"statoApprovvigionamenti\"" + 
-            "   ,   PJ.statostakeholder         AS \"statoStakeholder\"" + 
-            "   ,   PJ.meseriferimento          AS \"meseRiferimento\"" + 
-            "   ,   PJ.descrizionestatocorrente AS \"descrizioneStatoCorrente\"" + 
             "   ,   PJ.situazioneattuale        AS \"situazioneAttuale\"" + 
             "   ,   PJ.situazionefinale         AS \"situazioneFinale\"" + 
             "   ,   PJ.obiettivimisurabili      AS \"obiettiviMisurabili\"" + 
@@ -323,17 +301,6 @@ public interface Query extends Serializable {
             "   ,   PJ.datainizio               AS \"dataInizio\"" + 
             "   ,   PJ.datafine                 AS \"dataFine\"" + 
             "   ,   PJ.id_statoprogetto         AS \"idStatoProgetto\"" + 
-            "   ,   PJ.statotempi               AS \"statoTempi\"" + 
-            "   ,   PJ.statocosti               AS \"statoCosti\"" + 
-            "   ,   PJ.statorischi              AS \"statoRischi\"" + 
-            "   ,   PJ.statorisorse             AS \"statoRisorse\"" + 
-            "   ,   PJ.statoscope               AS \"statoScope\"" + 
-            "   ,   PJ.statocomunicazione       AS \"statoComunicazione\"" + 
-            "   ,   PJ.statoqualita             AS \"statoQualita\"" + 
-            "   ,   PJ.statoapprovvigionamenti  AS \"statoApprovvigionamenti\"" + 
-            "   ,   PJ.statostakeholder         AS \"statoStakeholder\"" + 
-            "   ,   PJ.meseriferimento          AS \"meseRiferimento\"" + 
-            "   ,   PJ.descrizionestatocorrente AS \"descrizioneStatoCorrente\"" + 
             "   ,   PJ.situazioneattuale        AS \"situazioneAttuale\"" + 
             "   ,   PJ.situazionefinale         AS \"situazioneFinale\"" + 
             "   ,   PJ.obiettivimisurabili      AS \"obiettiviMisurabili\"" + 
@@ -368,17 +335,6 @@ public interface Query extends Serializable {
             "   ,   PJ.datainizio               AS \"dataInizio\"" + 
             "   ,   PJ.datafine                 AS \"dataFine\"" + 
             "   ,   PJ.id_statoprogetto         AS \"idStatoProgetto\"" + 
-            "   ,   PJ.statotempi               AS \"statoTempi\"" + 
-            "   ,   PJ.statocosti               AS \"statoCosti\"" + 
-            "   ,   PJ.statorischi              AS \"statoRischi\"" + 
-            "   ,   PJ.statorisorse             AS \"statoRisorse\"" + 
-            "   ,   PJ.statoscope               AS \"statoScope\"" + 
-            "   ,   PJ.statocomunicazione       AS \"statoComunicazione\"" + 
-            "   ,   PJ.statoqualita             AS \"statoQualita\"" + 
-            "   ,   PJ.statoapprovvigionamenti  AS \"statoApprovvigionamenti\"" + 
-            "   ,   PJ.statostakeholder         AS \"statoStakeholder\"" + 
-            "   ,   PJ.meseriferimento          AS \"meseRiferimento\"" + 
-            "   ,   PJ.descrizionestatocorrente AS \"descrizioneStatoCorrente\"" + 
             "   ,   PJ.situazioneattuale        AS \"situazioneAttuale\"" + 
             "   ,   PJ.situazionefinale         AS \"situazioneFinale\"" + 
             "   ,   PJ.obiettivimisurabili      AS \"obiettiviMisurabili\"" + 
@@ -399,103 +355,29 @@ public interface Query extends Serializable {
             "       AND P.id= ?";
     
     /**
-     * Estrae un dipartimento dato il suo id, passato come parametro
+     * <p>Estrae le wbs relative ad un progetto, identificato tramite id, passato come parametro</p>
      */
-    public static final String GET_DIPART = 
+    public static final String GET_WBS_OF_PROJECT =
             "SELECT " +
-            "       D.id              AS \"id\"" + 
-            "   ,   D.nome            AS \"nome\"" + 
-            "   ,   D.prefisso        AS \"prefisso\"" + 
-            "   ,   D.indirizzosede   AS \"indirizzoSede\"" + 
-            "   FROM dipartimento D" + 
-            "   WHERE   D.id = ?";
-    
-    /** 
-     * Estrae lo stato di un progetto dato il suo id, passato come parametro
-     */
-    public static final String GET_STATOPROGETTO = 
-    		"SELECT " +
-    		"		SP.id		AS \"id\"" +
-    		"	, 	SP.nome		AS \"nome\"" +
-    		"	, 	SP.valore	AS \"informativa\"" + 
-    		"	FROM statoprogetto SP" + 
-    		"	WHERE SP.id = ?";
-    
-    /**
-     * <p>Estrae le attivit&agrave; relative ad un progetto, identificato 
-     * tramite l'id, passato come parametro.</p>
-     */
-    public static final String  GET_ACTIVITIES = 
-            "SELECT " +
-            "       A.id                    AS  \"id\"" +
-            "   ,   A.nome                  AS  \"nome\"" +
-            "   ,   A.descrizione           AS  \"descrizione\"" +
-            "   ,   A.datainizio            AS  \"dataInizio\"" +
-            "   ,   A.datafine              AS  \"dataFine\"" +
-            "   ,   A.datainizioattesa      AS  \"dataInizioAttesa\"" +
-            "   ,   A.datafineattesa        AS  \"dataFineAttesa\"" +
-            "   ,   A.datainizioeffettiva   AS  \"dataInizioEffettiva\"" +
-            "   ,   A.datafineeffettiva     AS  \"dataFineEffettiva\"" +
-            "   ,   A.guprevisti            AS  \"guPrevisti\"" +
-            "   ,   A.gueffettivi           AS  \"guEffettivi\"" +
-            "   ,   A.gurimanenti           AS  \"guRimanenti\"" +
-            "   ,   A.noteavanzamento       AS  \"noteAvanzamento\"" +
-            "   ,   A.milestone             AS  \"milestone\"" +
-            "   FROM attivita A" + 
+            "       W.id            AS \"id\"" + 
+            "   ,   W.nome          AS \"nome\"" + 
+            "   ,   W.descrizione   AS \"descrizione\"" + 
+            "   ,   W.workpackage   AS \"workPackage\"" + 
+            "   FROM wbs W" +
             "   WHERE id_progetto = ?";
     
     /**
-     * <p>Estrae l'attivit&agrave; specificata tramite id relativa ad un progetto, identificato 
-     * tramite l'id, passato come parametro.</p>
+     * <p>Estrae tutte le persone che hanno un ruolo in un determinato progetto,
+     * identificato tramite id, passato come parametro.</p>
      */
-    public static final String GET_ACTIVITY = 
-            "SELECT " +
-            "       A.id                    AS  \"id\"" +
-            "   ,   A.nome                  AS  \"nome\"" +
-            "   ,   A.descrizione           AS  \"descrizione\"" +
-            "   ,   A.datainizio            AS  \"dataInizio\"" +
-            "   ,   A.datafine              AS  \"dataFine\"" +
-            "   ,   A.datainizioattesa      AS  \"dataInizioAttesa\"" +
-            "   ,   A.datafineattesa        AS  \"dataFineAttesa\"" +
-            "   ,   A.datainizioeffettiva   AS  \"dataInizioEffettiva\"" +
-            "   ,   A.datafineeffettiva     AS  \"dataFineEffettiva\"" +
-            "   ,   A.guprevisti            AS  \"guPrevisti\"" +
-            "   ,   A.gueffettivi           AS  \"guEffettivi\"" +
-            "   ,   A.gurimanenti           AS  \"guRimanenti\"" +
-            "   ,   A.noteavanzamento       AS  \"noteAvanzamento\"" +
-            "   ,   A.milestone             AS  \"milestone\"" +
-            "   FROM attivita A" + 
-            "   WHERE id_progetto = ?" +
-            "       AND id = ? ";
-    
-    /**
-     * <p>Estrae le competenze relative ad un progetto, identificato 
-     * tramite l'id, passato come parametro.</p>
-     */
-    public static final String GET_SKILLS = 
-            "SELECT" +
-            "       C.id            AS \"id\"" +
-            "   ,   C.descrizione   AS \"nome\"" +
-            "   ,   C.informativa   AS \"informativa\"" + 
-            "   ,   C.presenza      AS \"presenza\"" + 
-            "   ,   C.id_persona    AS \"idPersona\"" +
-            "   FROM competenza C" +
-            "   WHERE id_progetto = ?";
-    
-    /**
-     * <p>Estrae i rischi relativi ad un progetto, identificato 
-     * tramite l'id, passato come parametro.</p>
-     */
-    public static final String GET_RISKS = 
-            "SELECT" +
-            "       R.id            AS \"id\"" +
-            "   ,   R.descrizione   AS \"nome\"" +
-            "   ,   R.probabilita   AS \"informativa\"" + 
-            "   ,   R.impatto       AS \"impatto\"" + 
-            "   ,   R.livello       AS \"livello\"" +
-            "   ,   R.stato         AS \"stato\"" +
-            "   FROM rischio R" +
-            "   WHERE id_progetto = ?";
+    public static final String GET_PEOPLE_ON_PROJECT = 
+            "SELECT " + 
+            "       P.id            AS \"id\"" +
+            "   ,   P.nome          AS \"nome\"" +
+            "   ,   P.cognome       AS \"cognome\"" +
+            "   FROM ruologestione RG" +
+            "       INNER JOIN persona P ON RG.id_persona = P.id" +
+            "   WHERE RG.id_progetto = ?";
     
     /**
      * <p>Estrae i valori dei campi relativi alla vision di un progetto, 
@@ -573,19 +455,156 @@ public interface Query extends Serializable {
             "       INNER JOIN ruologestione RG ON PJ.id = RG.id_progetto" + 
             "       INNER JOIN persona P ON RG.id_persona = P.id" + 
             "   WHERE   PJ.id = ?" +
-            "       AND P.id= ?";
+            "       AND P.id = ?";
     
     /**
-     * <p>Estrae le wbs relative ad un progetto, identificato tramite id, passato come parametro</p>
+     * Estrae un dipartimento dato il suo id, passato come parametro
      */
-    public static final String GET_WBS_OF_PROJECT =
+    public static final String GET_DIPART = 
             "SELECT " +
-            "       W.id            AS \"id\"" + 
-            "   ,   W.nome          AS \"nome\"" + 
-            "   ,   W.descrizione   AS \"descrizione\"" + 
-            "   ,   W.workpackage   AS \"workPackage\"" + 
-            "   FROM wbs W" +
+            "       D.id              AS \"id\"" + 
+            "   ,   D.nome            AS \"nome\"" + 
+            "   ,   D.prefisso        AS \"prefisso\"" + 
+            "   ,   D.indirizzosede   AS \"indirizzoSede\"" + 
+            "   FROM dipartimento D" + 
+            "   WHERE   D.id = ?";
+    
+    /** 
+     * Estrae lo stato di un progetto dato il suo id, passato come parametro
+     */
+    public static final String GET_STATOPROGETTO = 
+    		"SELECT " +
+    		"		SP.id		AS \"id\"" +
+    		"	, 	SP.nome		AS \"nome\"" +
+    		"	, 	SP.valore	AS \"informativa\"" + 
+    		"	FROM statoprogetto SP" + 
+    		"	WHERE SP.id = ?";
+    
+    /**
+     * <p>Estrae le attivit&agrave; relative ad un progetto, identificato 
+     * tramite l'id, passato come parametro.</p>
+     */
+    public static final String  GET_ACTIVITIES = 
+            "SELECT " +
+            "       A.id                    AS  \"id\"" +
+            "   ,   A.nome                  AS  \"nome\"" +
+            "   ,   A.descrizione           AS  \"descrizione\"" +
+            "   ,   A.datainizio            AS  \"dataInizio\"" +
+            "   ,   A.datafine              AS  \"dataFine\"" +
+            "   ,   A.datainizioattesa      AS  \"dataInizioAttesa\"" +
+            "   ,   A.datafineattesa        AS  \"dataFineAttesa\"" +
+            "   ,   A.datainizioeffettiva   AS  \"dataInizioEffettiva\"" +
+            "   ,   A.datafineeffettiva     AS  \"dataFineEffettiva\"" +
+            "   ,   A.guprevisti            AS  \"guPrevisti\"" +
+            "   ,   A.gueffettivi           AS  \"guEffettivi\"" +
+            "   ,   A.gurimanenti           AS  \"guRimanenti\"" +
+            "   ,   A.noteavanzamento       AS  \"noteAvanzamento\"" +
+            "   ,   A.milestone             AS  \"milestone\"" +
+            "   FROM attivita A" + 
             "   WHERE id_progetto = ?";
+    
+    /**
+     * <p>Estrae l'attivit&agrave; specificata tramite id relativa ad un progetto, identificato 
+     * tramite l'id, passato come parametro.</p>
+     */
+    public static final String GET_ACTIVITY = 
+            "SELECT " +
+            "       A.id                    AS  \"id\"" +
+            "   ,   A.nome                  AS  \"nome\"" +
+            "   ,   A.descrizione           AS  \"descrizione\"" +
+            "   ,   A.datainizio            AS  \"dataInizio\"" +
+            "   ,   A.datafine              AS  \"dataFine\"" +
+            "   ,   A.datainizioattesa      AS  \"dataInizioAttesa\"" +
+            "   ,   A.datafineattesa        AS  \"dataFineAttesa\"" +
+            "   ,   A.datainizioeffettiva   AS  \"dataInizioEffettiva\"" +
+            "   ,   A.datafineeffettiva     AS  \"dataFineEffettiva\"" +
+            "   ,   A.guprevisti            AS  \"guPrevisti\"" +
+            "   ,   A.gueffettivi           AS  \"guEffettivi\"" +
+            "   ,   A.gurimanenti           AS  \"guRimanenti\"" +
+            "   ,   A.noteavanzamento       AS  \"noteAvanzamento\"" +
+            "   ,   A.milestone             AS  \"milestone\"" +
+            "   FROM attivita A" + 
+            "   WHERE id_progetto = ?" +
+            "       AND id = ? ";
+    
+    /**
+     * <p>Estrae le persone che sono collegate ad una attivit&agrave;</p>
+     */
+    public static final String GET_PEOPLE_ON_ACTIVITY = 
+            "SELECT " +
+            "       P.id        AS \"id\"" +
+            "   ,   P.nome      AS \"nome\"" +
+            "   ,   P.cognome   AS \"cognome\"" +
+            "   FROM attivitagestione AG" +
+            "       INNER JOIN persona P ON AG.id_persona = P.id" +
+            "   WHERE AG.id_attivita = ?";
+    
+    /**
+     * <p>Estrae le competenze relative ad un progetto, identificato 
+     * tramite l'id, passato come parametro.</p>
+     */
+    public static final String GET_SKILLS = 
+            "SELECT " +
+            "       C.id            AS \"id\"" +
+            "   ,   C.descrizione   AS \"nome\"" +
+            "   ,   C.informativa   AS \"informativa\"" + 
+            "   ,   C.presenza      AS \"presenza\"" + 
+            "   ,   C.id_persona    AS \"idPersona\"" +
+            "   FROM competenza C" +
+            "   WHERE id_progetto = ?";
+    
+    /**
+     * <p>Estrae i rischi relativi ad un progetto, identificato 
+     * tramite l'id, passato come parametro.</p>
+     */
+    public static final String GET_RISKS = 
+            "SELECT " +
+            "       R.id            AS \"id\"" +
+            "   ,   R.descrizione   AS \"nome\"" +
+            "   ,   R.probabilita   AS \"informativa\"" + 
+            "   ,   R.impatto       AS \"impatto\"" + 
+            "   ,   R.livello       AS \"livello\"" +
+            "   ,   R.stato         AS \"stato\"" +
+            "   FROM rischio R" +
+            "   WHERE id_progetto = ?";
+    
+    /**
+     * <p>Estrae lo stato di avanzamento selezionato di un progetto, identificato tramite id,
+     * passato come parametro</p>
+     */
+    public static final String GET_PROJECT_STATUS = 
+            "SELECT " +
+            "       AP.id                       AS \"id\"" +
+            "   ,   AP.datainizio               AS \"dataInizio\"" + 
+            "   ,   AP.datafine                 AS \"dataFine\"" +
+            "   ,   AP.descrizioneavanzamento   AS \"descrizioneAvanzamento\"" +
+            "   ,   AP.statotempi               AS \"statoTempi\"" + 
+            "   ,   AP.statocosti               AS \"statoCosti\"" + 
+            "   ,   AP.statorischi              AS \"statoRischi\"" + 
+            "   ,   AP.statorisorse             AS \"statoRisorse\"" + 
+            "   ,   AP.statoscope               AS \"statoScope\"" + 
+            "   ,   AP.statocomunicazione       AS \"statoComunicazione\"" + 
+            "   ,   AP.statoqualita             AS \"statoQualita\"" + 
+            "   ,   AP.statoapprovvigionamenti  AS \"statoApprovvigionamenti\"" + 
+            "   ,   AP.statostakeholder         AS \"statoStakeholder\"" +
+            "   ,   AP.dataultimamodifica       AS \"dataUltimaModifica\"" +
+            "   ,   AP.oraultimamodifica        AS \"oraUltimaModifica\"" +
+            "   ,   AP.autoreultimamodifica     AS \"autoreUltimaModifica\"" +
+            "   FROM avanzamentoprogetto AP " +
+            "   WHERE AP.id = ?";
+    
+    /**
+     * <p>Estrae tutti gli stati di avanzamento di un progetto, identificato tramite id,
+     * passato come parametro</p>
+     */
+    public static final String GET_PROJECT_STATUS_LIST = 
+            "SELECT " +
+            "       AP.id                       AS \"id\"" +
+            "   ,   AP.datainizio               AS \"dataInizio\"" + 
+            "   ,   AP.datafine                 AS \"dataFine\"" +
+            "   FROM avanzamentoprogetto AP " +
+            "   WHERE AP.id_progetto = ?";
+
     
     /* ************************************************************************ *
      *                               Query di POL                               *
@@ -724,10 +743,11 @@ public interface Query extends Serializable {
      * <p>Modifica i campi dello status del progetto identificato 
      * tramite l'id, passato come parametro.</p>
      */
-    public static final String UPDATE_STATUS = 
-            "UPDATE progetto" + 
-            "   SET     meseriferimento = ?" +
-            "   ,       descrizionestatocorrente = ?" +
+    public static final String UPDATE_PROJECT_STATUS = 
+            "UPDATE avanzamentoprogetto" + 
+            "   SET     datainizio = ?" +
+            "   ,       datafine = ?" +
+            "   ,       descrizioneavanzamento = ?" +
             "   ,       statotempi = ?" + 
             "   ,       statocosti = ?" +
             "   ,       statorischi = ?" +
@@ -737,9 +757,12 @@ public interface Query extends Serializable {
             "   ,       statoqualita = ?" +
             "   ,       statoapprovvigionamenti = ?" +
             "   ,       statostakeholder = ?" +
+            "   ,       dataultimamodifica = ?" +
+            "   ,       oraultimamodifica = ?" +
+            "   ,       autoreultimamodifica = ?" +
             "   WHERE id = ?";
-            
-    
+
+        
     /* ************************************************************************ *
      *                               Query di POL                               *
      * ************************************************************************ *
