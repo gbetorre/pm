@@ -353,7 +353,7 @@ public class DBWrapper implements Query {
                 pst.clearParameters();
                 pst.setInt(1, idStatoProgetto);
                 rs2 = pst.executeQuery();
-                if(rs2.next()) {
+                if (rs2.next()) {
                 	statoProgetto = new CodeBean();
                 	BeanUtil.populate(statoProgetto, rs2);
                 	project.setStatoProgetto(statoProgetto);
@@ -430,7 +430,7 @@ public class DBWrapper implements Query {
                 pst.clearParameters();
                 pst.setInt(1, idStatoProgetto);
                 rs2 = pst.executeQuery();
-                if(rs2.next()) {
+                if (rs2.next()) {
                     statoProgetto = new CodeBean();
                     BeanUtil.populate(statoProgetto, rs2);
                     project.setStatoProgetto(statoProgetto);
@@ -484,7 +484,7 @@ public class DBWrapper implements Query {
             pst.setInt(1, projectId);
             pst.setInt(2, userId);
             rs = pst.executeQuery();
-            if(rs.next()) {
+            if (rs.next()) {
                 project = new ProjectBean();
                 BeanUtil.populate(project, rs);
             }
@@ -640,7 +640,7 @@ public class DBWrapper implements Query {
                 if (Utils.containsValues(paramsResource)) {
                     // 3 - Numero di campi fissi presenti in paramsResource (fornitoriChiaveEsterni, fornitoriChiaveInterni, ServiziAteneo)
                     // 4 - Numero di campi che contengono una competenza (id, nome, informativa, presenza)
-                    for(int i = 0; i < ((paramsResource.size() - 3) / 4); i++) {
+                    for (int i = 0; i < ((paramsResource.size() - 3) / 4); i++) {
                         con.setAutoCommit(false);
                         String isPresenzaAsString = paramsResource.get("pcr-presenza" + String.valueOf(i));
                         if ( (!isPresenzaAsString.equalsIgnoreCase("true")) && (!isPresenzaAsString.equalsIgnoreCase("false"))  ) {
@@ -783,7 +783,7 @@ public class DBWrapper implements Query {
             if (params.containsKey(PART_PROJECT)) {
                 HashMap<String, String> paramsStatus = params.get(PART_PROJECT);
                 if (Utils.containsValues(paramsStatus) && !paramsStatus.containsValue(Utils.UNIX_EPOCH)) {
-                    pst = con.prepareStatement(UPDATE_STATUS);
+                    pst = con.prepareStatement(UPDATE_PROJECT_STATUS);
                     con.setAutoCommit(false);
                     pst.clearParameters();
                     pst.setString(1, paramsStatus.get("sMese"));
@@ -834,28 +834,48 @@ public class DBWrapper implements Query {
      * 
      * @param projId - id del progetto di cui estrarre le attivit&agrave;
      * @return <code>Vector&lt;AttvitaBean&gt;</code> - ActivityBean rappresentante l'attivit&agrave; del progetto.
-     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
      */
     @SuppressWarnings({ "null", "static-method" })
-    public Vector<ActivityBean> getActivities(int projId)
-                                       throws WebStorageException{
-        ResultSet rs = null;
+    public Vector<ActivityBean> getActivities(int projId) 
+                                       throws WebStorageException {
+        ResultSet rs, rs2 = null;
         Connection con = null;
         PreparedStatement pst = null;
         ActivityBean attivita = null;
+        PersonBean person = null;
         Vector<ActivityBean> activities = new Vector<ActivityBean>();
+        Vector<PersonBean> people = new Vector<PersonBean>();
         try {
             con = pol_manager.getConnection();
+            con.setAutoCommit(false);
             pst = con.prepareStatement(GET_ACTIVITIES);
             pst.clearParameters();
             pst.setInt(1, projId);
             rs = pst.executeQuery();
-            while(rs.next()) {
+            con.commit();
+            while (rs.next()) {
                 attivita = new ActivityBean();
                 BeanUtil.populate(attivita, rs);
+                pst = null;
+                pst = con.prepareStatement(GET_PEOPLE_ON_ACTIVITY);
+                pst.clearParameters();
+                pst.setInt(1, attivita.getId());
+                rs2 = pst.executeQuery();
+                con.commit();
+                while (rs2.next()) {
+                    person = new PersonBean();
+                    BeanUtil.populate(person, rs2);
+                    people.add(person);
+                }
+                attivita.setPersone(people);
                 activities.add(attivita);
             }
             return activities;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto ActivityBean non valorizzato; problema nella query dell\'utente.\n";
             LOG.severe(msg); 
@@ -895,7 +915,7 @@ public class DBWrapper implements Query {
             pst.clearParameters();
             pst.setInt(1, projId);
             rs = pst.executeQuery();
-            while(rs.next()) {
+            while (rs.next()) {
                 competenza = new SkillBean();
                 BeanUtil.populate(competenza, rs);
                 skills.add(competenza);
@@ -940,7 +960,7 @@ public class DBWrapper implements Query {
             pst.clearParameters();
             pst.setInt(1, projId);
             rs = pst.executeQuery();
-            while(rs.next()) {
+            while (rs.next()) {
                 rischio = new RiskBean();
                 BeanUtil.populate(rischio, rs);
                 risks.add(rischio);
@@ -987,7 +1007,7 @@ public class DBWrapper implements Query {
             pst.clearParameters();
             pst.setInt(1, key);
             rs = pst.executeQuery();
-            while(rs.next()) {
+            while (rs.next()) {
                 wbs = new WbsBean();
                 BeanUtil.populate(wbs, rs);
                 vectorWbs.add(wbs);
