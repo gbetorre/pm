@@ -44,7 +44,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Vector;
 import java.util.logging.Logger;
 
@@ -52,7 +51,6 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import javax.swing.JOptionPane;
 
 import it.alma.bean.ActivityBean;
 import it.alma.bean.BeanUtil;
@@ -66,7 +64,6 @@ import it.alma.bean.RiskBean;
 import it.alma.bean.SkillBean;
 import it.alma.bean.WbsBean;
 import it.alma.exception.AttributoNonValorizzatoException;
-import it.alma.exception.CommandException;
 import it.alma.exception.NotFoundException;
 import it.alma.exception.WebStorageException;
 
@@ -238,6 +235,53 @@ public class DBWrapper implements Query {
     }
     
     
+    /**
+     * <p>Restituisce 
+     * <ul>
+     * <li>il massimo valore del contatore identificativo di una
+     * tabella il cui nome viene passato come argomento</li> 
+     * <li>oppure zero se nella tabella non sono presenti record.</li>
+     * </ul></p>
+     * 
+     * @param table nome della tabella di cui si vuol recuperare il max(id)
+     * @return <code>int</code> - un intero che rappresenta il massimo valore trovato, oppure zero se non sono stati trovati valori
+     * @throws WebStorageException se si verifica un problema nella query o in qualche tipo di puntamento
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public int getMax (String table) 
+                throws WebStorageException {
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        try {
+            int count = 0;
+            String query = SELECT_MAX_ID + table;
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(query);
+            pst.clearParameters();
+            rs = pst.executeQuery();
+            if (rs.next()) {
+                count = rs.getInt(1);
+            }
+            return count;
+        }  catch (SQLException sqle) {
+            String msg = FOR_NAME + "Impossibile recuperare il max(id).\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
     /* ********************************************************** *
      *                        Metodi di POL                       *
      * ********************************************************** */
@@ -385,11 +429,12 @@ public class DBWrapper implements Query {
     
     
     /**
-     * TODO
+     * <p>Recupera i progetti su cui un utente, il cui username viene
+     * passato come argomento, ha i diritti di scrittura/editing.</p>
      * 
-     * @param userName
-     * @return
-     * @throws WebStorageException
+     * @param userName login dell'utente di cui si vogliono ottenere i progetti editabili
+     * @return <code>Vector&lt;ProjectBean&gt;</code> - un Vector di ProjectBean, che rappresentano i progetti su cui l'utente ha i diritti di scrittura
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
      */
     @SuppressWarnings({ "null", "static-method" })
     public Vector<ProjectBean> getWritableProjects(String userName)
@@ -491,6 +536,207 @@ public class DBWrapper implements Query {
             return project;            
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto ProjectBean non valorizzato; problema nella query che recupera il progetto.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce un Vector di ActivityBean rappresentante le attvit&agrave; del progetto attuale</p>
+     * 
+     * @param projId - id del progetto di cui estrarre le attivit&agrave;
+     * @return <code>Vector&lt;AttvitaBean&gt;</code> - ActivityBean rappresentante l'attivit&agrave; del progetto.
+     * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public Vector<ActivityBean> getActivities(int projId) 
+                                       throws WebStorageException {
+        ResultSet rs, rs2 = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        ActivityBean attivita = null;
+        PersonBean person = null;
+        Vector<ActivityBean> activities = new Vector<ActivityBean>();
+        Vector<PersonBean> people = new Vector<PersonBean>();
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_ACTIVITIES);
+            pst.clearParameters();
+            pst.setInt(1, projId);
+            rs = pst.executeQuery();
+            con.commit();
+            while (rs.next()) {
+                attivita = new ActivityBean();
+                BeanUtil.populate(attivita, rs);
+                pst = null;
+                pst = con.prepareStatement(GET_PEOPLE_ON_ACTIVITY);
+                pst.clearParameters();
+                pst.setInt(1, attivita.getId());
+                rs2 = pst.executeQuery();
+                con.commit();
+                while (rs2.next()) {
+                    person = new PersonBean();
+                    BeanUtil.populate(person, rs2);
+                    people.add(person);
+                }
+                attivita.setPersone(people);
+                activities.add(attivita);
+            }
+            return activities;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto ActivityBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce un Vector di SkillBean rappresentante le competenze del progetto attuale</p>
+     * 
+     * @param projId - id del progetto di cui estrarre le competenze
+     * @return <code>Vector&lt;SkillBean&gt;</code> - SkillBean rappresentante le competenze del progetto.
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public Vector<SkillBean> getSkills(int projId)
+                                throws WebStorageException{
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        SkillBean competenza = null;
+        Vector<SkillBean> skills = new Vector<SkillBean>();
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_SKILLS);
+            pst.clearParameters();
+            pst.setInt(1, projId);
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                competenza = new SkillBean();
+                BeanUtil.populate(competenza, rs);
+                skills.add(competenza);
+            }
+            return skills;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto SkillBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce un Vector di RiskBean rappresentante i rischi del progetto attuale</p>
+     * 
+     * @param projId - id del progetto di cui estrarre i rischi
+     * @return <code>Vector&lt;RiskBean&gt;</code> - RiskBean rappresentante i rischi del progetto.
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public Vector<RiskBean> getRisks(int projId)
+                              throws WebStorageException{
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        RiskBean rischio = null;
+        Vector<RiskBean> risks = new Vector<RiskBean>();
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_RISKS);
+            pst.clearParameters();
+            pst.setInt(1, projId);
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                rischio = new RiskBean();
+                BeanUtil.populate(rischio, rs);
+                risks.add(rischio);
+            }
+            return risks;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto RiskBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce un vector contenente tutte le Wbs di un dato progetto.</p>
+     * 
+     * @param idProj - id del progetto di cui caricare le wbs
+     * @return vectorWbs - vettore contenente tutte le Wbs di un progetto
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public Vector<WbsBean> getWbs (int idProj) 
+                            throws WebStorageException {
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        WbsBean wbs = null;
+        Vector<WbsBean> vectorWbs = new Vector<WbsBean>();
+        try {
+            // Ottiene il progetto precaricato quando l'utente si è loggato corrispondente al progetto sul quale aggiungere un'attività
+            Integer key = new Integer(idProj);
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_WBS_OF_PROJECT);
+            pst.clearParameters();
+            pst.setInt(1, key);
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                wbs = new WbsBean();
+                BeanUtil.populate(wbs, rs);
+                vectorWbs.add(wbs);
+            }
+            return vectorWbs;
+        }  catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto RiskBean non valorizzato; problema nella query dell\'utente.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
         } finally {
@@ -830,215 +1076,14 @@ public class DBWrapper implements Query {
     
     
     /**
-     * <p>Restituisce un Vector di ActivityBean rappresentante le attvit&agrave; del progetto attuale</p>
-     * 
-     * @param projId - id del progetto di cui estrarre le attivit&agrave;
-     * @return <code>Vector&lt;AttvitaBean&gt;</code> - ActivityBean rappresentante l'attivit&agrave; del progetto.
-     * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
-     */
-    @SuppressWarnings({ "null", "static-method" })
-    public Vector<ActivityBean> getActivities(int projId) 
-                                       throws WebStorageException {
-        ResultSet rs, rs2 = null;
-        Connection con = null;
-        PreparedStatement pst = null;
-        ActivityBean attivita = null;
-        PersonBean person = null;
-        Vector<ActivityBean> activities = new Vector<ActivityBean>();
-        Vector<PersonBean> people = new Vector<PersonBean>();
-        try {
-            con = pol_manager.getConnection();
-            con.setAutoCommit(false);
-            pst = con.prepareStatement(GET_ACTIVITIES);
-            pst.clearParameters();
-            pst.setInt(1, projId);
-            rs = pst.executeQuery();
-            con.commit();
-            while (rs.next()) {
-                attivita = new ActivityBean();
-                BeanUtil.populate(attivita, rs);
-                pst = null;
-                pst = con.prepareStatement(GET_PEOPLE_ON_ACTIVITY);
-                pst.clearParameters();
-                pst.setInt(1, attivita.getId());
-                rs2 = pst.executeQuery();
-                con.commit();
-                while (rs2.next()) {
-                    person = new PersonBean();
-                    BeanUtil.populate(person, rs2);
-                    people.add(person);
-                }
-                attivita.setPersone(people);
-                activities.add(attivita);
-            }
-            return activities;
-        } catch (AttributoNonValorizzatoException anve) {
-            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
-            LOG.severe(msg); 
-            throw new WebStorageException(msg + anve.getMessage(), anve);
-        } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Oggetto ActivityBean non valorizzato; problema nella query dell\'utente.\n";
-            LOG.severe(msg); 
-            throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        } finally {
-            try {
-                con.close();
-            } catch (NullPointerException npe) {
-                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                LOG.severe(msg); 
-                throw new WebStorageException(msg + npe.getMessage());
-            } catch (SQLException sqle) {
-                throw new WebStorageException(FOR_NAME + sqle.getMessage());
-            }
-        }
-    }
-    
-    
-    /**
-     * <p>Restituisce un Vector di SkillBean rappresentante le competenze del progetto attuale</p>
-     * 
-     * @param projId - id del progetto di cui estrarre le competenze
-     * @return <code>Vector&lt;SkillBean&gt;</code> - SkillBean rappresentante le competenze del progetto.
-     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
-     */
-    @SuppressWarnings({ "null", "static-method" })
-    public Vector<SkillBean> getSkills(int projId)
-                                throws WebStorageException{
-        ResultSet rs = null;
-        Connection con = null;
-        PreparedStatement pst = null;
-        SkillBean competenza = null;
-        Vector<SkillBean> skills = new Vector<SkillBean>();
-        try {
-            con = pol_manager.getConnection();
-            pst = con.prepareStatement(GET_SKILLS);
-            pst.clearParameters();
-            pst.setInt(1, projId);
-            rs = pst.executeQuery();
-            while (rs.next()) {
-                competenza = new SkillBean();
-                BeanUtil.populate(competenza, rs);
-                skills.add(competenza);
-            }
-            return skills;
-        } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Oggetto SkillBean non valorizzato; problema nella query dell\'utente.\n";
-            LOG.severe(msg); 
-            throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        } finally {
-            try {
-                con.close();
-            } catch (NullPointerException npe) {
-                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                LOG.severe(msg); 
-                throw new WebStorageException(msg + npe.getMessage());
-            } catch (SQLException sqle) {
-                throw new WebStorageException(FOR_NAME + sqle.getMessage());
-            }
-        }
-    }
-    
-    
-    /**
-     * <p>Restituisce un Vector di RiskBean rappresentante i rischi del progetto attuale</p>
-     * 
-     * @param projId - id del progetto di cui estrarre i rischi
-     * @return <code>Vector&lt;RiskBean&gt;</code> - RiskBean rappresentante i rischi del progetto.
-     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
-     */
-    @SuppressWarnings({ "null", "static-method" })
-    public Vector<RiskBean> getRisks(int projId)
-                              throws WebStorageException{
-        ResultSet rs = null;
-        Connection con = null;
-        PreparedStatement pst = null;
-        RiskBean rischio = null;
-        Vector<RiskBean> risks = new Vector<RiskBean>();
-        try {
-            con = pol_manager.getConnection();
-            pst = con.prepareStatement(GET_RISKS);
-            pst.clearParameters();
-            pst.setInt(1, projId);
-            rs = pst.executeQuery();
-            while (rs.next()) {
-                rischio = new RiskBean();
-                BeanUtil.populate(rischio, rs);
-                risks.add(rischio);
-            }
-            return risks;
-        } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Oggetto RiskBean non valorizzato; problema nella query dell\'utente.\n";
-            LOG.severe(msg); 
-            throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        } finally {
-            try {
-                con.close();
-            } catch (NullPointerException npe) {
-                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                LOG.severe(msg); 
-                throw new WebStorageException(msg + npe.getMessage());
-            } catch (SQLException sqle) {
-                throw new WebStorageException(FOR_NAME + sqle.getMessage());
-            }
-        }
-    }
-    
-    
-    /**
-     * <p>Restituisce un vector contenente tutte le Wbs di un dato progetto.</p>
-     * 
-     * @param idProj - id del progetto di cui caricare le wbs
-     * @return vectorWbs - vettore contenente tutte le Wbs di un progetto
-     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
-     */
-    public Vector<WbsBean> getWbs (int idProj) 
-                 throws WebStorageException {
-        ResultSet rs = null;
-        Connection con = null;
-        PreparedStatement pst = null;
-        WbsBean wbs = null;
-        Vector<WbsBean> vectorWbs = new Vector<WbsBean>();
-        try {
-            // Ottiene il progetto precaricato quando l'utente si è loggato corrispondente al progetto sul quale aggiungere un'attività
-            Integer key = new Integer(idProj);
-            con = pol_manager.getConnection();
-            con.setAutoCommit(false);
-            pst = con.prepareStatement(GET_WBS_OF_PROJECT);
-            pst.clearParameters();
-            pst.setInt(1, key);
-            rs = pst.executeQuery();
-            while (rs.next()) {
-                wbs = new WbsBean();
-                BeanUtil.populate(wbs, rs);
-                vectorWbs.add(wbs);
-            }
-            return vectorWbs;
-        }  catch (SQLException sqle) {
-            String msg = FOR_NAME + "Oggetto RiskBean non valorizzato; problema nella query dell\'utente.\n";
-            LOG.severe(msg); 
-            throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        } finally {
-            try {
-                con.close();
-            } catch (NullPointerException npe) {
-                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                LOG.severe(msg); 
-                throw new WebStorageException(msg + npe.getMessage());
-            } catch (SQLException sqle) {
-                throw new WebStorageException(FOR_NAME + sqle.getMessage());
-            }
-        }
-    }
-    
-    /**
      * <p>Metodo per fare un nuovo inserimento di una nuova attivit&agrave;.</p>
      * 
      * @param idProj - identificativo del progetto, al quale l'attivit&agrave; fa riferimento
      * @param userId - identificativo dell'utente loggato
-     * @param valuesActivity - vector contenente tutti i valori che l'utente inserisce per la nuova attivit&agrave;
-     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
-     * @throws ParseException - se si verifica un problema nel cast da String a Date
+     * @param valuesActivity - Vector contenente tutti i valori che l'utente inserisce per la nuova attivit&agrave;
+     * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
+    @SuppressWarnings({ "null", "static-method" })
     public void insertActivity (int idProj,
                                 int userId, 
                                 Vector<String> valuesActivity) 
@@ -1055,12 +1100,13 @@ public class DBWrapper implements Query {
             // 6 è il numero di date che ci sono in un'attività
             // 3 è l'indice di posizione della prima data
             try {
+                int nextVal = getMax("attivita") + 1;
                 Date[] valuesAsDate = new Date[6];
                 SimpleDateFormat formatDate = new SimpleDateFormat("dd-MM-yyyy");
                 for ( int i = 0; i < 6; i++ ) {
                     valuesAsDate[i] = formatDate.parse(valuesActivity.get(3 + i));
                 }
-                pst.setInt(1, Integer.parseInt(valuesActivity.get(0)));
+                pst.setInt(1, nextVal);
                 pst.setString(2, valuesActivity.get(1));
                 pst.setString(3, valuesActivity.get(2));
                 pst.setDate(4, Utils.convert(valuesAsDate[0])); // non accetta una data java.util.Date, ma java.sql.Date
