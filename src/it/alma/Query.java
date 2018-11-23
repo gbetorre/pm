@@ -766,8 +766,16 @@ public interface Query extends Serializable {
     /* ************************************************************************ *
      *                               Query di POL                               *
      * ************************************************************************ *
-     *                        2.  Query di inserimento                          *
+     *                        3.  Query di inserimento                          *
      * ************************************************************************ */
+    /**
+     * <p>Query di selezione finalizzata all'inserimento</p>
+     */
+    public static final String SELECT_MAX_ID = 
+            "SELECT " +
+            "       MAX(id)                     AS \"max\"" +
+            "   FROM ";
+
     /**
      * <p>Query per inserimento di una nuova attivit&agrave;.</p>
      */
@@ -793,7 +801,7 @@ public interface Query extends Serializable {
             "   ,   id_stato" +
             "   ,   id_ruolo" +
             "   ,   id_persona )" +
-            "   VALUES (? " +          //id
+            "   VALUES (?"  +          //id
             "   ,       ? " +          //nome
             "   ,       ? " +          //descrizione
             "   ,       ? " +          //data inizio attività
