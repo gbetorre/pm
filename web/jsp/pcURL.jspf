@@ -54,3 +54,5 @@
   <c:param name="id" value="" />
 </c:url>
 <c:set var="p" value="${requestScope.progetto}" scope="page" />
+<c:set var="lsp" value="${requestScope.listaStatusProgetto}" scope="page" />
+<c:set var="ps" value="${requestScope.projectStatus}" scope="page" />
