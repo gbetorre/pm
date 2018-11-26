@@ -37,7 +37,9 @@
 package it.alma;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.LinkedList;
 
 
@@ -162,6 +164,10 @@ public interface Query extends Serializable {
      * <p>Lista contenente i possibili valori dell'attributo stato della classe RiskBean.</p>
      */    
     public static final LinkedList<String> STATO_RISCHIO_AS_LIST = new LinkedList<String>(Arrays.asList(STATO_RISCHIO));
+    /**
+     * <p>Contiene la formattazione che deve avere una data all'interno dell'applicazione.</p>
+     */
+    public static final SimpleDateFormat FORMAT_DATA = new SimpleDateFormat("yyyy-MM-dd");
     
     /* ************************************************************************ *
      *                   Query comuni a tutte le applicazioni                   *
@@ -204,6 +210,15 @@ public interface Query extends Serializable {
             "   WHERE   login = ?" +
             "       AND passwd = ?"
             ;
+    
+    /**
+     * <p>Estrae l'username dell'utente tramite l'id, passato come parametro.</p>
+     */
+    public static final String GET_USERNAME = 
+            "SELECT " +
+            "       U.login      AS \"login\"" +
+            "   FROM usr U" + 
+            "   WHERE U.id = ?";
         
     /**
      * <p>Estrae i ruoli di una persona  
@@ -591,6 +606,32 @@ public interface Query extends Serializable {
             "   ,   AP.oraultimamodifica        AS \"oraUltimaModifica\"" +
             "   ,   AP.autoreultimamodifica     AS \"autoreUltimaModifica\"" +
             "   FROM avanzamentoprogetto AP " +
+            "   WHERE AP.id_progetto = ? " +
+            "       AND AP.datafine = ?";
+    
+    /**
+     * <p>Estrae lo stato di avanzamento di un progetto, identificato tramite id,
+     * passato come parametro</p>
+     */
+    public static final String GET_LAST_PROJECT_STATUS = 
+            "SELECT " +
+            "       AP.id                       AS \"id\"" +
+            "   ,   AP.datainizio               AS \"dataInizio\"" + 
+            "   ,   AP.datafine                 AS \"dataFine\"" +
+            "   ,   AP.descrizioneavanzamento   AS \"descrizioneAvanzamento\"" +
+            "   ,   AP.statotempi               AS \"statoTempi\"" + 
+            "   ,   AP.statocosti               AS \"statoCosti\"" + 
+            "   ,   AP.statorischi              AS \"statoRischi\"" + 
+            "   ,   AP.statorisorse             AS \"statoRisorse\"" + 
+            "   ,   AP.statoscope               AS \"statoScope\"" + 
+            "   ,   AP.statocomunicazione       AS \"statoComunicazione\"" + 
+            "   ,   AP.statoqualita             AS \"statoQualita\"" + 
+            "   ,   AP.statoapprovvigionamenti  AS \"statoApprovvigionamenti\"" + 
+            "   ,   AP.statostakeholder         AS \"statoStakeholder\"" +
+            "   ,   AP.dataultimamodifica       AS \"dataUltimaModifica\"" +
+            "   ,   AP.oraultimamodifica        AS \"oraUltimaModifica\"" +
+            "   ,   AP.autoreultimamodifica     AS \"autoreUltimaModifica\"" +
+            "   FROM avanzamentoprogetto AP " +
             "   WHERE AP.id = ?";
     
     /**
@@ -603,7 +644,8 @@ public interface Query extends Serializable {
             "   ,   AP.datainizio               AS \"dataInizio\"" + 
             "   ,   AP.datafine                 AS \"dataFine\"" +
             "   FROM avanzamentoprogetto AP " +
-            "   WHERE AP.id_progetto = ?";
+            "   WHERE AP.id_progetto = ?" +
+            "   ORDER BY AP.datafine";
 
     
     /* ************************************************************************ *
@@ -760,6 +802,7 @@ public interface Query extends Serializable {
             "   ,       dataultimamodifica = ?" +
             "   ,       oraultimamodifica = ?" +
             "   ,       autoreultimamodifica = ?" +
+            "   ,       id_progetto = ?" +
             "   WHERE id = ?";
 
         
