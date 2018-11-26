@@ -35,11 +35,12 @@
     </form>
   </c:when>
   <c:otherwise>
-      <strong>
-        Spiacente: 
-        <c:out value="${sessionScope.usr.nome}" />
-        <c:out value="${sessionScope.usr.cognome}" /><br />
-        <span style="background:#ffc">Non sono stati trovati progetti a te associati.</span>
-      </strong>
+      <div class="alert alert-danger">
+        <strong>Spiacente 
+          <c:out value="${sessionScope.usr.nome}" />
+          <c:out value="${sessionScope.usr.cognome}" />!<br />
+        </strong>
+        <p>Non sono stati trovati progetti a te associati.</p>
+      </div>
   </c:otherwise>
 </c:choose>
