@@ -36,6 +36,8 @@
 
 package it.alma.command;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -60,6 +62,7 @@ import it.alma.bean.PersonBean;
 import it.alma.bean.ProjectBean;
 import it.alma.bean.RiskBean;
 import it.alma.bean.SkillBean;
+import it.alma.bean.StatusBean;
 import it.alma.bean.WbsBean;
 import it.alma.exception.AttributoNonValorizzatoException;
 import it.alma.exception.CommandException;
@@ -169,14 +172,18 @@ public class ProjectCommand extends ItemBean implements Command {
         String fileJspT = null;
         // Dichiara elenco di progetti
         Vector<ProjectBean> v = new Vector<ProjectBean>();
-        //Dichiara elenco di attività
+        // Dichiara elenco di attività
         Vector<ActivityBean> vActivities = new Vector<ActivityBean>();
-        //Dichiara elenco di competenze
+        // Dichiara elenco di competenze
         Vector<SkillBean> vSkills = new Vector<SkillBean>();
-        //Dichiara elenco di rischi
+        // Dichiara elenco di rischi
         Vector<RiskBean> vRisks = new Vector<RiskBean>();
-        //Dichiara elenco di wbs
+        // Dichiara elenco di wbs
         Vector<WbsBean> vWBS = new Vector<WbsBean>();
+        // Dichiara l'elenco degli status di un progetto
+        ArrayList<StatusBean> projectStatusList = new ArrayList<StatusBean>();
+        // Dichiara l'avanzamento progetto più recente
+        StatusBean projectStatus = null;
         /* ******************************************************************** *
          *      Instanzia nuova classe WebStorage per il recupero dei dati      *
          * ******************************************************************** */
@@ -268,14 +275,27 @@ public class ProjectCommand extends ItemBean implements Command {
                         }
                     }
                     runtimeProject = db.getProject(idPrj, user.getId());
-                    // Se part vale PART_PROJECT (cioè 'prj') non serve fare le altre query
-                    if (!part.equals(Query.PART_PROJECT)) {
-                        // Per ottimizzare
+                    // Per ottimizzare il caricamento di dati nella request
+                    if (part.equals(Query.PART_PROJECT)) {
+                        projectStatusList = db.getStatusList(idPrj);
+                        Date dateProjectStatus = new Date(0);
+                        if (!projectStatusList.isEmpty()) {
+                            for (int i = 0; i < projectStatusList.size(); i++) {
+                                if (projectStatusList.get(i).getDataFine().equals(Utils.convert(Utils.getCurrentDate())) 
+                                    || projectStatusList.get(i).getDataFine().before(Utils.convert(Utils.getCurrentDate())) ) {
+                                    dateProjectStatus = projectStatusList.get(i).getDataFine();
+                                    break;
+                                }
+                            }
+                        }
+                        projectStatus = db.getStatus(idPrj, dateProjectStatus);
+                    } else if (part.equals(Query.PART_ACTIVITY)) {
                         vActivities = db.getActivities(idPrj);
+                    } else if (part.equals(Query.PART_PROJECT_CHARTER_RESOURCE)) {
                         vSkills = db.getSkills(idPrj);
+                    } else if (part.contains(Query.PART_PROJECT_CHARTER_RISK)) {
                         vRisks = db.getRisks(idPrj);
-                    }
-                    if(part.equals(Query.PART_WBS)) {
+                    } else if(part.equals(Query.PART_WBS)) {
                         vWBS = db.getWbs(idPrj);
                     }
                 }
@@ -322,6 +342,10 @@ public class ProjectCommand extends ItemBean implements Command {
         req.setAttribute("rischi", vRisks);
         // Salva nella request elenco delle wbs di un progetto
         req.setAttribute("wbs", vWBS);
+        // Salva nella request elenco degli status di un progetto
+        req.setAttribute("listaStatusProgetto", projectStatusList);
+        // Salva nella request l'avanzamento progetto più recente
+        req.setAttribute("projectStatus", projectStatus);
     }
     
     
@@ -333,7 +357,7 @@ public class ProjectCommand extends ItemBean implements Command {
      * @param parser oggetto per la gestione assistita dei parametri di input, gia' pronto all'uso
      * @param params mappa da valorizzare per riferimento (ByRef)
      * @throws CommandException se si verifica un problema nella gestione degli oggetti data o in qualche tipo di puntamento
-     * @throws ParameterNotFoundException  - 
+     * @throws ParameterNotFoundException 
      */
     private static void loadParams(String part, 
                                    ParameterParser parser,
@@ -450,8 +474,10 @@ public class ProjectCommand extends ItemBean implements Command {
             GregorianCalendar data = new GregorianCalendar(1970, 1, 1);
             String dataAsString = Utils.format(data, "yyyy-mm-dd");
             HashMap<String, String> statusProject = new HashMap<String, String>();
-            statusProject.put("sMese", parser.getStringParameter("sMese", dataAsString));
-            statusProject.put("sAttuale", parser.getStringParameter("sAttuale", Utils.VOID_STRING));
+            statusProject.put("sId",parser.getStringParameter("sId", Utils.VOID_STRING));
+            statusProject.put("sDataInizio", parser.getStringParameter("sDataInizio", dataAsString));
+            statusProject.put("sDataFine", parser.getStringParameter("sDataFine", dataAsString));
+            statusProject.put("sAvanzamento", parser.getStringParameter("sAvanzamento", Utils.VOID_STRING));
             statusProject.put("sCosti", parser.getStringParameter("sCosti", Utils.VOID_STRING));
             statusProject.put("sTempi", parser.getStringParameter("sTempi", Utils.VOID_STRING));
             statusProject.put("sRischi", parser.getStringParameter("sRischi", Utils.VOID_STRING));
