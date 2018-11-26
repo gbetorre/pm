@@ -142,6 +142,8 @@ public class ProjectBean implements Serializable, Query {
     private int idStatoProgetto;
     /** Stato progetto */
     private CodeBean statoProgetto;
+    /** Periodo base di cadenza del progetto */
+    private float periodoBase;
     
     /**
      * <p>Costruttore: inizializza i campi a valori di default.</p>
@@ -166,7 +168,8 @@ public class ProjectBean implements Serializable, Query {
     	idDipart = -2;
     	dipart = null;
     	idStatoProgetto = -2;
-    	statoProgetto = null;    	
+    	statoProgetto = null;
+    	periodoBase = -2;
     }
 
     
@@ -935,6 +938,7 @@ public class ProjectBean implements Serializable, Query {
      * *************************************************** */
 	/**
 	 * Restituisce un oggetto StatoProgettoBean che rappresenta lo stato del progetto
+	 * 
 	 * @return <code>statoProgetto</code> - stato del progetto
 	 * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e statoProgetto non 		&egrave; stato valorizzato (&egrave; un dato obbligatorio) 
 	 */
@@ -947,11 +951,38 @@ public class ProjectBean implements Serializable, Query {
 
 	/**
 	 * Imposta lo stato di un progetto.
+	 * 
 	 * @param statoProgetto - stato progetto da impostare
 	 */
 	public void setStatoProgetto(CodeBean statoProgetto) {
 		this.statoProgetto = statoProgetto;
 	}
+
+	/* *************************************************** *
+     *        Metodi getter e setter per periodoBase       *
+     * *************************************************** */
+    /**
+     * Restituisce un intero periodoBase che rappresenta la cadenza delle riunioni di progetto
+     * 
+     * @return <code>periodoBase</code> - periodoBase del progetto
+     * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e periodoBase non      &egrave; stato valorizzato (&egrave; un dato obbligatorio)
+     */
+    public float getPeriodoBase() throws AttributoNonValorizzatoException {
+        if(periodoBase == -2) {
+            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo periodoBase non valorizzato!");
+        }
+        return periodoBase;
+    }
+
+
+    /**
+     * Imposta il periodo base del progetto
+     * 
+     * @param periodoBase - periodo base del progetto da impostare
+     */
+    public void setPeriodoBase(float periodoBase) {
+        this.periodoBase = periodoBase;
+    }
 	
     
 }
