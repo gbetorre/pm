@@ -290,7 +290,7 @@ public class ProjectCommand extends ItemBean implements Command {
                         if (idStatus > Query.NOTHING) {
                             // Recupera uno specifico status di progetto di dato id
                             projectStatus = db.getStatus(idStatus);
-                        } else {
+                        } else if (idStatus == Query.NOTHING) { // Valore fittizio (nessuno status può avere id = 0!)
                             // Recupera l'ultimo Status, cioè quello avente datainizio più prossima alla data odierna
                             Date dateProjectStatus = new Date(0);
                             if (!projectStatusList.isEmpty()) {
