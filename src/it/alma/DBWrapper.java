@@ -593,51 +593,7 @@ public class DBWrapper implements Query {
             }
         }
     }
-    
-    
-    /**
-     * <p>Restituisce un StatusBean rappresentante lo status attuale del progetto</p>
-     * 
-     * @param idProj id del progetto del quale ricavare lo status
-     * @param dateStatus data di fine dello status da ricavare
-     * @return <code>StatusBean</code> - StatusBean rappresentante lo status corrente
-     * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento
-     */
-    public StatusBean getStatus (int idProj, Date dateStatus) 
-                          throws WebStorageException {
-        ResultSet rs = null;
-        Connection con = null;
-        PreparedStatement pst = null;
-        StatusBean status = null;
-        try {
-            con = pol_manager.getConnection();
-            pst = con.prepareStatement(GET_PROJECT_STATUS);
-            pst.clearParameters();
-            pst.setInt(1, idProj);
-            pst.setDate(2, Utils.convert(dateStatus));  // non accetta una java.util.Date, ma una java.sql.Date
-            rs = pst.executeQuery();
-            if (rs.next()) {
-                status = new StatusBean();
-                BeanUtil.populate(status, rs);
-            }
-            return status;
-        } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Oggetto StatusBean non valorizzato; problema nella query dell\'utente.\n";
-            LOG.severe(msg); 
-            throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        } finally {
-            try {
-                con.close();
-            } catch (NullPointerException npe) {
-                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                LOG.severe(msg); 
-                throw new WebStorageException(msg + npe.getMessage());
-            } catch (SQLException sqle) {
-                throw new WebStorageException(FOR_NAME + sqle.getMessage());
-            }
-        }
-    }
-    
+
     
     /**
      * <p>Restituisce un Vector di StatusBean rappresentante tutti gli status del progetto attuale</p>
@@ -646,9 +602,9 @@ public class DBWrapper implements Query {
      * @return <code>ArrayList&lt;StatusBean&gt;</code> - ArrayList&lt;StatusBean&gt; rappresentante gli status del progetto.
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
      */
-    //@SuppressWarnings("null")
+    @SuppressWarnings({ "null", "static-method" })
     public ArrayList<StatusBean> getStatusList (int projId) 
-                                      throws WebStorageException {
+                                         throws WebStorageException {
         ResultSet rs = null;
         Connection con = null;
         PreparedStatement pst = null;
@@ -681,7 +637,95 @@ public class DBWrapper implements Query {
                 throw new WebStorageException(FOR_NAME + sqle.getMessage());
             }
         }
-
+    }
+    
+    
+    /**
+     * <p>Restituisce un StatusBean rappresentante lo status attuale del progetto</p>
+     * 
+     * @param idStatus id dello status da restituire
+     * @return <code>StatusBean</code> - StatusBean rappresentante lo status di identificativo passato come argomento
+     * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public StatusBean getStatus(int idStatus) 
+                         throws WebStorageException {
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        StatusBean status = null;
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_STATUS);
+            pst.clearParameters();
+            pst.setInt(1, idStatus);
+            rs = pst.executeQuery();
+            if (rs.next()) {
+                status = new StatusBean();
+                BeanUtil.populate(status, rs);
+            }
+            return status;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto StatusBean non valorizzato; problema nella query dello status.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce un StatusBean rappresentante lo status attuale del progetto</p>
+     * 
+     * @param idProj id del progetto del quale ricavare lo status
+     * @param dateStatus data di inizio dello status da ricavare
+     * @return <code>StatusBean</code> - StatusBean rappresentante lo status corrente
+     * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public StatusBean getStatus(int idProj, 
+                                Date dateStatus) 
+                         throws WebStorageException {
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        StatusBean status = null;
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_PROJECT_STATUS);
+            pst.clearParameters();
+            pst.setInt(1, idProj);
+            pst.setDate(2, Utils.convert(dateStatus));  // non accetta una java.util.Date, ma una java.sql.Date
+            rs = pst.executeQuery();
+            if (rs.next()) {
+                status = new StatusBean();
+                BeanUtil.populate(status, rs);
+            }
+            return status;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto StatusBean non valorizzato; problema nella query dello status piu\' prossimo alla data passata come argomento.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
     }
     
     
@@ -895,7 +939,7 @@ public class DBWrapper implements Query {
      * @param params - hashmap che contiene i parametri che si vogliono aggiornare del progetto
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
      */
-    @SuppressWarnings({ "null", "static-method" })
+    @SuppressWarnings({ "null" })
     public void updateProjectPart(int idProj,
                                   int userId,
                                   HashMap<Integer, ProjectBean> projects, 
