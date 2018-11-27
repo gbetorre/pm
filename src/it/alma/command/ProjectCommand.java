@@ -280,13 +280,13 @@ public class ProjectCommand extends ItemBean implements Command {
                      * **************************************************** */
                     // Recupera il progetto richiesto dalla navigazione utente
                     runtimeProject = db.getProject(idPrj, user.getId());
+                    // Recupera tutta la lista degli Status
+                    projectStatusList = db.getStatusList(idPrj);
                     // Per ottimizzare il caricamento di dati nella request separa i rami della richiesta
                     if (part.equals(Query.PART_PROJECT)) {
                         ; // Codice per mostrare dati aggregati sul progetto, o relazioni o altro
                     } else if (part.equals(Query.PART_STATUS)) {
-                        // Recupera tutta la lista degli Status
-                        projectStatusList = db.getStatusList(idPrj);
-                        // Testa se è presente l'id dello status
+                        // Testa se l'id dello status � significativo
                         if (idStatus > Query.NOTHING) {
                             // Recupera uno specifico status di progetto di dato id
                             projectStatus = db.getStatus(idStatus);
@@ -359,7 +359,7 @@ public class ProjectCommand extends ItemBean implements Command {
         // Salva nella request elenco delle wbs di un progetto
         req.setAttribute("wbs", vWBS);
         // Salva nella request elenco degli status di un progetto
-        req.setAttribute("listaStatusProgetto", projectStatusList);
+        req.setAttribute("listProjectStatus", projectStatusList);
         // Salva nella request l'avanzamento progetto più recente
         req.setAttribute("projectStatus", projectStatus);
     }
