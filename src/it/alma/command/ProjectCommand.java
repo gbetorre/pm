@@ -46,7 +46,6 @@ import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import javax.swing.JOptionPane;
 
 import com.oreilly.servlet.ParameterNotFoundException;
 import com.oreilly.servlet.ParameterParser;
@@ -56,7 +55,6 @@ import it.alma.Main;
 import it.alma.Query;
 import it.alma.Utils;
 import it.alma.bean.ActivityBean;
-import it.alma.bean.CodeBean;
 import it.alma.bean.ItemBean;
 import it.alma.bean.PersonBean;
 import it.alma.bean.ProjectBean;
@@ -138,6 +136,7 @@ public class ProjectCommand extends ItemBean implements Command {
         nomeFile.put(Query.PART_PROJECT_CHARTER_MILESTONE, "/jsp/pcMilestone.jsp");
         nomeFile.put(Query.PART_WBS, "/jsp/projWBS.jsp");
         nomeFile.put(Query.PART_ACTIVITY, "/jsp/projActivities.jsp");
+        nomeFile.put(Query.PART_STATUS, "/jsp/projStatus.jsp");
         nomeFile.put(Query.PART_PROJECT, this.getPaginaJsp());
     }  
   
@@ -163,7 +162,9 @@ public class ProjectCommand extends ItemBean implements Command {
         // Utente loggato
         PersonBean user = null;
         // Recupera o inizializza 'id progetto'
-        int idPrj = parser.getIntParameter("id", -1); 
+        int idPrj = parser.getIntParameter("id", -1);
+        // Recupera o inizializza 'id stato progetto'
+        int idStatus = parser.getIntParameter("ids", -1);
         // Recupera o inizializza 'tipo pagina'   
         String part = parser.getStringParameter("p", "-");
         // Flag di scrittura
@@ -231,7 +232,7 @@ public class ProjectCommand extends ItemBean implements Command {
                         HashMap<String, HashMap<String, String>> params = new HashMap<String, HashMap<String, String>>();
                         loadParams(part, parser, params);
                         /* **************************************************** *
-                         *                   UPDATE Project Part                *
+                         *                  UPDATE Project Part                 *
                          * **************************************************** */
                         try {
                             // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
@@ -274,21 +275,36 @@ public class ProjectCommand extends ItemBean implements Command {
                             throw new CommandException(msg + e.getMessage(), e);
                         }
                     }
+                    /* **************************************************** *
+                     *                  SELECT Project Part                 *
+                     * **************************************************** */
+                    // Recupera il progetto richiesto dalla navigazione utente
                     runtimeProject = db.getProject(idPrj, user.getId());
-                    // Per ottimizzare il caricamento di dati nella request
+                    // Per ottimizzare il caricamento di dati nella request separa i rami della richiesta
                     if (part.equals(Query.PART_PROJECT)) {
+                        ; // Codice per mostrare dati aggregati sul progetto, o relazioni o altro
+                    } else if (part.equals(Query.PART_STATUS)) {
+                        // Recupera tutta la lista degli Status
                         projectStatusList = db.getStatusList(idPrj);
-                        Date dateProjectStatus = new Date(0);
-                        if (!projectStatusList.isEmpty()) {
-                            for (int i = 0; i < projectStatusList.size(); i++) {
-                                if (projectStatusList.get(i).getDataFine().equals(Utils.convert(Utils.getCurrentDate())) 
-                                    || projectStatusList.get(i).getDataFine().before(Utils.convert(Utils.getCurrentDate())) ) {
-                                    dateProjectStatus = projectStatusList.get(i).getDataFine();
-                                    break;
+                        // Testa se è presente l'id dello status
+                        if (idStatus > Query.NOTHING) {
+                            // Recupera uno specifico status di progetto di dato id
+                            projectStatus = db.getStatus(idStatus);
+                        } else {
+                            // Recupera l'ultimo Status, cioè quello avente datainizio più prossima alla data odierna
+                            Date dateProjectStatus = new Date(0);
+                            if (!projectStatusList.isEmpty()) {
+                                for (int i = 0; i < projectStatusList.size(); i++) {
+                                    if (projectStatusList.get(i).getDataInizio().equals(Utils.convert(Utils.getCurrentDate())) ||
+                                        projectStatusList.get(i).getDataInizio().before(Utils.convert(Utils.getCurrentDate())) ) {
+                                        dateProjectStatus = projectStatusList.get(i).getDataInizio();
+                                        break;
+                                    }
                                 }
                             }
+                            // Recupera uno specifico stuatus di progetto a partire dalla sua data - assume UNIQUE(data, idProgetto)
+                            projectStatus = db.getStatus(idPrj, dateProjectStatus);
                         }
-                        projectStatus = db.getStatus(idPrj, dateProjectStatus);
                     } else if (part.equals(Query.PART_ACTIVITY)) {
                         vActivities = db.getActivities(idPrj);
                     } else if (part.equals(Query.PART_PROJECT_CHARTER_RESOURCE)) {
@@ -357,12 +373,11 @@ public class ProjectCommand extends ItemBean implements Command {
      * @param parser oggetto per la gestione assistita dei parametri di input, gia' pronto all'uso
      * @param params mappa da valorizzare per riferimento (ByRef)
      * @throws CommandException se si verifica un problema nella gestione degli oggetti data o in qualche tipo di puntamento
-     * @throws ParameterNotFoundException 
      */
     private static void loadParams(String part, 
                                    ParameterParser parser,
                                    HashMap<String, HashMap<String, String>> params)
-                            throws CommandException, ParameterNotFoundException {
+                            throws CommandException {
         /* **************************************************** *
          *        Ramo di Project Charter (PC) - Vision         *
          * **************************************************** */
