@@ -760,7 +760,6 @@ public class DBWrapper implements Query {
                 pst.clearParameters();
                 pst.setInt(1, attivita.getId());
                 rs2 = pst.executeQuery();
-                con.commit();
                 while (rs2.next()) {
                     person = new PersonBean();
                     BeanUtil.populate(person, rs2);
