@@ -39,7 +39,6 @@ package it.alma;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.LinkedList;
 
 
@@ -53,6 +52,10 @@ import java.util.LinkedList;
  */
 public interface Query extends Serializable {
 
+    /**
+     * <p>Costante parlante per i test che controllano che interi abbiano un valore significativo.</p>
+     */
+    public static final byte NOTHING = 0;
     /* ************************************************************************ *
      *                  Costanti parlanti per valori boolean                    *
      * ************************************************************************ */
@@ -102,6 +105,14 @@ public interface Query extends Serializable {
      */
     public static final String PART_PROJECT_CHARTER_MILESTONE   = "pcm";
     /**
+     * <p>Costante per il parametro identificante parte applicazione legata a un progetto.</p>
+     */
+    public static final String PART_PROJECT                     = "prj";
+    /**
+     * <p>Costante per il parametro identificante la pagina dello Status di un progetto.</p>
+     */
+    public static final String PART_STATUS                     = "sts";
+    /**
      * <p>Costante per il parametro identificante la pagina delle WBS di un progetto.</p>
      */
     public static final String PART_WBS                         = "wbs";
@@ -113,10 +124,6 @@ public interface Query extends Serializable {
      * <p>Costante per il parametro identificante la pagina del Report di un progetto.</p>
      */
     public static final String PART_REPORT                      = "rep";
-    /**
-     * <p>Costante per il parametro identificante la pagina dello Status di un progetto.</p>
-     */
-    public static final String PART_PROJECT                     = "prj";
     /**
      * <p>Costante per il parametro identificante la pagina di inserimento di un'Attivit&agrave; di un progetto.</p>
      */
@@ -607,13 +614,13 @@ public interface Query extends Serializable {
             "   ,   AP.autoreultimamodifica     AS \"autoreUltimaModifica\"" +
             "   FROM avanzamentoprogetto AP " +
             "   WHERE AP.id_progetto = ? " +
-            "       AND AP.datafine = ?";
+            "       AND AP.datainizio = ?";
     
     /**
      * <p>Estrae lo stato di avanzamento di un progetto, identificato tramite id,
      * passato come parametro</p>
      */
-    public static final String GET_LAST_PROJECT_STATUS = 
+    public static final String GET_STATUS = 
             "SELECT " +
             "       AP.id                       AS \"id\"" +
             "   ,   AP.datainizio               AS \"dataInizio\"" + 
@@ -645,7 +652,7 @@ public interface Query extends Serializable {
             "   ,   AP.datafine                 AS \"dataFine\"" +
             "   FROM avanzamentoprogetto AP " +
             "   WHERE AP.id_progetto = ?" +
-            "   ORDER BY AP.datafine";
+            "   ORDER BY AP.datainizio";
 
     
     /* ************************************************************************ *
