@@ -1,0 +1,6 @@
+<form  action="#" method="post">
+  <h4>Elenco degli status del progetto:</h4>
+  <c:forEach var="prjSts" items="${requestScope.listProjectStatus}" varStatus="loop">
+    <button class="btn btn-primary">LINK</button><br />
+  </c:forEach>
+</form>
