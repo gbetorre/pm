@@ -737,7 +737,7 @@ public class DBWrapper implements Query {
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
      */
     @SuppressWarnings({ "null", "static-method" })
-    public Vector<ActivityBean> getActivities (int projId) 
+    public Vector<ActivityBean> getActivities(int projId) 
                                        throws WebStorageException {
         ResultSet rs, rs2 = null;
         Connection con = null;
@@ -752,7 +752,6 @@ public class DBWrapper implements Query {
             pst.clearParameters();
             pst.setInt(1, projId);
             rs = pst.executeQuery();
-            con.commit();
             while (rs.next()) {
                 attivita = new ActivityBean();
                 BeanUtil.populate(attivita, rs);
