@@ -297,7 +297,10 @@ public class ProjectCommand extends ItemBean implements Command {
                                 for (int i = 0; i < projectStatusList.size(); i++) {
                                     if (projectStatusList.get(i).getDataInizio().equals(Utils.convert(Utils.getCurrentDate())) ||
                                         projectStatusList.get(i).getDataInizio().before(Utils.convert(Utils.getCurrentDate())) ) {
-                                        dateProjectStatus = projectStatusList.get(i).getDataInizio();
+                                        if (dateProjectStatus.before(projectStatusList.get(i).getDataInizio())) {
+                                            dateProjectStatus = projectStatusList.get(i).getDataInizio();
+                                        }
+                                    } else {
                                         break;
                                     }
                                 }
