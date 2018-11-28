@@ -30,6 +30,11 @@
       <servlet-name>session</servlet-name>
       <url-pattern>/auth</url-pattern>
    </servlet-mapping>
+   
+   <servlet-mapping>
+      <servlet-name>default</servlet-name>
+      <url-pattern>/web/*</url-pattern>
+   </servlet-mapping>
 
     <context-param>
         <description></description>
