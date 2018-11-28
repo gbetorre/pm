@@ -825,6 +825,47 @@ public interface Query extends Serializable {
             "SELECT " +
             "       MAX(id)                     AS \"max\"" +
             "   FROM ";
+    
+    /**
+     * <p>Query per inserimento di un nuovo status progetto.</p>
+     */
+    public static final String INSERT_STATUS =
+            "INSERT INTO avanzamentoprogetto " +
+            "   (   id" +
+            "   ,   datainizio" +
+            "   ,   datafine" +
+            "   ,   descrizioneavanzamento" +
+            "   ,   statotempi" +
+            "   ,   statocosti" +
+            "   ,   statorischi" +
+            "   ,   statorisorse" +
+            "   ,   statoscope" +
+            "   ,   statocomunicazione" +
+            "   ,   statoqualita" +
+            "   ,   statoapprovvigionamenti" +
+            "   ,   statostakeholder" +
+            "   ,   dataultimamodifica" +
+            "   ,   oraultimamodifica" +
+            "   ,   autoreultimamodifica" +
+            "   ,   id_progetto )" +
+            "   VALUES (? " +          // id
+            "   ,       ? " +          // datainizio
+            "   ,       ? " +          // datafine
+            "   ,       ? " +          // descrizioneavanzamento
+            "   ,       ? " +          // stato tempi
+            "   ,       ? " +          // stato costi
+            "   ,       ? " +          // stato rischi
+            "   ,       ? " +          // stato risorse
+            "   ,       ? " +          // stato scope
+            "   ,       ? " +          // stato comunicazione
+            "   ,       ? " +          // stato qualita
+            "   ,       ? " +          // stato approvvigionamenti
+            "   ,       ? " +          // stato stakeholder
+            "   ,       ? " +          // data ultima modifica
+            "   ,       ? " +          // ora ultima modifica
+            "   ,       ? " +          // autore ultima modifica
+            "   ,       ?)";           // id_progetto
+            
 
     /**
      * <p>Query per inserimento di una nuova attivit&agrave;.</p>
@@ -851,26 +892,26 @@ public interface Query extends Serializable {
             "   ,   id_stato" +
             "   ,   id_ruolo" +
             "   ,   id_persona )" +
-            "   VALUES (?"  +          //id
-            "   ,       ? " +          //nome
-            "   ,       ? " +          //descrizione
-            "   ,       ? " +          //data inizio attività
-            "   ,       ? " +          //data fine attività
-            "   ,       ? " +          //data inizio attesa
-            "   ,       ? " +          //data fine attesa
-            "   ,       ? " +          //data inizio effettiva
-            "   ,       ? " +          //data fine effettiva
-            "   ,       ? " +          //giorni/uomo previsti
-            "   ,       ? " +          //giorni/uomo effettivi
-            "   ,       ? " +          //giorni/uomo rimanenti
-            "   ,       ? " +          //note di avanzamento
-            "   ,       ? " +          //milestone
-            "   ,       ? " +          //id progetto
-            "   ,       ? " +          //id wbs
-            "   ,       ? " +          //id complessità
-            "   ,       ? " +          //id stato attività
-            "   ,       ? " +          //id ruolo
-            "   ,       ? )" ;         //id persona
+            "   VALUES (? " +          // id
+            "   ,       ? " +          // nome
+            "   ,       ? " +          // descrizione
+            "   ,       ? " +          // data inizio attività
+            "   ,       ? " +          // data fine attività
+            "   ,       ? " +          // data inizio attesa
+            "   ,       ? " +          // data fine attesa
+            "   ,       ? " +          // data inizio effettiva
+            "   ,       ? " +          // data fine effettiva
+            "   ,       ? " +          // giorni/uomo previsti
+            "   ,       ? " +          // giorni/uomo effettivi
+            "   ,       ? " +          // giorni/uomo rimanenti
+            "   ,       ? " +          // note di avanzamento
+            "   ,       ? " +          // milestone
+            "   ,       ? " +          // id progetto
+            "   ,       ? " +          // id wbs
+            "   ,       ? " +          // id complessità
+            "   ,       ? " +          // id stato attività
+            "   ,       ? " +          // id ruolo
+            "   ,       ?)" ;          // id persona
     
     /**
      * <p>Query per inserimento di una nuova competenza.</p>
@@ -883,12 +924,12 @@ public interface Query extends Serializable {
             "   ,   presenza" +
             "   ,   id_progetto" +
             "   ,   id_persona )" +    
-            "   VALUES (? " +          //id
-            "   ,       ? " +          //descrizione
-            "   ,       ? " +          //informativa
-            "   ,       ? " +          //presenza
-            "   ,       ? " +          //id progetto
-            "   ,       ? )" ;         //id persona
+            "   VALUES (? " +          // id
+            "   ,       ? " +          // descrizione
+            "   ,       ? " +          // informativa
+            "   ,       ? " +          // presenza
+            "   ,       ? " +          // id progetto
+            "   ,       ?)" ;          // id persona
     
     /**
      * <p>Query per inserimento di un nuovo rischio.</p>
@@ -902,13 +943,21 @@ public interface Query extends Serializable {
             "   ,   livello" +
             "   ,   stato" +
             "   ,   id_progetto" +
-            "   VALUES (? " +          //id
-            "   ,       ? " +          //descrizione
-            "   ,       ? " +          //probabilità
-            "   ,       ? " +          //impatto
-            "   ,       ? " +          //livello
-            "   ,       ? " +          //stato
-            "   ,       ? )" ;         //id progetto
+            "   VALUES (? " +          // id
+            "   ,       ? " +          // descrizione
+            "   ,       ? " +          // probabilità
+            "   ,       ? " +          // impatto
+            "   ,       ? " +          // livello
+            "   ,       ? " +          // stato
+            "   ,       ?)" ;          // id progetto
+    
+    
+    /* ************************************************************************ *
+     *                               Query di POL                               *
+     * ************************************************************************ *
+     *                       4.  Query di eliminazione                          *
+     * ************************************************************************ */
+    
     
     /* ************************************************************************ *
      *                  Costanti per applicazione QOL (ValDid)                  *
