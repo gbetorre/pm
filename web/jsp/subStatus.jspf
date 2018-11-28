@@ -1,6 +1,11 @@
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"  %>
 <form  action="#" method="post">
   <h4>Elenco degli status del progetto:</h4>
   <c:forEach var="prjSts" items="${requestScope.listProjectStatus}" varStatus="loop">
-    <button class="btn btn-primary">LINK</button><br />
+    <a href="${laststatus}${prjSts.id}">
+      Dal <fmt:formatDate value="${prjSts.dataInizio}" pattern="dd/MM/yyyy" /> 
+      al <fmt:formatDate value="${prjSts.dataFine}" pattern="dd/MM/yyyy" />
+    </a>
+    <br />
   </c:forEach>
 </form>
