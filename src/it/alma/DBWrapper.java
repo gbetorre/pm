@@ -1309,7 +1309,7 @@ public class DBWrapper implements Query {
                 pst.setInt(18, Integer.parseInt(valuesActivity.get(17)));
                 pst.setInt(19, Integer.parseInt(valuesActivity.get(18)));
                 pst.setInt(20, Integer.parseInt(valuesActivity.get(19)));
-                pst.executeQuery();
+                pst.executeUpdate();
                 con.commit();
             } catch (ParseException pe) {
                 String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di date.\n" + pe.getMessage();
@@ -1390,7 +1390,7 @@ public class DBWrapper implements Query {
             pst.setString(5, valuesRisk.get(4));
             pst.setString(6, valuesRisk.get(5));
             pst.setInt(7, key);
-            pst.executeQuery();
+            pst.executeUpdate();
             con.commit();
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto RiskBean non valorizzato; problema nella query dell\'utente.\n";
@@ -1437,7 +1437,7 @@ public class DBWrapper implements Query {
             pst.setBoolean(4, Boolean.parseBoolean(valuesSkill.get(3)));
             pst.setInt(5, key);
             pst.setInt(6, Integer.parseInt(valuesSkill.get(5)));
-            pst.executeQuery();
+            pst.executeUpdate();
             con.commit();
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto RiskBean non valorizzato; problema nella query dell\'utente.\n";
