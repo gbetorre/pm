@@ -67,15 +67,21 @@
     </context-param>
 
     <context-param>
-        <description>Directory fogli stile di POL   ../style/</description>
+        <description>Directory fogli stile di POL   ../web/style/</description>
         <param-name>urlDirectoryStili</param-name>
-        <param-value>style/</param-value>
+        <param-value>web/style/</param-value>
     </context-param>
     
     <context-param>
-        <description>Directory script client di POL   ../js/</description>
+        <description>Directory script client di POL   ../web/js/</description>
         <param-name>urlDirectoryScript</param-name>
-        <param-value>js/</param-value>
+        <param-value>web/js/</param-value>
+    </context-param>
+    
+    <context-param>
+        <description>Directory immagini di POL   ../web/img/</description>
+        <param-name>urlDirectoryImmagini</param-name>
+        <param-value>web/img/</param-value>
     </context-param>
     
     <context-param>
