@@ -1201,14 +1201,14 @@ public class DBWrapper implements Query {
                     }
                 }
             }
-            if (params.containsKey(PART_PROJECT)) {
-                HashMap<String, String> paramsStatus = params.get(PART_PROJECT);
+            if (params.containsKey(PART_STATUS)) {
+                HashMap<String, String> paramsStatus = params.get(PART_STATUS);
                 if (Utils.containsValues(paramsStatus) && !paramsStatus.containsValue(Utils.UNIX_EPOCH)) {
                     pst = con.prepareStatement(UPDATE_PROJECT_STATUS);
                     con.setAutoCommit(false);
                     pst.clearParameters();
-                    pst.setDate(1, Utils.convert(FORMAT_DATA.parse(paramsStatus.get("sDataInizio"))));
-                    pst.setDate(2, Utils.convert(FORMAT_DATA.parse(paramsStatus.get("sDataFine"))));
+                    pst.setDate(1, Utils.convert(DATA_FORMAT.parse(paramsStatus.get("sDataInizio"))));
+                    pst.setDate(2, Utils.convert(DATA_FORMAT.parse(paramsStatus.get("sDataFine"))));
                     pst.setString(3, paramsStatus.get("sAvanzamento"));
                     pst.setString(4, paramsStatus.get("sTempi"));
                     pst.setString(5, paramsStatus.get("sCosti"));
@@ -1286,7 +1286,7 @@ public class DBWrapper implements Query {
                 int nextVal = getMax("attivita") + 1;
                 Date[] valuesAsDate = new Date[6];
                 for ( int i = 0; i < 6; i++ ) {
-                    valuesAsDate[i] = FORMAT_DATA.parse(valuesActivity.get(3 + i));
+                    valuesAsDate[i] = DATA_FORMAT.parse(valuesActivity.get(3 + i));
                 }
                 pst.setInt(1, nextVal);
                 pst.setString(2, valuesActivity.get(1));
