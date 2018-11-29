@@ -19,12 +19,10 @@
               <th scope="row"><a href="<c:out value="${progetto}${prj.id}" />"><c:out value="${prj.titolo}" /></a></th>
               <th scope="row"><c:out value="${prj.statoProgetto.nome}" /></th>
               <th scope="row">
-                <div class="container">
-                  <a href="<c:out value= "${vision}${prj.id}" />"  class="btn btn-primary">Project Charter</a>
-                  <a href="<c:out value= "${lastStatus}${prj.id}" />"  class="btn btn-primary">Status</a>
-                  <a href="<c:out value= "${wbs}${prj.id}" />"  class="btn btn-primary">WBS</a>
-                  <a href="<c:out value= "${act}${prj.id}" />" class="btn btn-primary">Attivit&agrave;</a>
-                </div>
+                <a href="<c:out value= "${vision}${prj.id}" />"  class="btn btn-primary">Project Charter</a>
+                <a href="<c:out value= "${lastStatus}${prj.id}" />"  class="btn btn-primary">Status</a>
+                <a href="<c:out value= "${wbs}${prj.id}" />"  class="btn btn-primary">WBS</a>
+                <a href="<c:out value= "${act}${prj.id}" />" class="btn btn-primary">Attivit&agrave;</a>
               </th>
             </tr>
           </c:forEach>
