@@ -21,7 +21,7 @@
               <th scope="row">
                 <div class="container">
                   <a href="<c:out value= "${vision}${prj.id}" />"  class="btn btn-primary">Project Charter</a>
-                  <a href="<c:out value= "${laststatus}${zero}" />"  class="btn btn-primary">Status</a>
+                  <a href="<c:out value= "${lastStatus}${prj.id}" />"  class="btn btn-primary">Status</a>
                   <a href="<c:out value= "${wbs}${prj.id}" />"  class="btn btn-primary">WBS</a>
                   <a href="<c:out value= "${act}${prj.id}" />" class="btn btn-primary">Attivit&agrave;</a>
                 </div>
