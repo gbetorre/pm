@@ -172,15 +172,19 @@ public interface Query extends Serializable {
      */    
     public static final LinkedList<String> STATO_RISCHIO_AS_LIST = new LinkedList<String>(Arrays.asList(STATO_RISCHIO));
     /**
+     * <p>Pattern che deve avere una data (oggetto java.util.Date o GregorianCalendar) per essere conforme al fornato SQL.</p>
+     */
+    public static final String DATA_SQL_PATTERN = "yyyy-MM-dd";
+    /**
      * <p>Contiene la formattazione che deve avere una data all'interno dell'applicazione.</p>
      */
-    public static final SimpleDateFormat FORMAT_DATA = new SimpleDateFormat("yyyy-MM-dd");
+    public static final SimpleDateFormat DATA_FORMAT = new SimpleDateFormat(DATA_SQL_PATTERN);
     
     /* ************************************************************************ *
      *                   Query comuni a tutte le applicazioni                   *
      * ************************************************************************ */
     /**
-     * <p>Estrae le classi Command previste per l'applicazione.</p>
+     * <p>Estrae le classi Command previste per la/le applicazione/i.</p>
      */
     public static final String LOOKUP_COMMAND =
             "SELECT " +
@@ -194,7 +198,7 @@ public interface Query extends Serializable {
             "  FROM command";
     
     /* ************************************************************************ *
-     *                               Query di POL                               *
+     *                               QUERY DI POL                               *
      * ************************************************************************ *
      *                          1. Query di selezione                           *
      * ************************************************************************ */    
@@ -656,7 +660,7 @@ public interface Query extends Serializable {
 
     
     /* ************************************************************************ *
-     *                               Query di POL                               *
+     *                               QUERY DI POL                               *
      * ************************************************************************ *
      *                       2.  Query di aggiornamento                         *
      * ************************************************************************ */ 
@@ -814,7 +818,7 @@ public interface Query extends Serializable {
 
         
     /* ************************************************************************ *
-     *                               Query di POL                               *
+     *                               QUERY DI POL                               *
      * ************************************************************************ *
      *                        3.  Query di inserimento                          *
      * ************************************************************************ */
@@ -953,12 +957,13 @@ public interface Query extends Serializable {
     
     
     /* ************************************************************************ *
-     *                               Query di POL                               *
+     *                               QUERY DI POL                               *
      * ************************************************************************ *
      *                       4.  Query di eliminazione                          *
      * ************************************************************************ */
     
-    
+    /* ************************************************************************ *
+     *                                   QOL                                    *
     /* ************************************************************************ *
      *                  Costanti per applicazione QOL (ValDid)                  *
      * ************************************************************************ */
@@ -1071,6 +1076,11 @@ public interface Query extends Serializable {
                                              "4S006333"
                                             };
     
+    /* ************************************************************************ *
+     *                              QUERY DI QOL                                *
+     * ************************************************************************ *
+     *                       4.  Query di eliminazione                          *
+     * ************************************************************************ */
     /**
      * Query per estrarre le tuple delle AD Semplici.
      */
