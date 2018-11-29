@@ -1,32 +1,16 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-    <hr class="separatore" style="margin-top:90px;" />
-    <small>
-    <div id="bottom">
+    <hr class="separatore" />
+      <p id="ragSociale"> 
+        &copy; 2018 - <c:out value="${requestScope.theCurrentYear}" />&nbsp;
+        Universit&agrave; degli studi di Verona
+        Via dell'Artigliere 8, 37129 Verona &nbsp;|&nbsp; 
+        Partita IVA IT01541040232 &nbsp;|&nbsp; 
+        Codice Fiscale 93009870234 
+      </p>
       <div id="footer">
-        <div class="container_24" id="footerContainer">
-          <div class="grid_24" id="footerContent">
-            <div class="grid_6 omega" id="social">
-              <hr class="hrclear" />
-              <div id="accFederato">&nbsp;
-                <a href="#4112">Privacy</a> | 
-                <a id="eduroam" href="http://www.univr.it/main?ent=servizioaol&idDest=1&sServ=284&serv=39&lang=it" title="EDUcation ROAMing per l'accesso wireless federato">Policy</a>                             
-              </div>
-            </div>
-          </div>
-        </div>
+        &nbsp;
+        <a class="linkFooter" href="#4112">Privacy</a> | 
+        <a class="linkFooter" id="eduroam" href="http://www.univr.it/main?ent=servizioaol&idDest=1&sServ=284&serv=39&lang=it" title="EDUcation ROAMing per l'accesso wireless federato">Policy</a>                             
+        &nbsp;
+        <%-- |&nbsp; <a class="linkFooter" href="page=realizzazione">Credits</a> --%>
       </div>
-      <hr class="hrclear" />
-      <div id="bottomStripe">
-        <p id="ragSociale"> 
-          &copy; 2018 - <c:out value="${requestScope.theCurrentYear}" />&nbsp;
-          Universit&agrave; degli studi di Verona
-          Via dell'Artigliere 8, 37129 Verona &nbsp;|&nbsp; 
-          Partita IVA IT01541040232 &nbsp;|&nbsp; 
-          Codice Fiscale 93009870234 
-          &nbsp;|&nbsp;
-          <a href="page=realizzazione">Credits</a>
-        </p>
-      </div>
-    </div>
-    <div><a id="toTop" href="#topStripe"></a></div>
-    </small>
