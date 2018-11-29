@@ -48,11 +48,11 @@
   <c:param name="p" value="sts" />
   <c:param name="id" value="" />
 </c:url>
-<c:url var="laststatus" context="${initParam.appName}" value="/" scope="page">
- <c:param name="q" value="pol" />
+<c:url var="lastStatus" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="pol" />
   <c:param name="p" value="sts" />
-  <c:param name="id" value="4" />
-  <c:param name="ids" value="" />
+  <c:param name="ids" value="0" />
+  <c:param name="id" value="" />
 </c:url>
 <c:url var="wbs" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="pol" />
