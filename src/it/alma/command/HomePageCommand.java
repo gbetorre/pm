@@ -55,7 +55,7 @@ import it.alma.exception.WebStorageException;
 
 /** 
  * <p><code>HomePageCommand.java</code><br />
- * Implementa la logica per la gestione dei progetti on line (POL).</p>
+ * Gestisce la root dell'applicazione.</p>
  * 
  * <p>Created on mercoledì 11 ottobre 2018 15:13</p>
  * 
@@ -73,21 +73,13 @@ public class HomePageCommand extends ItemBean implements Command {
      */
     protected static Logger LOG = Logger.getLogger(Main.class.getName());
     /**
-     * Pagina a cui la command reindirizza per mostrare 
+     * Pagina a cui la command reindirizza per mostrare la form di login
      */
-    private static final String nomeFileElenco = "/jsp/login.jsp"; 
-    /**
-     * Pagina a cui la command fa riferimento per mostrare la Vision del progetto
-     */
-    private static final String nomeFileVision = "/jsp/pcVision.jsp";
-    /**
-     * Pagina a cui la command fa riferimento per mostrare gli Stakeholder del progetto
-     */
-    private static final String nomeFileStakeholder = "/jsp/pcStakeholder.jsp";
+    private static final String nomeFileElenco = "/jsp/login.jsp";
     
     
     /** 
-     * Crea una nuova istanza di ValuationCommand 
+     * Crea una nuova istanza di HomePageCommand 
      */
     public HomePageCommand() {
         ;   // It Doesn't Anything
@@ -142,9 +134,9 @@ public class HomePageCommand extends ItemBean implements Command {
         try {
             // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
             HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
-            if (ses == null) {
-                return;
-            } 
+            //if (ses == null) {
+            //    return;
+            //} 
         } catch (IllegalStateException ise) {
             String msg = FOR_NAME + "Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n";
             LOG.severe(msg);
@@ -166,25 +158,11 @@ public class HomePageCommand extends ItemBean implements Command {
          *                          Recupera i parametri                        *
          * ******************************************************************** */
         // Recupera o inizializza 'id progetto'
-        int idPrj = parser.getIntParameter("id", -1); 
+        int idPrj = parser.getIntParameter("id", -1);
         // Recupera o inizializza 'tipo corsi di studio'
         String tcs = parser.getStringParameter("tcs", "-");
         // Recupera o inizializza 'tipo pagina'   
         String part = parser.getStringParameter("p", "-");
-        // Dichiara la pagina a cui reindirizzare
-        String fileJspT = null;
-        // Decide il valore della pagina
-        if (part.equalsIgnoreCase("pcv")) {
-            fileJspT = nomeFileVision;
-        } else if (part.equalsIgnoreCase("pcs")) {
-            fileJspT = nomeFileStakeholder;
-        } else {
-            fileJspT = nomeFileElenco;
-        }
-        // Recupera il tipo di documento
-        //String tipo = parser.getStringParameter("tipo", "-");
-        // Ricerca il bean della ex-facolta', o del dipartimento, etc.
-        //int idScuDott = parser.getIntParameter("scuoladott", -1);
         
         // Imposta il testo del Titolo da visualizzare prima dell'elenco
         req.setAttribute("titoloE", "Project Charter");
