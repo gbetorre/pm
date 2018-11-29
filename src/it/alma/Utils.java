@@ -36,8 +36,6 @@
 
 package it.alma;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -53,7 +51,6 @@ import java.util.logging.Logger;
 
 import it.alma.exception.CommandException;
 import it.alma.exception.NotFoundException;
-import it.alma.exception.WebStorageException;
 
 
 /**
@@ -100,7 +97,9 @@ public class Utils {
     /**
      * Il TIMESTAMP dei sistemi corrisponde al numero di secondi trascorsi
      * da una data convezionale conosciuta come <em>Unix Epoch</em>
-     * (1° gennaio 1970, quando tutto &egrave; cominciato).
+     * (1° gennaio 1970, quando tutto &egrave; cominciato)<sup>1</sup>.<br />
+     * <small>1: Primo kernel Unix del 1969, sviluppato dai Bell Laboratories 
+     * a partire dal 1970.</small>
      */
     public static final String UNIX_EPOCH = "1970-01-01";
     /**
@@ -157,7 +156,7 @@ public class Utils {
      * @param s la String da controllare
      * @return <code>true</code> se la String e' convertibile in intero, false altrimenti
      */
-    private static boolean isInteger(String s) {
+    public static boolean isInteger(String s) {
         try { 
             Integer.parseInt(s); 
         } catch (NumberFormatException nfe) { 
@@ -571,7 +570,22 @@ public class Utils {
     
     
     /**
-     * Restituisce l'anno corrente.<br />
+     * Restituisce l'anno corrente sotto forma di intero primitivo.<br />
+     * Questo metodo pu&ograve; essere utilizzato ad esempio nei footer, 
+     * per l'indicazione del copyright (&copy;).
+     * 
+     * @return <code>String</code> - l'anno corrente sotto forma di intero primitivo
+     */
+    public static int getCurrentIntYear() {
+        int yearPosition = Calendar.YEAR;
+        Calendar nowHere = Calendar.getInstance();
+        int year = nowHere.get(yearPosition);
+        return year;
+    }
+    
+    
+    /**
+     * Restituisce l'anno corrente in formato String.<br />
      * Questo metodo &egrave; generalmente utilizzato ad esempio nei footer, 
      * per l'indicazione del copyright (&copy;).
      * 
@@ -585,19 +599,14 @@ public class Utils {
         return yearWrapper.toString();
     }
     
-    
+       
     /**
-     * Restituisce l'anno corrente.<br />
-     * Questo metodo &egrave; generalmente utilizzato ad esempio nei footer, 
-     * per l'indicazione del copyright (&copy;).
+     * Restituisce lo UNIX EPOCH sotto forma di GregorianCalendar.
      * 
-     * @return <code>String</code> - l'anno corrente sotto forma di oggetto String
+     * @return <code>GregorianCalendar</code> - lo UNIX EPOCH sotto forma di oggetto GregorianCalendar
      */
-    public static int getCurrentIntYear() {
-        int yearPosition = Calendar.YEAR;
-        Calendar nowHere = Calendar.getInstance();
-        int year = nowHere.get(yearPosition);
-        return year;
+    public static GregorianCalendar getUnixEpoch() {
+        return new GregorianCalendar(1970, 1, 1);
     }
     
 }
