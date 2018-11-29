@@ -101,7 +101,7 @@ public class ProjectCommand extends ItemBean implements Command {
     
     
     /** 
-     * Crea una nuova istanza di ValuationCommand 
+     * Crea una nuova istanza di ProjectCommand 
      */
     public ProjectCommand() {
         ;   // It Doesn't Anything
@@ -286,7 +286,7 @@ public class ProjectCommand extends ItemBean implements Command {
                     if (part.equals(Query.PART_PROJECT)) {
                         ; // Codice per mostrare dati aggregati sul progetto, o relazioni o altro
                     } else if (part.equals(Query.PART_STATUS)) {
-                        // Testa se l'id dello status è significativo
+                        // Testa se l'id dello status ï¿½ significativo
                         if (idStatus > Query.NOTHING) {
                             // Recupera uno specifico status di progetto di dato id
                             projectStatus = db.getStatus(idStatus);
@@ -308,7 +308,7 @@ public class ProjectCommand extends ItemBean implements Command {
                             // Recupera uno specifico stuatus di progetto a partire dalla sua data - assume UNIQUE(data, idProgetto)
                             projectStatus = db.getStatus(idPrj, dateProjectStatus);
                         }
-                    } else if (part.equals(Query.PART_ACTIVITY)) {
+                    } else if (part.equals(Query.PART_ACTIVITY) || part.equals(Query.PART_PROJECT_CHARTER_MILESTONE)) {
                         vActivities = db.getActivities(idPrj);
                     } else if (part.equals(Query.PART_PROJECT_CHARTER_RESOURCE)) {
                         vSkills = db.getSkills(idPrj);
@@ -487,12 +487,12 @@ public class ProjectCommand extends ItemBean implements Command {
         /* **************************************************** *
          *                Ramo di Status Progetto               *
          * **************************************************** */
-        else if (part.equalsIgnoreCase(Query.PART_PROJECT)) {
+        else if (part.equalsIgnoreCase(Query.PART_STATUS)) {
             // Recupero e caricamento parametri di project status
-            GregorianCalendar data = new GregorianCalendar(1970, 1, 1);
-            String dataAsString = Utils.format(data, "yyyy-mm-dd");
+            GregorianCalendar date = Utils.getUnixEpoch();
+            String dataAsString = Utils.format(date, Query.DATA_SQL_PATTERN);
             HashMap<String, String> statusProject = new HashMap<String, String>();
-            statusProject.put("sId",parser.getStringParameter("sId", Utils.VOID_STRING));
+            statusProject.put("sId", parser.getStringParameter("sId", Utils.VOID_STRING));
             statusProject.put("sDataInizio", parser.getStringParameter("sDataInizio", dataAsString));
             statusProject.put("sDataFine", parser.getStringParameter("sDataFine", dataAsString));
             statusProject.put("sAvanzamento", parser.getStringParameter("sAvanzamento", Utils.VOID_STRING));
@@ -505,7 +505,7 @@ public class ProjectCommand extends ItemBean implements Command {
             statusProject.put("sQualita", parser.getStringParameter("sQualita", Utils.VOID_STRING));
             statusProject.put("sApprovvigionamenti", parser.getStringParameter("sApprovvigionamenti", Utils.VOID_STRING));
             statusProject.put("sStakeholder", parser.getStringParameter("sStakeholder", Utils.VOID_STRING));
-            params.put(Query.PART_PROJECT, statusProject);
+            params.put(Query.PART_STATUS, statusProject);
         }
     }
     
