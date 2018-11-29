@@ -3,16 +3,26 @@
 <c:catch var="exception">
   <h4>Elenco degli status del progetto:</h4>
   <c:forEach var="prjSts" items="${requestScope.listProjectStatus}" varStatus="loop">
-    <c:url var="fullStatus" context="${initParam.appName}" value="/" scope="page">
-      <c:param name="q" value="pol" />
-      <c:param name="p" value="sts" />
-      <c:param name="id" value="${p.id}" />
-      <c:param name="ids" value="${prjSts.id}" />
-    </c:url>
-    <a href="${fullStatus}">
-      Dal <fmt:formatDate value="${prjSts.dataInizio}" pattern="dd/MM/yyyy" /> 
-      al <fmt:formatDate value="${prjSts.dataFine}" pattern="dd/MM/yyyy" />
-    </a>
+    <c:choose>
+      <c:when test="${requestScope.projectStatus.getId() ne prjSts.id}">
+        <c:url var="fullStatus" context="${initParam.appName}" value="/" scope="page">
+          <c:param name="q" value="pol" />
+          <c:param name="p" value="sts" />
+          <c:param name="id" value="${p.id}" />
+          <c:param name="ids" value="${prjSts.id}" />
+        </c:url>
+        <a href="${fullStatus}">
+          Dal <fmt:formatDate value="${prjSts.dataInizio}" pattern="dd/MM/yyyy" /> 
+          al <fmt:formatDate value="${prjSts.dataFine}" pattern="dd/MM/yyyy" />
+        </a>
+        <br />
+      </c:when>
+      <c:otherwise>
+        Dal <fmt:formatDate value="${prjSts.dataInizio}" pattern="dd/MM/yyyy" /> 
+        al <fmt:formatDate value="${prjSts.dataFine}" pattern="dd/MM/yyyy" />
+        <br />
+      </c:otherwise>
+    </c:choose>
     <br />
   </c:forEach>
 </c:catch>
