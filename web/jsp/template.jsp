@@ -11,35 +11,35 @@
     <meta name="author" content="Giovanroberto Torre, giovanroberto.torre@univr.it" />
     <link rev="made" href="giovanroberto.torre@univr.it" />
     <meta http-equiv='cache-control' content='no-cache'>
-    <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
-    <!-- Latest compiled CSS, just in case -->
-    <%--base href="${requestScope.baseHref}" /--%>
-    <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />pol.css" type="text/css" />
-    <%--link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />bootstrap.css" type="text/css" />--%>
-    <!-- <link href="<c:out value="${initParam.urlDirectoryStili}" />style.css" rel="stylesheet" type="text/css" />  -->
-    <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <!-- Include jQuery from CDN or from local hosted copy --> 
+    <script src="http://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script>
-      window.jQuery || document.write('<script src="javascript/jquery-1.11.3.min.js"><\/script>');
+      window.jQuery || document.write('<script src="${initParam.urlDirectoryScrypt}/jquery-3.3.1.js"><\/script>');
     </script>
+    <%--base href="${requestScope.baseHref}" /--%>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.css">
+    <!-- Latest compiled CSS, just in case -->
+    <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />bootstrap.css" type="text/css" />
+    <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />pol.css" type="text/css" />
+    <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />style.css" type="text/css" />
   </head>
   <body>
     <!-- Header -->
-    <div style="background:#ccff66">
+    <div id="idHeader">
       <%@ include file="header.jspf"%>
     </div>
     <!-- Corpo pagina -->
-    <jsp:include page="${fileJsp}" />
+    <div class="page">
+      <jsp:include page="${fileJsp}" />
+    </div>
     <!-- Footer -->
-    <div style="background:#99ff99">
+    <div id="idFooter" class="footer">
     <%@ include file="footer.jspf" %>
     </div>
     <script>
       function modify(){
         $('textarea').prop('readonly', false);
-        //$('#aName').prop('readonly', false);
-        //$('#pcv-obiettivi').prop('readonly', false);
-        //$('#pcv-minacce').prop('readonly', false);
         $('input[type=\'text\']').prop('readonly', false);
         $('input[type=\'checkbox\']').prop('disabled', false);
         $('select').prop('disabled', false);

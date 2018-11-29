@@ -1,6 +1,6 @@
 <%@ include file="pcURL.jspf" %>
 <form action="#" method="post">
-  <h2>Inserisci una nuova attività:</h2>
+  <h2>Inserisci una nuova competenza:</h2>
   <div class="row">
     <div class="col-sm-5">ID competenza</div>
     <div class="col-sm-5"><input type="text" class="form-control" id="skillId" name="skillId" value=""></div>

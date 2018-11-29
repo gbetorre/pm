@@ -1,6 +1,5 @@
 <%@ include file="pcURL.jspf" %>
 <form action="#" method="post">
-<div class="container mt-3">
   <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
     <li class="nav-item">
       <a data-toggle="tab" class="nav-link" href="${vision}${p.id}">Vision</a>
@@ -71,5 +70,4 @@
         </div>
 	  </div>
   </div>
-</div>
 </form>

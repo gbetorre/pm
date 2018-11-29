@@ -2,7 +2,9 @@
 <c:choose>
   <c:when test="${requestScope.progetti.size() gt 0}">
     <form action="#" method="get">
-      <h2>Elenco dei progetti di ${sessionScope.usr.nome} ${sessionScope.usr.cognome}</h2>
+      <br />
+      <h3>Elenco dei progetti di ${sessionScope.usr.nome} ${sessionScope.usr.cognome}</h3>
+      <br />
       <table class="table table-hover">
         <thead class="thead-light">
           <tr>

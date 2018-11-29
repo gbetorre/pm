@@ -1,6 +1,6 @@
 <%@ include file="pcURL.jspf" %>
 <form action="#" method="post">
-  <h2>Inserisci una nuova attività:</h2>
+  <h2>Inserisci un nuovo rischio:</h2>
   <div class="row">
     <div class="col-sm-5">ID rischio</div>
     <div class="col-sm-5"><input type="text" class="form-control" id="riskId" name="riskId" value=""></div>
