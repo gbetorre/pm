@@ -54,6 +54,14 @@ label.linkStatus {
 	background-color: #ccccff;
 }
 
+label.error { 
+	width: 250px; 
+	display: block; 
+	float: left; 
+	color: red; 
+	padding-left: 10px;
+}
+
 div.substatus {
 	background-color: #ccffcc;
 	border-style: groove;
@@ -72,6 +80,14 @@ img.logo {
 img.logoHeader{
 	width: 65%;
 	height: 70%;
+}
+
+.label { 
+	display: block; 
+	float: left; 
+	width: 120px;
+	text-align: right; 
+	margin-right: 5px; 
 }
 
 .pHeader {
@@ -96,7 +112,7 @@ img.logoHeader{
 }
 
 body.loginbody {
-	background-color: Menu;
+	background-color: #ddeeff;
 }
 
 /*Page header and footer styles*/
@@ -108,7 +124,7 @@ body.loginbody {
 
 .header {
 	 background-color: #ffffcc;	 
-	 height: 50px;
+	 height: 10%;
 }
 
 
