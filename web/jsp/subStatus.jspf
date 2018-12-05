@@ -2,7 +2,7 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"  %>
 <c:catch var="exception">
   <div class="substatus">
-    <h4>Elenco degli status del progetto:</h4>
+    <h4>Diario degli avanzamenti:</h4>
     <c:forEach var="prjSts" items="${requestScope.listProjectStatus}" varStatus="loop">
       <c:choose>
         <c:when test="${requestScope.projectStatus.getId() ne prjSts.id}">
