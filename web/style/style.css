@@ -57,7 +57,6 @@ a:link.btn-outline-danger, a:visited.btn-outline-danger {
 a:hover.btn-outline-danger {
 	background-color: red;
 	color: white;
-	width: 100px;
 }
 
 label.linkStatus {
