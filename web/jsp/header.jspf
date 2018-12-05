@@ -7,10 +7,12 @@
           </div>
           <div class="col-9">
             <p class="pHeader">
-              &nbsp;BENVENUTO
-              <c:out value="${sessionScope.usr.nome}" />
-              <c:out value="${sessionScope.usr.cognome}" />
-              <span class="right"><a class="btn btn-outline-danger" href="${initParam.appName}/auth?q=logout" >Esci</a></span>
+              <span class="right">
+                BENVENUTO
+                <c:out value="${sessionScope.usr.nome}" />
+                <c:out value="${sessionScope.usr.cognome}" />&nbsp;
+                <a class="btn btn-outline-danger" href="${initParam.appName}/auth?q=logout" >Esci</a>
+              </span>
             </p>
           </div>
         </div>
