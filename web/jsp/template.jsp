@@ -19,6 +19,7 @@
     <!-- Include jQuery validate Form elements from CDN or from local hosted copy -->
     <script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.17.0/jquery.validate.js"></script>
     <script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.17.0/additional-methods.js"></script>
+    <script src="<c:out value="${initParam.urlDirectoryScript}" />jquery-ui.js"></script>
     <%--base href="${requestScope.baseHref}" /--%>
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.css">
@@ -26,6 +27,7 @@
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />bootstrap.css" type="text/css" />
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />pol.css" type="text/css" />
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />style.css" type="text/css" />
+    <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />jquery-ui.css" type="text/css" />
   </head>
   <body>
     <!-- Header -->
