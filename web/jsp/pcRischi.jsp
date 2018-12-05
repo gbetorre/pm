@@ -14,7 +14,7 @@
       <a class="nav-link" data-toggle="tab" href="${risorse}${p.id}">Risorse</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link active" role="tab" data-toggle="tab" href="#">Rischi</a>
+      <a class="nav-link active tabactive" role="tab" data-toggle="tab" href="#">Rischi</a>
     </li>
     <li class="nav-item">
       <a class="nav-link" data-toggle="tab" href="${vincoli}${p.id}">Vincoli</a>

@@ -7,7 +7,7 @@
     <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${risorse}${p.id}">Risorse</a></li>
     <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${rischi}${p.id}">Rischi</a></li>
     <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${vincoli}${p.id}">Vincoli</a></li>
-    <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#">Milestone</a></li>
+    <li class="nav-item"><a class="nav-link active tabactive" data-toggle="tab" href="#">Milestone</a></li>
   </ul>
   <hr class="separatore" />
   <div class="tab-content responsive hidden-xs hidden-sm">

@@ -4,7 +4,7 @@
         <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${vision}${p.id}">Vision</a></li>
         <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${stakeholder}${p.id}">Stakeholder</a></li>
         <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${deliverable}${p.id}">Deliverable</a></li>
-        <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#">Risorse</a></li>
+        <li class="nav-item"><a class="nav-link active tabactive" data-toggle="tab" href="#">Risorse</a></li>
         <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${rischi}${p.id}">Rischi</a></li>
         <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${vincoli}${p.id}">Vincoli</a></li>
         <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${milestone}${p.id}">Milestone</a></li>
@@ -126,10 +126,10 @@
         	var dblength = 1024;
         	if(len >= dblength) {
         		this.value = this.value.substring(0, dblength);
-        		$('.charNum').text(' you have reached the limit');
+        		$(this).next('div').text(' you have reached the limit');
         	} else {
         		var chars = dblength - len;
-        		$('.charNum').text(chars + ' characters left');
+        		$(this).next('div').text(chars + ' characters left');
         	}
         });
       });
