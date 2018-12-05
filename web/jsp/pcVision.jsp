@@ -9,7 +9,7 @@
 </c:forTokens>
     <form id="pcvision_form" name="pcv" action="#" method="post">
     	<ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
-     		<li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#">Vision</a></li>
+     		<li class="nav-item"><a class="nav-link active tabactive" data-toggle="tab" href="#">Vision</a></li>
      		<li class="nav-item"><a class="nav-link" data-toggle="tab" href="${stakeholder}${p.id}">Stakeholder</a></li>
      		<li class="nav-item"><a class="nav-link" data-toggle="tab" href="${deliverable}${p.id}">Deliverable</a></li>
      		<li class="nav-item"><a class="nav-link" data-toggle="tab" href="${risorse}${p.id}">Risorse</a></li>
@@ -93,10 +93,10 @@
   	    	var dblength = 1024;
   	    	if(len >= dblength) {
   	    		this.value = this.value.substring(0, dblength);
-  	      		$('.charNum').text(' you have reached the limit');
+  	      		$(this).next('div').text(' you have reached the limit');
   	      	} else {
   	      		var chars = dblength - len;
-  	        	$('.charNum').text(chars + ' characters left');
+  	        	$(this).next('div').text(chars + ' characters left');
   	      	}
   	  	});
       });
