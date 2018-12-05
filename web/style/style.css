@@ -34,6 +34,17 @@ a:link.btn, a:visited.btn {
 	color: white;
 }
 
+a:link.active.tabactive, a:visited.active.tabactive {
+	border-top-width: medium;
+	border-top-color: blue;
+}
+
+a:link.nav-link, a:visited.nav-link {
+	background-color: #f3f3f3;
+	border-color: #ffffff;
+	color: #0099cc;
+}
+
 a:hover.nav-link {
 	background-color: blue;
 	color: white;
@@ -41,7 +52,6 @@ a:hover.nav-link {
 
 a:link.btn-outline-danger, a:visited.btn-outline-danger {
 	color: red;
-	width: 100px;
 }
 
 a:hover.btn-outline-danger {
@@ -74,6 +84,7 @@ div.charNum {
 }
 
 span.right {
+	margin-top: 5px;
 	float: right;
 }
 
@@ -84,7 +95,13 @@ img.logo {
 
 img.logoHeader{
 	width: 65%;
-	height: 70%;
+	height: 85%;
+}
+
+textarea {
+  box-sizing: border-box;
+  min-height: 31px;
+  overflow-x: hidden; /* for Firefox (issue #5) */
 }
 
 .label { 
@@ -97,7 +114,7 @@ img.logoHeader{
 
 .pHeader {
 	font-family: 'Trocchi', sans-serif; 
-	font-size: 1.7em;
+	font-size: 1.0em;
 	font-style: italic;
 	font-weight: bold;
 }
@@ -128,7 +145,7 @@ body.loginbody {
 }
 
 .header {
-	 background-image: linear-gradient(to bottom, #ffffcc, #ffffff);
+	 background-image: linear-gradient(to bottom, #ffff66, #ffffff);
 	 height: 10%;
 }
 
