@@ -42,16 +42,7 @@
     <!-- Footer -->
     <div id="idFooter" class="footer">
     <%@ include file="footer.jspf" %>
-    </div>
-    <script>
-      function modify(){
-        $('textarea').prop('readonly', false);
-        $('input[type=\'text\']').prop('readonly', false);
-        $('input[type=\'checkbox\']').prop('disabled', false);
-        $('select').prop('disabled', false);
-        $('button').prop('disabled', false);
-      }
-      $('textarea').textareaAutoSize();
-    </script>
+    </div>    
+    <script src="<c:out value="${initParam.urlDirectoryScript}" />pol.js"></script>
   </body>
 </html>
