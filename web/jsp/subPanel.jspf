@@ -10,7 +10,10 @@
     <c:set var="found" value="${loop.getIndex()}" scope="page" />
   </c:if>
 </c:forEach>
-<c:if test="${ruolo eq 'PMOATE' or ruolo eq 'PMODIP' or ruolo eq 'PM' or ruolo eq 'TL'}">
+<c:if test="${(ruolo eq 'PMOATE') or (ruolo eq 'PMODIP') or (ruolo eq 'PM') or (ruolo eq 'TL')}">
+  <c:if test="${param['q'] eq 'act'}">
+    <a href="javascript:window.open('${addAct}${p.id}', 'newAttivita', true)" class="btn btn-primary">Aggiungi</a>
+  </c:if>
   <input type="button" class="btn btn-primary" name="modifica" value="Modifica" onclick="modify()">
   <input type="submit" class="btn btn-primary" name="${distinguishingSubmitName}" value="Salva">
 </c:if>
