@@ -412,7 +412,7 @@ public class DBWrapper implements Query {
         PreparedStatement pst = null;
         PersonBean person = null;
         Vector<PersonBean> people = new Vector<PersonBean>();
-        Vector<SkillBean> skills = new Vector<SkillBean>();
+        Vector<SkillBean> skills = null;
         try {
             con = pol_manager.getConnection();
             pst = con.prepareStatement(GET_PEOPLE_BY_DEPARTMENT);
@@ -421,6 +421,7 @@ public class DBWrapper implements Query {
             rs = pst.executeQuery();
             while (rs.next()) {
                 person = new PersonBean();
+                skills = new Vector<SkillBean>();
                 BeanUtil.populate(person, rs);
                 // Recupera competenze di ogni persona
                 pst = con.prepareStatement(GET_SKILLS_BY_PERSON);
@@ -433,7 +434,7 @@ public class DBWrapper implements Query {
                     BeanUtil.populate(skill, rs1);
                     skills.add(skill);
                 }
-                //person.setSkills(skills);
+                person.setCompetenze(skills);
                 people.add(person);
             }
             return people;
