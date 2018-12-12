@@ -41,6 +41,7 @@ package it.alma.bean;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
 
 import it.alma.Query;
 import it.alma.exception.AttributoNonValorizzatoException;
@@ -78,24 +79,8 @@ public class StatusBean implements Serializable, Query {
     private Date dataFine;
     /** Descrizione dell'avanzamento di un progetto */
     private String descrizioneAvanzamento;
-    /** Stato tempi del progetto */
-    private String statoTempi;
-    /** Stato costi del progetto */
-    private String statoCosti;
-    /** Stato rischi del progetto */
-    private String statoRischi;
-    /** Stato risorse del progetto */
-    private String statoRisorse;
-    /** Stato scope del progetto */
-    private String statoScope;
-    /** Stato comunicazione del progetto */
-    private String statoComunicazione;
-    /** Stato qualita del progetto */
-    private String statoQualita;
-    /** Stato approvvigionamenti del progetto */
-    private String statoApprovvigionamenti;
-    /** Stato stakeholder del progetto */
-    private String statoStakeholder;
+    /** Stati dell'avanzamento di un progetto */
+    private HashMap<String, CodeBean> stati;
     /* ******************************************************* *
      *          Dati descrittivi dell'ultima modifica          *
      * ******************************************************* */
@@ -113,7 +98,7 @@ public class StatusBean implements Serializable, Query {
     public StatusBean() {
         id = -2;
         descrizioneAvanzamento = null;
-        statoTempi =statoCosti = statoRischi = statoRisorse = statoScope = statoComunicazione = statoQualita = statoApprovvigionamenti = statoStakeholder = null;
+        stati = null;
         dataInizio = dataFine = dataUltimaModifica = new Date(0);
         oraUltimaModifica = autoreUltimaModifica = null;        
     };
@@ -210,293 +195,32 @@ public class StatusBean implements Serializable, Query {
     }
 
 
-    /* **************************************************** *
-     *           Metodi getter e setter per stato tempi     *
-     * **************************************************** */
-    /**
-     * Restituisce lo stato tempi del progetto.
-     * 
-     * @return <code>statoTempi</code> - stato dei tempi
-     * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e statoTempi non &egrave; stato valorizzato (&egrave; un dato obbligatorio) 
-     * oppure statoTempi non &egrave; stato valorizzato correttamente
-     */
-    public String getStatoTempi() throws AttributoNonValorizzatoException {
-        if (statoTempi == null) {
-            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoTempi non valorizzato!");
-        }
-        else if (!STATI_AS_LIST.contains(statoTempi)) {
-            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoTempi non valorizzato correttamente!");
-        }
-        else {
-            return statoTempi;
-        }
-    }
-
-    /**
-     * Imposta lo stato tempi del progetto.
-     * 
-     * @param statoTempi lo stato tempi da impostare
-     */
-    public void setStatoTempi(String statoTempi) {
-        this.statoTempi = statoTempi;
-    }
-
-
-    /* **************************************************** *
-     *           Metodi getter e setter per stato costi     *
-     * **************************************************** */
-    /**
-     * Restituisce lo stato costi del progetto.
-     * 
-     * @return <code>statoCosti</code> - stato dei costi
-     * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e statoCosti non &egrave; stato valorizzato (&egrave; un dato obbligatorio) 
-     * oppure statoCosti non &egrave; stato valorizzato correttamente
-     */
-    public String getStatoCosti() throws AttributoNonValorizzatoException {
-        if (statoCosti == null) {
-            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoCosti non valorizzato!");
-        }
-        else if (!STATI_AS_LIST.contains(statoCosti)) {
-            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoCosti non valorizzato correttamente!");
-        }
-        else {
-            return statoCosti;
-        }
-    }
-
-    /**
-     * Imposta lo stato costi del progetto.
-     * 
-     * @param statoCosti lo stato costi da impostare
-     */
-    public void setStatoCosti(String statoCosti) {
-        this.statoCosti = statoCosti;
-    }
-
-
-    /* **************************************************** *
-     *           Metodi getter e setter per stato rischi    *
-     * **************************************************** */
-    /**
-     * Restituisce lo stato rischi del progetto.
-     * 
-     * @return <code>statoRischi</code> - stato dei rischi
-     * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e statoRischi non &egrave; stato valorizzato (&egrave; un dato obbligatorio) 
-     * oppure statoRischi non &egrave; stato valorizzato correttamente
-     */
-    public String getStatoRischi() throws AttributoNonValorizzatoException {
-        if (statoRischi == null) {
-            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoRischi non valorizzato!");
-        }
-        else if (!STATI_AS_LIST.contains(statoRischi)) {
-            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoRischi non valorizzato correttamente!");
-        }
-        else {
-            return statoRischi;
-        }
-    }
-
-    /**
-     * Imposta lo stato rischi del progetto
-     * 
-     * @param statoRischi lo stato rischi da impostare
-     */
-    public void setStatoRischi(String statoRischi) {
-        this.statoRischi = statoRischi;
-    }
-
-
-    /* **************************************************** *
-     *           Metodi getter e setter per stato risorse   *
-     * **************************************************** */
-    /**
-     * Restituisce lo stato risorse del progetto
-     * 
-     * @return <code>statoRisorse</code> - stato delle risorse
-     * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e statoRisorse non &egrave; stato valorizzato (&egrave; un dato obbligatorio) 
-     * oppure statoRisorse non &egrave; stato valorizzato correttamente
-     */
-    public String getStatoRisorse() throws AttributoNonValorizzatoException {
-        if (statoRisorse == null) {
-            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoRisorse non valorizzato!");
-        }
-        else if (!STATI_AS_LIST.contains(statoRisorse)) {
-            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoRisorse non valorizzato correttamente!");
-        }
-        else {
-            return statoRisorse;
-        }
-    }
-
-    /**
-     * Imposta lo stato delle risorse del progetto
-     * 
-     * @param statoRisorse  lo stato delle risorse da impostare
-     */
-    public void setStatoRisorse(String statoRisorse) {
-        this.statoRisorse = statoRisorse;
-    }
-
-
-    /* **************************************************** *
-     *           Metodi getter e setter per stato scope     *
-     * **************************************************** */
-    /**
-     * Restituisce lo stato scope del progetto
-     * 
-     * @return <code>statoScope</code> -  stato scope
-     * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e statoScope non &egrave; stato valorizzato (&egrave; un dato obbligatorio) 
-     * oppure statoScope non &egrave; stato valorizzato correttamente
-     */
-    public String getStatoScope() throws AttributoNonValorizzatoException {
-        if (statoScope == null) {
-            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoScope non valorizzato!");
-        }
-        else if (!STATI_AS_LIST.contains(statoScope)) {
-            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoScope non valorizzato correttamente!");
-        }
-        else {
-            return statoScope;
-        }
-    }
-
-    /**
-     * Imposta lo stato scope del progetto
-     * 
-     * @param statoScope lo stato scope da impostare
-     */
-    public void setStatoScope(String statoScope) {
-        this.statoScope = statoScope;
-    }
-
-
-    /* **************************************************** *
-     *    Metodi getter e setter per stato comunicazione    *
-     * **************************************************** */
-    /**
-     * Restituisce lo stato comunicazione del progetto
-     * 
-     * @return <code>statoComunicazione</code> - stato della comunicazione
-     * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e statoComunicazione non &egrave; stato valorizzato (&egrave; un dato obbligatorio) 
-     * oppure statoComunicazione non &egrave; stato valorizzato correttamente
-     */
-    public String getStatoComunicazione() throws AttributoNonValorizzatoException {
-        if (statoComunicazione == null) {
-            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoComunicazione non valorizzato!");
-        }
-        else if (!STATI_AS_LIST.contains(statoComunicazione)) {
-            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoComunicazione non valorizzato correttamente!");
-        }
-        else {
-            return statoComunicazione;
-        }
-    }
-
-    /**
-     * Imposta lo stato comunicazione del progetto
-     * 
-     * @param statoComunicazione stato della comunicazione da impostare
-     */
-    public void setStatoComunicazione(String statoComunicazione) {
-        this.statoComunicazione = statoComunicazione;
-    }
-
-
-    /* **************************************************** *
-     *    Metodi getter e setter per stato qualit&agrave;   *
-     * **************************************************** */
-    /**
-     * Restituisce lo stato qualit&agrave; del progetto
-     * 
-     * @return <code>statoQualita</code> - stato della qualit&agrave
-     * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e statoQualit&agrave; non &egrave; stato valorizzato (&egrave; un dato obbligatorio) 
-     * oppure statoQualit&agrave; non &egrave; stato valorizzato correttamente
-     */
-    public String getStatoQualita() throws AttributoNonValorizzatoException {
-        if (statoQualita == null) {
-            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoQualita non valorizzato!");
-        }
-        else if (!STATI_AS_LIST.contains(statoQualita)) {
-            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoQualita non valorizzato correttamente!");
-        }
-        else {
-            return statoQualita;
-        }
-    }
-
-    /**
-     * Imposta lo stato qualit&agrave del progetto
-     * 
-     * @param statoQualita stato della qualit&agrave da impostare
-     */
-    public void setStatoQualita(String statoQualita) {
-        this.statoQualita = statoQualita;
-    }
-
-
     /* ***************************************************** *
-     *  Metodi getter e setter per stato approvvigionamenti  *
+     *          Metodi getter e setter per stati             *
      * ***************************************************** */
     /**
-     * Restituisce lo stato approvvigionamenti del progetto
+     * Restituisce gli stati dell'avanzamento
      * 
-     * @return <code>statoApprovvigionamenti</code> - stato approvvigionamenti
-     * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e statoApprovvigionamenti non &egrave; stato valorizzato (&egrave; un dato obbligatorio) 
-     * oppure statoApprovvigionamenti; non &egrave; stato valorizzato correttamente
+     * @return <code>stati</code> - stati di un avanzamento progetto
+     * @throws AttributoNonValorizzatoException eccezione che viene sollevata se questo oggetto viene usato e stati non &egrave; stato valorizzato (&egrave; un dato obbligatorio)
      */
-    public String getStatoApprovvigionamenti() throws AttributoNonValorizzatoException {
-        if (statoApprovvigionamenti == null) {
-            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoApprovvigionamenti non valorizzato!");
-        }
-        else if (!STATI_AS_LIST.contains(statoApprovvigionamenti)) {
-            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoApprovvigionamenti non valorizzato correttamente!");
-        }
-        else {
-            return statoApprovvigionamenti;
-        }
-    }
-
-    /**
-     * Imposta lo stato approvvigionamenti del progetto
-     * @param statoApprovvigionamenti stato approvvigionamenti da impostare
-     */
-    public void setStatoApprovvigionamenti(String statoApprovvigionamenti) {
-        this.statoApprovvigionamenti = statoApprovvigionamenti;
-    }
-
-
-    /* ***************************************************** *
-     *     Metodi getter e setter per stato stakeholder      *
-     * ***************************************************** */
-    /**
-     * Restituisce lo stato degli stakeholder del progetto
-     * 
-     * @return <code>statoStakeholder</code> - stato degli stakeholder
-     * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e statoStakeholder non &egrave; stato valorizzato (&egrave; un dato obbligatorio) 
-     * oppure statoStakeholder; non &egrave; stato valorizzato correttamente
-     */
-    public String getStatoStakeholder() throws AttributoNonValorizzatoException {
-        if (statoStakeholder == null) {
+    public HashMap<String, CodeBean> getStati() throws AttributoNonValorizzatoException {
+        if (stati == null) {
             throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoStakeholder non valorizzato!");
         }
-        else if (!STATI_AS_LIST.contains(statoStakeholder)) {
-            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoStakeholder non valorizzato correttamente!");
-        }
-        else {
-            return statoStakeholder;
-        }
+        return stati;
     }
 
     /**
-     * Imposta lo stato degli stakeholder del progetto
+     * Imposta gli stati dell'avanzamento 
      * 
-     * @param statoStakeholder stato degli stakeholder da impostare
+     * @param stati - stati da impostare
      */
-    public void setStatoStakeholder(String statoStakeholder) {
-        this.statoStakeholder = statoStakeholder;
+    public void setStati(HashMap<String, CodeBean> stati) {
+        this.stati = stati;
     }
 
-
+    
     /* *********************************************************** *
      *       Metodi getter e setter per data ultima modifica       *
      * *********************************************************** */
