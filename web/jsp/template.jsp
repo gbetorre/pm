@@ -1,5 +1,7 @@
 <%@ page contentType="text/html;" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<c:set var="head" value="${requestScope.header}" scope="page" />
+<c:set var="foot" value="${requestScope.footer}" scope="page" />
 <!DOCTYPE html>
 <html>
   <head>
@@ -31,18 +33,25 @@
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />jquery-ui.css" type="text/css" />
   </head>
   <body>
+  <c:catch var="exception">
+    <c:if test="${not empty head and head}">
     <!-- Header -->
     <div id="idHeader">
       <%@ include file="header.jspf"%>
     </div>
+    </c:if>
     <!-- Corpo pagina -->
     <div class="page">
       <jsp:include page="${fileJsp}" />
     </div>
+    <c:if test="${not empty foot and foot}">    
     <!-- Footer -->
     <div id="idFooter" class="footer">
-    <%@ include file="footer.jspf" %>
+      <%@ include file="footer.jspf" %>
     </div>    
+    </c:if>
+  </c:catch>
+  <c:out value="${exception}" />
     <script src="<c:out value="${initParam.urlDirectoryScript}" />pol.js"></script>
   </body>
 </html>
