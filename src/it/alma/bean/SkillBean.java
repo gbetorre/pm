@@ -37,6 +37,7 @@
 package it.alma.bean;
 
 import java.io.Serializable;
+import java.util.Vector;
 
 import it.alma.exception.AttributoNonValorizzatoException;
 
@@ -67,8 +68,8 @@ public class SkillBean extends CodeBean implements Serializable {
     private boolean presenza;
     /** Id del progetto a cui riferisce la competenza */
     private int idProgetto;
-    /** Id della persona a cui riferisce la competenza */
-    private int idPersona;
+    /** Persone che condividono la competenza */
+    private Vector<PersonBean> personale;
     
     
     /**
@@ -78,7 +79,7 @@ public class SkillBean extends CodeBean implements Serializable {
         super();
         presenza = false;
         idProgetto = -2;
-        idPersona = -2;
+        personale = null;
     }
 
     
@@ -111,7 +112,7 @@ public class SkillBean extends CodeBean implements Serializable {
      * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e l'idProgetto non &egrave; stato valorizzato (&egrave; un dato obbligatorio) 
      */
     public int getIdProgetto() throws AttributoNonValorizzatoException {
-        if(idProgetto == -2) {
+        if (idProgetto == -2) {
             throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo idProgetto non valorizzato!");
         }
         return idProgetto;
@@ -127,26 +128,26 @@ public class SkillBean extends CodeBean implements Serializable {
 
     
     /* ********************************************************** *
-     *          Metodi getter e setter per idPersona              *
+     *          Metodi getter e setter per personale              *
      * ********************************************************** */
     /**
-     * Restituisce l'id della persona a cui riferisce la competenza.
-     * @return <code>idPersona</code> - id della persona a cui riferisce la competenza
-     * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e l'idPersona non &egrave; stato valorizzato (&egrave; un dato obbligatorio) 
+     * Restituisce lista delle persone che hanno/condividono la competenza.
+     * @return <code>Vector&lt;PersonBean&gt;</code> - elenco delle persone a cui si riferisce la competenza
+     * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e le persone non sono state valorizzate (&egrave; un dato obbligatorio) 
      */
-    public int getIdPersona() throws AttributoNonValorizzatoException {
-        if(idPersona == -2) {
-            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo idProgetto non valorizzato!");
+    public Vector<PersonBean> getPersone() throws AttributoNonValorizzatoException {
+        if (personale == null) {
+            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo personale non valorizzato!");
         }
-        return idPersona;
+        return personale;
     }
 
     /**
-     * Imposta l'id della persona a cui la competenza fa riferimento.
-     * @param idPersona - idPersona da impostare
+     * Imposta la lista delle persone a cui la competenza fa riferimento.
+     * @param personale - elenco persone da impostare
      */
-    public void setIdPersona(int idPersona) {
-        this.idPersona = idPersona;
+    public void setPersone(Vector<PersonBean> personale) {
+        this.personale = personale;
     }
     
 }
