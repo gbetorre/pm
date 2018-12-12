@@ -37,7 +37,7 @@
    </servlet-mapping>
 
     <context-param>
-        <description></description>
+        <description>Pagina di errore a cui redirigere in caso venga sollevata un'eccezione</description>
         <param-name>errorJsp</param-name>
         <param-value>/jsp/error.jsp</param-value>
     </context-param>
@@ -49,7 +49,7 @@
     </context-param>
 
     <context-param>
-        <description></description>
+        <description>Assembla tutte le pagine che servono normale html</description>
         <param-name>templateJsp</param-name>
         <param-value>/jsp/template.jsp</param-value>
     </context-param>
