@@ -98,7 +98,7 @@ public class Utils {
      * Il TIMESTAMP dei sistemi corrisponde al numero di secondi trascorsi
      * da una data convezionale conosciuta come <em>Unix Epoch</em>
      * (1° gennaio 1970, quando tutto &egrave; cominciato)<sup>1</sup>.<br />
-     * <small>1: Primo kernel Unix del 1969, sviluppato dai Bell Laboratories 
+     * <small>1: Primo kernel UNIX del 1969, sviluppato dai Bell Laboratories 
      * a partire dal 1970.</small>
      */
     public static final String UNIX_EPOCH = "1970-01-01";
