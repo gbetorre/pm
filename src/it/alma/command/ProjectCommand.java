@@ -87,7 +87,7 @@ public class ProjectCommand extends ItemBean implements Command {
      */
     protected static Logger LOG = Logger.getLogger(Main.class.getName());
     /**
-     * Pagina a cui la command reindirizza per mostrare 
+     * Pagina a cui la command reindirizza per mostrare la lista dei progetti che l'utente ha i diritti di visualizzare
      */
     private static final String nomeFileElenco = "/jsp/elencoProgetti.jsp";
     /**
@@ -308,8 +308,8 @@ public class ProjectCommand extends ItemBean implements Command {
                             // Recupera uno specifico stuatus di progetto a partire dalla sua data - assume UNIQUE(data, idProgetto)
                             projectStatus = db.getStatus(idPrj, dateProjectStatus);
                         }
-                    } else if (part.equals(Query.PART_ACTIVITY) || part.equals(Query.PART_PROJECT_CHARTER_MILESTONE)) {
-                        vActivities = db.getActivities(idPrj);
+                    //} else if (part.equals(Query.PART_ACTIVITY) || part.equals(Query.PART_PROJECT_CHARTER_MILESTONE)) {
+                    //    vActivities = db.getActivities(idPrj);
                     } else if (part.equals(Query.PART_PROJECT_CHARTER_RESOURCE)) {
                         vSkills = db.getSkills(idPrj);
                     } else if (part.contains(Query.PART_PROJECT_CHARTER_RISK)) {
@@ -342,19 +342,13 @@ public class ProjectCommand extends ItemBean implements Command {
         }
         /* ******************************************************************** *
          *              Settaggi in request dei valori calcolati                *
-         * ******************************************************************** */
-        // Imposta il testo del Titolo da visualizzare prima dell'elenco
-        req.setAttribute("titoloE", "Project Charter");
-        // Salva nella request: Titolo pagina (da mostrare nell'HTML)
-        req.setAttribute("tP", req.getAttribute("titoloE"));         
-        // Imposta la Pagina JSP di forwarding
-        req.setAttribute("fileJsp", fileJspT);
+         * ******************************************************************** */    
         // Salva nella request elenco progetti
         req.setAttribute("progetti", v);
         // Salva nella request dettaglio progetto
         req.setAttribute("progetto", runtimeProject);
         // Salva nella request elenco attivita del progetto
-        req.setAttribute("attivita", vActivities);
+        //req.setAttribute("attivita", vActivities);
         // Salva nella request elenco competenze del progetto
         req.setAttribute("competenze", vSkills);
         // Salva nella request elenco rischi del progetto
@@ -365,6 +359,8 @@ public class ProjectCommand extends ItemBean implements Command {
         req.setAttribute("listProjectStatus", projectStatusList);
         // Salva nella request l'avanzamento progetto più recente
         req.setAttribute("projectStatus", projectStatus);
+        // Imposta la Pagina JSP di forwarding
+        req.setAttribute("fileJsp", fileJspT);
     }
     
     
@@ -443,7 +439,7 @@ public class ProjectCommand extends ItemBean implements Command {
          *              Ramo di Project Charter - Rischi        *
          * **************************************************** */
         else if (part.equalsIgnoreCase(Query.PART_PROJECT_CHARTER_RISK)) {
-            // Recupero e caricamento parametri di project charter/risorse
+            // Recupero e caricamento parametri di project charter/rischi
             int totRisks = Integer.parseInt(parser.getStringParameter("pck-loop-status", Utils.VOID_STRING));
             HashMap<String, String> pck = new HashMap<String, String>();
             for (int i = 0; i <= totRisks; i++) {
@@ -522,8 +518,8 @@ public class ProjectCommand extends ItemBean implements Command {
      * @return <code>LinkedHashMap&lt;Integer&comma; ProjectBean&gt;</code> - Struttura di tipo Dictionary, o Mappa ordinata, avente per chiave un Wrapper dell'identificativo dell'oggetto, e per valore quest'ultimo
      * @throws CommandException se si verifica un problema nell'accesso all'id di un oggetto, nello scorrimento di liste o in qualche altro tipo di puntamento
      */
-    private static LinkedHashMap<Integer, ProjectBean> decant(Vector<ProjectBean> projects)
-                                                       throws CommandException {
+    public static LinkedHashMap<Integer, ProjectBean> decant(Vector<ProjectBean> projects)
+                                                      throws CommandException {
         LinkedHashMap<Integer, ProjectBean> userProjects = new LinkedHashMap<Integer, ProjectBean>(7);
         for (int i = 0; i < projects.size(); i++) {
             try {
@@ -572,7 +568,6 @@ public class ProjectCommand extends ItemBean implements Command {
         map.put(Query.PART_PROJECT_CHARTER_RESOURCE, skillsByProject);
         map.put(Query.PART_PROJECT_CHARTER_RISK, risksByProject);
         return map;
-        
     }
     
 }
