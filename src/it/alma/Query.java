@@ -111,7 +111,7 @@ public interface Query extends Serializable {
     /**
      * <p>Costante per il parametro identificante la pagina dello Status di un progetto.</p>
      */
-    public static final String PART_STATUS                     = "sts";
+    public static final String PART_STATUS                      = "sts";
     /**
      * <p>Costante per il parametro identificante la pagina delle WBS di un progetto.</p>
      */
@@ -127,7 +127,7 @@ public interface Query extends Serializable {
     /**
      * <p>Costante per il parametro identificante la pagina di inserimento di un'Attivit&agrave; di un progetto.</p>
      */
-    public static final String ADD_ACTIVITY_TO_PROJECT          = "addAct";
+    public static final String ADD_ACTIVITY_TO_PROJECT          = "add";
     /**
      * <p>Costante per il parametro identificante la pagina di inserimento di un rischio di un progetto.</p>
      */
@@ -406,6 +406,26 @@ public interface Query extends Serializable {
             "   WHERE RG.id_progetto = ?";
     
     /**
+     * <p>Estrae tutte le persone che appartengono al dipartimento 
+     * a cui appartiene un determinato progetto,
+     * identificato tramite id, passato come parametro.</p>
+     */
+    public static final String GET_PEOPLE_BY_DEPARTMENT = 
+            "SELECT " + 
+            "       P.id            AS \"id\"" +
+            "   ,   P.nome          AS \"nome\"" +
+            "   ,   P.cognome       AS \"cognome\"" +
+            "   FROM progetto PJ    " +
+            "       INNER JOIN dipartimento D ON D.id = PJ.id_dipart" +
+            "       INNER JOIN grp G ON D.id_share_grp = G.id" +
+            "       INNER JOIN belongs B ON G.id = B.id1_grp" +
+            "       INNER JOIN usr U on B.id0_usr = U.id" +
+            "       INNER JOIN identita I ON U.id = I.id0_usr" +
+            "       INNER JOIN persona P ON I.id1_persona = P.id" +
+            "   WHERE PJ.id = ?" + 
+            "   ORDER BY P.cognome, P.nome";
+    
+    /**
      * <p>Estrae i valori dei campi relativi alla vision di un progetto, 
      * identificato tramite l'id, passato come parametro.</p>
      */
@@ -574,10 +594,43 @@ public interface Query extends Serializable {
             "       C.id            AS \"id\"" +
             "   ,   C.descrizione   AS \"nome\"" +
             "   ,   C.informativa   AS \"informativa\"" + 
-            "   ,   C.presenza      AS \"presenza\"" + 
-            "   ,   C.id_persona    AS \"idPersona\"" +
+            "   ,   C.presenza      AS \"presenza\"" +
+            //"   ,   C.id_persona    AS \"idPersona\"" +
             "   FROM competenza C" +
-            "   WHERE id_progetto = ?";
+            "   WHERE C.id_progetto = ?";
+    
+    /**
+     * <p>Estrae le persone collegate a una determinata competenza
+     * (a sua volta relativa ad un progetto), identificata 
+     * tramite il suo id, passato come parametro.</p>
+     */
+    public static final String GET_PEOPLE_BY_SKILL = 
+            "SELECT " +
+            "       P.id            AS \"id\"" +
+            "   ,   P.nome          AS \"nome\"" +
+            "   ,   P.cognome       AS \"cognome\"" +
+            "   FROM persona P    " +
+            "       INNER JOIN competenzagestione CG ON CG.id_persona = P.id" +
+            "       INNER JOIN competenza C ON CG.id_competenza = C.id" +
+            "   WHERE C.id = ?" + 
+            "   ORDER BY P.cognome, P.nome";
+    
+    /**
+     * <p>Estrae le competenze relative ad una persona 
+     * &ndash; il cui identificativo viene passato come parametro &ndash; 
+     * collegata ad un dato progetto 
+     * &ndash; il cui identificativo viene passato come parametro.</p>
+     */
+    public static final String GET_SKILLS_BY_PERSON = 
+            "SELECT " +
+            "       C.id            AS \"id\"" +
+            "   ,   C.descrizione   AS \"nome\"" +
+            "   ,   C.informativa   AS \"informativa\"" + 
+            "   ,   C.presenza      AS \"presenza\"" +
+            "   FROM competenza C" +
+            "       INNER JOIN competenzagestione CG ON CG.id_competenza = C.id" +
+            "   WHERE C.id_progetto = ?"
+            + "     AND CG.id_persona = ?";
     
     /**
      * <p>Estrae i rischi relativi ad un progetto, identificato 
