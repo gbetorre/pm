@@ -60,8 +60,12 @@
   <c:param name="id" value="" />
 </c:url>
 <c:url var="act" context="${initParam.appName}" value="/" scope="page">
-  <c:param name="q" value="pol" />
-  <c:param name="p" value="act" />
+  <c:param name="q" value="act" />
+  <c:param name="id" value="" />
+</c:url>
+<c:url var="addAct" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="act" />
+  <c:param name="p" value="add" />
   <c:param name="id" value="" />
 </c:url>
 <c:set var="p" value="${requestScope.progetto}" scope="page" />
