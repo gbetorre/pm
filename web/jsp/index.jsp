@@ -1,1 +1,1 @@
-<!DOCTYPE html><html><head><title>HTML5, for Fun &amp; Work</title></head><body><h1>HTML5, for <i>Fun</i> &amp; Work</h1></body></html>
+<%@ page contentType="text/html;" %><%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %><!DOCTYPE html><html><head><title>HTML5, for Fun &amp; Work</title></head><body>    <script type="text/javascript">          window.location="${initParam.appName}".replace("&amp;", "&");    </script> </body></html>
