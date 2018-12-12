@@ -4,3 +4,4 @@ javadoc.xml
 .metadata/
 .settings/
 .classpath
+web/style/__history/
