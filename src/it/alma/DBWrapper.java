@@ -39,6 +39,7 @@ package it.alma;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -712,13 +713,16 @@ public class DBWrapper implements Query {
      * @return <code>StatusBean</code> - StatusBean rappresentante lo status di dato identificativo passato come argomento
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento
      */
-    @SuppressWarnings({ "null", "static-method" })
     public StatusBean getStatus(int idStatus) 
                          throws WebStorageException {
         ResultSet rs = null;
         Connection con = null;
         PreparedStatement pst = null;
         StatusBean status = null;
+        CodeBean statiTemp = new CodeBean();
+        HashMap<String, CodeBean> stati = new HashMap<String, CodeBean>(15);
+        int ordinal = 0;
+        StringBuffer statoString = null; //new StringBuffer();
         try {
             con = pol_manager.getConnection();
             pst = con.prepareStatement(GET_STATUS);
@@ -728,7 +732,70 @@ public class DBWrapper implements Query {
             if (rs.next()) {
                 status = new StatusBean();
                 BeanUtil.populate(status, rs);
+                // Ramo di stato costi
+                statiTemp = retrieve(GET_STATOCOSTI, idStatus);
+                statoString = new StringBuffer("StatoCosti");
+                statiTemp.setInformativa(statoString.toString());
+                statiTemp.setOrdinale(ordinal++);
+                stati.put(statoString.toString(), statiTemp);
+                // Ramo di stato tempi
+                statiTemp = retrieve(GET_STATOTEMPI, idStatus);
+                statoString = null;
+                statoString = new StringBuffer("StatoTempi");
+                statiTemp.setInformativa(statoString.toString());
+                statiTemp.setOrdinale(ordinal++);
+                stati.put(statoString.toString(), statiTemp);
+                // Ramo di stato rischi
+                statiTemp = retrieve(GET_STATORISCHI, idStatus);
+                statoString = null;
+                statoString = new StringBuffer("StatoRischi");
+                statiTemp.setInformativa(statoString.toString());
+                statiTemp.setOrdinale(ordinal++);
+                stati.put(statoString.toString(), statiTemp);
+                // Ramo di stato risorse
+                statiTemp = retrieve(GET_STATORISORSE, idStatus);
+                statoString = null;
+                statoString = new StringBuffer("StatoRisorse");
+                statiTemp.setInformativa(statoString.toString());
+                statiTemp.setOrdinale(ordinal++);
+                stati.put(statoString.toString(), statiTemp);
+                // Ramo di stato scope
+                statiTemp = retrieve(GET_STATOSCOPE, idStatus);
+                statoString = null;
+                statoString = new StringBuffer("StatoScope");
+                statiTemp.setInformativa(statoString.toString());
+                statiTemp.setOrdinale(ordinal++);
+                stati.put(statoString.toString(), statiTemp);
+                // Ramo di stato comunicazione
+                statiTemp = retrieve(GET_STATOCOMUNICAZIONE, idStatus);
+                statoString = null;
+                statoString = new StringBuffer("StatoComunicazione");
+                statiTemp.setInformativa(statoString.toString());
+                statiTemp.setOrdinale(ordinal++);
+                stati.put(statoString.toString(), statiTemp);
+                // Ramo di stato qualita
+                statiTemp = retrieve(GET_STATOQUALITA, idStatus);
+                statoString = null;
+                statoString = new StringBuffer("StatoQualita");
+                statiTemp.setInformativa(statoString.toString());
+                statiTemp.setOrdinale(ordinal++);
+                stati.put(statoString.toString(), statiTemp);
+                // Ramo di stato approvvigionamenti
+                statiTemp = retrieve(GET_STATOAPPROVVIGIONAMENTI, idStatus);
+                statoString = null;
+                statoString = new StringBuffer("StatoApprovvigionamenti");
+                statiTemp.setInformativa(statoString.toString());
+                statiTemp.setOrdinale(ordinal++);
+                stati.put(statoString.toString(), statiTemp);
+                // Ramo di stato stakeholder
+                statiTemp = retrieve(GET_STATOSTAKEHOLDER, idStatus);
+                statoString = null;
+                statoString = new StringBuffer("StatoStakeholder");
+                statiTemp.setInformativa(statoString.toString());
+                statiTemp.setOrdinale(ordinal++);
+                stati.put(statoString.toString(), statiTemp);
             }
+            status.setStati(stati);
             return status;
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto StatusBean non valorizzato; problema nella query dello status.\n";
@@ -759,7 +826,6 @@ public class DBWrapper implements Query {
      * @return <code>StatusBean</code> - StatusBean rappresentante lo status corrente
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento
      */
-    @SuppressWarnings({ "null", "static-method" })
     public StatusBean getStatus(int idProj, 
                                 Date statusDate) 
                          throws WebStorageException {
@@ -767,6 +833,10 @@ public class DBWrapper implements Query {
         Connection con = null;
         PreparedStatement pst = null;
         StatusBean status = null;
+        CodeBean statiTemp = new CodeBean();
+        HashMap<String, CodeBean> stati = new HashMap<String, CodeBean>(15);
+        int ordinal = 0;
+        StringBuffer statoString = null; //new StringBuffer();
         try {
             con = pol_manager.getConnection();
             pst = con.prepareStatement(GET_PROJECT_STATUS);
@@ -777,12 +847,79 @@ public class DBWrapper implements Query {
             if (rs.next()) {
                 status = new StatusBean();
                 BeanUtil.populate(status, rs);
+                // Ramo di stato costi
+                statiTemp = retrieve(GET_STATOCOSTI, status.getId());
+                statoString = new StringBuffer("StatoCosti");
+                statiTemp.setInformativa(statoString.toString());
+                statiTemp.setOrdinale(ordinal++);
+                stati.put(statoString.toString(), statiTemp);
+                // Ramo di stato tempi
+                statiTemp = retrieve(GET_STATOTEMPI, status.getId());
+                statoString = null;
+                statoString = new StringBuffer("StatoTempi");
+                statiTemp.setInformativa(statoString.toString());
+                statiTemp.setOrdinale(ordinal++);
+                stati.put(statoString.toString(), statiTemp);
+                // Ramo di stato rischi
+                statiTemp = retrieve(GET_STATORISCHI, status.getId());
+                statoString = null;
+                statoString = new StringBuffer("StatoRischi");
+                statiTemp.setInformativa(statoString.toString());
+                statiTemp.setOrdinale(ordinal++);
+                stati.put(statoString.toString(), statiTemp);
+                // Ramo di stato risorse
+                statiTemp = retrieve(GET_STATORISORSE, status.getId());
+                statoString = null;
+                statoString = new StringBuffer("StatoRisorse");
+                statiTemp.setInformativa(statoString.toString());
+                statiTemp.setOrdinale(ordinal++);
+                stati.put(statoString.toString(), statiTemp);
+                // Ramo di stato scope
+                statiTemp = retrieve(GET_STATOSCOPE, status.getId());
+                statoString = null;
+                statoString = new StringBuffer("StatoScope");
+                statiTemp.setInformativa(statoString.toString());
+                statiTemp.setOrdinale(ordinal++);
+                stati.put(statoString.toString(), statiTemp);
+                // Ramo di stato comunicazione
+                statiTemp = retrieve(GET_STATOCOMUNICAZIONE, status.getId());
+                statoString = null;
+                statoString = new StringBuffer("StatoComunicazione");
+                statiTemp.setInformativa(statoString.toString());
+                statiTemp.setOrdinale(ordinal++);
+                stati.put(statoString.toString(), statiTemp);
+                // Ramo di stato qualita
+                statiTemp = retrieve(GET_STATOQUALITA, status.getId());
+                statoString = null;
+                statoString = new StringBuffer("StatoQualita");
+                statiTemp.setInformativa(statoString.toString());
+                statiTemp.setOrdinale(ordinal++);
+                stati.put(statoString.toString(), statiTemp);
+                // Ramo di stato approvvigionamenti
+                statiTemp = retrieve(GET_STATOAPPROVVIGIONAMENTI, status.getId());
+                statoString = null;
+                statoString = new StringBuffer("StatoApprovvigionamenti");
+                statiTemp.setInformativa(statoString.toString());
+                statiTemp.setOrdinale(ordinal++);
+                stati.put(statoString.toString(), statiTemp);
+                // Ramo di stato stakeholder
+                statiTemp = retrieve(GET_STATOSTAKEHOLDER, status.getId());
+                statoString = null;
+                statoString = new StringBuffer("StatoStakeholder");
+                statiTemp.setInformativa(statoString.toString());
+                statiTemp.setOrdinale(ordinal++);
+                stati.put(statoString.toString(), statiTemp);
             }
+            status.setStati(stati);
             return status;
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto StatusBean non valorizzato; problema nella query dello status piu\' prossimo alla data passata come argomento.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Oggetto StatusBean non valorizzato; problema nella query dello status piu\' prossimo alla data passata come argomento.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
         } finally {
             try {
                 con.close();
@@ -1283,15 +1420,15 @@ public class DBWrapper implements Query {
                     pst.setDate(1, Utils.convert(DATA_FORMAT.parse(paramsStatus.get("sDataInizio"))));
                     pst.setDate(2, Utils.convert(DATA_FORMAT.parse(paramsStatus.get("sDataFine"))));
                     pst.setString(3, paramsStatus.get("sAvanzamento"));
-                    pst.setString(4, paramsStatus.get("sTempi"));
-                    pst.setString(5, paramsStatus.get("sCosti"));
-                    pst.setString(6, paramsStatus.get("sRischi"));
-                    pst.setString(7, paramsStatus.get("sRisorse"));
-                    pst.setString(8, paramsStatus.get("sScope"));
-                    pst.setString(9, paramsStatus.get("sComunicazione"));
-                    pst.setString(10, paramsStatus.get("sQualita"));
-                    pst.setString(11, paramsStatus.get("sApprovvigionamenti"));
-                    pst.setString(12, paramsStatus.get("sStakeholder"));
+                    pst.setInt(4, Integer.parseInt(paramsStatus.get("sTempi")));
+                    pst.setInt(5, Integer.parseInt(paramsStatus.get("sCosti")));
+                    pst.setInt(6, Integer.parseInt(paramsStatus.get("sRischi")));
+                    pst.setInt(7, Integer.parseInt(paramsStatus.get("sRisorse")));
+                    pst.setInt(8, Integer.parseInt(paramsStatus.get("sScope")));
+                    pst.setInt(9, Integer.parseInt(paramsStatus.get("sComunicazione")));
+                    pst.setInt(10, Integer.parseInt(paramsStatus.get("sQualita")));
+                    pst.setInt(11, Integer.parseInt(paramsStatus.get("sApprovvigionamenti")));
+                    pst.setInt(12, Integer.parseInt(paramsStatus.get("sStakeholder")));
                     pst.setDate(13, Utils.convert(Utils.convert(Utils.getCurrentDate())));
                     pst.setDate(14, Utils.convert(Utils.convert(Utils.getCurrentDate())));
                     pst.setString(15, getLogin(userId));
@@ -1333,7 +1470,57 @@ public class DBWrapper implements Query {
     
     
     /**
-     * <p>Metodo che aggiorna le attivit&agrave; di progetto..</p>
+     * <p>Metodo per fare un inserimento di un nuovo stato progetto.</p>
+     * 
+     * @param userId - id dell'utente loggato
+     * @param idProj - id del progetto sul quale attribuire lo status
+     * @param idStatus - id dello status che si va ad inserire
+     * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    public void insertStatus (int userId,
+                              int idProj, 
+                              int idStatus)
+                       throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        try {
+            con = pol_manager.getConnection();
+            con.setAutoCommit(false);
+            pst = con.prepareStatement(INSERT_STATUS);
+            pst.clearParameters();
+            int nextVal = getMax("avanzamentoprogetto") + 1;
+            if (nextVal == idStatus) {
+                pst.setInt(1, idStatus);
+                pst.setDate(2, Utils.convert(Utils.convert(Utils.getCurrentDate())));
+                pst.setDate(3, Utils.convert(Utils.convert(Utils.getCurrentDate())));
+                pst.setDate(4, Utils.convert(Utils.convert(Utils.getCurrentDate())));
+                pst.setDate(5, Utils.convert(Utils.convert(Utils.getCurrentDate().getTime())));
+                pst.setString(6, getLogin(userId));
+                pst.setInt(7, idProj);
+                pst.executeUpdate();
+                con.commit();
+            } else {
+                //TODO errore
+            } 
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto RiskBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /** <p>Metodo che aggiorna le attivit&agrave; di progetto..</p>
      * 
      * @param idProj - id del progetto da aggiornare 
      * @param userId - id dell'utente che ha eseguito il login
@@ -1453,7 +1640,7 @@ public class DBWrapper implements Query {
         Connection con = null;
         PreparedStatement pst = null;
         try {
-            // Ottiene il progetto precaricato quando l'utente si è loggato corrispondente al progetto sul quale aggiungere un'attività
+            // Ottiene il progetto precaricato quando l'utente si &egrave; loggato corrispondente al progetto sul quale aggiungere un'attività
             con = pol_manager.getConnection();
             con.setAutoCommit(false);
             pst = con.prepareStatement(INSERT_ACTIVITY);
@@ -1631,6 +1818,50 @@ public class DBWrapper implements Query {
                 throw new WebStorageException(FOR_NAME + sqle.getMessage());
             }
         }
+    }
+    
+    
+    /**
+     * <p>Metodo che data in input una query e l'id di uno stato 
+     * estrae i dati richiesti e popola un CodeBean, che ritorna al chiamante.</p>
+     * 
+     * @param query - Query che deve eseguire il metodo
+     * @param idStatus - Id dello status del quale estrarre i dati
+     * @return CodeBean - CodeBean contenente lo stato corrispondente alla query passata
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    private CodeBean retrieve (String query,
+                               int idStatus) 
+                        throws WebStorageException {
+        Connection con = null;
+        ResultSet rs = null;
+        PreparedStatement pst = null;
+        CodeBean stato = new CodeBean();
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(query);
+            pst.clearParameters();
+            pst.setInt(1, idStatus);
+            rs = pst.executeQuery();
+            if (rs.next()) {
+                BeanUtil.populate(stato, rs);
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto CodeBean non valorizzato; problema nella query di stato.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+        return stato;
     }
     
     
