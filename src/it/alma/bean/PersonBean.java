@@ -99,8 +99,6 @@ public class PersonBean implements Serializable {
     private String url;
     /** Flag per specificare se la persona lavora in ateneo a tempo pieno o parziale */
     private boolean tempoPieno;
-    /** Flag per specificare se la persona &egrave; ancora in servizio o meno (aspettativa, pensione...) */
-    private boolean inServizio;
     /** Note in caso di aspettativa o di fine servizio */
     private String note;
     /** Campo note contenente una descrizione testuale del ruolo della persona */
@@ -111,9 +109,6 @@ public class PersonBean implements Serializable {
     private boolean esterno;
     /** Ateneo o struttura di provenienza (in genere in caso di relatori di seminari o visiting professor) */
     private String universita;
-    /* ************************************************************************ *  
-     *                  Dati strettamente per docenti ed affini                 *
-     * ************************************************************************ */
     /** Attributo per codice SSD del docente */
     private String codiceSettore;
     /** Attributo per descrizione SSD di appartenenza del docente */
@@ -122,175 +117,56 @@ public class PersonBean implements Serializable {
     private String nomeCiclo;
     /** Nome corso di studi della persona */
     private String nomeCS;
-    /** Slot di ricevimento studenti */
-    private Vector ricevimento;
-    /** Descrizioni aggiuntive sul ricevimento studenti */
-    private String noteRicevimento;
-    /** Flag specificante se il docente &egrave; titolare dell'insegnamento */
-    private boolean titolare;
-    /** Flag specificante se il docente &egrave; coordinatore dei moduli */
-    private boolean coordinatore;
-    /** Elenco delle competenze del docente */
-    private Vector argomentiComp;
-    /** Rilevanza delle pubblicazioni della persona rispetto a una o pi&uacute; keyword */
-    private int peso1;
-    /** Rilevanza delle competenze della persona rispetto a una o pi&uacute; keyword */
-    private int peso2;
-    /** Rilevanza della didattica della persona rispetto a una o pi&uacute; keyword */
-    private int peso3;
-    /* ************************************************************************ *  
-     *  Dati identificativi dell'ubicazione e dell'appartenenza della persona   *
-     * ************************************************************************ */
-    /** Identificativo dell'ufficio della persona */
-    private int idUfficio;
-    /** Nome del luogo di lavoro della persona */
-    private String stanzaUfficio;
-    /** Piano ove &egrave; ubicato l'ufficio della persona */
-    private String pianoUfficio;
-    /** Edificio ove &egrave; ubicato l'ufficio della persona */
-    private String edificioUfficio;
-    /** Elenco uffici di lavoro della persona */
-    //private Vector<LuogoBean> uffici;
-    /** Data di fine servizio presso la scuola/struttura di raccordo */
-    private Date fineServizio;
-    /** Data di fine servizio presso il dipartimento */
-    private Date fineServizioDipart;
-    /** Data di fine servizio presso le direzioni */
-    private Date fineServizioDir;
-    /** Data di fine servizio presso biblioteca o centro di ateneo */
-    private Date fineServizioBiblioCR;
-    /** Ultima data in ordine temporale di fine servizio */ 
-    private Date fineServizioMax;
-    /** Identificativo della scuola/struttura di raccordo della persona */
-    protected int idFacolta;
-    /** Nome della scuola/struttura di raccordo cui la persona appartiene */
-    private String facolta;
-    /** Indirizzo web della scuola/struttura di raccordo della persona */
-    private String urlFacolta;
-    /** Data disattivazione della scuola/struttura di raccordo della persona */
-    private Date dataDisattivazioneFac;
     /** Identificativo del dipartimento cui la persona afferisce */
     protected int idDipartimento;
     /** Nome del dipartimento cui la persona afferisce */
     private String dipartimento;
     /** Indirizzo web del dipartimento cui la persona afferisce */
     protected String urlDipartimento;
-    /** Data disattivazione del dipartimento cui la persona afferiva */
-    private Date dataDisattivazioneDip;
-    /** Identificativo del nuovo dipartimento cui la persona afferisce */
-    private int idContinuazioneDip;
-    /** Flag indicante se il dipartimento della persona &egrave; attivando */
-    private boolean inAttivazioneDip;
-    /** Identificativo della direzione di appartenenza della persona */
-    protected int idDirezione;
-    /** Nome della direzione cui la persona appartiene */
-    private String nomeDirezione;
-    /** Flag specificante se la direzione in questione &egrave; la direzione amministrativa */
-    private boolean direzioneRadice;
-    /** Identificativo della biblioteca centralizzata o centro di ateneo della persona */
-    private int idBibliocr;
-    /** Nome della biblioteca centralizzata o centro di ateneo della persona */
-    private String nomeBibliocr;
-    /** Indirizzo web della biblioteca centralizzata o centro di ateneo della persona */
-    private String urlBibliocr;
-    /** Identificativo del tipo della biblioteca centralizzata o centro di ateneo della persona */
-    private int idTipoBiblioCR;
     /** Nome della sezione dipartimentale in cui la persona lavora */
-    private String sezione;    
-    /* ************************************************************************ *  
-     *                       Qualifica / Carica / Mansione                      *
-     * ************************************************************************ */
+    private String sezione;
     /** Carica in organo */
     private String caricaInOrganoCol;
-    /** Flag specificante se trattasi di responsabile di area */
-    private boolean responsabileArea;
-    /** String specificante l'incarico nel contesto dell'area */
-    private String incaricoInArea;
-    /** Flag specificante se trattasi di responsabile ufficio */
-    private boolean responsabileUO;
     /** String specificante l'incarico della persona */
     private String mansione;
-    /** Identificativo della qualifica principale nel contesto dell'appartenenza */
-    private int idQualificaPrincipaleFacolta;
-    /** Denominazione della qualifica principale nel contesto dell'appartenenza */
-    private String qualificaPrincipaleFacolta;
     /** Identificativo della qualifica principale nel contesto dell'afferenza */
     private int idQualificaPrincipaleDip; // modificato per non superare i 32 caratteri
     /** Denominazione della qualifica principale nel contesto dell'afferenza */
     private String qualificaPrincipaleDip; // modificato per non superare i 32 caratteri
-    /** Identificativo della qualifica principale nel contesto dell'appartenenza a direzione */
-    private int idQualificaDirezione;
-    /** Denominazione della qualifica principale nel contesto dell'appartenenza a direzione */
-    private String nomeQualificaDirezione;
-    /** Identificativo della qualifica principale nel contesto dell'appartenenza a biblioteca centralizzata o centro di ateneo */
-    private int idQualificaBibliocr;
-    /** Denominazione della qualifica principale nel contesto dell'appartenenza a biblioteca centralizzata o centro di ateneo */
-    private String nomeQualificaBibliocr;  
-    /** Codice specificante l'incarico della persona nel contesto della biblioteca (se coordinatore, appartenente, etc.) */
-    private char ruoloBibliocr;
-    /** String specificante la descrizione dell'incarico della persona nel contesto bibliotecario o di centro */
-    private String incaricoBibliocr;
-    /** Elenco delle afferenze secondarie */
-    //private Vector<QualificaBean> qualificheAfferenzeSecondarie;
     /** Flag specificante se trattasi di un tecnico di ex-facolt&agrave; */
     private boolean isTAFacolta;
-    /* ************************************************************** *  
-     *                       Ruolo della persona                      *
-     * ************************************************************** */
+    /** Ruolo della persona  */
     private Vector<CodeBean> ruoli;
+    /** Elenco delle competenze della persona */
+    private Vector<SkillBean> competenze;
     
     
     /**
      * <p>Costruttore: inizializza i campi a valori di default.</p>
      */
     public PersonBean() {
-        id = idDipartimento = idFacolta = idUfficio = idQualificaPrincipaleFacolta = idQualificaPrincipaleDip = -2;
+        id = idDipartimento = idQualificaPrincipaleDip = -2;
         nome = cognome = telefono = telefonoMobile = fax = email = emailCertificata = urlPersonalPage = null;
-        note = codiceSettore = descrizioneSettore = noteRicevimento = null;
-        stanzaUfficio = pianoUfficio = edificioUfficio = null;
+        note = codiceSettore = descrizioneSettore = null;
         nomeCiclo = nomeCS = null;
-        facolta = qualificaPrincipaleFacolta = urlFacolta = null;
         dipartimento = qualificaPrincipaleDip = urlDipartimento = null;
         mansione = sezione = null;
-        dataNascita = fineServizioDipart = fineServizio = fineServizioDir = fineServizioBiblioCR = dataDisattivazioneDip = dataDisattivazioneFac = setFineServizioMax(new Date(0));
-        esterno = mostraPersonale = mostraTelefono = tempoPieno = inServizio = titolare = coordinatore = responsabileArea = responsabileUO = inAttivazioneDip = oblio = false;
-        idDirezione = idBibliocr = idQualificaDirezione = idQualificaBibliocr = -2;
-        nomeDirezione = nomeQualificaDirezione = null;
-        nomeBibliocr = nomeQualificaBibliocr = urlBibliocr = incaricoBibliocr = null;
+        dataNascita = new Date(0);
+        esterno = mostraPersonale = mostraTelefono = tempoPieno = oblio = false;
         sesso = ' ';
-        ruoloBibliocr = ' ';
         caricaInOrganoCol = null;
         nomeCiclo = null;
-        incaricoInArea = null;
-        skypeid=null;
-        foto=null;
-        argomentiComp = null;
-        //uffici = null;
-        idContinuazioneDip = -2;
+        skypeid = null;
+        foto = null;
+        competenze = null;
         universita = null;
-        direzioneRadice = false;
         ruolo = null;
-        //qualificheAfferenzeSecondarie = new Vector<QualificaBean>();
         url=null;
         isTAFacolta = false;
-        idTipoBiblioCR = peso1 = peso2 = -2;
         ruoli = null;
     }
     
 
-    /**
-     * @return
-     */
-    public boolean isDataDisattivazioneDipEmpty() {
-        return (new Date(0).equals(dataDisattivazioneDip) || (dataDisattivazioneDip == null));
-    } 
-    
-    /**
-     * @return
-     */
-    public boolean isDataDisattivazioneFacEmpty() {
-        return (new Date(0).equals(dataDisattivazioneFac) || (dataDisattivazioneFac == null));
-    } 
     
     /**
      * @return
@@ -298,49 +174,8 @@ public class PersonBean implements Serializable {
     public boolean isDataNascitaEmpty() {
         return (new Date(0).equals(dataNascita) || (dataNascita == null));
     }
-    
-    /**
-     * @return
-     */
-    public boolean isFineServizioEmpty() {
-        return (new Date(0).equals(fineServizio) || (fineServizio == null));
-    }
-    
-    /**
-     * @return
-     */
-    public boolean isFineServizioDipartEmpty() {
-        return (new Date(0).equals(fineServizioDipart) || (fineServizioDipart == null));
-    }
-    
-    /**
-     * @return
-     */
-    public boolean isFineServizioDirEmpty() {
-        return (new Date(0).equals(fineServizioDir) || (fineServizioDir == null));
-    }    
-    
-    /**
-     * @return
-     */
-    public boolean isFineServizioBiblioCREmpty() {
-        return (new Date(0).equals(fineServizioBiblioCR) || (fineServizioBiblioCR == null));
-    }    
-    
-    /**
-     * @return
-     */
-    public boolean isFacoltaEmpty() {
-           return (facolta == null || facolta.equals(""));
-    }
-
-    /**
-     * @return
-     */
-    public boolean isUrlFacoltaEmpty() {
-           return (urlFacolta == null || urlFacolta.equals(""));
-    }
-    
+     
+   
     /**
      * @return
      */
@@ -354,28 +189,7 @@ public class PersonBean implements Serializable {
     public boolean isUrlDipartimentoEmpty() {
            return (urlDipartimento == null || urlDipartimento.equals(""));
     }
-    
-    /**
-     * @return
-     */
-    public boolean isNomeDirezioneEmpty() {
-           return (nomeDirezione == null || nomeDirezione.equals(""));
-    }
-
-     /**
-     * @return
-     */
-    public boolean isNomeBibliocrEmpty() {
-           return (nomeBibliocr == null || nomeBibliocr.equals(""));
-    }    
-
-    /**
-     * @return
-     */
-    public boolean isUrlBibliocrEmpty() {
-           return (urlBibliocr == null || urlBibliocr.equals(""));
-    }
-    
+        
     /**
      * @return
      */
@@ -386,51 +200,10 @@ public class PersonBean implements Serializable {
     /**
      * @return
      */
-    public boolean isInServizio() {
-        return inServizio;
-    }
-    
-    /**
-     * @return
-     */
     public boolean isMostraTelefono() {
         return mostraTelefono;
     }
     
-    /**
-     * @return
-     */
-    public boolean isTitolare() {
-        return titolare;
-    }
-    
-    /**
-     * @return
-     */
-    public boolean isCoordinatore() {
-        return coordinatore;
-    }
-
-    public boolean isInAttivazioneDip() {
-		return inAttivazioneDip;
-	}
-
-	public void setInAttivazioneDip(boolean inAttivazioneDip) {
-		this.inAttivazioneDip = inAttivazioneDip;
-	}
-
-    /**
-     * @param InAttivazioneDip Valori '1' o '0'
-     */
-    public void setInAttivazioneDip(char inAttivazioneDip) {
-        if (inAttivazioneDip == '1') {
-            this.inAttivazioneDip = true;
-        } else {
-            this.inAttivazioneDip = false;
-        }
-    }
-	
-	
     
     /**
      * @return codiceSettore
@@ -454,21 +227,6 @@ public class PersonBean implements Serializable {
         }
     }
     
-    public Date getDataDisattivazioneDip() {
-		return dataDisattivazioneDip;
-	}
-    
-    public Date getDataDisattivazioneFac() {
-        return dataDisattivazioneFac;
-    }
-
-	public void setDataDisattivazioneDip(Date dataDisattivazioneDip) {
-		this.dataDisattivazioneDip = dataDisattivazioneDip;
-	}
-	
-	public void setDataDisattivazioneFac(Date dataDisattivazioneFac) {
-        this.dataDisattivazioneFac = dataDisattivazioneFac;
-    }
 
 	/**
      * @return dataNascita
@@ -489,17 +247,6 @@ public class PersonBean implements Serializable {
             throw new AttributoNonValorizzatoException("PersonBean: attributo descrizioneSettore non valorizzato!");
         } else {
             return this.descrizioneSettore;
-        }
-    }
-    
-    /**
-     * @return edificioUfficio
-     */
-    public String getEdificioUfficio() throws AttributoNonValorizzatoException {
-        if (edificioUfficio == null) {
-            throw new AttributoNonValorizzatoException("PersonBean: attributo edificioUfficio non valorizzato!");
-        } else {
-            return this.edificioUfficio;
         }
     }
     
@@ -547,49 +294,6 @@ public class PersonBean implements Serializable {
         }
     }
 
-    /**
-     * @return fineServizio
-     */
-    public Date getFineServizio() throws AttributoNonValorizzatoException {
-        if (new Date(0).equals(fineServizio)) {
-            throw new AttributoNonValorizzatoException("PersonBean: attributo fineServizio non valorizzato!");
-        } else {
-            return this.fineServizio;
-        }
-    }
-    
-    /**
-     * @return fineServizioDipart
-     */
-    public Date getFineServizioDipart() throws AttributoNonValorizzatoException {
-        if (new Date(0).equals(fineServizioDipart)) {
-            throw new AttributoNonValorizzatoException("PersonBean: attributo fineServizioDipart non valorizzato!");
-        } else {
-            return this.fineServizioDipart;
-        }
-    }
-    
-    /**
-     * @return fineServizioDir
-     */
-    public Date getFineServizioDir() throws AttributoNonValorizzatoException {
-        if (new Date(0).equals(fineServizioDir)) {
-            throw new AttributoNonValorizzatoException("PersonBean: attributo fineServizioDir non valorizzato!");
-        } else {
-            return this.fineServizioDir;
-        }
-    }
-
-    /**
-     * @return fineServizioBiblioCR
-     */
-    public Date getFineServizioBiblioCR() throws AttributoNonValorizzatoException {
-        if (new Date(0).equals(fineServizioBiblioCR)) {
-            throw new AttributoNonValorizzatoException("PersonBean: attributo fineServizioBiblioCR non valorizzato!");
-        } else {
-            return this.fineServizioBiblioCR;
-        }
-    }
     
     /**
      * @return mansione
@@ -621,28 +325,6 @@ public class PersonBean implements Serializable {
             throw new AttributoNonValorizzatoException("PersonBean: attributo idDipartimento non valorizzato!");
         } else {
             return this.idDipartimento;
-        }
-    }
-    
-    /**
-     * @return idFacolta
-     */
-    public int getIdFacolta() throws AttributoNonValorizzatoException {
-        if (idFacolta == -2) {
-            throw new AttributoNonValorizzatoException("PersonBean: attributo idFacolta non valorizzato!");
-        } else {
-            return this.idFacolta;
-        }
-    }
-    
-    /**
-     * @return idUfficio
-     */
-    public int getIdUfficio() throws AttributoNonValorizzatoException {
-        if (idUfficio == -2) {
-            throw new AttributoNonValorizzatoException("PersonBean: attributo idUfficio non valorizzato!");
-        } else {
-            return this.idUfficio;
         }
     }
     
@@ -691,17 +373,6 @@ public class PersonBean implements Serializable {
     }
     
     /**
-     * @return facolta
-     */
-    public String getFacolta() throws AttributoNonValorizzatoException {
-        if (facolta == null) {
-            throw new AttributoNonValorizzatoException("PersonBean: attributo facolta non valorizzato!");
-        } else {
-            return this.facolta;
-        }
-    }
-    
-    /**
      * @return note
      */
     public String getNote() throws AttributoNonValorizzatoException {
@@ -709,17 +380,6 @@ public class PersonBean implements Serializable {
             throw new AttributoNonValorizzatoException("PersonBean: attributo note non valorizzato!");
         } else {
             return this.note;
-        }
-    }
-    
-    /**
-     * @return pianoUfficio
-     */
-    public String getPianoUfficio() throws AttributoNonValorizzatoException {
-        if (pianoUfficio == null) {
-            throw new AttributoNonValorizzatoException("PersonBean: attributo pianoUfficio non valorizzato!");
-        } else {
-            return this.pianoUfficio;
         }
     }
     
@@ -747,18 +407,6 @@ public class PersonBean implements Serializable {
     }
     
     /**
-     * @return qualificaPrincipaleFacolta
-     */
-    public String getQualificaPrincipaleFacolta() throws AttributoNonValorizzatoException {
-        if (qualificaPrincipaleFacolta == null) {
-            throw new AttributoNonValorizzatoException(
-            "PersonBean: attributo qualificaPrincipaleFacolta non valorizzato!");
-        } else {
-            return this.qualificaPrincipaleFacolta;
-        }
-    }
-    
-    /**
      * @return sezione
      */
     public String getSezione() throws AttributoNonValorizzatoException {
@@ -766,17 +414,6 @@ public class PersonBean implements Serializable {
             throw new AttributoNonValorizzatoException("PersonBean: attributo sezione non valorizzato!");
         } else {
             return this.sezione;
-        }
-    }
-    
-    /**
-     * @return stanzaUfficio
-     */
-    public String getStanzaUfficio() throws AttributoNonValorizzatoException {
-        if (stanzaUfficio == null) {
-            throw new AttributoNonValorizzatoException("PersonBean: attributo stanzaUfficio non valorizzato!");
-        } else {
-            return this.stanzaUfficio;
         }
     }
     
@@ -832,202 +469,6 @@ public class PersonBean implements Serializable {
         }
     }
     
-    public int getIdQualificaPrincipaleFacolta() throws AttributoNonValorizzatoException {
-        if (idQualificaPrincipaleFacolta == -2) {
-            throw new AttributoNonValorizzatoException(
-            "PersonBean: attributo idQualificaPrincipaleFacolta non valorizzato!");
-        } else {
-            return this.idQualificaPrincipaleFacolta;
-        }
-    }
-    
-    /**
-     * @return urlFacolta
-     */
-    public String getUrlFacolta() {
-        return this.urlFacolta;
-    }
-
-    /**
-     * @return urlFacolta
-     */
-    public String getUrlBibliocr() throws AttributoNonValorizzatoException {
-        if (urlBibliocr == null) {
-            throw new AttributoNonValorizzatoException("PersonBean: attributo urlBibliocr non valorizzato!");
-        } else {
-            return this.urlBibliocr;
-        }
-    }
-    
-    /**
-     * Ritorna l'id della direzione
-     *
-     * @return
-     *
-     * @throws
-     */
-    public int getIdDirezione() throws AttributoNonValorizzatoException {
- /*       if ( idDirezione == -2 ) {
-            String error = "PersonBean: attributo 'idDirezione' non valorizzato.";
-            throw new AttributoNonValorizzatoException(error);
-        } else {*/
-            return idDirezione;
- //       }
-    }
-    
-    /**
-     * Ritorna l'id della biblioteca o centro di Ateneo
-     *
-     * @return
-     *
-     * @throws
-     */
-    public int getIdBibliocr() throws AttributoNonValorizzatoException {
-/*        if ( idBibliocr == -2 ) {
-            String error = "PersonBean: attributo 'idBibliocr' non valorizzato.";
-            throw new AttributoNonValorizzatoException(error);
-        } else {*/
-            return idBibliocr;
-//        }
-    }
-    
-    
-    /**
-     * Ritorna il nome della direzione.
-     *
-     * @return
-     *
-     * @throws
-     */
-    public String getNomeDirezione() throws AttributoNonValorizzatoException {
-        if ( nomeDirezione == null ) {
-            String error = "PersonBean: attributo 'nomeDirezione' non valorizzato.";
-            throw new AttributoNonValorizzatoException(error);
-        } else {
-            return nomeDirezione;
-        }
-    }
-
-    /**
-     * Ritorna il nome della biblioteca o centro di ateneo.
-     *
-     * @return
-     *
-     * @throws
-     */
-    public String getNomeBibliocr() throws AttributoNonValorizzatoException {
-        if ( nomeBibliocr == null ) {
-            String error = "PersonBean: attributo 'nomeBibliocr' non valorizzato.";
-            throw new AttributoNonValorizzatoException(error);
-        } else {
-            return nomeBibliocr;
-        }
-    }
-    
-    /**
-     * Ritorna l'id della qualifica nella direzione.
-     *
-     * @return
-     *
-     * @throws
-     */
-    public int getIdQualificaDirezione() throws AttributoNonValorizzatoException {
-        if ( idQualificaDirezione == -2 ) {
-            String error = "PersonBean: attributo 'idQualificaDirezione' non valorizzato.";
-            throw new AttributoNonValorizzatoException(error);
-        } else {
-            return idQualificaDirezione;
-        }
-    }
-    
-    /**
-     * Ritorna l'id della qualifica nella biblioteca o centro di ateneo.
-     *
-     * @return
-     *
-     * @throws
-     */
-    public int getIdQualificaBibliocr() throws AttributoNonValorizzatoException {
-        if ( idQualificaBibliocr == -2 ) {
-            String error = "PersonBean: attributo 'idQualificaBibliocr' non valorizzato.";
-            throw new AttributoNonValorizzatoException(error);
-        } else {
-            return idQualificaBibliocr;
-        }
-    }
-   
-    
-    /**
-     * Ritorna l'id della qualifica nella direzione.
-     *
-     * @return
-     *
-     * @throws
-     */
-    public String getNomeQualificaDirezione() throws AttributoNonValorizzatoException {
-        if ( nomeQualificaDirezione == null ) {
-            String error = "PersonBean: attributo 'nomeQualificaDirezione' non valorizzato.";
-            throw new AttributoNonValorizzatoException(error);
-        } else {
-            return nomeQualificaDirezione;
-        }
-    }
-
-    /**
-     * Ritorna l'id della qualifica nella biblioteca o centro di ateneo.
-     *
-     * @return
-     *
-     * @throws
-     */
-    public String getNomeQualificaBibliocr() throws AttributoNonValorizzatoException {
-        if ( nomeQualificaBibliocr == null ) {
-            String error = "PersonBean: attributo 'nomeQualificaBibliocr' non valorizzato.";
-            throw new AttributoNonValorizzatoException(error);
-        } else {
-            return nomeQualificaBibliocr;
-        }
-    }
-
-    /**
-     * Restituisce il ruolo che la persona riveste nella biblioteca o centro di dipartimento.
-     * Il ruolo è un attributo facoltativo.
-     *
-     * @author trrgnr59
-     * @return <code>char ruoloBibliocr</code> - Il ruolo della persona nella biblioteca/centro.
-     */
-    public char getRuoloBibliocr() {
-        return ruoloBibliocr;
-    }
-    
-    /**
-     * Restituisce l'incarico che la persona ricopre nella biblioteca o centro di dipartimento.
-     * L'incarico è un attributo facoltativo.
-     *
-     * @author trrgnr59
-     * @return <code>String incaricoBibliocr</code> - L'incarico della persona nella biblioteca/centro.
-     */
-    public String getIncaricoBibliocr() {
-        return incaricoBibliocr;
-    }
-    
-    public String getIncaricoInArea() throws AttributoNonValorizzatoException {
-        if ( incaricoInArea == null ) {
-            String error = "PersonBean: attributo 'incaricoInArea' non valorizzato.";
-            throw new AttributoNonValorizzatoException(error);
-        } else {
-            return incaricoInArea;
-        }        
-    }
-    
-    public boolean isResponsabileArea() throws AttributoNonValorizzatoException {
-            return responsabileArea;     
-    }
-    
-     public boolean isResponsabileUO() throws AttributoNonValorizzatoException {
-        return responsabileUO;
-    }   
-     
 
     /**
      * @param caricaInOrganoCol
@@ -1063,13 +504,7 @@ public class PersonBean implements Serializable {
     public void setDescrizioneSettore(String string) {
         descrizioneSettore = string;
     }
-    
-    /**
-     * @param edificioUfficio
-     */
-    public void setEdificioUfficio(String string) {
-        edificioUfficio = string;
-    }
+
     
     /**
      * @param email
@@ -1098,34 +533,6 @@ public class PersonBean implements Serializable {
     public void setSkypeid(String string) {
         skypeid = string;
     }
-
-    /**
-     * @param fineServizio
-     */
-    public void setFineServizio(Date date) {
-        fineServizio = date;
-    }
-    
-    /**
-     * @param fineServizioDipart
-     */
-    public void setFineServizioDipart(Date date) {
-        fineServizioDipart = date;
-    }
-    
-    /**
-     * @param fineServizioDir
-     */
-    public void setFineServizioDir(Date date) {
-        fineServizioDir = date;
-    }    
-    
-    /**
-     * @param fineServizioBiblioCR
-     */
-    public void setFineServizioBiblioCR(Date date) {
-        fineServizioBiblioCR = date;
-    }    
     
     /**
      * @param id
@@ -1142,31 +549,10 @@ public class PersonBean implements Serializable {
     }
     
     /**
-     * @param idFacolta
-     */
-    public void setIdFacolta(int i) {
-        idFacolta = i;
-    }
-    
-    /**
      * @param idQualificaPrincipaleDip
      */
     public void setIdQualificaPrincipaleDip(int i) {
         idQualificaPrincipaleDip = i;
-    }
-    
-    /**
-     * @param idQualificaPrincipaleFacolta
-     */
-    public void setIdQualificaPrincipaleFacolta(int idQualifica) {
-        idQualificaPrincipaleFacolta = idQualifica;
-    }
-    
-    /**
-     * @param idUfficio
-     */
-    public void setIdUfficio(int i) {
-        idUfficio = i;
     }
     
     /**
@@ -1223,24 +609,10 @@ public class PersonBean implements Serializable {
     }
     
     /**
-     * @param facolta
-     */
-    public void setFacolta(String string) {
-        facolta = string;
-    }
-    
-    /**
      * @param note
      */
     public void setNote(String string) {
         note = string;
-    }
-    
-    /**
-     * @param pianoUfficio
-     */
-    public void setPianoUfficio(String string) {
-        pianoUfficio = string;
     }
     
     /**
@@ -1249,14 +621,7 @@ public class PersonBean implements Serializable {
     public void setQualificaPrincipaleDip(String string) {
         qualificaPrincipaleDip = string;
     }
-    
-    /**
-     * @param qualificaPrincipaleFacolta
-     */
-    public void setQualificaPrincipaleFacolta(String string) {
-        qualificaPrincipaleFacolta = string;
-    }
-    
+   
     
     /**
      * @param sezione
@@ -1264,13 +629,7 @@ public class PersonBean implements Serializable {
     public void setSezione(String string) {
         sezione = string;
     }
-    
-    /**
-     * @param stanzaUfficio
-     */
-    public void setStanzaUfficio(String string) {
-        stanzaUfficio = string;
-    }
+
     
     /**
      * @param telefono
@@ -1297,18 +656,7 @@ public class PersonBean implements Serializable {
         }
     }
     
-    /**
-     * @param inServizio Valori '1' o '0'
-     */
-    public void setInServizio(char v) {
-        if (v == '1') {
-            this.inServizio = true;
-        } else {
-            this.inServizio = false;
-        }
-    }
-    
-    
+   
     /**
      * @param tempoPieno.
      */
@@ -1316,12 +664,6 @@ public class PersonBean implements Serializable {
         this.tempoPieno = v;
     }
     
-    /**
-     * @param inServizio.
-     */
-    public void setInServizio(boolean v) {
-        this.inServizio = v;
-    }
     
     /**
      * @param urlPersonalPage
@@ -1330,21 +672,6 @@ public class PersonBean implements Serializable {
         urlPersonalPage = string;
     }
     
-    /**
-     * @param urlFacolta
-     *
-     */
-    public void setUrlFacolta(String urlFacolta) {
-        this.urlFacolta = urlFacolta;
-    }
-    
-    /**
-     * @param urlBibliocr
-     *
-     */
-    public void setUrlBibliocr(String urlBibliocr) {
-        this.urlBibliocr = urlBibliocr;
-    }
     
     /**
      * @param urlDipartimento
@@ -1353,172 +680,7 @@ public class PersonBean implements Serializable {
     public void setUrlDipartimento(java.lang.String urlDipartimento) {
         this.urlDipartimento = urlDipartimento;
     }
-    
-    /**
-     * @return ricevimento
-     */
-    public Vector getRicevimento() {
-        return ricevimento;
-    }
-    
-    /**
-     * @param Vector ricevimento
-     */
-    public void setRicevimento(Vector vector) {
-        ricevimento = vector;
-    }
-    
-    /**
-     * noteRicevimento rappresenta eventuali note che un docente vuole pubblicare
-     * insieme/al posto dell'orario di ricevimento
-     * @return noteRicevimento
-     */
-    public String getNoteRicevimento() throws AttributoNonValorizzatoException {
-        if (this.noteRicevimento == null) {
-            throw new AttributoNonValorizzatoException("PersonBean: attributo noteRicevimento non valorizzato!");
-        } else {
-            return this.noteRicevimento;
-        }
-    }
-    
-    /**
-     * noteRicevimento rappresenta eventuali note che un docente vuole pubblicare
-     * insieme/al posto dell'orario di ricevimento
-     * @return noteRicevimento
-     */
-    public void setNoteRicevimento(String note) {
-        this.noteRicevimento = note;
-    }
-    
-    /**
-     * @param titolare
-     */
-    public void setTitolare(boolean b) {
-        titolare = b;
-    }
-    
-    /**
-     * @param titolare Valori '1' o '0'
-     */
-    public void setTitolare(char v) {
-        if (v == '1') {
-            this.titolare = true;
-        } else {
-            this.titolare = false;
-        }
-    }
 
-    /**
-     * @param coordinatore
-     */
-    public void setCoordinatore(boolean b) {
-        coordinatore = b;
-    }
-                                                                                
-    /**
-     * @param coordinatore Valori '1' o '0'
-     */
-    public void setCoordinatore(char v) {
-        if (v == '1') {
-            this.coordinatore = true;
-        } else {
-            this.coordinatore = false;
-        }
-    }
-  
-    /**
-     * Imposta l'id della direzione
-     *
-     * @param id
-     */
-    public void setIdDirezione(int id) {
-        idDirezione = id;
-    }
-    
-    /**
-     * Imposta l'id della biblioteca o centro di Ateneo
-     *
-     * @param id
-     */
-    public void setIdBibliocr(int id) {
-        idBibliocr = id;
-    }
-    
-    /**
-     * Imposta il nome della direzione.
-     *
-     * @param nome
-     */
-    public void setNomeDirezione(String nome) {
-        nomeDirezione = nome;
-    }
-    
-    /**
-     * Imposta l'id della qualifica nella direzione.
-     *
-     * @return
-     */
-    public void setIdQualificaDirezione(int id) {
-        idQualificaDirezione = id;
-    }
-    
-    /**
-     * Imposta il nome della qualifica nella direzione.
-     *
-     * @return
-     */
-    public void setNomeQualificaDirezione(String nome) {
-        nomeQualificaDirezione = nome;
-    }
-        
-    /**
-     * Imposta il nome della biblioteca o centro di ateneo.
-     *
-     * @param nome
-     */
-    public void setNomeBibliocr(String nome) {
-        nomeBibliocr = nome;
-    }
-    
-    /**
-     * Imposta l'id della qualifica nella biblioteca o centro di ateneo.
-     *
-     * @return
-     */
-    public void setIdQualificaBibliocr(int id) {
-        idQualificaBibliocr = id;
-    }
-    
-    /**
-     * Imposta il nome della qualifica nella biblioteca o centro di ateneo.
-     *
-     * @return
-     */
-    public void setNomeQualificaBibliocr(String nome) {
-        nomeQualificaBibliocr = nome;
-    }
-    
-    /**
-     * Imposta il nome del ruolo che la persona riveste nella biblioteca o centro di dipartimento.
-     * Il ruolo è un attributo facoltativo.
-     *
-     * @author trrgnr59
-     * @param ruoloBibliocr il valore del ruolo rivestito dalla persona nel contesto della biblioteca/centro.
-     */
-    public void setRuoloBibliocr(char ruoloBibliocr) {
-        this.ruoloBibliocr = ruoloBibliocr;
-    }
-    
-    /**
-     * Imposta la descrizione dell'incarico che la persona ricopre nella biblioteca o centro di dipartimento.
-     * L'incarico è un attributo facoltativo.
-     *
-     * @author trrgnr59
-     * @param incaricoBibliocr il valore dell'incarico che la persona ricopre nella biblioteca/centro.
-     */
-    public void setIncaricoBibliocr(String incaricoBibliocr) {
-        this.incaricoBibliocr = incaricoBibliocr;
-    }
     
     /**
      * Getter for property sesso.
@@ -1553,18 +715,6 @@ public class PersonBean implements Serializable {
             this.sesso = sesso;
     }
     
-    public void setIncaricoInArea(String incaricoInArea) {
-        this.incaricoInArea = incaricoInArea;
-    }
-    
-    
-    public void setResponsabileArea(boolean responsabileArea) {
-        this.responsabileArea = responsabileArea;
-    }
-    
-     public void setResponsabileUO(boolean responsabileUO) {
-        this.responsabileUO = responsabileUO;
-    }
    
     /**
      * Holds value of property creditiInsegnati.
@@ -1633,53 +783,13 @@ public class PersonBean implements Serializable {
         return foto;
     }
 
-    public void setArgomentiComp(Vector argomenti) {
-        this.argomentiComp = argomenti;
+    public void setCompetenze(Vector<SkillBean> argomenti) {
+        this.competenze = argomenti;
     }
     
-    public Vector getArgomentiComp() throws AttributoNonValorizzatoException {
-        if (this.argomentiComp == null) {
-            throw new AttributoNonValorizzatoException("PersonBean: attributo argomentiComp non valorizzato.");
-        } else {
-            return this.argomentiComp;
-        }
+    public Vector<SkillBean> getCompetenze() {
+        return this.competenze;
     }
-
-	/**
-	 * @return the uffici
-	 *
-	public Vector<LuogoBean> getUffici() throws AttributoNonValorizzatoException {
-		if (this.uffici == null) {
-			throw new AttributoNonValorizzatoException("PersonBean: attributo uffici non valorizzato.");
-		} else {
-			return this.uffici;
-		}
-	}
-
-	/**
-	 * @param uffici the uffici to set
-	 *
-	public void setUffici(Vector<LuogoBean> uffici) {
-		this.uffici = uffici;
-	}*/
-
-	/**
-	 * @return the idContinuazioneDip
-	 */
-	public int getIdContinuazioneDip() throws AttributoNonValorizzatoException {
-		if (this.idContinuazioneDip == -2) {
-			throw new AttributoNonValorizzatoException("PersonBean: attributo idContinuazioneDip non valorizzato.");
-		} else {
-			return idContinuazioneDip;
-		}
-	}
-
-	/**
-	 * @param idContinuazioneDip the idContinuazioneDip to set
-	 */
-	public void setIdContinuazioneDip(int idContinuazioneDip) {
-		this.idContinuazioneDip = idContinuazioneDip;
-	}
 
 	/**
 	 * @return the universita
@@ -1700,20 +810,6 @@ public class PersonBean implements Serializable {
 	}
 
 	/**
-	 * @return the direzioneRadice
-	 */
-	public boolean isDirezioneRadice() {
-		return direzioneRadice;
-	}
-
-	/**
-	 * @param direzioneRadice the direzioneRadice to set
-	 */
-	public void setDirezioneRadice(boolean direzioneRadice) {
-		this.direzioneRadice = direzioneRadice;
-	}
-
-	/**
 	 * @return the ruolo
 	 */
 	public String getRuolo() throws AttributoNonValorizzatoException {
@@ -1731,20 +827,6 @@ public class PersonBean implements Serializable {
 		this.ruolo = ruolo;
 	}
 
-    /**
-     * @return the qualificheAfferenzeSecondarie
-     *
-    public Vector<QualificaBean> getQualificheAfferenzeSecondarie() {
-        return qualificheAfferenzeSecondarie;
-    }
-
-    /**
-     * @param qualificheAfferenzeSecondarie the dipartimentiAfferenzeSecondarie to set
-     *
-    public void setQualificheAfferenzeSecondarie(
-            Vector<QualificaBean> dipartimentiAfferenzeSecondarie) {
-        this.qualificheAfferenzeSecondarie = dipartimentiAfferenzeSecondarie;
-    }*/
 
     /**
      * @param url the url to set
@@ -1759,21 +841,6 @@ public class PersonBean implements Serializable {
     public String getUrl() {
         return this.url;
     }
-
-	/**
-	 * @return the fineServizioMax
-	 */
-	public Date getFineServizioMax() {
-		return fineServizioMax;
-	}
-
-	/**
-	 * @param fineServizioMax the fineServizioMax to set
-	 */
-	public Date setFineServizioMax(Date fineServizioMax) {
-		this.fineServizioMax = fineServizioMax;
-		return fineServizioMax;
-	}
 
 	/**
 	 * @return the currFileDoc
@@ -1820,65 +887,6 @@ public class PersonBean implements Serializable {
             this.isTAFacolta = false;
         }
     }
-
-    /**
-     * @return the idTipoBiblioCR
-     */
-    public int getIdTipoBiblioCR() {
-        return idTipoBiblioCR;
-    }
-
-    /**
-     * @param idTipoBiblioCR the idTipoBiblioCR to set
-     */
-    public void setIdTipoBiblioCR(int idTipoBibliocr) {
-        this.idTipoBiblioCR = idTipoBibliocr;
-    }
-    
-    /**
-     * @return the peso1
-     */
-    public int getPeso1() {
-        return peso1;
-    }
-
-    /**
-     * @param peso1 the peso1 to set
-     */
-    public void setPeso1(int peso1) {
-        this.peso1 = peso1;
-    }
-
-    /**
-     * @return the peso2
-     */
-    public int getPeso2() {
-        return peso2;
-    }
-
-    /**
-     * @param peso2 the peso2 to set
-     */
-    public void setPeso2(int peso2) {
-        this.peso2 = peso2;
-    }
-
-
-    /**
-     * @return the peso3
-     */
-    public int getPeso3() {
-        return peso3;
-    }
-
-
-    /**
-     * @param peso3 the peso3 to set
-     */
-    public void setPeso3(int peso3) {
-        this.peso3 = peso3;
-    }
-
 
     /**
      * @return the presentazione
