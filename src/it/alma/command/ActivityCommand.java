@@ -36,7 +36,12 @@
 
 package it.alma.command;
 
+import java.util.Date;
 import java.util.Enumeration;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Vector;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -47,8 +52,12 @@ import com.oreilly.servlet.ParameterParser;
 import it.alma.DBWrapper;
 import it.alma.Main;
 import it.alma.Query;
+import it.alma.Utils;
+import it.alma.bean.ActivityBean;
 import it.alma.bean.ItemBean;
 import it.alma.bean.PersonBean;
+import it.alma.bean.ProjectBean;
+import it.alma.exception.AttributoNonValorizzatoException;
 import it.alma.exception.CommandException;
 import it.alma.exception.WebStorageException;
 
@@ -86,6 +95,14 @@ public class ActivityCommand extends ItemBean implements Command {
      * di una nuova attivit&agrave; al progetto
      */
     private static final String nomeFileActivity = "/jsp/pcAttivita.jsp";
+    /**
+     * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutti gli attributi del progetto
+     */    
+    private static final HashMap<String, String> nomeFile = new HashMap<String, String>();
+    /**
+     *  Progetto di dato id
+     */
+    ProjectBean runtimeProject = null;
     
     
     /** 
@@ -114,6 +131,11 @@ public class ActivityCommand extends ItemBean implements Command {
           String msg = FOR_NAME + "La voce menu' " + this.getNome() + " non ha il campo paginaJsp. Impossibile visualizzare i risultati.\n";
           throw new CommandException(msg);
         }
+        // Carica la hashmap contenente le pagine da includere in funzione dei parametri sulla querystring
+        nomeFile.put(Query.PART_ACTIVITY, nomeFileElenco);
+        nomeFile.put(Query.PART_PROJECT_CHARTER_MILESTONE, nomeFileMilestone);
+        nomeFile.put(Query.ADD_ACTIVITY_TO_PROJECT, nomeFileActivity);
+        nomeFile.put(Query.PART_PROJECT, this.getPaginaJsp());
     }  
   
     
@@ -127,14 +149,38 @@ public class ActivityCommand extends ItemBean implements Command {
      */
     public void execute(HttpServletRequest req) 
                  throws CommandException {
+        /* ******************************************************************** *
+         *              Dichiara e inizializza variabili locali                 *
+         * ******************************************************************** */
         // Databound
         DBWrapper db = null;
         // Parser per la gestione assistita dei parametri di input
         ParameterParser parser = new ParameterParser(req);
+        // Dichiara la pagina a cui reindirizzare
+        String fileJspT = null;
+        // Flag per decidere se mostrare l'header
+        boolean isHeader = true;
+        // Flag per decidere se mostrare il footer
+        boolean isFooter = true;
         // Utente loggato
         PersonBean user = null;
+        // Dichiara elenco di progetti
+        Vector<ProjectBean> v = new Vector<ProjectBean>();
+        // Dichiara elenco di attività
+        Vector<ActivityBean> vActivities = new Vector<ActivityBean>();
+        // Dichiara struttura di persone che possono essere aggiunte a un'attività
+        Vector<PersonBean> candidates = null;
         /* ******************************************************************** *
-         *      Instanzia nuova classe WebStorage per il recupero dei dati      *
+         *                    Recupera parametri e attributi                    *
+         * ******************************************************************** */
+        // Recupera o inizializza 'id progetto'
+        int idPrj = parser.getIntParameter("id", -1); 
+        // Recupera o inizializza 'tipo pagina'   
+        String part = parser.getStringParameter("p", "-");
+        // Flag di scrittura
+        boolean write = (boolean) req.getAttribute("w");
+        /* ******************************************************************** *
+         *      Instanzia nuova classe DBWrapper per il recupero dei dati       *
          * ******************************************************************** */
         try {
             db = new DBWrapper();
@@ -148,8 +194,12 @@ public class ActivityCommand extends ItemBean implements Command {
             // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
             HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
             if (ses == null) {
-                return;
-            } 
+                throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
+            }
+            user = (PersonBean) ses.getAttribute("usr");
+            if (user == null) {
+                throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
+            }
         } catch (IllegalStateException ise) {
             String msg = FOR_NAME + "Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n";
             LOG.severe(msg);
@@ -168,101 +218,179 @@ public class ActivityCommand extends ItemBean implements Command {
             throw new CommandException(msg + e.getMessage(), e);
         }
         /* ******************************************************************** *
-         *                          Recupera i parametri                        *
+         *                          Corpo del programma                         *
          * ******************************************************************** */
-        // Recupera o inizializza 'id progetto'
-        int idPrj = parser.getIntParameter("id", -1); 
-        // Recupera o inizializza 'tipo corsi di studio'
-        String tcs = parser.getStringParameter("tcs", "-");
-        // Recupera o inizializza 'tipo pagina'   
-        String part = parser.getStringParameter("p", "-");
-        // Dichiara la pagina a cui reindirizzare
-        String fileJspT = null;
         // Decide il valore della pagina
-        if (part.equalsIgnoreCase("pcv")) {
-            fileJspT = nomeFileMilestone;
-        } else if (part.equalsIgnoreCase("pcs")) {
-            //fileJspT = nomeFileStakeholder;
-        } else {
-            fileJspT = nomeFileElenco;
-        }
-        // Recupera il tipo di documento
-        //String tipo = parser.getStringParameter("tipo", "-");
+        try {
+            // Controllo sull'input
+            if (idPrj > Query.NOTHING) {
+                // Recupera in ogni caso il progetto richiesto dalla navigazione utente
+                runtimeProject = db.getProject(idPrj, user.getId());
+                // Verifica se è presente il parametro 'p'
+                if (nomeFile.containsKey(part)) {
+                    // TODO: workaround...
+                    //if (part.equalsIgnoreCase(Query.ADD_ACTIVITY_TO_PROJECT)) {
+                    //    write = true;
+                    //}
+                    // Verifica se deve eseguire un'operazione di scrittura
+                    if (write) {
+                        // Creazione della tabella valori parametri
+                        HashMap<String, HashMap<String, String>> params = new HashMap<String, HashMap<String, String>>();
+                        // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
+                        HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
+                        // Recupera i progetti su cui l'utente ha diritti di scrittura
+                        Vector<ProjectBean> writablePrj = (Vector<ProjectBean>) ses.getAttribute("writableProjects");
+                        // Se non ci sono progetti scrivibili e il flag "write" è true c'è qualcosa che non va...
+                        if (writablePrj == null) {
+                            String msg = FOR_NAME + "Il flag di scrittura e\' true pero\' non sono stati trovati progetti scrivibili: problema!.\n";
+                            LOG.severe(msg);
+                            throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
+                        }
+                        // Recupera dalla sessione le attività su cui l'utente ha diritti di scrittura
+                        LinkedHashMap<Integer, Vector<ActivityBean>> userWritableActivitiesByProjectId = (LinkedHashMap<Integer, Vector<ActivityBean>>) ses.getAttribute("writableActivity");
+                        // Trasforma un Vector di progetti scrivibili dall'utente loggato in un dictionary degli stessi
+                        HashMap<Integer, ProjectBean> writableProjects = ProjectCommand.decant(writablePrj);
+                        // Controlla se deve effettuare un inserimento o un aggiornamento
+                        if (part.equalsIgnoreCase(Query.PART_PROJECT_CHARTER_MILESTONE)) {
+                            /* ************************************************ *
+                             *                UPDATE Activity Part              *
+                             * ************************************************ */
+                            loadParams(part, parser, params);
+                            //Vector<ProjectBean> userWritableProjects = db.getProjects(user.getId(), Query.GET_ONLY_WRITABLE_PROJECTS);
+                            db.updateActivityPart(idPrj, user.getId(), writableProjects, userWritableActivitiesByProjectId, params);
+                        } else if (part.equalsIgnoreCase(Query.ADD_ACTIVITY_TO_PROJECT)) {
+                            /* ************************************************ *
+                             *                INSERT Activity Part              *
+                             * ************************************************ */
+                            loadParams(part, parser, params);
+                            isHeader = isFooter = false;
+                        }
 
-        
-        // Imposta il testo del Titolo da visualizzare prima dell'elenco
-        req.setAttribute("titoloE", "Project Charter");
-        // Salva nella request: Titolo pagina (da mostrare nell'HTML)
-        req.setAttribute("tP", req.getAttribute("titoloE"));         
+                        // Aggiorna i progetti, le attività dell'utente in sessione
+                        //ses.removeAttribute("writableProjects");
+                        ses.removeAttribute("writableActivity");
+                        //ses.setAttribute("writableProjects", userWritableProjects);
+                        ses.setAttribute("writableActivity", userWritableActivitiesByProjectId);
+                    }
+                    /* **************************************************** *
+                     *                 SELECT Activity Part                 *
+                     * **************************************************** */
+                    // Recupera le Milestones
+                    if (part.equals(Query.PART_PROJECT_CHARTER_MILESTONE)) {
+                        vActivities = db.getActivities(idPrj);
+                    } else if (part.equals(Query.ADD_ACTIVITY_TO_PROJECT)) {
+                        isHeader = isFooter = false;
+                        candidates = db.getPeople(runtimeProject.getId());
+                        
+                    }
+                    fileJspT = nomeFile.get(part);
+                } else {
+                    // Se il parametro 'p' non è presente, deve solo selezionare le attività 
+                    vActivities = db.getActivities(idPrj);
+                    fileJspT = nomeFileElenco;
+                }
+            } else {
+                // Se siamo qui vuol dire che l'id del progetto non è > zero, il che è un guaio
+                HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
+                ses.invalidate();
+                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id progetto non valido!.\n";
+                LOG.severe(msg);
+                throw new CommandException("Attenzione: indirizzo richiesto non valido!\n");
+            }
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio del bean, probabilmente l\'id dell\'utente..\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + anve.getMessage(), anve);
+        } catch (WebStorageException wse) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di valori dal db.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + wse.getMessage(), wse);
+        } catch (IllegalStateException ise) {
+            String msg = FOR_NAME + "Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + ise.getMessage(), ise);
+        } catch (ClassCastException cce) {
+            String msg = FOR_NAME + "Si e\' verificato un problema in una conversione di tipo.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + cce.getMessage(), cce);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n Attenzione: controllare di essere autenticati nell\'applicazione!\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + npe.getMessage(), npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+        /* ******************************************************************** *
+         *              Settaggi in request dei valori calcolati                *
+         * ******************************************************************** */
+        // Importa nella request flag di visualizzazione header e footer
+        req.setAttribute("header", isHeader);
+        // Importa nella request flag di visualizzazione header e footer
+        req.setAttribute("footer", isFooter);
+        // Imposta nella request dettaglio progetto
+        req.setAttribute("progetto", runtimeProject);
+        // Imposta nella request elenco attivita del progetto
+        req.setAttribute("attivita", vActivities);
+        // Imposta nella request elenco persone del dipartimento
+        req.setAttribute("people", candidates);
         // Imposta la Pagina JSP di forwarding
-        req.setAttribute("fileJsp", nomeFileElenco);
-        // Salva nella request: utente
-        //req.setAttribute("user", user);
+        req.setAttribute("fileJsp", fileJspT);
     }
     
-    /* ************************************************************************ *
-     *                            Metodi di utilita'                            *
-     * ************************************************************************ */
     
     /**
-     * <p>Restituisce i nomi e i valori degli attributi presenti in Request
-     * in un dato momento e in un dato contesto, rappresentati dallo
-     * stato del chiamante.</p>
-     * <p>Pu&ograve; essere utilizzato per verificare rapidamente 
-     * quali attributi sono presenti in Request onde evitare duplicazioni
-     * o ridondanze.</p>
-     * </p>
-     * Ad esempio, richiamando questo metodo dal ramo "didattica" del sito web
-     * di ateneo, metodo <code>requestByPage</code>
-     * e.g.: <pre>req.setAttribute("reqAttr", getAttributes(req));</pre>
-     * e richiamandolo dalla pagina relativa, con la semplice:
-     * <pre>${reqAttr}</pre>
-     * si ottiene:
-     * <pre style="border:solid gray;border-width:2px;padding:8px;">
-     * <strong>dipartimento</strong> = it.univr.di.uol.bean.DipartimentoBean@518dd094
-     * <strong>mO</strong> = {it.univr.di.uol.bean.SegnalibroBean@1ef0921d=[it.univr.di.uol.MenuVerticale@5ab38d6b, it.univr.di.uol.MenuVerticale@42099a52], it.univr.di.uol.bean.SegnalibroBean@4408bdc9=[it.univr.di.uol.MenuVerticale@4729f5d], it.univr.di.uol.bean.SegnalibroBean@19e3fa04=[it.univr.di.uol.MenuVerticale@13c94f3], it.univr.di.uol.bean.SegnalibroBean@463329e3=[it.univr.di.uol.MenuVerticale@3056de27]}
-     * <strong>lingue</strong> = it.univr.di.uol.Lingue@3578ce60
-     * <strong>FirstLanguage</strong> = it
-     * <strong>flagsUrl</strong> = ent=home&page=didattica
-     * <strong>SecondLanguage</strong> = en
-     * <strong>logoFileDoc</strong> = [[it.univr.di.uol.bean.FileDocBean@5b11bbf9]]
-     * <strong>currentYear</strong> = 2015
-     * </pre></p>
+     * <p>Valorizza per riferimento una mappa contenente i valori relativi  
+     * ad una attivit&agrave; eventualmente da aggiornare.</p> 
      * 
-     * @param req HttpServletRequest contenente gli attributi che si vogliono conoscere
-     * @return un unico oggetto contenente tutti i valori e i nomi degli attributi settati in request nel momento in cui lo chiede il chiamante
+     * @param part la sezione del sito che si vuole aggiornare
+     * @param parser oggetto per la gestione assistita dei parametri di input, gia' pronto all'uso
+     * @param params mappa da valorizzare per riferimento (ByRef)
+     * @throws CommandException se si verifica un problema nella gestione degli oggetti data o in qualche tipo di puntamento
      */
-    public static String getAttributes(HttpServletRequest req) {
-        Enumeration<String> attributes = req.getAttributeNames();
-        StringBuffer attributesName = new StringBuffer("<pre>");
-        while (attributes.hasMoreElements()) {
-            String attributeName = attributes.nextElement();
-            attributesName.append("<strong><u>");
-            attributesName.append(attributeName);
-            attributesName.append("</u></strong>");
-            attributesName.append(" = ");
-            attributesName.append(req.getAttribute(attributeName));
-            attributesName.append("<br />");
+    private static void loadParams(String part, 
+                                   ParameterParser parser,
+                                   HashMap<String, HashMap<String, String>> params)
+                            throws CommandException {
+        /* **************************************************** *
+         *          Ramo di Project Charter - Milestone         *
+         * **************************************************** */
+        if (part.equalsIgnoreCase(Query.PART_PROJECT_CHARTER_MILESTONE)) {
+            // Recupero e caricamento parametri di project charter/milestone
+            int totActivities = Integer.parseInt(parser.getStringParameter("pcm-loop-status", Utils.VOID_STRING));
+            HashMap<String, String> pcm = new HashMap<String, String>();
+            for (int i = 0; i <= totActivities; i++) {
+                String milestone = "false";
+                pcm.put("pcm-id" + String.valueOf(i), parser.getStringParameter("pcm-id" + String.valueOf(i), Utils.VOID_STRING));
+                pcm.put("pcm-nome" + String.valueOf(i), parser.getStringParameter("pcm-nome" + String.valueOf(i), Utils.VOID_STRING));
+                pcm.put("pcm-descrizione" + String.valueOf(i), parser.getStringParameter("pcm-descrizione" + String.valueOf(i), Utils.VOID_STRING));
+                if((parser.getStringParameter("pcm-milestone" + String.valueOf(i), Utils.VOID_STRING)) != "") {
+                    milestone = "true";
+                }
+                pcm.put("pcm-milestone" + String.valueOf(i), milestone);
+            }
+            params.put(Query.PART_PROJECT_CHARTER_MILESTONE, pcm);
+        } 
+        /* **************************************************** *
+         *                Ramo di INSERT Attivita'              *
+         * **************************************************** */
+        else if (part.equalsIgnoreCase(Query.ADD_ACTIVITY_TO_PROJECT)) {
+            /* Recupero e caricamento parametri di project charter/milestone
+            int totActivities = Integer.parseInt(parser.getStringParameter("pcm-loop-status", Utils.VOID_STRING));
+            HashMap<String, String> pcm = new HashMap<String, String>();
+            for (int i = 0; i <= totActivities; i++) {
+                String milestone = "false";
+                pcm.put("pcm-id" + String.valueOf(i), parser.getStringParameter("pcm-id" + String.valueOf(i), Utils.VOID_STRING));
+                pcm.put("pcm-nome" + String.valueOf(i), parser.getStringParameter("pcm-nome" + String.valueOf(i), Utils.VOID_STRING));
+                pcm.put("pcm-descrizione" + String.valueOf(i), parser.getStringParameter("pcm-descrizione" + String.valueOf(i), Utils.VOID_STRING));
+                if((parser.getStringParameter("pcm-milestone" + String.valueOf(i), Utils.VOID_STRING)) != "") {
+                    milestone = "true";
+                }
+                pcm.put("pcm-milestone" + String.valueOf(i), milestone);
+            }
+            params.put(Query.PART_PROJECT_CHARTER_MILESTONE, pcm);*/
         }
-        attributesName.append("</pre>");
-        return String.valueOf(attributesName);
-    }
-    
-    // TODO COMMENTO
-    public static String getParameters(HttpServletRequest req) {
-        Enumeration<String> parameters = req.getParameterNames();
-        StringBuffer parametersName = new StringBuffer("<pre>");
-        while (parameters.hasMoreElements()) {
-            String parameterName = parameters.nextElement();
-            parametersName.append("<strong><u>");
-            parametersName.append(parameterName);
-            parametersName.append("</u></strong>");
-            parametersName.append(" = ");
-            parametersName.append(req.getParameter(parameterName));
-            parametersName.append("<br />");
-        }
-        parametersName.append("</pre>");
-        return String.valueOf(parametersName);
     }
     
 }
