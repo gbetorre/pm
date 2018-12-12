@@ -38,6 +38,7 @@ package it.alma;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 
@@ -124,6 +125,10 @@ public interface Query extends Serializable {
      * <p>Costante per il parametro identificante la pagina del Report di un progetto.</p>
      */
     public static final String PART_REPORT                      = "rep";
+    /**
+     * <p>Costante per il parametro identificante la pagina di inserimento di uno status di un progetto.</p>
+     */
+    public static final String ADD_STATUS_TO_PROJECT          = "addSts";
     /**
      * <p>Costante per il parametro identificante la pagina di inserimento di un'Attivit&agrave; di un progetto.</p>
      */
@@ -647,29 +652,138 @@ public interface Query extends Serializable {
             "   FROM rischio R" +
             "   WHERE id_progetto = ?";
     
+    
+    /**
+     * <p>Estrae lo stato costi dell'avanzamento di un progetto, identificato tramite id, passato
+     * come parametro.</p>
+     */
+    public static final String GET_STATOCOSTI =  
+            "SELECT "  +
+            "       AP.id_statocosti                AS \"id\"" +
+            "   ,   SAV1.nome                       AS \"nome\"" +
+            "   FROM avanzamentoprogetto AP" +
+            "       INNER JOIN statoavanzamento SAV1 ON AP.id_statocosti = SAV1.id" +
+            "   WHERE AP.id = ?";
+    
+
+    /**
+     * <p>Estrae lo stato tempi dell'avanzamento di un progetto, identificato tramite id, passato
+     * come parametro.</p>
+     */
+    public static final String GET_STATOTEMPI =  
+            "SELECT "  +
+            "       AP.id_statotempi                AS \"id\"" +
+            "   ,   SAV1.nome                       AS \"nome\"" +
+            "   FROM avanzamentoprogetto AP" +
+            "       INNER JOIN statoavanzamento SAV1 ON AP.id_statotempi = SAV1.id" +
+            "   WHERE AP.id = ?";
+    
+    
+    /**
+     * <p>Estrae lo stato rischi dell'avanzamento di un progetto, identificato tramite id, passato
+     * come parametro.</p>
+     */
+    public static final String GET_STATORISCHI =  
+            "SELECT "  +
+            "       AP.id_statorischi               AS \"id\"" +
+            "   ,   SAV1.nome                       AS \"nome\"" +
+            "   FROM avanzamentoprogetto AP" +
+            "       INNER JOIN statoavanzamento SAV1 ON AP.id_statorischi = SAV1.id" +
+            "   WHERE AP.id = ?";
+    
+    
+    /**
+     * <p>Estrae lo stato risorse dell'avanzamento di un progetto, identificato tramite id, passato
+     * come parametro.</p>
+     */
+    public static final String GET_STATORISORSE =  
+            "SELECT "  +
+            "       AP.id_statorisorse              AS \"id\"" +
+            "   ,   SAV1.nome                       AS \"nome\"" +
+            "   FROM avanzamentoprogetto AP" +
+            "       INNER JOIN statoavanzamento SAV1 ON AP.id_statorisorse = SAV1.id" +
+            "   WHERE AP.id = ?";
+    
+    
+    /**
+     * <p>Estrae lo stato scope dell'avanzamento di un progetto, identificato tramite id, passato
+     * come parametro.</p>
+     */
+    public static final String GET_STATOSCOPE =  
+            "SELECT "  +
+            "       AP.id_statoscope                AS \"id\"" +
+            "   ,   SAV1.nome                       AS \"nome\"" +
+            "   FROM avanzamentoprogetto AP" +
+            "       INNER JOIN statoavanzamento SAV1 ON AP.id_statoscope = SAV1.id" +
+            "   WHERE AP.id = ?";
+    
+    
+    /**
+     * <p>Estrae lo stato risorse dell'avanzamento di un progetto, identificato tramite id, passato
+     * come parametro.</p>
+     */
+    public static final String GET_STATOCOMUNICAZIONE =  
+            "SELECT "  +
+            "       AP.id_statocomunicazione              AS \"id\"" +
+            "   ,   SAV1.nome                             AS \"nome\"" +
+            "   FROM avanzamentoprogetto AP" +
+            "       INNER JOIN statoavanzamento SAV1 ON AP.id_statocomunicazione = SAV1.id" +
+            "   WHERE AP.id = ?";
+    
+    
+    /**
+     * <p>Estrae lo stato qualit&agrave; dell'avanzamento di un progetto, identificato tramite id, passato
+     * come parametro.</p>
+     */
+    public static final String GET_STATOQUALITA =  
+            "SELECT "  +
+            "       AP.id_statoqualita              AS \"id\"" +
+            "   ,   SAV1.nome                       AS \"nome\"" +
+            "   FROM avanzamentoprogetto AP" +
+            "       INNER JOIN statoavanzamento SAV1 ON AP.id_statoqualita = SAV1.id" +
+            "   WHERE AP.id = ?";
+    
+    
+    /**
+     * <p>Estrae lo stato approvvigionamenti dell'avanzamento di un progetto, identificato tramite id, passato
+     * come parametro.</p>
+     */
+    public static final String GET_STATOAPPROVVIGIONAMENTI =  
+            "SELECT "  +
+            "       AP.id_statoapprovvigionamenti              AS \"id\"" +
+            "   ,   SAV1.nome                                  AS \"nome\"" +
+            "   FROM avanzamentoprogetto AP" +
+            "       INNER JOIN statoavanzamento SAV1 ON AP.id_statoapprovvigionamenti = SAV1.id" +
+            "   WHERE AP.id = ?";
+    
+    
+    /**
+     * <p>Estrae lo stato stakeholder dell'avanzamento di un progetto, identificato tramite id, passato
+     * come parametro.</p>
+     */
+    public static final String GET_STATOSTAKEHOLDER =  
+            "SELECT "  +
+            "       AP.id_statostakeholder              AS \"id\"" +
+            "   ,   SAV1.nome                           AS \"nome\"" +
+            "   FROM avanzamentoprogetto AP" +
+            "       INNER JOIN statoavanzamento SAV1 ON AP.id_statostakeholder = SAV1.id" +
+            "   WHERE AP.id = ?";
+    
+    
     /**
      * <p>Estrae lo stato di avanzamento selezionato di un progetto, identificato tramite id,
      * passato come parametro</p>
      */
     public static final String GET_PROJECT_STATUS = 
             "SELECT " +
-            "       AP.id                       AS \"id\"" +
-            "   ,   AP.datainizio               AS \"dataInizio\"" + 
-            "   ,   AP.datafine                 AS \"dataFine\"" +
-            "   ,   AP.descrizioneavanzamento   AS \"descrizioneAvanzamento\"" +
-            "   ,   AP.statotempi               AS \"statoTempi\"" + 
-            "   ,   AP.statocosti               AS \"statoCosti\"" + 
-            "   ,   AP.statorischi              AS \"statoRischi\"" + 
-            "   ,   AP.statorisorse             AS \"statoRisorse\"" + 
-            "   ,   AP.statoscope               AS \"statoScope\"" + 
-            "   ,   AP.statocomunicazione       AS \"statoComunicazione\"" + 
-            "   ,   AP.statoqualita             AS \"statoQualita\"" + 
-            "   ,   AP.statoapprovvigionamenti  AS \"statoApprovvigionamenti\"" + 
-            "   ,   AP.statostakeholder         AS \"statoStakeholder\"" +
-            "   ,   AP.dataultimamodifica       AS \"dataUltimaModifica\"" +
-            "   ,   AP.oraultimamodifica        AS \"oraUltimaModifica\"" +
-            "   ,   AP.autoreultimamodifica     AS \"autoreUltimaModifica\"" +
-            "   FROM avanzamentoprogetto AP " +
+            "       AP.id                           AS \"id\"" +
+            "   ,   AP.datainizio                   AS \"dataInizio\"" + 
+            "   ,   AP.datafine                     AS \"dataFine\"" +
+            "   ,   AP.descrizioneavanzamento       AS \"descrizioneAvanzamento\"" +
+            "   ,   AP.dataultimamodifica           AS \"dataUltimaModifica\"" +
+            "   ,   AP.oraultimamodifica            AS \"oraUltimaModifica\"" +
+            "   ,   AP.autoreultimamodifica         AS \"autoreUltimaModifica\"" +
+            "   FROM avanzamentoprogetto AP" +
             "   WHERE AP.id_progetto = ? " +
             "       AND AP.datainizio = ?";
     
@@ -679,23 +793,14 @@ public interface Query extends Serializable {
      */
     public static final String GET_STATUS = 
             "SELECT " +
-            "       AP.id                       AS \"id\"" +
-            "   ,   AP.datainizio               AS \"dataInizio\"" + 
-            "   ,   AP.datafine                 AS \"dataFine\"" +
-            "   ,   AP.descrizioneavanzamento   AS \"descrizioneAvanzamento\"" +
-            "   ,   AP.statotempi               AS \"statoTempi\"" + 
-            "   ,   AP.statocosti               AS \"statoCosti\"" + 
-            "   ,   AP.statorischi              AS \"statoRischi\"" + 
-            "   ,   AP.statorisorse             AS \"statoRisorse\"" + 
-            "   ,   AP.statoscope               AS \"statoScope\"" + 
-            "   ,   AP.statocomunicazione       AS \"statoComunicazione\"" + 
-            "   ,   AP.statoqualita             AS \"statoQualita\"" + 
-            "   ,   AP.statoapprovvigionamenti  AS \"statoApprovvigionamenti\"" + 
-            "   ,   AP.statostakeholder         AS \"statoStakeholder\"" +
-            "   ,   AP.dataultimamodifica       AS \"dataUltimaModifica\"" +
-            "   ,   AP.oraultimamodifica        AS \"oraUltimaModifica\"" +
-            "   ,   AP.autoreultimamodifica     AS \"autoreUltimaModifica\"" +
-            "   FROM avanzamentoprogetto AP " +
+            "       AP.id                           AS \"id\"" +
+            "   ,   AP.datainizio                   AS \"dataInizio\"" + 
+            "   ,   AP.datafine                     AS \"dataFine\"" +
+            "   ,   AP.descrizioneavanzamento       AS \"descrizioneAvanzamento\"" +
+            "   ,   AP.dataultimamodifica           AS \"dataUltimaModifica\"" +
+            "   ,   AP.oraultimamodifica            AS \"oraUltimaModifica\"" +
+            "   ,   AP.autoreultimamodifica         AS \"autoreUltimaModifica\"" +
+            "   FROM avanzamentoprogetto AP" +
             "   WHERE AP.id = ?";
     
     /**
@@ -854,15 +959,15 @@ public interface Query extends Serializable {
             "   SET     datainizio = ?" +
             "   ,       datafine = ?" +
             "   ,       descrizioneavanzamento = ?" +
-            "   ,       statotempi = ?" + 
-            "   ,       statocosti = ?" +
-            "   ,       statorischi = ?" +
-            "   ,       statorisorse = ?" +
-            "   ,       statoscope = ?" +
-            "   ,       statocomunicazione = ?" +
-            "   ,       statoqualita = ?" +
-            "   ,       statoapprovvigionamenti = ?" +
-            "   ,       statostakeholder = ?" +
+            "   ,       id_statotempi = ?" + 
+            "   ,       id_statocosti = ?" +
+            "   ,       id_statorischi = ?" +
+            "   ,       id_statorisorse = ?" +
+            "   ,       id_statoscope = ?" +
+            "   ,       id_statocomunicazione = ?" +
+            "   ,       id_statoqualita = ?" +
+            "   ,       id_statoapprovvigionamenti = ?" +
+            "   ,       id_statostakeholder = ?" +
             "   ,       dataultimamodifica = ?" +
             "   ,       oraultimamodifica = ?" +
             "   ,       autoreultimamodifica = ?" +
@@ -891,16 +996,6 @@ public interface Query extends Serializable {
             "   (   id" +
             "   ,   datainizio" +
             "   ,   datafine" +
-            "   ,   descrizioneavanzamento" +
-            "   ,   statotempi" +
-            "   ,   statocosti" +
-            "   ,   statorischi" +
-            "   ,   statorisorse" +
-            "   ,   statoscope" +
-            "   ,   statocomunicazione" +
-            "   ,   statoqualita" +
-            "   ,   statoapprovvigionamenti" +
-            "   ,   statostakeholder" +
             "   ,   dataultimamodifica" +
             "   ,   oraultimamodifica" +
             "   ,   autoreultimamodifica" +
@@ -908,16 +1003,6 @@ public interface Query extends Serializable {
             "   VALUES (? " +          // id
             "   ,       ? " +          // datainizio
             "   ,       ? " +          // datafine
-            "   ,       ? " +          // descrizioneavanzamento
-            "   ,       ? " +          // stato tempi
-            "   ,       ? " +          // stato costi
-            "   ,       ? " +          // stato rischi
-            "   ,       ? " +          // stato risorse
-            "   ,       ? " +          // stato scope
-            "   ,       ? " +          // stato comunicazione
-            "   ,       ? " +          // stato qualita
-            "   ,       ? " +          // stato approvvigionamenti
-            "   ,       ? " +          // stato stakeholder
             "   ,       ? " +          // data ultima modifica
             "   ,       ? " +          // ora ultima modifica
             "   ,       ? " +          // autore ultima modifica
