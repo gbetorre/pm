@@ -3,20 +3,34 @@
     <form id="newAct_form" action="#" method="post">
       <h3>Inserisci una nuova attivit&agrave;:</h3>
       <br />
+      <c:set var="skills" value="" scope="page" />
       <div class="row">
-        <div class="col-sm-5">Identificativo della persona <sup>&star;</sup></div>
         <div class="col-sm-5">
-          <select class="form-control" id="sRischi" name="sRischi">
+          Identificativo della persona 
+          <sup>&#10039;</sup>
+        </div>
+        <div class="col-sm-5">
+          <select class="form-control" id="actPeople" name="actPeople">
           <c:forEach var="person" items="${requestScope.people}">
             <option value="${person.id}">${person.nome} ${person.cognome}</option>
+            <c:set var="skills" value="${person.competenze}" scope="page" />
           </c:forEach>
           </select>
         </div>
       </div>
       <br />
       <div class="row">
-        <div class="col-sm-5">Identificativo del ruolo ricoperto nell'attivit&agrave;</div>
-        <div class="col-sm-5"><input type="text" class="form-control" id="actIdRuolo" name="actIdRuolo" value=""></div>
+        <div class="col-sm-5">
+          Identificativo del ruolo ricoperto nell'attivit&agrave;
+          <sup>&#10039;</sup>
+        </div>
+        <div class="col-sm-5">
+          <select class="form-control" id="actIdRuolo" name="actIdRuolo" multiple>
+          <c:forEach var="skill" items="${pageScope.skills}">
+            <option value="${skill.id}"><c:out value="${skill.nome}" /></option>
+          </c:forEach>
+          </select>
+        </div>
       </div>
       <div class="row">
         <div class="col-sm-5">&nbsp;</div>
@@ -139,13 +153,13 @@
         <%@ include file="subPanel.jspf" %>
       </div>
     </form>
-      <script type="text/javascript">
-        $(document).ready(function () {
-            $('#btn').click(function () {
-                window.opener.location.reload(true);
-                window.self.close();
-            });
-        });
+    <script type="text/javascript">
+      $(document).ready(function () {
+          $('#btn').click(function () {
+              window.opener.location.reload(true);
+              window.self.close();
+          });
+      });
     </script>
     <script>
     var offsetcharacter = 5;
@@ -202,6 +216,23 @@
       } else {
         //$body.show();
       }
+    });
+    
+    
+    $("#actPeople").change(function () {
+      switch($(this).val()) {
+      <c:forEach var="person" items="${requestScope.people}">
+        case '${person.id}':
+          $("#actIdRuolo").html("<c:forEach var="skill" items="${person.competenze}"><option value='${skill.id}'>${skill.nome}</option></c:forEach>");
+          break;
+       </c:forEach>
+     
+//           case '28':
+//               $("#actIdRuolo").html("<option value='test'>item1: test 1</option><option value='test2'>item1: test 2</option>");
+//               break;
+//           default:
+//               $("#size").html("<option value=''>--select one--</option>");
+       }
     });
     
     </script>
