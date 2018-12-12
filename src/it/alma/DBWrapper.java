@@ -41,7 +41,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -238,47 +237,6 @@ public class DBWrapper implements Query {
     
     
     /**
-     * <p>Restituisce l'username dato l'id della persona</p>
-     * 
-     * @param userId nome della tabella di cui si vuol recuperare il max(id)
-     * @return <code>String</code> - stringa che definisce lo username dell'utente loggato
-     * @throws WebStorageException se si verifica un problema nella query o in qualche tipo di puntamento
-     */
-    public String getLogin (int userId) 
-                     throws WebStorageException {
-        ResultSet rs = null;
-        Connection con = null;
-        PreparedStatement pst = null;
-        String username = Utils.VOID_STRING;
-        try {
-            con = pol_manager.getConnection();
-            pst = con.prepareStatement(GET_USERNAME);
-            pst.clearParameters();
-            pst.setInt(1, userId);
-            rs = pst.executeQuery();
-            if (rs.next()) {
-                username = rs.getString(1);
-            }
-            return username;
-        } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Impossibile recuperare lo username.\n";
-            LOG.severe(msg); 
-            throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        } finally {
-            try {
-                con.close();
-            } catch (NullPointerException npe) {
-                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                LOG.severe(msg); 
-                throw new WebStorageException(msg + npe.getMessage());
-            } catch (SQLException sqle) {
-                throw new WebStorageException(FOR_NAME + sqle.getMessage());
-            }
-        }
-    }
-    
-    
-    /**
      * <p>Restituisce 
      * <ul>
      * <li>il massimo valore del contatore identificativo di una
@@ -327,7 +285,51 @@ public class DBWrapper implements Query {
     
     /* ********************************************************** *
      *                        Metodi di POL                       *
+    /* ********************************************************** *
+     *                     Metodi di SELEZIONE                    *
      * ********************************************************** */
+    /**
+     * <p>Restituisce l'username dato l'id della persona</p>
+     * 
+     * @param userId nome utente
+     * @return <code>String</code> - stringa che definisce lo username dell'utente loggato
+     * @throws WebStorageException se si verifica un problema nella query o in qualche tipo di puntamento
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public String getLogin (int userId) 
+                     throws WebStorageException {
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        String username = Utils.VOID_STRING;
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_USERNAME);
+            pst.clearParameters();
+            pst.setInt(1, userId);
+            rs = pst.executeQuery();
+            if (rs.next()) {
+                username = rs.getString(1);
+            }
+            return username;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Impossibile recuperare lo username.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
     /**
      * <p>Restituisce un PersonBean rappresentante un utente loggato.</p>
      * 
@@ -374,6 +376,68 @@ public class DBWrapper implements Query {
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
         } catch (AttributoNonValorizzatoException sqle) {
             String msg = FOR_NAME + "Oggetto id della persona non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce un Vector di PersonBean, ciascuno rappresentante 
+     * un utente del dipartimento il cui identificativo viene 
+     * passato come argomento.</p>
+     * 
+     * @param projectId - username della persona che ha eseguito il login
+     * @return <code>Vector&lt;PersonBean&gt;</code> - elenco di PersonBean rappresentante le persone del dipartimento a cui il progetto e' collegato
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e l'id della persona non &egrave; stato valorizzato (&egrave; un dato obbligatorio) 
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public Vector<PersonBean> getPeople(int projectId)
+                                 throws WebStorageException, 
+                                        AttributoNonValorizzatoException {
+        ResultSet rs, rs1 = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        PersonBean person = null;
+        Vector<PersonBean> people = new Vector<PersonBean>();
+        Vector<SkillBean> skills = new Vector<SkillBean>();
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_PEOPLE_BY_DEPARTMENT);
+            pst.clearParameters();
+            pst.setInt(1, projectId);
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                person = new PersonBean();
+                BeanUtil.populate(person, rs);
+                // Recupera competenze di ogni persona
+                pst = con.prepareStatement(GET_SKILLS_BY_PERSON);
+                pst.clearParameters();
+                pst.setInt(1, projectId);
+                pst.setInt(2, person.getId());
+                rs1 = pst.executeQuery();
+                while (rs1.next()) {
+                    SkillBean skill = new SkillBean();
+                    BeanUtil.populate(skill, rs1);
+                    skills.add(skill);
+                }
+                //person.setSkills(skills);
+                people.add(person);
+            }
+            return people;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
         } finally {
@@ -603,8 +667,8 @@ public class DBWrapper implements Query {
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
      */
     @SuppressWarnings({ "null", "static-method" })
-    public ArrayList<StatusBean> getStatusList (int projId) 
-                                         throws WebStorageException {
+    public ArrayList<StatusBean> getStatusList(int projId) 
+                                        throws WebStorageException {
         ResultSet rs = null;
         Connection con = null;
         PreparedStatement pst = null;
@@ -641,10 +705,11 @@ public class DBWrapper implements Query {
     
     
     /**
-     * <p>Restituisce un StatusBean rappresentante lo status attuale del progetto</p>
+     * <p>Restituisce un StatusBean rappresentante uno status richiesto del progetto,
+     * a partire dal suo ID, passato come argomento.</p>
      * 
      * @param idStatus id dello status da restituire
-     * @return <code>StatusBean</code> - StatusBean rappresentante lo status di identificativo passato come argomento
+     * @return <code>StatusBean</code> - StatusBean rappresentante lo status di dato identificativo passato come argomento
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento
      */
     @SuppressWarnings({ "null", "static-method" })
@@ -684,16 +749,19 @@ public class DBWrapper implements Query {
     
     
     /**
-     * <p>Restituisce un StatusBean rappresentante lo status attuale del progetto</p>
+     * <p>Restituisce un StatusBean rappresentante lo status attuale del progetto,
+     * ovvero l'ultimo avanzamento (status) progetto in ordine di tempo,
+     * ovvero quello avente la data di inizio pi&uacute; prossima alla
+     * data corrente al momento della richiesta effettuata dall'utente.</p>
      * 
      * @param idProj id del progetto del quale ricavare lo status
-     * @param dateStatus data di inizio dello status da ricavare
+     * @param statusDate data di inizio dello status da ricavare
      * @return <code>StatusBean</code> - StatusBean rappresentante lo status corrente
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento
      */
     @SuppressWarnings({ "null", "static-method" })
     public StatusBean getStatus(int idProj, 
-                                Date dateStatus) 
+                                Date statusDate) 
                          throws WebStorageException {
         ResultSet rs = null;
         Connection con = null;
@@ -704,7 +772,7 @@ public class DBWrapper implements Query {
             pst = con.prepareStatement(GET_PROJECT_STATUS);
             pst.clearParameters();
             pst.setInt(1, idProj);
-            pst.setDate(2, Utils.convert(dateStatus));  // non accetta una java.util.Date, ma una java.sql.Date
+            pst.setDate(2, Utils.convert(statusDate));  // Non accetta una java.util.Date, ma una java.sql.Date
             rs = pst.executeQuery();
             if (rs.next()) {
                 status = new StatusBean();
@@ -928,6 +996,11 @@ public class DBWrapper implements Query {
     }
     
     
+    /* ********************************************************** *
+     *                        Metodi di POL                       *
+    /* ********************************************************** *
+     *                   Metodi di AGGIORNAMENTO                  *
+     * ********************************************************** */
     /**
      * <p>Metodo che controlla la query da eseguire e chiama il metodo opportuno.</p>
      * 
@@ -1259,6 +1332,111 @@ public class DBWrapper implements Query {
     }
     
     
+    /**
+     * <p>Metodo che aggiorna le attivit&agrave; di progetto..</p>
+     * 
+     * @param idProj - id del progetto da aggiornare 
+     * @param userId - id dell'utente che ha eseguito il login
+     * @param projects - Map contenente la lista dei progetti su cui l'utente corrente e' abilitato alla modifica
+     * @param activitiesRelatedToProject - HashMap contenente le attività su cui l'utente e' abilitato alla modifica
+     * @param params - hashmap che contiene i parametri che si vogliono aggiornare del progetto
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public void updateActivityPart(int idProj,
+                                   int userId,
+                                   HashMap<Integer, ProjectBean> projects, 
+                                   HashMap<Integer, Vector<ActivityBean>> activitiesRelatedToProject,
+                                   HashMap<String, HashMap<String, String>>params) 
+                            throws WebStorageException {
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement pst = null;        
+        try {
+            // Ottiene il progetto precaricato quando l'utente si è loggato corrispondente al progetto che vuole aggiornare
+            Integer key = new Integer(idProj);
+            ProjectBean project = projects.get(key);
+            // Recuperare le liste di attività
+            Vector<ActivityBean> activities = activitiesRelatedToProject.get(key);
+            // Ottiene la connessione
+            con = pol_manager.getConnection();
+            /* **************************************************************** *
+             *   Gestisce gli update delle varie funzionalita' delle attivita'  *
+             * **************************************************************** */
+            if (params.containsKey(PART_PROJECT_CHARTER_MILESTONE)) {
+                HashMap<String, String> paramsMilestone = params.get(PART_PROJECT_CHARTER_MILESTONE);
+                if (Utils.containsValues(paramsMilestone)) {
+                    con.setAutoCommit(false);
+                    // 4 è il numero di campi che compongono un'attività
+                    for (int i = 0; i < (paramsMilestone.size() / 4); i++) {
+                        String isMilestoneAsString = paramsMilestone.get("pcm-milestone" + String.valueOf(i));
+                        if ( (!isMilestoneAsString.equalsIgnoreCase("true")) && (!isMilestoneAsString.equalsIgnoreCase("false"))  ) {
+                            throw new ClassCastException("Attenzione: il valore del parametro \'pcm-milestone\' non e\' riconducibile a un valore boolean!\n");
+                        }
+                        // Controllo che le attività del progetto non abbiano subito modifiche non visualizzate dall'utente
+                        /* TODO
+                         * Controllo di concorrenza da implementare
+                        pst = con.prepareStatement(GET_ACTIVITY);
+                        pst.clearParameters();
+                        pst.setInt(1, idProj);
+                        pst.setInt(2, Integer.parseInt(paramsMilestone.get("pcm-id" + String.valueOf(i)))); 
+                        rs = pst.executeQuery();
+                        if(rs.next()) {
+                            if ( (rs.getString("id").equals(activities.get(i).getId())) &&
+                                 (rs.getString("nome").equals(activities.get(i).getNome())) &&
+                                 (rs.getString("descrizione").equals(activities.get(i).getDescrizione())) &&
+                                 (rs.getBoolean("milestone") (activities.get(i).isMilestone())) ) {
+                                
+                            }
+                        }*/
+                        pst = null;
+                        pst = con.prepareStatement(UPDATE_ATTIVITA_FROM_PROGETTO);
+                        pst.clearParameters();
+                        pst.setString(1, paramsMilestone.get("pcm-nome" + String.valueOf(i)));
+                        pst.setString(2, paramsMilestone.get("pcm-descrizione" + String.valueOf(i)));
+                        pst.setBoolean(3, Boolean.parseBoolean(isMilestoneAsString));
+                        pst.setInt(4, Integer.parseInt(paramsMilestone.get("pcm-id" + String.valueOf(i))));
+                        pst.setInt(5, idProj);
+                        pst.executeUpdate();
+                        con.commit();
+                    }
+                }
+            }
+        } catch (NotFoundException nfe) {
+            String msg = FOR_NAME + "Probabile problema nel puntamento alla HashMap dei parametri.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + nfe.getMessage(), nfe);
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il progetto.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } catch (NumberFormatException nfe) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il progetto.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + nfe.getMessage(), nfe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il progetto.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + e.getMessage(), e);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /* ********************************************************** *
+     *                        Metodi di POL                       *
+    /* ********************************************************** *
+     *                   Metodi di INSERIMENTO                    *
+     * ********************************************************** */
     /**
      * <p>Metodo per fare un nuovo inserimento di una nuova attivit&agrave;.</p>
      * 
