@@ -25,6 +25,7 @@ function modify(){
     $('input[type=\'checkbox\']').prop('disabled', false);
     $('select').prop('disabled', false);
     $('button').prop('disabled', false);
+    $('input[type=\'text\'].calendarData').datepicker();
 }
   
 $('textarea').textareaAutoSize();
