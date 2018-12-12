@@ -39,6 +39,7 @@ package it.alma;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Vector;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.RequestDispatcher;
@@ -47,7 +48,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.swing.JOptionPane;
 
 import it.alma.bean.ItemBean;
 import it.alma.command.Command;
@@ -70,6 +70,22 @@ public class Main extends HttpServlet {
      * dalla JVM, e questo potrebbe portare a errori riguardo alla serializzazione). 
      */
     private static final long serialVersionUID = 1L;
+    /**
+     * <p>Logger della classe per scrivere i messaggi di errore.</p> 
+     * <p>All logging goes through this logger.</p>
+     * <p>To avoid the 'Read access to enclosing field Main.log 
+     * is emulated by a synthetic accessor method' warning, 
+     * visibility is changed to 'friendly' (id est 'default', 
+     * id est 'visible from the same package').</p>
+     * <p>Spiegazione, per chi non "mastica" l'inglese (o Java, o
+     * <ul><li>non ha il cervello</li><li>&egrave; uno zombie</li>
+     * <li>&egrave; l'Abate Far&iacute;a</li><li>&egrave; un pacco
+     * raccomandato</li>):</ul>
+     * non &egrave; privata ma Default (friendly) per essere visibile 
+     * negli elementi ovverride implementati da questa classe.</p>
+     *  
+     */
+    /* default */ static Logger log = Logger.getLogger(Main.class.getName());
     /**
      *  Nome di questa classe 
      *  (utilizzato per contestualizzare i messaggi di errore)
@@ -303,16 +319,28 @@ public class Main extends HttpServlet {
             req.setAttribute("w", false);
             Command cmd = lookupCommand(q);
             cmd.execute(req);
-        } catch (CommandException e) { // Potrebbe già uscire qui
-            req.setAttribute("javax.servlet.jsp.jspException", e);
+        } catch (CommandException ce) { // Potrebbe già uscire qui
+            String msg = FOR_NAME + 
+                         "L'errore è stato generato dalla seguente chiamata: " + 
+                         req.getQueryString() +
+                         ", presente nella pagina: " + 
+                         req.getHeader("Referer");
+            log.log(Level.WARNING, msg, ce);
             fileJsp = errorJsp;
-            log("Errore: " + e);
-            final RequestDispatcher rd = getServletContext().getRequestDispatcher(fileJsp + "?" + req.getQueryString());
-            rd.forward(req, res);
-            return;
+            req.setAttribute("message", ce.getMessage());
+            req.setAttribute("javax.servlet.jsp.jspException", ce);
+            flush(req, res, fileJsp);
         } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            String msg = FOR_NAME +  
+                         "L'errore è stato generato dalla seguente chiamata: " + 
+                         req.getQueryString() + 
+                         ", presente nella pagina: " + 
+                         req.getHeader("Referer");
+            log.log(Level.SEVERE, msg, e);
+            fileJsp = errorJsp;
+            req.setAttribute("message", e.getMessage());
+            req.setAttribute("javax.servlet.jsp.jspException", e);
+            flush(req, res, fileJsp);
         }
         /*
          * Mantiene tutti i parametri di navigazione
@@ -357,9 +385,9 @@ public class Main extends HttpServlet {
              */
             req.setAttribute("baseHref", baseHref);
         }
-        final RequestDispatcher rd = getServletContext().getRequestDispatcher(fileJsp + "?" + req.getQueryString());
-        rd.forward(req, res);
+        flush(req, res, fileJsp);
     }
+    
     
     /**
      * <p>Gestisce le richieste del client effettuate con il metodo POST.</p>
@@ -498,6 +526,14 @@ public class Main extends HttpServlet {
         // Valorizza l'anno corrente: utile al footer
         String currentYear = Utils.getCurrentYear();
         req.setAttribute("theCurrentYear", currentYear);
+        // Cerca o inizializza flag di visualizzazione header
+        if (req.getAttribute("header") == null) {
+            req.setAttribute("header", true);
+        }
+        // Cerca o inizializza flag di visualizzazione footer
+        if (req.getAttribute("footer") == null) {
+            req.setAttribute("footer", true);
+        }
     }
     
     
@@ -522,6 +558,17 @@ public class Main extends HttpServlet {
         baseHref.append(req.getContextPath());
         baseHref.append('/');
         return new String(baseHref);
+    }
+    
+    
+    private void flush(HttpServletRequest req,
+                       HttpServletResponse res,
+                       String fileJspT) 
+                throws ServletException, 
+                       IOException {
+        final RequestDispatcher rd = getServletContext().getRequestDispatcher(fileJspT + "?" + req.getQueryString());
+        rd.forward(req, res);
+        return;
     }
     
 }
