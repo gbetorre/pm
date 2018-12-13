@@ -82,6 +82,10 @@ div.charNum {
 	font-weight: bold;
 }
 
+div.additional-fields {
+  display:none;
+}
+
 span.right {
 	margin-top: 5px;
 	float: right;
