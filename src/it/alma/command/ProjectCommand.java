@@ -488,19 +488,19 @@ public class ProjectCommand extends ItemBean implements Command {
             GregorianCalendar date = Utils.getUnixEpoch();
             String dataAsString = Utils.format(date, Query.DATA_SQL_PATTERN);
             HashMap<String, String> statusProject = new HashMap<String, String>();
-            statusProject.put("sId", parser.getStringParameter("sId", Utils.VOID_STRING));
-            statusProject.put("sDataInizio", parser.getStringParameter("sDataInizio", dataAsString));
-            statusProject.put("sDataFine", parser.getStringParameter("sDataFine", dataAsString));
-            statusProject.put("sAvanzamento", parser.getStringParameter("sAvanzamento", Utils.VOID_STRING));
-            statusProject.put("sCosti", parser.getStringParameter("sCosti", Utils.VOID_STRING));
-            statusProject.put("sTempi", parser.getStringParameter("sTempi", Utils.VOID_STRING));
-            statusProject.put("sRischi", parser.getStringParameter("sRischi", Utils.VOID_STRING));
-            statusProject.put("sRisorse", parser.getStringParameter("sRisorse", Utils.VOID_STRING));
-            statusProject.put("sScope", parser.getStringParameter("sScope", Utils.VOID_STRING));
-            statusProject.put("sComunicazione", parser.getStringParameter("sComunicazione", Utils.VOID_STRING));
-            statusProject.put("sQualita", parser.getStringParameter("sQualita", Utils.VOID_STRING));
-            statusProject.put("sApprovvigionamenti", parser.getStringParameter("sApprovvigionamenti", Utils.VOID_STRING));
-            statusProject.put("sStakeholder", parser.getStringParameter("sStakeholder", Utils.VOID_STRING));
+            statusProject.put("sts-id", parser.getStringParameter("sts-id", Utils.VOID_STRING));
+            statusProject.put("sts-datainizio", parser.getStringParameter("sts-datainizio", dataAsString));
+            statusProject.put("sts-datafine", parser.getStringParameter("sts-datafine", dataAsString));
+            statusProject.put("sts-avanzamento", parser.getStringParameter("sts-avanzamento", Utils.VOID_STRING));
+            statusProject.put("sts-costi", parser.getStringParameter("sts-costi", Utils.VOID_STRING));
+            statusProject.put("sts-tempi", parser.getStringParameter("sts-tempi", Utils.VOID_STRING));
+            statusProject.put("sts-rischi", parser.getStringParameter("sts-rischi", Utils.VOID_STRING));
+            statusProject.put("sts-risorse", parser.getStringParameter("sts-risorse", Utils.VOID_STRING));
+            statusProject.put("sts-scope", parser.getStringParameter("sts-scope", Utils.VOID_STRING));
+            statusProject.put("sts-comunicazione", parser.getStringParameter("sts-comunicazione", Utils.VOID_STRING));
+            statusProject.put("sts-qualita", parser.getStringParameter("sts-qualita", Utils.VOID_STRING));
+            statusProject.put("sts-approvvigionamenti", parser.getStringParameter("sts-approvvigionamenti", Utils.VOID_STRING));
+            statusProject.put("sts-stakeholder", parser.getStringParameter("sts-stakeholder", Utils.VOID_STRING));
             params.put(Query.PART_STATUS, statusProject);
         }
     }
