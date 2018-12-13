@@ -49,6 +49,7 @@ import java.util.MissingResourceException;
 import java.util.Scanner;
 import java.util.logging.Logger;
 
+import java.text.ParseException;
 import it.alma.exception.CommandException;
 import it.alma.exception.NotFoundException;
 
@@ -522,6 +523,32 @@ public class Utils {
             String msg = FOR_NAME + "Si e\' verificato un problema. Impossibile visualizzare i risultati.\n" + e.getLocalizedMessage();
             log.warning(msg + "Attenzione: si e\' verificato un problema nel metodo di formattazione della data.\n");
             throw new CommandException(msg, e);
+        }
+    }
+    
+    
+    /**
+     * @param date 
+     * @param initDateFormat 
+     * @param endDateFormat 
+     * @return 
+     * @throws CommandException 
+     * 
+     */
+    public static Date formatDate (String date, 
+                                   String initDateFormat,
+                                   String endDateFormat) 
+                            throws CommandException{
+        try {
+            Date initDate = new SimpleDateFormat(initDateFormat).parse(date);
+            SimpleDateFormat formatter = new SimpleDateFormat(endDateFormat);
+            String parsedDate = formatter.format(initDate);
+            Date returnDate = formatter.parse(parsedDate);
+            return returnDate;
+        } catch (ParseException pe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema. Impossibile visualizzare i risultati.\n" + pe.getLocalizedMessage();
+            log.warning(msg + "Attenzione: si e\' verificato un problema nel metodo di formattazione della data.\n");
+            throw new CommandException(msg, pe);
         }
     }
 
