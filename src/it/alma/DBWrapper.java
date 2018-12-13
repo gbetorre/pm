@@ -39,7 +39,6 @@ package it.alma;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -66,6 +65,7 @@ import it.alma.bean.SkillBean;
 import it.alma.bean.StatusBean;
 import it.alma.bean.WbsBean;
 import it.alma.exception.AttributoNonValorizzatoException;
+import it.alma.exception.CommandException;
 import it.alma.exception.NotFoundException;
 import it.alma.exception.WebStorageException;
 
@@ -1418,23 +1418,26 @@ public class DBWrapper implements Query {
                     pst = con.prepareStatement(UPDATE_PROJECT_STATUS);
                     con.setAutoCommit(false);
                     pst.clearParameters();
-                    pst.setDate(1, Utils.convert(DATA_FORMAT.parse(paramsStatus.get("sDataInizio"))));
-                    pst.setDate(2, Utils.convert(DATA_FORMAT.parse(paramsStatus.get("sDataFine"))));
-                    pst.setString(3, paramsStatus.get("sAvanzamento"));
-                    pst.setInt(4, Integer.parseInt(paramsStatus.get("sTempi")));
-                    pst.setInt(5, Integer.parseInt(paramsStatus.get("sCosti")));
-                    pst.setInt(6, Integer.parseInt(paramsStatus.get("sRischi")));
-                    pst.setInt(7, Integer.parseInt(paramsStatus.get("sRisorse")));
-                    pst.setInt(8, Integer.parseInt(paramsStatus.get("sScope")));
-                    pst.setInt(9, Integer.parseInt(paramsStatus.get("sComunicazione")));
-                    pst.setInt(10, Integer.parseInt(paramsStatus.get("sQualita")));
-                    pst.setInt(11, Integer.parseInt(paramsStatus.get("sApprovvigionamenti")));
-                    pst.setInt(12, Integer.parseInt(paramsStatus.get("sStakeholder")));
+                    Date dateTemp = Utils.formatDate(paramsStatus.get("sts-datainizio"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
+                    pst.setDate(1, Utils.convert(dateTemp));
+                    dateTemp = null;
+                    dateTemp = Utils.formatDate(paramsStatus.get("sts-datafine"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
+                    pst.setDate(2, Utils.convert(dateTemp));
+                    pst.setString(3, paramsStatus.get("sts-avanzamento"));
+                    pst.setInt(4, Integer.parseInt(paramsStatus.get("sts-tempi")));
+                    pst.setInt(5, Integer.parseInt(paramsStatus.get("sts-costi")));
+                    pst.setInt(6, Integer.parseInt(paramsStatus.get("sts-rischi")));
+                    pst.setInt(7, Integer.parseInt(paramsStatus.get("sts-risorse")));
+                    pst.setInt(8, Integer.parseInt(paramsStatus.get("sts-scope")));
+                    pst.setInt(9, Integer.parseInt(paramsStatus.get("sts-comunicazione")));
+                    pst.setInt(10, Integer.parseInt(paramsStatus.get("sts-qualita")));
+                    pst.setInt(11, Integer.parseInt(paramsStatus.get("sts-approvvigionamenti")));
+                    pst.setInt(12, Integer.parseInt(paramsStatus.get("sts-stakeholder")));
                     pst.setDate(13, Utils.convert(Utils.convert(Utils.getCurrentDate())));
                     pst.setDate(14, Utils.convert(Utils.convert(Utils.getCurrentDate())));
                     pst.setString(15, getLogin(userId));
                     pst.setInt(16, idProj);
-                    pst.setInt(17, Integer.parseInt(paramsStatus.get("sId")));
+                    pst.setInt(17, Integer.parseInt(paramsStatus.get("sts-id")));
                     //JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
                     pst.executeUpdate();
                     con.commit();
@@ -1452,10 +1455,10 @@ public class DBWrapper implements Query {
             String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il progetto.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + nfe.getMessage(), nfe);
-        } catch (ParseException pe) {
+        } catch (CommandException ce) {
             String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il progetto.\n";
             LOG.severe(msg); 
-            throw new WebStorageException(msg + pe.getMessage(), pe);
+            throw new WebStorageException(msg + ce.getMessage(), ce);
         } finally {
             try {
                 con.close();
