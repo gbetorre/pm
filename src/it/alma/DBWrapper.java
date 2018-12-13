@@ -44,6 +44,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Vector;
 import java.util.logging.Logger;
 
@@ -714,6 +715,7 @@ public class DBWrapper implements Query {
      * @return <code>StatusBean</code> - StatusBean rappresentante lo status di dato identificativo passato come argomento
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento
      */
+    @SuppressWarnings("null")
     public StatusBean getStatus(int idStatus) 
                          throws WebStorageException {
         ResultSet rs = null;
@@ -1006,7 +1008,7 @@ public class DBWrapper implements Query {
      */
     @SuppressWarnings({ "null", "static-method" })
     public Vector<SkillBean> getSkills(int projId)
-                                throws WebStorageException{
+                                throws WebStorageException {
         ResultSet rs = null;
         Connection con = null;
         PreparedStatement pst = null;
@@ -1051,7 +1053,7 @@ public class DBWrapper implements Query {
      */
     @SuppressWarnings({ "null", "static-method" })
     public Vector<RiskBean> getRisks(int projId)
-                              throws WebStorageException{
+                              throws WebStorageException {
         ResultSet rs = null;
         Connection con = null;
         PreparedStatement pst = null;
@@ -1091,31 +1093,34 @@ public class DBWrapper implements Query {
      * <p>Restituisce un vector contenente tutte le Wbs di un dato progetto.</p>
      * 
      * @param idProj - id del progetto di cui caricare le wbs
+     * @param getAll - flag specificante se bisogna recuperare solo i WorkPackage (false) o tutte le WBS (true)
      * @return vectorWbs - vettore contenente tutte le Wbs di un progetto
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
     @SuppressWarnings({ "null", "static-method" })
-    public Vector<WbsBean> getWbs (int idProj) 
+    public Vector<WbsBean> getWbs (int idProj, 
+                                   boolean getAll) 
                             throws WebStorageException {
         ResultSet rs = null;
         Connection con = null;
         PreparedStatement pst = null;
         WbsBean wbs = null;
-        Vector<WbsBean> vectorWbs = new Vector<WbsBean>();
+        Vector<WbsBean> vWbs = new Vector<WbsBean>();
+        String query = getAll ? GET_WBS_BY_PROJECT : GET_WP_BY_PROJECT;
         try {
             // Ottiene il progetto precaricato quando l'utente si è loggato corrispondente al progetto sul quale aggiungere un'attività
             Integer key = new Integer(idProj);
             con = pol_manager.getConnection();
-            pst = con.prepareStatement(GET_WBS_OF_PROJECT);
+            pst = con.prepareStatement(query);
             pst.clearParameters();
             pst.setInt(1, key);
             rs = pst.executeQuery();
             while (rs.next()) {
                 wbs = new WbsBean();
                 BeanUtil.populate(wbs, rs);
-                vectorWbs.add(wbs);
+                vWbs.add(wbs);
             }
-            return vectorWbs;
+            return vWbs;
         }  catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto RiskBean non valorizzato; problema nella query dell\'utente.\n";
             LOG.severe(msg); 
@@ -1133,6 +1138,48 @@ public class DBWrapper implements Query {
         }
     }
     
+    
+    /**
+     * 
+     * @param query 
+     * @return 
+     * @throws WebStorageException 
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public LinkedList<CodeBean> getStati(String query)
+                                  throws WebStorageException {
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        CodeBean stato = null;
+        Vector<CodeBean> stati = new Vector<CodeBean>();
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(query);
+            pst.clearParameters();
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                stato = new CodeBean();
+                BeanUtil.populate(stato, rs);
+                stati.add(stato);
+            }
+            return new LinkedList<CodeBean>(stati);
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto non valorizzato; problema nella query.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
     
     /* ********************************************************** *
      *                        Metodi di POL                       *
