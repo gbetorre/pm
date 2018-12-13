@@ -23,6 +23,7 @@
     <script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.17.0/additional-methods.js"></script>
     <script src="<c:out value="${initParam.urlDirectoryScript}" />jquery-ui.js"></script>
     <script src="<c:out value="${initParam.urlDirectoryScript}" />jquery.textarea_autosize.js"></script>
+    <script src="<c:out value="${initParam.urlDirectoryScript}" />grayscale.js"></script>
     <%--base href="${requestScope.baseHref}" /--%>
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.css">
@@ -31,6 +32,7 @@
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />pol.css" type="text/css" />
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />style.css" type="text/css" />
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />jquery-ui.css" type="text/css" />
+    <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />grayscale.css" type="text/css" />
   </head>
   <body>
   <c:catch var="exception">
@@ -46,9 +48,9 @@
     </div>
     <c:if test="${not empty foot and foot}">    
     <!-- Footer -->
-    <div id="idFooter" class="footer">
+    <footer>
       <%@ include file="footer.jspf" %>
-    </div>    
+    </footer>    
     </c:if>
   </c:catch>
   <c:out value="${exception}" />
