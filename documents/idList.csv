@@ -1,3 +1,131 @@
-﻿Element name;Id
-div header;divHeader
-div footer;divFooter
+PAGINA;ELEMENTO;id;name
+pcDeliverable.jsp;form;pcdeliverable_form;
+pcDeliverable.jsp;ul;tabs-0;
+pcDeliverable.jsp;div;tab-pcdeliverable;
+pcDeliverable.jsp;textarea;;pcd-descrizione
+pcDeliverable.jsp;div;container-fluid;
+error.jsp;meta ;;language
+error.jsp;meta ;;description
+error.jsp;meta ;;creator
+error.jsp;meta ;;author
+error.jsp;a;countdown;
+login.jsp;input;input;usr
+login.jsp;input;pwd;pwd
+pcAttivita.jsp;form;newAct_form;
+pcAttivita.jsp;select;actPeople;actPeople
+pcAttivita.jsp;input;show-extrainfo;
+pcAttivita.jsp;div;actNome;actNome
+pcAttivita.jsp;textarea;;textarea
+pcAttivita.jsp;input;actDataInizio;actDataInizio
+pcAttivita.jsp;input;actDataFine;actDataFine
+pcAttivita.jsp;input;actDataInizioAttesa;actDataInizioAttesa
+pcAttivita.jsp;input;actDataFineAttesa;actDataFineAttesa
+pcAttivita.jsp;input;actDataInizioEffettiva;actDataInizioEffettiva
+pcAttivita.jsp;input;actDataFineEffettiva;actDataInizioEffettiva
+pcAttivita.jsp;input;actGuPrevisti;actGuPrevisti
+pcAttivita.jsp;input;actGuEffettivi;actGuEffettivi
+pcAttivita.jsp;input;actGuRimanenti;actGuRimanenti
+pcAttivita.jsp;textarea;;sAvanzamento
+pcAttivita.jsp;input;;actMilestone
+pcAttivita.jsp;select;sRischi;sRischi
+pcAttivita.jsp;div;actIdComplessita;actIdComplessita
+pcAttivita.jsp;div;actIdStato;actIdStato
+pcAttivita.jsp;input;btn;
+pcCompetenza.jsp;div;skillId;skillId
+pcCompetenza.jsp;div;skillDescrizione;skillDescrizione
+pcCompetenza.jsp;div;skillInformativa;skillInformativa
+pcCompetenza.jsp;div;skillPresenza;skillPresenza
+pcCompetenza.jsp;div;skillIdPersona;skillIdPersona
+pcMilestone.jsp;input;pcm-id${status};pcm-id${status}
+pcMilestone.jsp;input;pcm-nome${status};pcm-nome${status}
+pcMilestone.jsp;input;pcm-descrizione${status};pcm-descrizione${status}
+pcMilestone.jsp;input;pcm-milestone${status};pcm-milestone${status}
+pcMilestone.jsp;input;pcm-milestone${status};pcm-milestone${status}
+pcMilestone.jsp;input;pcm-loop-status;pcm-loop-status
+pcRischi.jsp;ul;tabs-0;
+pcRischi.jsp;div;rischi;
+pcRischi.jsp;input ;pck-id${status};pck-id${status}
+pcRischi.jsp;th;pck-nome${status};pck-nome${status}
+pcRischi.jsp;th;pck-informativa${status};pck-informativa${status}
+pcRischi.jsp;th;pck-impatto${status};pck-impatto${status}
+pcRischi.jsp;th;pck-livello${status};pck-livello${status}
+pcRischi.jsp;th;pck-stato${status};pck-stato${status}
+pcRischi.jsp;input;pck-loop-status;pck-loop-status
+pcRischio.jsp;div;riskId;riskId
+pcRischio.jsp;div;riskDescrizione;riskDescrizione
+pcRischio.jsp;div;riskProbabilita;riskProbabilita
+pcRischio.jsp;div;riskImpatto;riskImpatto
+pcRischio.jsp;div;riskLivello;riskLivello
+pcRischio.jsp;div;riskStato;riskStato
+pcRisorse.jsp;form;pcrisorse_form;
+pcRisorse.jsp;div;tab-pcrisorse;
+pcRisorse.jsp;input;pcr-id${status};pcr-id${status}
+pcRisorse.jsp;th;pcr-nome${status};pcr-nome${status}
+pcRisorse.jsp;th;pcr-informativa${status};pcr-informativa${status}
+pcRisorse.jsp;input;pcr-presenza${status};pcr-presenza${status}
+pcRisorse.jsp;input;pcr-presenza${status};pcr-presenza${status}
+pcRisorse.jsp;input;pcr-presenza${status};pcr-presenza${status}
+pcRisorse.jsp;input;pcr-loop-status;pcr-loop-status
+pcRisorse.jsp;textarea;;pcr-chiaveesterni
+pcRisorse.jsp;textarea;;pcr-chiaveesterni
+pcRisorse.jsp;textarea;;pcr-serviziateneo
+pcStakeholder.jsp;form;pcstakeholder_form;
+pcStakeholder.jsp;div;tab-pcstakeholder;
+pcStakeholder.jsp;textarea;;pcs-chiave
+pcStakeholder.jsp;textarea;;pcs-istituzionale
+pcStakeholder.jsp;textarea;;pcs-marginale
+pcStakeholder.jsp;textarea;;pcs-operativo
+pcStakeholder.jsp;div ;container-fluid;
+pcVincoli.jsp;form;pcvincoli_form;
+pcVincoli.jsp;textarea;;pcc-descrizione
+pcVincoli.jsp;div;container-fluid;
+pcVision.jsp;form;pcvision_form;pcv
+pcVision.jsp;div;tab-pcvision;
+pcVision.jsp;textarea ;pcv-situazione;pcv-situazione
+pcVision.jsp;textarea ;pcv-descrizione;pcv-descrizione
+pcVision.jsp;textarea ;pcv-obiettivi;pcv-obiettivi
+pcVision.jsp;textarea ;pcv-minacce;pcv-minacce
+pcVision.jsp;div;container-fluid;
+projActivities.jsp;input;act-id${status};act-id${status}
+projActivities.jsp;input;act-nome${status};act-nome${status}
+projActivities.jsp;input;act-descrizione${status};act-descrizione${status}
+projActivities.jsp;input;act-milestone${status};act-milestone${status}
+projActivities.jsp;input;act-milestone${status};act-milestone${status}
+projActivities.jsp;div;container-fluid;
+projCharter.jsp;ul;tabs-0;
+projCharter.jsp;input;;modifica
+projCharter.jsp;input;;salva
+projCharter.jsp;input;;annulla
+projStatus.jsp;form;status_form;
+projStatus.jsp;input;sts-id;sts-id
+projStatus.jsp;input;sts-datainizio;sts-datainizio
+projStatus.jsp;input;sts-datafine;sts-datafine
+projStatus.jsp;textarea;;sts-avanzamento
+projStatus.jsp;select;sts-costi;sts-costi
+projStatus.jsp;select;sts-tempi;sts-tempi
+projStatus.jsp;select;sts-rischi;sts-rischi
+projStatus.jsp;select;sts-risorse;sts-risorse
+projStatus.jsp;select;sts-scope;sts-scope
+projStatus.jsp;select;sts-comunicazione;sts-comunicazione
+projStatus.jsp;select;sts-qualita;sts-qualita
+projStatus.jsp;select;sts-approvvigionamenti;sts-approvvigionamenti
+projStatus.jsp;select;sts-stakeholder;sts-stakeholder
+projWBS.jsp;ul;tabs-0;
+projWBS.jsp;div;tab-pcvision;
+projWBS.jsp;input;wbs-id${status};wbs-id${status}
+projWBS.jsp;input;wbs-id${status};wbs-id${status}
+projWBS.jsp;input;wbs-descrizione${status};wbs-descrizione${status}
+projWBS.jsp;input;wbs-workpackage${status};wbs-workpackage${status}
+projWBS.jsp;input;wbs-workpackage${status};wbs-workpackage${status}
+projWBS.jsp;div;container-fluid;
+template.jsp;meta ;;language
+template.jsp;meta ;;description
+template.jsp;meta ;;creator
+template.jsp;meta ;;author
+template.jsp;div;idHeader;
+template.jsp;div;idFooter;
+footer.jsp;p;ragSociale;
+footer.jsp;div;footer;
+footer.jsp;a;eduroam;
+subPanel.jsp;input;;modifica
+subPanel.jsp;input;;${distinguishingSubmitName}
