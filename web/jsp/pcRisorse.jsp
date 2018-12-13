@@ -55,17 +55,17 @@
           <hr class="separatore" />
           <label for="pcr-chiaveesterni">Fornitori chiave esterni:</label>
           <br>
-          <textarea name="pcr-chiaveesterni" class="form-control" aria-label="With textarea" readonly>${p.fornitoriChiaveEsterni}</textarea>
+          <textarea name="pcr-chiaveesterni" class="form-control" aria-label="With textarea" maxlength="1024" readonly>${p.fornitoriChiaveEsterni}</textarea>
           <div class="charNum"></div>
           <hr class="separatore" />
           <label for="pcr-chiaveinterni">Fornitori chiave interni:</label>
           <br>
-          <textarea name="pcr-chiaveinterni" class="form-control" aria-label="With textarea" readonly>${p.fornitoriChiaveInterni}</textarea>
+          <textarea name="pcr-chiaveinterni" class="form-control" aria-label="With textarea" maxlength="1024" readonly>${p.fornitoriChiaveInterni}</textarea>
           <div class="charNum"></div>
           <hr class="separatore" />
           <label for="pcr-serviziateneo">Servizi di ateneo:</label>
           <br>
-          <textarea name="pcr-serviziateneo" class="form-control" aria-label="With textarea" readonly>${p.serviziAteneo}</textarea>
+          <textarea name="pcr-serviziateneo" class="form-control" aria-label="With textarea" maxlength="1024" readonly>${p.serviziAteneo}</textarea>
           <div class="charNum"></div>
           <hr class="separatore" />
           <div id="container-fluid">
@@ -121,16 +121,17 @@
             return true;
           }
         });
-        $('textarea').keyup(function () {
-        	var len = $(this).val().length;
-        	var dblength = 1024;
-        	if(len >= dblength) {
-        		this.value = this.value.substring(0, dblength);
-        		$(this).next('div').text(' you have reached the limit');
-        	} else {
-        		var chars = dblength - len;
-        		$(this).next('div').text(chars + ' characters left');
-        	}
+        
+        $('textarea[maxlength]').keyup(function () {
+          var len = $(this).val().length;
+          var dblength = parseInt($(this).attr('maxlength'));
+          if(len >= dblength) {
+            this.value = this.value.substring(0, dblength);
+            $(this).next('div').text(' you have reached the limit');
+          } else {
+            var chars = dblength - len;
+            $(this).next('div').text(chars + ' characters left');
+          }
         });
       });
     </script>

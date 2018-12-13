@@ -26,7 +26,7 @@
       <hr class="separatore" /> 
       <div class="tab-content responsive hidden-xs hidden-sm">
         <div role="tabpanel" class="tab-pane active" id="tab-pcdeliverable">
-          <textarea name="pcd-descrizione" class="form-control" aria-label="With textarea" readonly>${p.deliverable}</textarea>
+          <textarea name="pcd-descrizione" class="form-control" aria-label="With textarea" maxlength="1024" readonly>${p.deliverable}</textarea>
           <div class="charNum"></div>
         </div>
       </div>
@@ -74,16 +74,17 @@
             return true;
           }
         });
-        $('textarea').keyup(function () {
-        	var len = $(this).val().length;
-        	var dblength = 1024;
-        	if(len >= dblength) {
-        		this.value = this.value.substring(0, dblength);
-        		$(this).next('div').text(' you have reached the limit');
-        	} else {
-        		var chars = dblength - len;
-        		$(this).next('div').text(chars + ' characters left');
-        	}
+        
+        $('textarea[maxlength]').keyup(function () {
+          var len = $(this).val().length;
+          var dblength = parseInt($(this).attr('maxlength'));
+          if(len >= dblength) {
+            this.value = this.value.substring(0, dblength);
+            $(this).next('div').text(' you have reached the limit');
+          } else {
+            var chars = dblength - len;
+            $(this).next('div').text(chars + ' characters left');
+          }
         });
       });
     </script>
