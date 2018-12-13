@@ -10,10 +10,12 @@
           <sup>&#10039;</sup>
         </div>
         <div class="col-sm-5">
-          <select class="form-control" id="actPeople" name="actPeople">
-          <c:forEach var="person" items="${requestScope.people}">
+          <select class="form-control" id="act-people" name="act-people">
+          <c:forEach var="person" items="${requestScope.people}" varStatus="status">
             <option value="${person.id}">${person.nome} ${person.cognome}</option>
-            <c:set var="skills" value="${person.competenze}" scope="page" />
+            <c:if test="${status.index eq 0}">
+              <c:set var="skills" value="${person.competenze}" scope="page" />
+            </c:if>
           </c:forEach>
           </select>
         </div>
@@ -25,7 +27,7 @@
           <sup>&#10039;</sup>
         </div>
         <div class="col-sm-5">
-          <select class="form-control" id="actIdRuolo" name="actIdRuolo" multiple>
+          <select class="form-control" id="act-role" name="act-role" multiple>
           <c:forEach var="skill" items="${pageScope.skills}">
             <option value="${skill.id}"><c:out value="${skill.nome}" /></option>
           </c:forEach>
@@ -39,17 +41,17 @@
         </div>
       </div>
       <hr />
-      <div class="additional-fields" style="display:none;">
+      <div class="additional-fields">
         <div class="row">
           <div class="col-sm-5">Nome attivit&agrave;</div>
-          <div class="col-sm-5"><input type="text" class="form-control" id="actNome" name="actNome" value="" readonly></div>
+          <div class="col-sm-5"><input type="text" class="form-control" id="act-name" name="act-name" value="" readonly></div>
         </div>
         <br />
         <div class="row">
           <div class="col-sm-5">Descrizione dell'attivit&agrave;</div>
           <!-- <div class="col-sm-5"><input type="text" class="form-control" id="actDescrizione" name="actDescrizione" value=""></div> -->
           <div class="col-sm-5">
-            <textarea class="form-control" name="sAvanzamento" readonly></textarea>
+            <textarea class="form-control" name="act-progress" readonly></textarea>
             <div class="charNum"></div>
           </div>
         </div>
@@ -57,61 +59,61 @@
         <div class="row">
           <div class="col-sm-5">Data di inizio dell'attivit&agrave;</div>
           <div class="col-sm-5">
-            <input type="text" class="form-control" id="actDataInizio" name="actDataInizio" value="" readonly></div>
+            <input type="text" class="form-control calendarData" id="act-datainizio" name="act-datainizio" value="${requestScope.now}" readonly></div>
         </div>
         <br />
         <div class="row">
           <div class="col-sm-5">Data di fine dell'attivit&agrave;</div>
           <div class="col-sm-5">
-            <input type="text" class="form-control" id="actDataFine" name="actDataFine" value="" readonly></div>
+            <input type="text" class="form-control calendarData" id="act-datafine" name="act-datafine" value="" readonly></div>
         </div>
         <br />
         <div class="row">
           <div class="col-sm-5">Data di inizio attesa</div>
           <div class="col-sm-5">
-            <input type="text" class="form-control" id="actDataInizioAttesa" name="actDataInizioAttesa" value="" readonly>
+            <input type="text" class="form-control calendarData" id="act-datainizioattesa" name="act-datainizioattesa" value="" readonly>
           </div>
         </div>
         <br />
         <div class="row">
           <div class="col-sm-5">Data di fine attesa</div>
           <div class="col-sm-5">
-            <input type="text" class="form-control" id="actDataFineAttesa" name="actDataFineAttesa" value="" readonly>
+            <input type="text" class="form-control calendarData" id="act-datafineattesa" name="act-datafineattesa" value="" readonly>
           </div>
         </div>
         <br />
         <div class="row">
           <div class="col-sm-5">Data di inizio effettiva</div>
           <div class="col-sm-5">
-            <input type="text" class="form-control" id="actDataInizioEffettiva" name="actDataInizioEffettiva" value="" readonly>
+            <input type="text" class="form-control calendarData" id="act-datainizioeffettiva" name="act-datainizioeffettiva" value="" readonly>
           </div>
         </div>
         <br />
         <div class="row">
           <div class="col-sm-5">Data di fine effettiva</div>
           <div class="col-sm-5">
-            <input type="text" class="form-control" id="actDataFineEffettiva" name="actDataFineEffettiva" value="" readonly>
+            <input type="text" class="form-control calendarData" id="act-datafineeffettiva" name="act-datafineeffettiva" value="" readonly>
           </div>
         </div>
         <br />
         <div class="row">
           <div class="col-sm-5">Giorni/Uomo previsti</div>
           <div class="col-sm-5">
-            <input type="text" class="form-control" id="actGuPrevisti" name="actGuPrevisti" value="" readonly>
+            <input type="text" class="form-control" id="act-guprevisti" name="act-guprevisti" value="" readonly>
           </div>
         </div>
         <br />
         <div class="row">
           <div class="col-sm-5">Giorni/Uomo effettivi</div>
           <div class="col-sm-5">
-            <input type="text" class="form-control" id="actGuEffettivi" name="actGuEffettivi" value="" readonly>
+            <input type="text" class="form-control" id="act-gueffettivi" name="act-gueffettivi" value="" readonly>
           </div>
         </div>
         <br />
         <div class="row">
           <div class="col-sm-5">Giorni/Uomo rimanenti</div>
           <div class="col-sm-5">
-            <input type="text" class="form-control" id="actGuRimanenti" name="actGuRimanenti" value="" readonly>
+            <input type="text" class="form-control" id="act-gurimanenti" name="act-gurimanenti" value="" readonly>
           </div>
         </div>
         <br />
@@ -119,7 +121,7 @@
           <div class="col-sm-5">Note di avanzamento</div>
           <div class="col-sm-5">
             <!-- <input type="text" class="form-control" id="actNote" name="actNote" value=""> -->
-            <textarea class="form-control" name="sAvanzamento" readonly></textarea>
+            <textarea class="form-control" name="act-avanzamento" readonly></textarea>
             <div class="charNum"></div>
           </div>
         </div>
@@ -127,26 +129,42 @@
         <div class="row">
           <div class="col-sm-5">Milestone</div>
           <div class="col-sm-5">
-            <input type="checkbox" class="form-check-input" id="actMilestone" name="actMilestone">
+            &nbsp;&nbsp;&nbsp;
+            <input type="checkbox" class="form-check-input" id="act-milestone" name="act-milestone">
           </div>
         </div>
         <br />
         <div class="row">
           <div class="col-sm-5">Identificativo WBS</div>
           <div class="col-sm-5">
-            <select class="form-control" id="sRischi" name="sRischi" disabled></select>
-            <!-- <input type="text" class="form-control" id="actIdWbs" name="actIdWbs" value=""> -->
+          <select class="form-control" id="act-wbs" name="act-wbs">
+          <c:forEach var="wp" items="${requestScope.wbs}" varStatus="status">
+            <option value="${wp.id}">${wp.nome}</option>
+          </c:forEach>
+          </select>
           </div>
         </div>
         <br />
         <div class="row">
           <div class="col-sm-5">Identificativo complessit&agrave; dell'attivit&agrave;</div>
-          <div class="col-sm-5"><input type="text" class="form-control" id="actIdComplessita" name="actIdComplessita" value=""></div>
+          <div class="col-sm-5">
+            <select class="form-control" id="act-compl" name="act-compl">
+            <c:forEach var="status" items="${requestScope.complessita}" varStatus="loop">
+              <option value="${status.id}">${status.nome}</option>
+            </c:forEach>
+            </select>
+          </div>
         </div>
         <br />
         <div class="row">
-          <div class="col-sm-5">Identificativo stato attivit&agrave;</div>
-          <div class="col-sm-5"><input type="text" class="form-control" id="actIdStato" name="actIdStato" value=""></div>
+          <div class="col-sm-5">Stato attivit&agrave;</div>
+          <div class="col-sm-5">
+            <select class="form-control" id="act-status" name="act-status">
+            <c:forEach var="status" items="${requestScope.statiAttivita}" varStatus="loop">
+              <option value="${status.id}">${status.nome}</option>
+            </c:forEach>
+            </select>
+          </div>
         </div>
         <br />
         <input type='button' id='btn' value='Close' class="btn btn-primary" />
@@ -166,36 +184,32 @@
     $(document).ready(function () {
       $('#newAct_form').validate ({
       rules: {
-        'actNome': {
+        'act-name': {
           required: true,
           minlength: offsetcharacter
         },
-        'actDataInizio': {
+        'act-datainizio': {
           required: true
         },
-        'actDataFine': {
+        'act-datafine': {
           required: true
         },
-        'actGuPrevisti': {
-          numeric: true
+        'act-guprevisti': {
+          number: true
         }
       }, 
       messages: {
-        'actNome': "Please enter the description of project status.",
-        'actDataInizio': "Please enter a valid data inizio.",
-        'actDataFine': "Please enter a valid data fine."
+        'act-name': "Inserire il nome dell\'attivita\'",
+        'act-datainizio': "Inserire una data di inizio valida",
+        'act-datafine': "Inserire una data di fine valida",
+        'act-guprevisti': "Inserire un valore numerico"
       },
       submitHandler: function (form) {
         alert('ok');
         return true;
       }
       });
-      $('#actDataInizio').datepicker();
-      $('#actDataFine').datepicker();
-      $('#actDataInizioAttesa').datepicker();
-      $('#actDataFineAttesa').datepicker();
-      $('#actDataInizioEffettiva').datepicker();
-      $('#actDataFineEffettiva').datepicker();
+
       $('textarea').keyup(function (e) {
           var len = $(this).val().length;
           var dblength = 16384;
@@ -219,14 +233,13 @@
     });
     
     
-    $("#actPeople").change(function () {
+    $("#act-people").change(function () {
       switch($(this).val()) {
       <c:forEach var="person" items="${requestScope.people}">
         case '${person.id}':
-          $("#actIdRuolo").html("<c:forEach var="skill" items="${person.competenze}"><option value='${skill.id}'>${skill.nome}</option></c:forEach>");
+          $("#act-role").html("<c:forEach var="skill" items="${person.competenze}"><option value='${skill.id}'>${skill.nome}</option></c:forEach>");
           break;
-       </c:forEach>
-     
+       </c:forEach>    
 //           case '28':
 //               $("#actIdRuolo").html("<option value='test'>item1: test 1</option><option value='test2'>item1: test 2</option>");
 //               break;
