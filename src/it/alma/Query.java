@@ -38,7 +38,6 @@ package it.alma;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 
@@ -67,7 +66,11 @@ public interface Query extends Serializable {
     /**
      * <p>Costante parlante per flag di recupero progetti utente che lo stesso pu&ograve; editaere.</p>
      */
-    public static final boolean GET_ONLY_WRITABLE_PROJECTS = false;
+    public static final boolean GET_WRITABLE_PROJECTS_ONLY = false;
+    /**
+     * <p>Costante parlante per flag di recupero WBS eclusivamente di tipo Work Package.</p>
+     */
+    public static final boolean GET_WORK_PACKAGES_ONLY = false;
     /**
      * <p>Costante parlante per flag di recupero progetti utente 
      * indipendentemente dal livello di autorizzazione 
@@ -128,7 +131,7 @@ public interface Query extends Serializable {
     /**
      * <p>Costante per il parametro identificante la pagina di inserimento di uno status di un progetto.</p>
      */
-    public static final String ADD_STATUS_TO_PROJECT          = "addSts";
+    public static final String ADD_STATUS_TO_PROJECT            = "addSts";
     /**
      * <p>Costante per il parametro identificante la pagina di inserimento di un'Attivit&agrave; di un progetto.</p>
      */
@@ -206,7 +209,47 @@ public interface Query extends Serializable {
      *                               QUERY DI POL                               *
      * ************************************************************************ *
      *                          1. Query di selezione                           *
-     * ************************************************************************ */    
+     * ************************************************************************ */
+    /**
+     * <p>Seleziona tutti i valori della tabella Complessita</p>
+     */
+    public static final String GET_COMPLESSITA = 
+            "SELECT " +
+            "       C.id        AS \"id\"" +
+            "   ,   C.nome      AS \"nome\"" +
+            "   FROM complessita C" + 
+            "   ORDER BY C.id";
+    
+    /**
+     * <p>Seleziona tutti i valori della tabella StatoAttivita</p>
+     */
+    public static final String GET_STATI_ATTIVITA = 
+            "SELECT " +
+            "       SA.id        AS \"id\"" +
+            "   ,   SA.nome      AS \"nome\"" +
+            "   FROM statoattivita SA" + 
+            "   ORDER BY SA.id";
+    
+    /**
+     * <p>Seleziona tutti i valori della tabella StatoAvanzamento</p>
+     */
+    public static final String GET_STATI_AVANZAMENTO = 
+            "SELECT " +
+            "       SAV.id        AS \"id\"" +
+            "   ,   SAV.nome      AS \"nome\"" +
+            "   FROM statoavanzamento SAV" + 
+            "   ORDER BY SAV.id";
+    
+    /**
+     * <p>Seleziona tutti i valori della tabella StatoProgetto</p>
+     */
+    public static final String GET_STATI_PROGETTO = 
+            "SELECT " +
+            "       SP.id        AS \"id\"" +
+            "   ,   SP.nome      AS \"nome\"" +
+            "   FROM statoprogetto SP" + 
+            "   ORDER BY SP.id";
+    
     /**
      * <p>Estrae l'utente con username e password passati come parametri.</p>
      */
@@ -388,7 +431,7 @@ public interface Query extends Serializable {
     /**
      * <p>Estrae le wbs relative ad un progetto, identificato tramite id, passato come parametro</p>
      */
-    public static final String GET_WBS_OF_PROJECT =
+    public static final String GET_WBS_BY_PROJECT =
             "SELECT " +
             "       W.id            AS \"id\"" + 
             "   ,   W.nome          AS \"nome\"" + 
@@ -396,6 +439,19 @@ public interface Query extends Serializable {
             "   ,   W.workpackage   AS \"workPackage\"" + 
             "   FROM wbs W" +
             "   WHERE id_progetto = ?";
+    
+    /**
+     * <p>Estrae le wbs relative ad un progetto, identificato tramite id, passato come parametro</p>
+     */
+    public static final String GET_WP_BY_PROJECT =
+            "SELECT " +
+            "       W.id            AS \"id\"" + 
+            "   ,   W.nome          AS \"nome\"" + 
+            "   ,   W.descrizione   AS \"descrizione\"" + 
+            "   ,   W.workpackage   AS \"workPackage\"" + 
+            "   FROM wbs W" +
+            "   WHERE id_progetto = ?" +
+            "       AND W.workpackage = true";
     
     /**
      * <p>Estrae tutte le persone che hanno un ruolo in un determinato progetto,
