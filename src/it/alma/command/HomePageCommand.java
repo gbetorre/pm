@@ -37,6 +37,7 @@
 package it.alma.command;
 
 import java.util.Enumeration;
+import java.util.LinkedList;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -47,6 +48,7 @@ import com.oreilly.servlet.ParameterParser;
 import it.alma.DBWrapper;
 import it.alma.Main;
 import it.alma.Query;
+import it.alma.bean.CodeBean;
 import it.alma.bean.ItemBean;
 import it.alma.bean.PersonBean;
 import it.alma.exception.CommandException;
@@ -76,13 +78,37 @@ public class HomePageCommand extends ItemBean implements Command {
      * Pagina a cui la command reindirizza per mostrare la form di login
      */
     private static final String nomeFileElenco = "/jsp/login.jsp";
+    /**
+     * DataBound.
+     */
+    private DBWrapper db;
+    /**
+     * Lista destinata a contenere i possibili valori per esprimere 
+     * la complessi&agrave; di un elemento
+     */
+    private static LinkedList<CodeBean> complessita = new LinkedList<CodeBean>();
+    /**
+     * Lista destinata a contenere i possibili valori per esprimere
+     * lo stato di un'attivit&agrave; di un progetto
+     */
+    private static LinkedList<CodeBean> statiAttivita = new LinkedList<CodeBean>();
+    /**
+     * Lista destinata a contenere i possibili valori per esprimere
+     * lo stato di avanzamento di un progetto
+     */
+    private static LinkedList<CodeBean> statiAvanzamento = new LinkedList<CodeBean>();
+    /**
+     * Lista destinata a contenere i possibili valori per esprimere
+     * lo stato in cui si trova un progetto in generale
+     */
+    private static LinkedList<CodeBean> statiProgetto = new LinkedList<CodeBean>();
     
     
     /** 
      * Crea una nuova istanza di HomePageCommand 
      */
     public HomePageCommand() {
-        ;   // It Doesn't Anything
+        /*;*/   // It doesn't anything
     }
   
     
@@ -103,6 +129,23 @@ public class HomePageCommand extends ItemBean implements Command {
         if (this.getPaginaJsp() == null) {
           String msg = FOR_NAME + "La voce menu' " + this.getNome() + " non ha il campo paginaJsp. Impossibile visualizzare i risultati.\n";
           throw new CommandException(msg);
+        }
+        try {
+            // Attiva la connessione al database
+            db = new DBWrapper();
+            // Recupera i possibili valori degli stati
+            complessita = db.getStati(Query.GET_COMPLESSITA);
+            statiAttivita = db.getStati(Query.GET_STATI_ATTIVITA);
+            statiAvanzamento = db.getStati(Query.GET_STATI_AVANZAMENTO);
+            statiProgetto = db.getStati(Query.GET_STATI_PROGETTO);
+        }
+        catch (WebStorageException wse) {
+            String msg = FOR_NAME + "Non e\' possibile avere una connessione al database.\n" + wse.getMessage();
+            throw new CommandException(msg, wse);
+        }
+        catch (Exception e) {
+            String msg = FOR_NAME + "Problemi nel caricare gli stati.\n" + e.getMessage();
+            throw new CommandException(msg, e);
         }
     }  
   
@@ -158,12 +201,7 @@ public class HomePageCommand extends ItemBean implements Command {
          *                          Recupera i parametri                        *
          * ******************************************************************** */
         // Recupera o inizializza 'id progetto'
-        int idPrj = parser.getIntParameter("id", -1);
-        // Recupera o inizializza 'tipo corsi di studio'
-        String tcs = parser.getStringParameter("tcs", "-");
-        // Recupera o inizializza 'tipo pagina'   
-        String part = parser.getStringParameter("p", "-");
-        
+        int idPrj = parser.getIntParameter("id", -1);       
         // Imposta il testo del Titolo da visualizzare prima dell'elenco
         req.setAttribute("titoloE", "Project Charter");
         // Salva nella request: Titolo pagina (da mostrare nell'HTML)
@@ -222,7 +260,18 @@ public class HomePageCommand extends ItemBean implements Command {
         return String.valueOf(attributesName);
     }
     
-    // TODO COMMENTO
+    
+    /**
+     * <p>Restituisce i nomi e i valori dei parametri presenti in Request
+     * in un dato momento e in un dato contesto, rappresentati dallo
+     * stato del chiamante.</p>
+     * <p>Pu&ograve; essere utilizzato per verificare rapidamente 
+     * quali parametri sono presenti in Request onde evitare duplicazioni
+     * e/o ridondanze.</p>
+     * 
+     * @param req HttpServletRequest contenente gli attributi che si vogliono conoscere
+     * @return un unico oggetto contenente tutti i valori e i nomi dei parametri settati in request nel momento in cui lo chiede il chiamante
+     */
     public static String getParameters(HttpServletRequest req) {
         Enumeration<String> parameters = req.getParameterNames();
         StringBuffer parametersName = new StringBuffer("<pre>");
@@ -237,6 +286,53 @@ public class HomePageCommand extends ItemBean implements Command {
         }
         parametersName.append("</pre>");
         return String.valueOf(parametersName);
+    }
+    
+    /* ************************************************************************ *
+     *                    Getters sulle variabili di classe                     *
+     * ************************************************************************ */
+    
+    /**
+     * <p>Restituisce i possibili valori descrittivi della complessit&agrave; 
+     * di un elemento.</p>
+     * 
+     * @return <code>LinkedList&lt;CodeBean&gt;</code> - una lista ordinata di tutti i possibili valori con cui puo' essere descritta la complessita' di un elemento
+     */
+    public static LinkedList<CodeBean> getComplessita() {
+        return new LinkedList<CodeBean>(complessita);
+    }
+    
+    
+    /**
+     * <p>Restituisce i possibili valori descrittivi della attivit&agrave; 
+     * di un work package.</p>
+     * 
+     * @return <code>LinkedList&lt;CodeBean&gt;</code> - una lista ordinata di tutti i possibili valori con cui puo' essere descritto lo stato di un'attivita'
+     */
+    public static LinkedList<CodeBean> getStatiAttivita() {
+        return new LinkedList<CodeBean>(statiAttivita);
+    }
+    
+    
+    /**
+     * <p>Restituisce i possibili valori descrittivi dell'avanzamento 
+     * di un progetto.</p>
+     * 
+     * @return <code>LinkedList&lt;CodeBean&gt;</code> - una lista ordinata di tutti i possibili valori con cui puo' essere descritto lo stato di avanzamento di un progetto
+     */
+    public static LinkedList<CodeBean> getStatiAvanzamento() {
+        return new LinkedList<CodeBean>(statiAvanzamento);
+    }
+    
+    
+    /**
+     * <p>Restituisce i possibili valori descrittivi dello stato 
+     * di un progetto.</p>
+     * 
+     * @return <code>LinkedList&lt;CodeBean&gt;</code> - una lista ordinata di tutti i possibili valori con cui puo' essere descritto lo stato di un progetto
+     */
+    public static LinkedList<CodeBean> getStatiProgetto() {
+        return new LinkedList<CodeBean>(statiProgetto);
     }
     
 }
