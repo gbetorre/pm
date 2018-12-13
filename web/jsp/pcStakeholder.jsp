@@ -28,22 +28,22 @@
     		<div role="tabpanel" class="tab-pane active" id="tab-pcstakeholder">
     		<label for="pcs-chiave">Chiave</label>
     		<br>
-    		<textarea name="pcs-chiave" class="form-control" aria-label="With textarea" readonly>${p.stakeholderChiave}</textarea>
+    		<textarea name="pcs-chiave" class="form-control" aria-label="With textarea" maxlength="1024" readonly>${p.stakeholderChiave}</textarea>
     		<div class="charNum"></div>
             <br><br>
     		<label for="pcs-istituzionale">Istituzionale</label>
     		<br>
-    		<textarea name="pcs-istituzionale" class="form-control" aria-label="With textarea" readonly>${p.stakeholderIstituzionali}</textarea>
+    		<textarea name="pcs-istituzionale" class="form-control" aria-label="With textarea" maxlength="1024" readonly>${p.stakeholderIstituzionali}</textarea>
     		<div class="charNum"></div>
             <br><br>
     		<label for="pcs-marginale">Marginale</label>
     		<br>
-    		<textarea name="pcs-marginale" class="form-control" aria-label="With textarea" readonly>${p.stakeholderMarginali}</textarea>
+    		<textarea name="pcs-marginale" class="form-control" aria-label="With textarea" maxlength="1024" readonly>${p.stakeholderMarginali}</textarea>
     		<div class="charNum"></div>
             <br><br>
     		<label for="pcs-operativo">Operativo</label>
     		<br>
-    		<textarea name="pcs-operativo" class="form-control" aria-label="With textarea" readonly>${p.stakeholderOperativi}</textarea>
+    		<textarea name="pcs-operativo" class="form-control" aria-label="With textarea" maxlength="1024" readonly>${p.stakeholderOperativi}</textarea>
           	<div class="charNum"></div>	
             <br><br>
     		<div id="container-fluid">
@@ -103,16 +103,17 @@
             return true;
           }
         });
-  	    $('textarea').keyup(function () {
-    	  var len = $(this).val().length;
-    	  var dblength = 1024;
-    	  if(len >= dblength) {
-    	  	this.value = this.value.substring(0, dblength);
-    	  	$(this).next('div').text(' you have reached the limit');
-    	  } else {
-    	  	var chars = dblength - len;
-    	  	$(this).next('div').text(chars + ' characters left');
-    	  }
-    	});
+        
+        $('textarea[maxlength]').keyup(function () {
+          var len = $(this).val().length;
+          var dblength = parseInt($(this).attr('maxlength'));
+          if(len >= dblength) {
+            this.value = this.value.substring(0, dblength);
+            $(this).next('div').text(' you have reached the limit');
+          } else {
+            var chars = dblength - len;
+            $(this).next('div').text(chars + ' characters left');
+          }
+        });
       });
     </script>
