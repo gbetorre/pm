@@ -247,7 +247,7 @@ public class ProjectCommand extends ItemBean implements Command {
                             LinkedHashMap<Integer, Vector> userWritableRisksByProjectId =  (LinkedHashMap<Integer, Vector>) ses.getAttribute("writableRisks");
                             LinkedHashMap<String, HashMap<Integer, Vector>> objectsMap = decant(userWritableActivitiesByProjectId, userWritableSkillsByProjectId, userWritableRisksByProjectId);
                             db.updateProjectPart(idPrj, user.getId(), writableProjects, objectsMap, params);
-                            Vector<ProjectBean> userWritableProjects = db.getProjects(user.getId(), Query.GET_ONLY_WRITABLE_PROJECTS);
+                            Vector<ProjectBean> userWritableProjects = db.getProjects(user.getId(), Query.GET_WRITABLE_PROJECTS_ONLY);
                             // Aggiorna i progetti, le attività dell'utente in sessione
                             ses.removeAttribute("writableProjects");
                             ses.removeAttribute("writableActivity");
@@ -315,7 +315,7 @@ public class ProjectCommand extends ItemBean implements Command {
                     } else if (part.contains(Query.PART_PROJECT_CHARTER_RISK)) {
                         vRisks = db.getRisks(idPrj);
                     } else if(part.equals(Query.PART_WBS)) {
-                        vWBS = db.getWbs(idPrj);
+                        vWBS = db.getWbs(idPrj, Query.GET_ALL);
                     }
                 }
                 fileJspT = nomeFile.get(part);
