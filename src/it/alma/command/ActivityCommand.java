@@ -41,6 +41,7 @@ import java.util.Enumeration;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Vector;
 import java.util.logging.Logger;
 
@@ -54,9 +55,11 @@ import it.alma.Main;
 import it.alma.Query;
 import it.alma.Utils;
 import it.alma.bean.ActivityBean;
+import it.alma.bean.CodeBean;
 import it.alma.bean.ItemBean;
 import it.alma.bean.PersonBean;
 import it.alma.bean.ProjectBean;
+import it.alma.bean.WbsBean;
 import it.alma.exception.AttributoNonValorizzatoException;
 import it.alma.exception.CommandException;
 import it.alma.exception.WebStorageException;
@@ -170,6 +173,14 @@ public class ActivityCommand extends ItemBean implements Command {
         Vector<ActivityBean> vActivities = new Vector<ActivityBean>();
         // Dichiara struttura di persone che possono essere aggiunte a un'attività
         Vector<PersonBean> candidates = null;
+        // Dichiara struttura di Work Package cui può essere aggiunta un'attività
+        Vector<WbsBean> workPackage = null;
+        // Dichiara lista di valori di complessità
+        LinkedList<CodeBean> complexity = null;
+        // Dichiara lista di valori di stati attività
+        LinkedList<CodeBean> states = null;
+        // Data di oggi sotto forma di oggetto String
+        String today = null;
         /* ******************************************************************** *
          *                    Recupera parametri e attributi                    *
          * ******************************************************************** */
@@ -234,7 +245,7 @@ public class ActivityCommand extends ItemBean implements Command {
                     //}
                     // Verifica se deve eseguire un'operazione di scrittura
                     if (write) {
-                        // Creazione della tabella valori parametri
+                        // Creazione della tabella che conterrà i valori dei parametri passati dalle form
                         HashMap<String, HashMap<String, String>> params = new HashMap<String, HashMap<String, String>>();
                         // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
                         HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
@@ -256,7 +267,7 @@ public class ActivityCommand extends ItemBean implements Command {
                              *                UPDATE Activity Part              *
                              * ************************************************ */
                             loadParams(part, parser, params);
-                            //Vector<ProjectBean> userWritableProjects = db.getProjects(user.getId(), Query.GET_ONLY_WRITABLE_PROJECTS);
+                            //Vector<ProjectBean> userWritableProjects = db.getProjects(user.getId(), Query.GET_WRITABLE_PROJECTS_ONLY);
                             db.updateActivityPart(idPrj, user.getId(), writableProjects, userWritableActivitiesByProjectId, params);
                         } else if (part.equalsIgnoreCase(Query.ADD_ACTIVITY_TO_PROJECT)) {
                             /* ************************************************ *
@@ -264,6 +275,7 @@ public class ActivityCommand extends ItemBean implements Command {
                              * ************************************************ */
                             loadParams(part, parser, params);
                             isHeader = isFooter = false;
+                            //db.insertActivityPart(idPrj, user.getId(), writableProjects, userWritableActivitiesByProjectId, params);
                         }
 
                         // Aggiorna i progetti, le attività dell'utente in sessione
@@ -281,7 +293,10 @@ public class ActivityCommand extends ItemBean implements Command {
                     } else if (part.equals(Query.ADD_ACTIVITY_TO_PROJECT)) {
                         isHeader = isFooter = false;
                         candidates = db.getPeople(runtimeProject.getId());
-                        
+                        workPackage = db.getWbs(runtimeProject.getId(), Query.GET_WORK_PACKAGES_ONLY); 
+                        complexity = HomePageCommand.getComplessita();
+                        states = HomePageCommand.getStatiAttivita();
+                        today = Utils.format(Utils.getCurrentDate());
                     }
                     fileJspT = nomeFile.get(part);
                 } else {
@@ -335,6 +350,14 @@ public class ActivityCommand extends ItemBean implements Command {
         req.setAttribute("attivita", vActivities);
         // Imposta nella request elenco persone del dipartimento
         req.setAttribute("people", candidates);
+        // Imposta nella request elenco wbs associabili
+        req.setAttribute("wbs", workPackage);
+        // Imposta nella request elenco wbs associabili
+        req.setAttribute("complessita", complexity);
+        // Imposta nella request elenco wbs associabili
+        req.setAttribute("statiAttivita", states);
+        // Imposta nella request data di oggi 
+        req.setAttribute("now", today);
         // Imposta la Pagina JSP di forwarding
         req.setAttribute("fileJsp", fileJspT);
     }
@@ -346,12 +369,12 @@ public class ActivityCommand extends ItemBean implements Command {
      * 
      * @param part la sezione del sito che si vuole aggiornare
      * @param parser oggetto per la gestione assistita dei parametri di input, gia' pronto all'uso
-     * @param params mappa da valorizzare per riferimento (ByRef)
+     * @param formParams mappa da valorizzare per riferimento (ByRef)
      * @throws CommandException se si verifica un problema nella gestione degli oggetti data o in qualche tipo di puntamento
      */
     private static void loadParams(String part, 
                                    ParameterParser parser,
-                                   HashMap<String, HashMap<String, String>> params)
+                                   HashMap<String, HashMap<String, String>> formParams)
                             throws CommandException {
         /* **************************************************** *
          *          Ramo di Project Charter - Milestone         *
@@ -370,26 +393,22 @@ public class ActivityCommand extends ItemBean implements Command {
                 }
                 pcm.put("pcm-milestone" + String.valueOf(i), milestone);
             }
-            params.put(Query.PART_PROJECT_CHARTER_MILESTONE, pcm);
+            formParams.put(Query.PART_PROJECT_CHARTER_MILESTONE, pcm);
         } 
         /* **************************************************** *
-         *                Ramo di INSERT Attivita'              *
+         *           Ramo di INSERT di una Attivita'            *
          * **************************************************** */
         else if (part.equalsIgnoreCase(Query.ADD_ACTIVITY_TO_PROJECT)) {
-            /* Recupero e caricamento parametri di project charter/milestone
-            int totActivities = Integer.parseInt(parser.getStringParameter("pcm-loop-status", Utils.VOID_STRING));
-            HashMap<String, String> pcm = new HashMap<String, String>();
-            for (int i = 0; i <= totActivities; i++) {
-                String milestone = "false";
-                pcm.put("pcm-id" + String.valueOf(i), parser.getStringParameter("pcm-id" + String.valueOf(i), Utils.VOID_STRING));
-                pcm.put("pcm-nome" + String.valueOf(i), parser.getStringParameter("pcm-nome" + String.valueOf(i), Utils.VOID_STRING));
-                pcm.put("pcm-descrizione" + String.valueOf(i), parser.getStringParameter("pcm-descrizione" + String.valueOf(i), Utils.VOID_STRING));
-                if((parser.getStringParameter("pcm-milestone" + String.valueOf(i), Utils.VOID_STRING)) != "") {
-                    milestone = "true";
-                }
-                pcm.put("pcm-milestone" + String.valueOf(i), milestone);
-            }
-            params.put(Query.PART_PROJECT_CHARTER_MILESTONE, pcm);*/
+            // Recupero e caricamento parametri di add activity
+            //int totActivities = Integer.parseInt(parser.getStringParameter("pcm-loop-status", Utils.VOID_STRING));
+            HashMap<String, String> act = new HashMap<String, String>();
+            act.put("pcv-situazione", parser.getStringParameter("pcv-situazione", Utils.VOID_STRING));
+            act.put("pcv-descrizione", parser.getStringParameter("pcv-descrizione", Utils.VOID_STRING));
+            act.put("pcv-obiettivi", parser.getStringParameter("pcv-obiettivi", Utils.VOID_STRING));
+            act.put("pcv-minacce", parser.getStringParameter("pcv-minacce", Utils.VOID_STRING));
+            // Caricamento della tabella valori parametri
+            
+            formParams.put(Query.PART_PROJECT_CHARTER_MILESTONE, act);
         }
     }
     
