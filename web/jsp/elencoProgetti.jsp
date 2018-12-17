@@ -17,10 +17,10 @@
         <tbody>
           <c:forEach var="prj" items="${requestScope.progetti}" varStatus="loop">
             <tr>
-              <td width="40px" scope="row"><c:out value="${prj.id}" /></td>
+              <td scope="row"><c:out value="${prj.id}" /></td>
               <td scope="row"><a href="<c:out value="${progetto}${prj.id}" />"><c:out value="${prj.titolo}" /></a></td>
-              <td width="150px" scope="row"><c:out value="${prj.statoProgetto.nome}" /></td>
-              <td width="450px" scope="row">
+              <td scope="row"><c:out value="${prj.statoProgetto.nome}" /></td>
+              <td width="40%" scope="row">
                 <a href="<c:out value= "${vision}${prj.id}" />"  class="btn btn-primary">Project Charter</a>
                 <a href="<c:out value= "${lastStatus}${prj.id}" />"  class="btn btn-primary">Status</a>
                 <a href="<c:out value= "${wbs}${prj.id}" />"  class="btn btn-primary">WBS</a>
