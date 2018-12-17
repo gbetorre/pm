@@ -41,6 +41,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Vector;
 import java.util.logging.Logger;
 
@@ -55,6 +56,7 @@ import it.alma.Main;
 import it.alma.Query;
 import it.alma.Utils;
 import it.alma.bean.ActivityBean;
+import it.alma.bean.CodeBean;
 import it.alma.bean.ItemBean;
 import it.alma.bean.PersonBean;
 import it.alma.bean.ProjectBean;
@@ -173,8 +175,8 @@ public class ProjectCommand extends ItemBean implements Command {
         String fileJspT = null;
         // Dichiara elenco di progetti
         Vector<ProjectBean> v = new Vector<ProjectBean>();
-        // Dichiara elenco di attività
-        Vector<ActivityBean> vActivities = new Vector<ActivityBean>();
+        // Dichiara lista di valori di stati avanzamento�
+        LinkedList<CodeBean> statiValues = null;
         // Dichiara elenco di competenze
         Vector<SkillBean> vSkills = new Vector<SkillBean>();
         // Dichiara elenco di rischi
@@ -227,6 +229,7 @@ public class ProjectCommand extends ItemBean implements Command {
         try {
             if (nomeFile.containsKey(part)) {
                 if (idPrj > 0) {
+                    statiValues = HomePageCommand.getStatiAvanzamento();
                     if (write) {
                         // Creazione della tabella valori parametri
                         HashMap<String, HashMap<String, String>> params = new HashMap<String, HashMap<String, String>>();
@@ -359,6 +362,8 @@ public class ProjectCommand extends ItemBean implements Command {
         req.setAttribute("listProjectStatus", projectStatusList);
         // Salva nella request l'avanzamento progetto più recente
         req.setAttribute("projectStatus", projectStatus);
+        // Salva nella request i valori degli stati di un'avanzamento progetto
+        req.setAttribute("statiValues", statiValues);
         // Imposta la Pagina JSP di forwarding
         req.setAttribute("fileJsp", fileJspT);
     }
