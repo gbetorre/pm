@@ -12,7 +12,7 @@
   <hr class="separatore" />
   <div class="tab-content responsive hidden-xs hidden-sm">
     <div role="tabpanel" class="tab-pane active" id="tab-pcvision">
-    <h4>Attivit&agrave; del progetto</h4>
+    <h4>Milestone del progetto</h4>
       <table class="table table-bordered table-hover">
         <thead class="thead-light">
         <tr>
