@@ -19,8 +19,8 @@
       window.jQuery || document.write('<script src="${initParam.urlDirectoryScrypt}/jquery-3.3.1.js"><\/script>');
     </script>
     <!-- Include jQuery validate Form elements from CDN or from local hosted copy -->
-    <script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.17.0/jquery.validate.js"></script>
-    <script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.17.0/additional-methods.js"></script>
+    <script src="<c:out value="${initParam.urlDirectoryScript}" /> jquery.validate-1.17.0.js"></script>
+    <script src="<c:out value="${initParam.urlDirectoryScript}" /> additional-methods-1.17.0.js"></script>
     <script src="<c:out value="${initParam.urlDirectoryScript}" />jquery-ui.js"></script>
     <script src="<c:out value="${initParam.urlDirectoryScript}" />jquery.textarea_autosize.js"></script>
     <script src="<c:out value="${initParam.urlDirectoryScript}" />grayscale.js"></script>
@@ -46,11 +46,12 @@
     <div class="page">
       <jsp:include page="${fileJsp}" />
     </div>
+    <br /><br /><br /><br />
     <c:if test="${not empty foot and foot}">    
-    <!-- Footer -->
-    <footer>
-      <%@ include file="footer.jspf" %>
-    </footer>    
+      <!-- Footer -->
+      <footer>
+        <%@ include file="footer.jspf" %>
+      </footer>    
     </c:if>
   </c:catch>
   <c:out value="${exception}" />
