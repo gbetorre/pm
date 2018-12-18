@@ -43,6 +43,7 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Vector;
@@ -250,7 +251,6 @@ public class DBWrapper implements Query {
      * @return <code>int</code> - un intero che rappresenta il massimo valore trovato, oppure zero se non sono stati trovati valori
      * @throws WebStorageException se si verifica un problema nella query o in qualche tipo di puntamento
      */
-    @SuppressWarnings({ "null", "static-method" })
     public int getMax (String table) 
                 throws WebStorageException {
         ResultSet rs = null;
@@ -1520,57 +1520,6 @@ public class DBWrapper implements Query {
     }
     
     
-    /**
-     * <p>Metodo per fare un inserimento di un nuovo stato progetto.</p>
-     * 
-     * @param userId - id dell'utente loggato
-     * @param idProj - id del progetto sul quale attribuire lo status
-     * @param idStatus - id dello status che si va ad inserire
-     * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
-     */
-    public void insertStatus (int userId,
-                              int idProj, 
-                              int idStatus)
-                       throws WebStorageException {
-        Connection con = null;
-        PreparedStatement pst = null;
-        try {
-            con = pol_manager.getConnection();
-            con.setAutoCommit(false);
-            pst = con.prepareStatement(INSERT_STATUS);
-            pst.clearParameters();
-            int nextVal = getMax("avanzamentoprogetto") + 1;
-            if (nextVal == idStatus) {
-                pst.setInt(1, idStatus);
-                pst.setDate(2, Utils.convert(Utils.convert(Utils.getCurrentDate())));
-                pst.setDate(3, Utils.convert(Utils.convert(Utils.getCurrentDate())));
-                pst.setDate(4, Utils.convert(Utils.convert(Utils.getCurrentDate())));
-                pst.setDate(5, Utils.convert(Utils.convert(Utils.getCurrentDate().getTime())));
-                pst.setString(6, getLogin(userId));
-                pst.setInt(7, idProj);
-                pst.executeUpdate();
-                con.commit();
-            } else {
-                //TODO errore
-            } 
-        } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Oggetto RiskBean non valorizzato; problema nella query dell\'utente.\n";
-            LOG.severe(msg); 
-            throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        } finally {
-            try {
-                con.close();
-            } catch (NullPointerException npe) {
-                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                LOG.severe(msg); 
-                throw new WebStorageException(msg + npe.getMessage());
-            } catch (SQLException sqle) {
-                throw new WebStorageException(FOR_NAME + sqle.getMessage());
-            }
-        }
-    }
-    
-    
     /** <p>Metodo che aggiorna le attivit&agrave; di progetto..</p>
      * 
      * @param idProj - id del progetto da aggiornare 
@@ -1674,7 +1623,62 @@ public class DBWrapper implements Query {
      *                        Metodi di POL                       *
     /* ********************************************************** *
      *                   Metodi di INSERIMENTO                    *
-     * ********************************************************** */
+     * ********************************************************** */    
+    /**
+     * <p>Metodo per fare un inserimento di un nuovo stato progetto.</p>
+     * 
+     * @param user - utente loggato
+     * @param idProj - id del progetto sul quale attribuire lo status
+     * @param idStatus - id dello status che si va ad inserire
+     * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    public void insertStatus (PersonBean user,
+                              int idProj, 
+                              int idStatus)
+                       throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        try {
+            con = pol_manager.getConnection();
+            con.setAutoCommit(false);
+            pst = con.prepareStatement(INSERT_STATUS);
+            pst.clearParameters();
+            int nextVal = getMax("avanzamentoprogetto") + 1;
+            if (nextVal == idStatus) {
+                pst.setInt(1, idStatus);
+                pst.setDate(2, Utils.convert(Utils.convert(Utils.getCurrentDate())));
+                pst.setDate(3, Utils.convert(getDefaultEndDate(idProj)));
+                pst.setDate(4, Utils.convert(Utils.convert(Utils.getCurrentDate())));
+                pst.setDate(5, Utils.convert(Utils.convert(Utils.getCurrentDate().getTime())));
+                pst.setString(6, user.getCognome() + " " + user.getNome());
+                pst.setInt(7, idProj);
+                pst.executeUpdate();
+                con.commit();
+            } else {
+                throw new WebStorageException(FOR_NAME + "un altro utente ha inserito un nuovo avanzamento progetto.\n");
+            } 
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto RiskBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
     /**
      * <p>Metodo per fare un nuovo inserimento di una nuova attivit&agrave;.</p>
      * 
@@ -1916,6 +1920,48 @@ public class DBWrapper implements Query {
     }
     
     
+    /**
+     * 
+     * @param idProj 
+     * @return 
+     * @throws WebStorageException 
+     */
+    private Date getDefaultEndDate (int idProj) 
+                             throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+        GregorianCalendar endDate = null;
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_PROJECT_PERIOD);
+            pst.clearParameters();
+            pst.setInt(1, idProj);
+            rs = pst.executeQuery();
+            if (rs.next()) {
+                if (rs.getFloat(1) == 0.25) {
+                    endDate = Utils.getDate(7, 0, 0);
+                } else {
+                    endDate = Utils.getDate(0, (int) rs.getFloat(1), 0);
+                }
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto endDate non valorizzato; problema nella query di stato.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+        return Utils.convert(endDate);
+    }
     /* ********************************************************** *
      *                        Metodi di QOL                       *
      *                          (ValDid)                          *
