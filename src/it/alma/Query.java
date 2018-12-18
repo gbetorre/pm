@@ -429,6 +429,19 @@ public interface Query extends Serializable {
             "       AND P.id= ?";
     
     /**
+     * <p>Estrae la wbs (o il workpackage) selezionata,
+     * identificata tramite l'id, passato come parametro</p>
+     */
+    public static final String GET_WBS =
+            "SELECT " +
+            "       W.id            AS \"id\"" + 
+            "   ,   W.nome          AS \"nome\"" + 
+            "   ,   W.descrizione   AS \"descrizione\"" + 
+            "   ,   W.workpackage   AS \"workPackage\"" + 
+            "   FROM wbs W" +
+            "   WHERE id = ?";
+    
+    /**
      * <p>Estrae le wbs relative ad un progetto, identificato tramite id, passato come parametro</p>
      */
     public static final String GET_WBS_BY_PROJECT =
@@ -441,7 +454,7 @@ public interface Query extends Serializable {
             "   WHERE id_progetto = ?";
     
     /**
-     * <p>Estrae le wbs relative ad un progetto, identificato tramite id, passato come parametro</p>
+     * <p>Estrae i workpackage relative ad un progetto, identificato tramite id, passato come parametro</p>
      */
     public static final String GET_WP_BY_PROJECT =
             "SELECT " +
@@ -1029,6 +1042,18 @@ public interface Query extends Serializable {
             "   ,       autoreultimamodifica = ?" +
             "   ,       id_progetto = ?" +
             "   WHERE id = ?";
+    
+    /**
+     * <p>Modifica una WBS (o workpackage) selezionato,
+     * identificato tramite l'id, passato come parametro.</p>
+     */
+    public static final String UPDATE_WBS = 
+            "UPDATE wbs" +
+            "   SET     nome = ?" +
+            "   ,       descrizione = ?" +
+            "   ,       workpackage = ?" +
+            "   ,       id_wbs = ?" +
+            "   WHERE id = ?";
 
         
     /* ************************************************************************ *
@@ -1043,6 +1068,18 @@ public interface Query extends Serializable {
             "SELECT " +
             "       MAX(id)                     AS \"max\"" +
             "   FROM ";
+    
+    
+    /**
+     * 
+     */
+    public static final String GET_PROJECT_PERIOD = 
+            "SELECT " +
+            "       PR.mesibase    AS \"mesiBase\"" +
+            "   FROM periodoriferimento PR" +
+            "       INNER JOIN progetto P ON PR.id = P.id_periodoriferimento" +
+            "   WHERE P.id = ?";
+    
     
     /**
      * <p>Query per inserimento di un nuovo status progetto.</p>
@@ -1140,7 +1177,7 @@ public interface Query extends Serializable {
             "   ,   impatto" +
             "   ,   livello" +
             "   ,   stato" +
-            "   ,   id_progetto" +
+            "   ,   id_progetto )" +
             "   VALUES (? " +          // id
             "   ,       ? " +          // descrizione
             "   ,       ? " +          // probabilità
@@ -1148,6 +1185,16 @@ public interface Query extends Serializable {
             "   ,       ? " +          // livello
             "   ,       ? " +          // stato
             "   ,       ?)" ;          // id progetto
+    
+    /**
+     * <p>Query di inserimento di una nuova WBS (o workpackage)</p>
+     */
+    public static final String INSERT_WBS = 
+            "INSERT INTO wbs" +
+            "   (   id" +
+            "   ,   id_progetto )" +
+            "   VALUES (? " +       // id
+            "   ,       ? )";       // id progetto
     
     
     /* ************************************************************************ *
