@@ -33,16 +33,22 @@ body {
 }
 
 a:link:not(.btn), a:visited:not(.btn) {
-	color: blue;
+	color: #484f51; 
 }
 
 a:hover:not(.btn):not(.ui-datepicker-prev):not(.ui-datepicker-next):not(.nav-link) {
-	background-color: yellow;
-	color: red;
+	text-decoration: underline;
+	color: black;
+	background-color: #d7d9d9;
 }
 
 a:visited.linkFooter, a:link.linkFooter {
 	color: red;
+}
+
+a:hover.linkFooter {
+	color: white;
+	text-decoration: underline;
 }
 
 a:link.btn, a:visited.btn {
