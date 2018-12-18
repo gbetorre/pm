@@ -1,0 +1,201 @@
+PAGINA;ELEMENTO;class
+pcDeliverable.jsp;ul;nav nav-tabs responsive hidden-xs hidden-sm
+pcDeliverable.jsp;li;nav-item
+pcDeliverable.jsp;a;nav-link
+pcDeliverable.jsp;hir;separatore
+pcDeliverable.jsp;div;tab-content responsive hidden-xs hidden-sm
+pcDeliverable.jsp;div;tab-pane active
+pcDeliverable.jsp;textarea;form-control
+pcDeliverable.jsp;div;charNum
+pcDeliverable.jsp;div;row
+pcDeliverable.jsp;div;col-2
+pcDeliverable.jsp;span ;float-left
+pcDeliverable.jsp;a;btn btn-primary
+pcDeliverable.jsp;div;col-8 text-center
+pcDeliverable.jsp;span;float-right
+login.jsp;body;masthead
+login.jsp;div;row justify-content-center
+login.jsp;div;col-3 text-center
+login.jsp;img ;logo
+login.jsp;div;col text-center
+login.jsp;div ;container justify-content-center
+login.jsp;div;col-11
+login.jsp;div;input-group
+login.jsp;input;form-control
+login.jsp;input;btn btn-primary
+pcAttivita.jsp;div;row
+pcAttivita.jsp;div;col-sm-5
+pcAttivita.jsp;div;col-sm-5
+pcAttivita.jsp;select;form-control
+pcAttivita.jsp;div;row
+pcAttivita.jsp;div;col-sm-5
+pcAttivita.jsp;select;form-control
+pcAttivita.jsp;input ;btn extrainfo
+pcAttivita.jsp;div;dditional-fields
+pcAttivita.jsp;textarea;form-control
+pcAttivita.jsp;div;charNum
+pcAttivita.jsp;input;form-control calendarData
+pcAttivita.jsp;input;form-control
+pcAttivita.jsp;input;form-check-input
+pcCompetenza.jsp;div;row
+pcCompetenza.jsp;div;col-sm-5
+pcCompetenza.jsp;div;"col-sm-5""><input"
+pcMilestone.jsp;ul ;nav nav-tabs responsive hidden-xs hidden-sm
+pcMilestone.jsp;li;nav-item
+pcMilestone.jsp;li;nav-link
+pcMilestone.jsp;hr;separatore
+pcMilestone.jsp;div;tab-content responsive hidden-xs hidden-sm
+pcMilestone.jsp;div;tab-pane active
+pcMilestone.jsp;table;table table-bordered table-hover
+pcMilestone.jsp;thead;thead-light
+pcMilestone.jsp;th;text-center
+pcMilestone.jsp;input;form-control
+pcMilestone.jsp;div;form-check text-center
+pcMilestone.jsp;input;form-check-input
+pcMilestone.jsp;div;text-center
+pcMilestone.jsp;a;btn btn-primary
+pcMilestone.jsp;div;row
+pcMilestone.jsp;div;col-2
+pcMilestone.jsp;span;float-left
+pcMilestone.jsp;div;col-8 text-center
+pcMilestone.jsp;span;float-right
+pcRischi.jsp;ul;nav nav-tabs responsive hidden-xs hidden-sm
+pcRischi.jsp;li;nav-item
+pcRischi.jsp;a;nav-link
+pcRischi.jsp;hr;separatore
+pcRischi.jsp;div;tab-content
+pcRischi.jsp;thead;thead-light
+pcRischi.jsp;table;table table-bordered table-hover
+pcRischi.jsp;scope;form-control
+pcRischi.jsp;div;container-fluid
+pcRischi.jsp;div;row
+pcRischi.jsp;div;col-2
+pcRischi.jsp;span ;float-left
+pcRischi.jsp;a;btn btn-primary
+pcRischi.jsp;div;col-8 text-center
+pcRischi.jsp;span ;float-right
+pcRischio.jsp;div;row
+pcRischio.jsp;div;col-sm-5
+pcRisorse.jsp;li;nav-item
+pcRisorse.jsp;li;nav-link
+pcRisorse.jsp;hr;separatore
+pcRisorse.jsp;div;tab-content responsive hidden-xs hidden-sm
+pcRisorse.jsp;div;tab-pane active
+pcRisorse.jsp;table;table table-bordered table-hover
+pcRisorse.jsp;thead;thead-light
+pcRisorse.jsp;th;text-center
+pcRisorse.jsp;th;form-control
+pcRisorse.jsp;div;form-check text-center
+pcRisorse.jsp;input;form-check-input
+pcRisorse.jsp;div;text-center
+pcRisorse.jsp;textarea;form-control
+pcRisorse.jsp;div;"charNum""></div"
+pcRisorse.jsp;a;btn btn-primary
+pcRisorse.jsp;div;col-8 text-center
+pcRisorse.jsp;span;float-right
+pcRisorse.jsp;span;float-left
+pcRisorse.jsp;div;col-2
+pcStakeholder.jsp;ul;nav nav-tabs responsive hidden-xs hidden-sm
+pcStakeholder.jsp;li;nav-item
+pcStakeholder.jsp;a;nav-link active tabactive
+pcStakeholder.jsp;a;nav-link
+pcStakeholder.jsp;hr ;separatore
+pcStakeholder.jsp;div;tab-content responsive hidden-xs hidden-sm
+pcStakeholder.jsp;div;tab-pane active
+pcStakeholder.jsp;textarea;form-control
+pcStakeholder.jsp;div;charNum
+pcStakeholder.jsp;div;container-fluid
+pcStakeholder.jsp;div;row
+pcStakeholder.jsp;div;col-2
+pcStakeholder.jsp;span;float-left
+pcStakeholder.jsp;a;btn btn-primary
+pcStakeholder.jsp;span;float-right
+pcStakeholder.jsp;div;col-8 text-center
+pcStakeholder.jsp;hr;separatore
+pcVincoli.jsp;ul;nav nav-tabs responsive hidden-xs hidden-sm
+pcVincoli.jsp;li;nav-item
+pcVincoli.jsp;li;nav-link
+pcVincoli.jsp;hr;separatore
+pcVincoli.jsp;div;tab-content responsive hidden-xs hidden-sm
+pcVincoli.jsp;div;tab-pane active
+pcVincoli.jsp;textarea;form-control
+pcVincoli.jsp;div;charNum
+pcVincoli.jsp;div;container-fluid
+pcVincoli.jsp;div;row
+pcVincoli.jsp;div;col-2
+pcVincoli.jsp;span;float-left
+pcVincoli.jsp;a ;btn btn-primary
+pcVincoli.jsp;div;col-8 text-center
+pcVincoli.jsp;hr ;separatore
+pcVincoli.jsp;span ;float-left
+pcVincoli.jsp;span ;float-right
+pcVision.jsp;li;nav-item
+pcVision.jsp;li;nav-link active tabactive
+pcVision.jsp;div;tab-content responsive hidden-xs hidden-sm
+pcVision.jsp;div ;tab-pane active
+pcVision.jsp;textarea;form-control
+pcVision.jsp;div;charNum
+pcVision.jsp;div;col-2
+pcVision.jsp;span;float-left
+pcVision.jsp;span;float-right
+pcVision.jsp;a;btn btn-primary
+pcVision.jsp;div;col-8 text-center
+projActivities.jsp;table;table table-bordered table-hover
+projActivities.jsp;thead ;thead-light
+projActivities.jsp;th ;text-center
+projActivities.jsp;input;form-control
+projActivities.jsp;input;form-check-input
+projActivities.jsp;div;form-check text-center
+projActivities.jsp;div;container-fluid
+projActivities.jsp;div;alert alert-danger
+projActivities.jsp;div;row
+projActivities.jsp;div;col-2
+projActivities.jsp;span;float-left
+projActivities.jsp;a ;btn btn-primary
+projActivities.jsp;div;col-8 text-center
+projCharter.jsp;a;transition
+projStatus.jsp;div;row
+projStatus.jsp;div;col-9
+projStatus.jsp;hr;separatore
+projStatus.jsp;div ;form-row
+projStatus.jsp;div;col-1
+projStatus.jsp;div;col-3
+projStatus.jsp;input;form-control calendarData
+projStatus.jsp;textarea;form-control
+projStatus.jsp;div ;charNum
+projStatus.jsp;div;col
+projStatus.jsp;select;form-control
+projStatus.jsp;div;alert alert-danger
+projStatus.jsp;span;float-left
+projStatus.jsp;a;btn btn-primary
+projStatus.jsp;div;col text-center
+projWBS.jsp;ul;nav nav-tabs responsive hidden-xs hidden-sm
+projWBS.jsp;li;nav-item
+projWBS.jsp;li;nav-link
+projWBS.jsp;hr;separatore
+projWBS.jsp;div;tab-content responsive hidden-xs hidden-sm
+projWBS.jsp;div;tab-pane active
+projWBS.jsp;table;table table-bordered table-hover
+projWBS.jsp;thead;thead-light
+projWBS.jsp;th ;text-center
+projWBS.jsp;input ;form-control
+projWBS.jsp;div ;form-check text-center
+projWBS.jsp;div ;form-check-input
+projWBS.jsp;div ;row
+projWBS.jsp;div ;col-1 text-center
+projWBS.jsp;button;btn btn-primary
+projWBS.jsp;hr;separatore
+projWBS.jsp;span;float-left
+projWBS.jsp;div;col-8 text-center
+template.jsp;div;page
+elencoProgetti.jsp;a;btn btn-primary
+elencoProgetti.jsp;div;alert alert-danger
+progetto.jsp;div;alert alert-danger
+subStatus.jsp;div;substatus
+subStatus.jsp;label;linkStatus
+header.jspf;div;header
+header.jspf;div;row justify-content-center
+header.jspf;div;col-3
+header.jspf;div;col-9
+header.jspf;p;pHeader
+header.jspf;span;right
