@@ -16,23 +16,25 @@
     <!-- Include jQuery from CDN or from local hosted copy --> 
     <script src="http://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script>
-      window.jQuery || document.write('<script src="${initParam.urlDirectoryScrypt}/jquery-3.3.1.js"><\/script>');
+      window.jQuery || document.write('<script src="${initParam.urlDirectoryScrypt}/jquery/jquery-3.3.1.js"><\/script>');
     </script>
     <!-- Include jQuery validate Form elements from CDN or from local hosted copy -->
-    <script src="<c:out value="${initParam.urlDirectoryScript}" />jquery.validate-1.17.0.js"></script>
-    <script src="<c:out value="${initParam.urlDirectoryScript}" />additional-methods-1.17.0.js"></script>
-    <script src="<c:out value="${initParam.urlDirectoryScript}" />jquery-ui.js"></script>
-    <script src="<c:out value="${initParam.urlDirectoryScript}" />jquery.textarea_autosize.js"></script>
-    <script src="<c:out value="${initParam.urlDirectoryScript}" />grayscale.js"></script>
+    <script src="<c:out value="${initParam.urlDirectoryScript}" />jquery/plugin/jquery.validate-1.17.0.js"></script>
+    <script src="<c:out value="${initParam.urlDirectoryScript}" />jquery/plugin/additional-methods-1.17.0.js"></script>
+    <script src="<c:out value="${initParam.urlDirectoryScript}" />jquery/plugin/jquery-ui.js"></script>
+    <script src="<c:out value="${initParam.urlDirectoryScript}" />jquery/plugin/jquery.textarea_autosize.js"></script>
+    <script src="<c:out value="${initParam.urlDirectoryScript}" />bootstrap/bootstrap.js"></script>
+    <script src="<c:out value="${initParam.urlDirectoryScript}" />bootstrap/plugin/bootstrap.bundle.js"></script>
+    <script src="<c:out value="${initParam.urlDirectoryScript}" />bootstrap/plugin/grayscale.js"></script>
     <%--base href="${requestScope.baseHref}" /--%>
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.css">
     <!-- Latest compiled CSS, just in case -->
-    <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />bootstrap.css" type="text/css" />
+    <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />bootstrap/bootstrap.css" type="text/css" />
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />pol.css" type="text/css" />
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />style.css" type="text/css" />
-    <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />jquery-ui.css" type="text/css" />
-    <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />grayscale.css" type="text/css" />
+    <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />jquery/jquery-ui.css" type="text/css" />
+    <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />bootstrap/plugin/grayscale.css" type="text/css" />
   </head>
   <body>
   <c:catch var="exception">
