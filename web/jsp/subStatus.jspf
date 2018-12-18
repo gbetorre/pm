@@ -12,6 +12,12 @@
               <c:param name="id" value="${p.id}" />
               <c:param name="ids" value="${prjSts.id}" />
             </c:url>
+            <c:url var="newStatus" context="${initParam.appName}" value="/" scope="page">
+              <c:param name="q" value="pol" />
+              <c:param name="p" value="sts" />
+              <c:param name="id" value="${p.id}" />
+              <c:param name="ids" value="${newStatusId}" />
+            </c:url>
             &nbsp;
             <a href="${fullStatus}">
               Dal <fmt:formatDate value="${prjSts.dataInizio}" pattern="dd/MM/yyyy" /> 
@@ -30,7 +36,7 @@
         </c:choose>
         <br />
       </c:forEach>
-      <form id="liststatus_form" action="#" method="post">
+      <form id="liststatus_form" name="liststatus_form" action="${newStatus}" method="post">
         <div align="center">
           <button type="submit" class="btn btn-primary" id="sts-add" name="sts-add">Aggiungi</button>
         </div>
