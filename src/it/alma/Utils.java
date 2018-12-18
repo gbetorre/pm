@@ -89,6 +89,16 @@ public class Utils {
      */
     public static final String VOID_STRING = "";
     /**
+     * <p>Costante da utilizzare quando serve un valore per inizializzazione
+     * o da utilizzare come argomento.</p>
+     * <p>Maggiormente visibile e chiara del valore che incapsula 
+     * <code>(-1) </code> e per questo motivo pu&ograve; essere utilizzata 
+     * direttamente nel codice ad esempio in caso di inzializzazioni 
+     * di default effettuate dal
+     * </code>{@link com.oreilly.servlet.ParameterParser ParameterParser}</code>.</p>
+     */
+    public static final int DEFAULT_ID = -1;
+    /**
      * <p>Numero di anni da spostare per l'estrazione degli elementi
      * nella visualizzazione di default.
      * P.es. un valore 1 implica un'estrazione di un anno, tra la data corrente
@@ -112,6 +122,14 @@ public class Utils {
      * (quindi, in pratica, gli orologi verranno resettati a UNIX EPOCH). 
      */
     public static final String THE_END_OF_TIME = "2106-02-07";
+    /** 
+     * Costante per il tipo MIME html
+     */
+    public static final String MIME_TYPE_HTML = "text/html";
+    /**
+     * Costante per il tipo MIME testo semplice
+     */
+    public static final String MIME_TYPE_TEXT = "text/plain";
     
     
     /**
@@ -633,7 +651,7 @@ public class Utils {
      * @return <code>GregorianCalendar</code> - lo UNIX EPOCH sotto forma di oggetto GregorianCalendar
      */
     public static GregorianCalendar getUnixEpoch() {
-        return new GregorianCalendar(1970, 1, 1);
+        return new GregorianCalendar(1970, 0, 1);
     }
     
 }
