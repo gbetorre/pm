@@ -19,8 +19,8 @@
       window.jQuery || document.write('<script src="${initParam.urlDirectoryScrypt}/jquery-3.3.1.js"><\/script>');
     </script>
     <!-- Include jQuery validate Form elements from CDN or from local hosted copy -->
-    <script src="<c:out value="${initParam.urlDirectoryScript}" /> jquery.validate-1.17.0.js"></script>
-    <script src="<c:out value="${initParam.urlDirectoryScript}" /> additional-methods-1.17.0.js"></script>
+    <script src="<c:out value="${initParam.urlDirectoryScript}" />jquery.validate-1.17.0.js"></script>
+    <script src="<c:out value="${initParam.urlDirectoryScript}" />additional-methods-1.17.0.js"></script>
     <script src="<c:out value="${initParam.urlDirectoryScript}" />jquery-ui.js"></script>
     <script src="<c:out value="${initParam.urlDirectoryScript}" />jquery.textarea_autosize.js"></script>
     <script src="<c:out value="${initParam.urlDirectoryScript}" />grayscale.js"></script>
