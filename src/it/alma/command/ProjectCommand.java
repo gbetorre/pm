@@ -185,8 +185,10 @@ public class ProjectCommand extends ItemBean implements Command {
         Vector<WbsBean> vWBS = new Vector<WbsBean>();
         // Dichiara l'elenco degli status di un progetto
         ArrayList<StatusBean> projectStatusList = new ArrayList<StatusBean>();
-        // Dichiara l'avanzamento progetto piÃ¹ recente
+        // Dichiara l'avanzamento progetto più recente
         StatusBean projectStatus = null;
+        // Dichiara l'id massimo della tabella avanzamentoprogetto
+        int newStatusId = -1;
         /* ******************************************************************** *
          *      Instanzia nuova classe WebStorage per il recupero dei dati      *
          * ******************************************************************** */
@@ -234,9 +236,6 @@ public class ProjectCommand extends ItemBean implements Command {
                         // Creazione della tabella valori parametri
                         HashMap<String, HashMap<String, String>> params = new HashMap<String, HashMap<String, String>>();
                         loadParams(part, parser, params);
-                        /* **************************************************** *
-                         *                  UPDATE Project Part                 *
-                         * **************************************************** */
                         try {
                             // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
                             HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
@@ -249,13 +248,23 @@ public class ProjectCommand extends ItemBean implements Command {
                             LinkedHashMap<Integer, Vector> userWritableSkillsByProjectId =  (LinkedHashMap<Integer, Vector>) ses.getAttribute("writableSkills");
                             LinkedHashMap<Integer, Vector> userWritableRisksByProjectId =  (LinkedHashMap<Integer, Vector>) ses.getAttribute("writableRisks");
                             LinkedHashMap<String, HashMap<Integer, Vector>> objectsMap = decant(userWritableActivitiesByProjectId, userWritableSkillsByProjectId, userWritableRisksByProjectId);
-                            db.updateProjectPart(idPrj, user.getId(), writableProjects, objectsMap, params);
-                            Vector<ProjectBean> userWritableProjects = db.getProjects(user.getId(), Query.GET_WRITABLE_PROJECTS_ONLY);
-                            // Aggiorna i progetti, le attivitÃ  dell'utente in sessione
-                            ses.removeAttribute("writableProjects");
-                            ses.removeAttribute("writableActivity");
-                            ses.setAttribute("writableProjects", userWritableProjects);
-                            ses.setAttribute("writableActivity", userWritableActivitiesByProjectId);
+                            if (req.getParameterMap().containsKey("sts-add")) {
+                                /* **************************************************** *
+                                 *                 INSERT Project Status                *
+                                 * **************************************************** */
+                                db.insertStatus(user, idPrj, idStatus);
+                            } else {
+                                /* **************************************************** *
+                                 *                  UPDATE Project Part                 *
+                                 * **************************************************** */
+                                db.updateProjectPart(idPrj, user.getId(), writableProjects, objectsMap, params);
+                                Vector<ProjectBean> userWritableProjects = db.getProjects(user.getId(), Query.GET_WRITABLE_PROJECTS_ONLY);
+                                // Aggiorna i progetti, le attività  dell'utente in sessione
+                                ses.removeAttribute("writableProjects");
+                                ses.removeAttribute("writableActivity");
+                                ses.setAttribute("writableProjects", userWritableProjects);
+                                ses.setAttribute("writableActivity", userWritableActivitiesByProjectId);
+                            }
                         } catch (AttributoNonValorizzatoException anve) {
                             String msg = FOR_NAME + "Impossibile recuperare un attributo obbligatorio, probabilmente l\'id dell\'utente.\n";
                             LOG.severe(msg);
@@ -283,18 +292,19 @@ public class ProjectCommand extends ItemBean implements Command {
                      * **************************************************** */
                     // Recupera il progetto richiesto dalla navigazione utente
                     runtimeProject = db.getProject(idPrj, user.getId());
+                    newStatusId = db.getMax("avanzamentoprogetto") + 1;
                     // Recupera tutta la lista degli Status
                     projectStatusList = db.getStatusList(idPrj);
                     // Per ottimizzare il caricamento di dati nella request separa i rami della richiesta
                     if (part.equals(Query.PART_PROJECT)) {
                         ; // Codice per mostrare dati aggregati sul progetto, o relazioni o altro
                     } else if (part.equals(Query.PART_STATUS)) {
-                        // Testa se l'id dello status ï¿½ significativo
+                        // Testa se l'id dello status è significativo
                         if (idStatus > Query.NOTHING) {
                             // Recupera uno specifico status di progetto di dato id
                             projectStatus = db.getStatus(idStatus);
-                        } else if (idStatus == Query.NOTHING) { // Valore fittizio (nessuno status puÃ² avere id = 0!)
-                            // Recupera l'ultimo Status, cioÃ¨ quello avente datainizio piÃ¹ prossima alla data odierna
+                        } else if (idStatus == Query.NOTHING) { // Valore fittizio (nessuno status può avere id = 0!)
+                            // Recupera l'ultimo Status, cioè quello avente datainizio più prossima alla data odierna
                             Date dateProjectStatus = new Date(0);
                             if (!projectStatusList.isEmpty()) {
                                 for (int i = 0; i < projectStatusList.size(); i++) {
@@ -308,11 +318,9 @@ public class ProjectCommand extends ItemBean implements Command {
                                     }
                                 }
                             }
-                            // Recupera uno specifico stuatus di progetto a partire dalla sua data - assume UNIQUE(data, idProgetto)
+                            // Recupera uno specifico status di progetto a partire dalla sua data - assume UNIQUE(data, idProgetto)
                             projectStatus = db.getStatus(idPrj, dateProjectStatus);
                         }
-                    //} else if (part.equals(Query.PART_ACTIVITY) || part.equals(Query.PART_PROJECT_CHARTER_MILESTONE)) {
-                    //    vActivities = db.getActivities(idPrj);
                     } else if (part.equals(Query.PART_PROJECT_CHARTER_RESOURCE)) {
                         vSkills = db.getSkills(idPrj);
                     } else if (part.contains(Query.PART_PROJECT_CHARTER_RISK)) {
@@ -350,8 +358,6 @@ public class ProjectCommand extends ItemBean implements Command {
         req.setAttribute("progetti", v);
         // Salva nella request dettaglio progetto
         req.setAttribute("progetto", runtimeProject);
-        // Salva nella request elenco attivita del progetto
-        //req.setAttribute("attivita", vActivities);
         // Salva nella request elenco competenze del progetto
         req.setAttribute("competenze", vSkills);
         // Salva nella request elenco rischi del progetto
@@ -360,10 +366,12 @@ public class ProjectCommand extends ItemBean implements Command {
         req.setAttribute("wbs", vWBS);
         // Salva nella request elenco degli status di un progetto
         req.setAttribute("listProjectStatus", projectStatusList);
-        // Salva nella request l'avanzamento progetto piÃ¹ recente
+        // Salva nella request l'avanzamento progetto più recente
         req.setAttribute("projectStatus", projectStatus);
         // Salva nella request i valori degli stati di un'avanzamento progetto
         req.setAttribute("statiValues", statiValues);
+        // Salva nella request l'id massimo della tabella avanzamentoprogetto
+        req.setAttribute("newStatusId", newStatusId);
         // Imposta la Pagina JSP di forwarding
         req.setAttribute("fileJsp", fileJspT);
     }
@@ -469,7 +477,7 @@ public class ProjectCommand extends ItemBean implements Command {
         /* **************************************************** *
          *          Ramo di Project Charter - Milestone         *
          * **************************************************** */
-        else if (part.equalsIgnoreCase(Query.PART_PROJECT_CHARTER_MILESTONE)) {
+        /*else if (part.equalsIgnoreCase(Query.PART_PROJECT_CHARTER_MILESTONE)) {
             // Recupero e caricamento parametri di project charter/milestone
             int totActivities = Integer.parseInt(parser.getStringParameter("pcm-loop-status", Utils.VOID_STRING));
             HashMap<String, String> pcm = new HashMap<String, String>();
@@ -484,7 +492,7 @@ public class ProjectCommand extends ItemBean implements Command {
                 pcm.put("pcm-milestone" + String.valueOf(i), milestone);
             }
             params.put(Query.PART_PROJECT_CHARTER_MILESTONE, pcm);
-        }
+        }*/
         /* **************************************************** *
          *                Ramo di Status Progetto               *
          * **************************************************** */
