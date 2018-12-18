@@ -48,6 +48,7 @@ import com.oreilly.servlet.ParameterParser;
 import it.alma.DBWrapper;
 import it.alma.Main;
 import it.alma.Query;
+import it.alma.Utils;
 import it.alma.bean.CodeBean;
 import it.alma.bean.ItemBean;
 import it.alma.bean.PersonBean;
@@ -270,21 +271,34 @@ public class HomePageCommand extends ItemBean implements Command {
      * e/o ridondanze.</p>
      * 
      * @param req HttpServletRequest contenente gli attributi che si vogliono conoscere
+     * @param mime argomento specificante il formato dell'output desiderato
      * @return un unico oggetto contenente tutti i valori e i nomi dei parametri settati in request nel momento in cui lo chiede il chiamante
      */
-    public static String getParameters(HttpServletRequest req) {
+    public static String getParameters(HttpServletRequest req,
+                                       String mime) {
         Enumeration<String> parameters = req.getParameterNames();
-        StringBuffer parametersName = new StringBuffer("<pre>");
-        while (parameters.hasMoreElements()) {
-            String parameterName = parameters.nextElement();
-            parametersName.append("<strong><u>");
-            parametersName.append(parameterName);
-            parametersName.append("</u></strong>");
-            parametersName.append(" = ");
-            parametersName.append(req.getParameter(parameterName));
-            parametersName.append("<br />");
+        StringBuffer parametersName = new StringBuffer();
+        if (mime.equals(Utils.MIME_TYPE_HTML)) {
+            parametersName.append("<pre>");
+            while (parameters.hasMoreElements()) {
+                String parameterName = parameters.nextElement();
+                parametersName.append("<strong><u>");
+                parametersName.append(parameterName);
+                parametersName.append("</u></strong>");
+                parametersName.append(" = ");
+                parametersName.append(req.getParameter(parameterName));
+                parametersName.append("<br />");
+            }
+            parametersName.append("</pre>");
+        } else if (mime.equals(Utils.MIME_TYPE_TEXT)) {
+            while (parameters.hasMoreElements()) {
+                String parameterName = parameters.nextElement();
+                parametersName.append(parameterName);
+                parametersName.append(" = ");
+                parametersName.append(req.getParameter(parameterName));
+                parametersName.append("\n");
+            }
         }
-        parametersName.append("</pre>");
         return String.valueOf(parametersName);
     }
     
