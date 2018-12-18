@@ -17,7 +17,7 @@
           <a class="nav-link" data-toggle="tab" href="${rischi}${p.id}">Rischi</a>
         </li>
         <li class="nav-item">
-          <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${vincoli}${p.id}">Vincoli</a>
+          <a class="nav-link" data-toggle="tab" href="${vincoli}${p.id}">Vincoli</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" data-toggle="tab" href="${milestone}${p.id}">Milestone</a>
