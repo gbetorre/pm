@@ -14,7 +14,7 @@
     <link rev="made" href="giovanroberto.torre@univr.it" />
     <meta http-equiv='cache-control' content='no-cache'>
     <!-- Include jQuery from CDN or from local hosted copy --> 
-    <script src="http://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="http://code.jquery.com/jquery-3.3.1.js"></script>
     <script>
       window.jQuery || document.write('<script src="${initParam.urlDirectoryScrypt}/jquery/jquery-3.3.1.js"><\/script>');
     </script>
@@ -23,8 +23,8 @@
     <script src="<c:out value="${initParam.urlDirectoryScript}" />jquery/plugin/additional-methods-1.17.0.js"></script>
     <script src="<c:out value="${initParam.urlDirectoryScript}" />jquery/plugin/jquery-ui.js"></script>
     <script src="<c:out value="${initParam.urlDirectoryScript}" />jquery/plugin/jquery.textarea_autosize.js"></script>
-    <script src="<c:out value="${initParam.urlDirectoryScript}" />bootstrap/bootstrap.js"></script>
-    <script src="<c:out value="${initParam.urlDirectoryScript}" />bootstrap/plugin/bootstrap.bundle.js"></script>
+    <!-- <script src="<c:out value="${initParam.urlDirectoryScript}" />bootstrap/bootstrap.js"></script> 
+    <script src="<c:out value="${initParam.urlDirectoryScript}" />bootstrap/plugin/bootstrap.bundle.js"></script> -->
     <script src="<c:out value="${initParam.urlDirectoryScript}" />bootstrap/plugin/grayscale.js"></script>
     <%--base href="${requestScope.baseHref}" /--%>
     <!-- Latest compiled and minified CSS -->
