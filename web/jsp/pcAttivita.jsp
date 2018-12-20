@@ -13,7 +13,7 @@
           <select class="form-control" id="act-people" name="act-people">
           <c:forEach var="person" items="${requestScope.people}" varStatus="status">
             <option value="${person.id}">${person.nome} ${person.cognome}</option>
-            <c:if test="${status.index eq 0}">
+            <c:if test="${status.index eq pageScope.zero}">
               <c:set var="skills" value="${person.competenze}" scope="page" />
             </c:if>
           </c:forEach>
@@ -49,9 +49,8 @@
         <br />
         <div class="row">
           <div class="col-sm-5">Descrizione dell'attivit&agrave;</div>
-          <!-- <div class="col-sm-5"><input type="text" class="form-control" id="actDescrizione" name="actDescrizione" value=""></div> -->
           <div class="col-sm-5">
-            <textarea class="form-control" name="act-progress" readonly></textarea>
+            <textarea class="form-control" name="act-descr" readonly></textarea>
             <div class="charNum"></div>
           </div>
         </div>
@@ -69,30 +68,16 @@
         </div>
         <br />
         <div class="row">
-          <div class="col-sm-5">Data di inizio attesa</div>
-          <div class="col-sm-5">
-            <input type="text" class="form-control calendarData" id="act-datainizioattesa" name="act-datainizioattesa" value="" readonly>
-          </div>
-        </div>
-        <br />
-        <div class="row">
-          <div class="col-sm-5">Data di fine attesa</div>
-          <div class="col-sm-5">
-            <input type="text" class="form-control calendarData" id="act-datafineattesa" name="act-datafineattesa" value="" readonly>
-          </div>
-        </div>
-        <br />
-        <div class="row">
           <div class="col-sm-5">Data di inizio effettiva</div>
           <div class="col-sm-5">
-            <input type="text" class="form-control calendarData" id="act-datainizioeffettiva" name="act-datainizioeffettiva" value="" readonly>
+            <input type="text" class="form-control calendarData" id="act-datainiziovera" name="act-datainiziovera" value="" readonly>
           </div>
         </div>
         <br />
         <div class="row">
           <div class="col-sm-5">Data di fine effettiva</div>
           <div class="col-sm-5">
-            <input type="text" class="form-control calendarData" id="act-datafineeffettiva" name="act-datafineeffettiva" value="" readonly>
+            <input type="text" class="form-control calendarData" id="act-datafinevera" name="act-datafinevera" value="" readonly>
           </div>
         </div>
         <br />
@@ -121,7 +106,7 @@
           <div class="col-sm-5">Note di avanzamento</div>
           <div class="col-sm-5">
             <!-- <input type="text" class="form-control" id="actNote" name="actNote" value=""> -->
-            <textarea class="form-control" name="act-avanzamento" readonly></textarea>
+            <textarea class="form-control" name="act-progress" readonly></textarea>
             <div class="charNum"></div>
           </div>
         </div>
@@ -179,11 +164,14 @@
           });
       });
     </script>
-    <script>
+    <script type="text/javascript">
     var offsetcharacter = 5;
     $(document).ready(function () {
       $('#newAct_form').validate ({
       rules: {
+        'act-role': {
+          required: true
+        },
         'act-name': {
           required: true,
           minlength: offsetcharacter
@@ -196,13 +184,22 @@
         },
         'act-guprevisti': {
           number: true
+        },
+        'act-gueffettivi': {
+          number: true
+        },
+        'act-gurimanenti': {
+          number: true
         }
       }, 
       messages: {
+        'act-role': "Scegliere una competenza (ruolo) per la persona selezionata",
         'act-name': "Inserire il nome dell\'attivita\'",
         'act-datainizio': "Inserire una data di inizio valida",
         'act-datafine': "Inserire una data di fine valida",
-        'act-guprevisti': "Inserire un valore numerico"
+        'act-guprevisti': "Inserire un valore numerico",
+        'act-gueffettivi': "Inserire un valore numerico",
+        'act-gurimanenti': "Inserire un valore numerico"
       },
       submitHandler: function (form) {
         alert('ok');
@@ -240,12 +237,6 @@
           $("#act-role").html("<c:forEach var="skill" items="${person.competenze}"><option value='${skill.id}'>${skill.nome}</option></c:forEach>");
           break;
        </c:forEach>    
-//           case '28':
-//               $("#actIdRuolo").html("<option value='test'>item1: test 1</option><option value='test2'>item1: test 2</option>");
-//               break;
-//           default:
-//               $("#size").html("<option value=''>--select one--</option>");
        }
     });
-    
     </script>
