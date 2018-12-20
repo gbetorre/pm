@@ -29,3 +29,21 @@ function modify(){
 }
   
 $('textarea').textareaAutoSize();
+
+jQuery.validator.addMethod("greaterThan", 
+    function (value, element, params) {
+        var finalDate = value.split('/');
+        var dayFinalDate = finalDate[0];
+        var monthFinalDate = finalDate[1];
+        var yearFinalDate = finalDate[2];
+        var firstDate = $(params).val().split('/');
+        var dayFirstDate = firstDate[0];
+        var monthFirstDate = firstDate[1];
+        var yearFirstDate = firstDate[2];
+        if (!/Invalid|NaN/.test(new Date(yearFinalDate, monthFinalDate, dayFinalDate))) {
+          return new Date(yearFinalDate, monthFinalDate, dayFinalDate) > new Date(yearFirstDate, monthFirstDate, dayFirstDate);
+        }
+        return isNaN(value) && isNaN($(params).val()) 
+            || (Number(value) > Number($(params).val()));
+    }, 'Must be greater than {0}.'
+  );
