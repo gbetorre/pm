@@ -1,5 +1,11 @@
 <%@ include file="pcURL.jspf" %>
-<form action="#" method="post">
+<form action="${updWbs}" method="post">
+  <c:url var="updWbs" context="${initParam.appName}" value="/" scope="page">
+    <c:param name="q" value="wbs" />
+    <c:param name="p" value="upd" />
+    <c:param name="id" value="${p.id}" />
+    <c:param name="idw" value="" />
+  </c:url>
   <h2>WBS del progetto <strong><c:out value="${p.titolo}" /></strong></h2>
   <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
     <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="">WBS</a></li>
@@ -12,6 +18,7 @@
       <table class="table table-bordered table-hover">
         <thead class="thead-light">
         <tr>
+          <th scope="col"></th>
           <th scope="col">Nome</th>
           <th scope="col">Descrizione</th>
           <th scope="col"><div class="text-center">Workpackage</div></th>
@@ -21,15 +28,18 @@
         <c:set var="status" value="" scope="page" />
         <c:forEach var="wbs" items="${requestScope.wbs}" varStatus="loop">
           <c:set var="status" value="${loop.index}" scope="page" />
-          <input type="hidden" id="wbs-id${status}" name="wbs-id${status}" value="<c:out value="${wbs.id}"/>">
           <tr>
-            <td scope="row">
+            <td scope="col">
+              <input type="radio" id="wbs-<c:out value="${wbs.id}"/>" name="wbs-select" value="<c:out value="${wbs.id}"/>"/>
+              <input type="hidden" id="wbs-id${status}" name="wbs-id${status}" value="<c:out value="${wbs.id}"/>">
+            </td>
+            <td scope="col">
               <input type="text" class="form-control" id="wbs-nome${status}" name="wbs-nome${status}" value="<c:out value="${wbs.nome}"/>" readonly>
             </td>
-            <td scope="row">
+            <td scope="col">
               <input type="text" class="form-control" id="wbs-descrizione${status}" name="wbs-descrizione${status}" value="<c:out value="${wbs.descrizione}"/>" readonly>
             </td>
-            <td scope="row">
+            <td scope="col">
               <c:choose>
                 <c:when test="${wbs.workPackage}">
                   <div class="form-check text-center">
@@ -47,6 +57,8 @@
         </c:forEach>
         </tbody>
       </table>
+      <input type="hidden" id="wbs-loop-status" name="wbs-loop-status" value="<c:out value="${status}"/>">
+      <input type="submit" id="sumbit" name="submit" value="submit">
       <div id="container-fluid">
       <div class="row">
         <div class="col-1 text-center"></div>
