@@ -25,6 +25,11 @@
         <div class="col-sm-5">
           Identificativo del ruolo ricoperto nell'attivit&agrave;
           <sup>&#10039;</sup>
+          <div id="act-role-label">
+          <c:if test="${pageScope.skills.size() gt zero}">
+            (selezionarne uno)
+          </c:if>
+          </div>
         </div>
         <div class="col-sm-5">
           <select class="form-control" id="act-role" name="act-role" multiple>
@@ -202,7 +207,6 @@
         'act-gurimanenti': "Inserire un valore numerico"
       },
       submitHandler: function (form) {
-        alert('ok');
         return true;
       }
       });
@@ -235,6 +239,14 @@
       <c:forEach var="person" items="${requestScope.people}">
         case '${person.id}':
           $("#act-role").html("<c:forEach var="skill" items="${person.competenze}"><option value='${skill.id}'>${skill.nome}</option></c:forEach>");
+        <c:choose>
+        <c:when test="${person.competenze.size() gt 1}">
+          $("#act-role-label").append("(selezionarne uno)");
+        </c:when>
+        <c:otherwise>
+          $("#act-role-label").text("");
+        </c:otherwise>
+        </c:choose>
           break;
        </c:forEach>    
        }
