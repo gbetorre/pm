@@ -55,8 +55,7 @@
   <c:param name="id" value="" />
 </c:url>
 <c:url var="wbs" context="${initParam.appName}" value="/" scope="page">
-  <c:param name="q" value="pol" />
-  <c:param name="p" value="wbs" />
+  <c:param name="q" value="wbs" />
   <c:param name="id" value="" />
 </c:url>
 <c:url var="act" context="${initParam.appName}" value="/" scope="page">
