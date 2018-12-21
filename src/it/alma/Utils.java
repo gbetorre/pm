@@ -36,9 +36,10 @@
 
 package it.alma;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
+//import java.io.IOException;
+//import java.net.MalformedURLException;
+//import java.net.URL;
+import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -46,7 +47,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.MissingResourceException;
-import java.util.Scanner;
+//import java.util.Scanner;
 import java.util.logging.Logger;
 
 import java.text.ParseException;
@@ -76,6 +77,13 @@ public class Utils {
      * negli oggetti ovverride implementati da questa classe.</p>
      */
     static final String FOR_NAME = "\n" + Logger.getLogger(new Throwable().getStackTrace()[0].getClassName()) + ": ";
+    /**
+     * <p>Costante da utilizzare quando serve uno spazio (l'equivalente,
+     * in html, di &nbsp;), generalmente usato per separare pi&uacute; 
+     * sottostostringhe in una stringa da restituire come valore 
+     * oppure messaggio.</p>
+     */
+    public static final char BLANK_SPACE = ' ';
     /**
      * <p>Costante da utilizzare quando serve un valore per inizializzazione
      * o da utilizzare come argomento.</p>
@@ -188,12 +196,12 @@ public class Utils {
     }
     
 
-    /**
+    /*
      * TODO: COMMENTO
      * 
      * @param path
      * @return
-     */
+     *
     public static String getContent(String path)
                              throws NotFoundException, CommandException {
         StringBuffer content = new StringBuffer();
@@ -204,7 +212,7 @@ public class Utils {
                 sc = new Scanner(file.openStream());
                 while (sc.hasNext()) {
                     // Unnecessary Cast: Already returns a String
-                    content.append(/*(String)*/ sc.next());
+                    content.append(/*(String)*//* sc.next());
                 }
             } catch (IOException ioe) {
                 String msg = FOR_NAME + "Si e\' verificato un problema nel puntamento al file remoto.\n";
@@ -226,7 +234,7 @@ public class Utils {
             throw new NotFoundException("Attenzione: controllare che la risorsa sia raggiungibile!\n" + mue.getMessage(), mue);
         }        
         return new String(content);
-    }
+    }*/
     
     /* ************************************************************************ *
      *   Metodi di utilita' per la definizione e la manipolazione delle date    *
@@ -235,16 +243,14 @@ public class Utils {
     /**
      * <p>Restituisce una data di default da utilizzare nell'estrazione
      * di elementi soggetti a una scansione temporale.</p>
-     * <p>Ad esempio, i "bolli", anche quelli di dol3 ("superbolli"),
-     * hanno una data di inizio e di fine pubblicazione.<br />
-     * Lo stesso vale per le iniziative, e in genere per tutti gli elementi
+     * <p>Ad esempio, elementi che hanno una data di inizio 
+     * e una data di fine pubblicazione.<br />
+     * Lo stesso vale in genere per tutti gli elementi
      * che vengono mostrati a vario titolo, sotto forma di claim, di elenco,
-     * di lista, di menu, etc., nelle pagine intermedie 
-     * del sito di dipartimento.</p>
+     * di lista, di menu, etc., nelle pagine del sito.</p>
      * <p>La data di default restituita in questione &egrave; quella che 
      * la command utilizza come data di inizio ricerca di tutti gli elementi
-     * da mostrare nelle pagine intermedie, in particolare i "superbolli"
-     * (contenuti) di dol3 <em>e corrisponde, sostanzialmente,
+     * da mostrare nelle pagine intermedie <em>e corrisponde, sostanzialmente,
      * alla data corrente</em>.</p>
      * <p>Questo valore &egrave; molto utile nel caso in cui si debbano
      * effettuare nell'intervallo di default estrazioni di elementi storicizzati 
@@ -268,7 +274,7 @@ public class Utils {
      * <a href="http://stackoverflow.com/questions/1404210/java-date-vs-calendar">
      * (v.)</a></cite>
      * Siccome per motivi di retrocompatibilit&agrave; spesso non va bene
-     * usare un Calendar ma ci vuole una Date (la WebStorage usa le Date),
+     * usare un Calendar ma ci vuole una Date (il DBWrapper usa le java.sql.Date),
      * basta applicare una semplice trasformazione al valore restituito,
      * quale la seguente:
      * <pre>
@@ -546,28 +552,43 @@ public class Utils {
     
     
     /**
-     * @param date 
-     * @param initDateFormat 
-     * @param endDateFormat 
-     * @return 
-     * @throws CommandException 
+     * <p>Formatta una data che riceve sotto forma di oggetto <code>String</code> 
+     * basandosi su un parametro che ne indica il formato di partenza
+     * e su un parametro che indica il formato che dovr&agrave; avere
+     * un oggetto di tipo <code>java.util.Date</code> 
+     * restituito come tipo di ritorno.</p>
+     * <p>Per un elenco dei valori di pattern ammessi, v. la classe
+     * {@link SimpleDateFormat} 
+     * (<a href="http://docs.oracle.com/javase/6/docs/api/java/text/SimpleDateFormat.html">
+     * javadoc</a>)</p>
+     * 
+     * @param date una String che deve essere convertita
+     * @param initDateFormat il formato con cui la String e' formattata
+     * @param endDateFormat il formato che l'oggetto Date restituito dovra' avere
+     * @return <code>java.util.Date</code> - un oggetto Date costruito a partire dalla String ricevuta e formattato secondo il formato indicato
+     * @throws CommandException se si verifica un problema nella conversione di tipo o in qualche tipo di puntamento
      * 
      */
-    public static Date formatDate (String date, 
-                                   String initDateFormat,
-                                   String endDateFormat) 
-                            throws CommandException{
+    public static Date format(String date, 
+                              String initDateFormat,
+                              String endDateFormat) 
+                       throws CommandException {
+        Date returnDate = null;
         try {
             Date initDate = new SimpleDateFormat(initDateFormat).parse(date);
             SimpleDateFormat formatter = new SimpleDateFormat(endDateFormat);
             String parsedDate = formatter.format(initDate);
-            Date returnDate = formatter.parse(parsedDate);
-            return returnDate;
+            returnDate = formatter.parse(parsedDate);
         } catch (ParseException pe) {
             String msg = FOR_NAME + "Si e\' verificato un problema. Impossibile visualizzare i risultati.\n" + pe.getLocalizedMessage();
             log.warning(msg + "Attenzione: si e\' verificato un problema nel metodo di formattazione della data.\n");
             throw new CommandException(msg, pe);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema. Impossibile visualizzare i risultati.\n" + npe.getLocalizedMessage();
+            log.warning(msg + "Attenzione: si e\' verificato un problema nel puntamento a qualche parametro.\n");
+            throw new CommandException(msg, npe);
         }
+        return returnDate;
     }
 
     
@@ -615,36 +636,95 @@ public class Utils {
     
     
     /**
-     * Restituisce l'anno corrente sotto forma di intero primitivo.<br />
-     * Questo metodo pu&ograve; essere utilizzato ad esempio nei footer, 
-     * per l'indicazione del copyright (&copy;).
+     * <p>Restituisce l'anno corrente sotto forma di intero primitivo.</p>
+     * <p>Questo metodo pu&ograve; essere utilizzato ad esempio nei footer, 
+     * per l'indicazione del copyright (&copy;).</p>
      * 
      * @return <code>String</code> - l'anno corrente sotto forma di intero primitivo
      */
-    public static int getCurrentIntYear() {
+    public static int getCurrentYearAsInt() {
         int yearPosition = Calendar.YEAR;
-        Calendar nowHere = Calendar.getInstance();
-        int year = nowHere.get(yearPosition);
+        Calendar rightNow = Calendar.getInstance();
+        int year = rightNow.get(yearPosition);
         return year;
     }
     
     
     /**
-     * Restituisce l'anno corrente in formato String.<br />
-     * Questo metodo &egrave; generalmente utilizzato ad esempio nei footer, 
-     * per l'indicazione del copyright (&copy;).
+     * <p>Restituisce l'anno corrente in formato String.</p>
+     * <p>Questo metodo &egrave; generalmente utilizzato ad esempio nei footer, 
+     * per l'indicazione del copyright (&copy;).</p>
      * 
      * @return <code>String</code> - l'anno corrente sotto forma di oggetto String
      */
     public static String getCurrentYear() {
         int yearPosition = Calendar.YEAR;
-        Calendar nowHere = Calendar.getInstance();
-        int year = nowHere.get(yearPosition);
+        Calendar rightNow = Calendar.getInstance();
+        int year = rightNow.get(yearPosition);
         Integer yearWrapper = new Integer(year);
         return yearWrapper.toString();
     }
     
-       
+    
+    /**
+     * <p>Restituisce l'ora corrente in formato String.</p>
+     * <p>L'ora restituita &egrave; in formato h-24.</p>
+     * 
+     * @return <code>String</code> - l'ora corrente, in formato h-24, sotto forma di oggetto String
+     */
+    public static String getCurrentHour() {
+        int hourPosition = Calendar.HOUR_OF_DAY;
+        Calendar rightNow = Calendar.getInstance();
+        int hour = rightNow.get(hourPosition);
+        Integer hourWrapper = new Integer(hour);
+        return hourWrapper.toString();
+    }
+    
+    
+    /**
+     * <p>Restituisce i minuti correnti in formato String.</p>
+     * <p>I minuti restituiti sono in formato m-60.<br />
+     * E.g., <code>at 10:04:15.250 PM the MINUTE is 4.</code><br />
+     * But: the method will return: 
+     * <code>"04"</code> (as a String) .</p>
+     * <p><small>Notice that this method makes use of Dynamic String - as known as 
+     * "StringBuffer", because:<br />
+     * <cite id="Java-API">"Strings are constant; 
+     * their values cannot be changed after they are created.<br /> 
+     * String buffers support mutable strings.<br /> 
+     * Because String objects are immutable they can be shared."</cite></small>
+     * </p> 
+     * 
+     * @return <code>String</code> - i minuti correnti, in formato "mm", sotto forma di oggetto String
+     */
+    public static String getCurrentMinutes() {
+        int minutePosition = Calendar.MINUTE;
+        Calendar rightNow = Calendar.getInstance();
+        int minutes = rightNow.get(minutePosition);
+        Integer minuteWrapper = new Integer(minutes);
+        StringBuffer minutesAsDynamicString = new StringBuffer(minuteWrapper.toString());
+        if (minutes < 10) {
+            minutesAsDynamicString.insert(0, "0");
+        }
+        return minutesAsDynamicString.toString();
+    }
+    
+    
+    /**
+     * <p>Restituisce l'orario corrente sotto forma di oggetto 
+     * {@link java.sql.Time Time}.</p>
+     * <p>L'orario restituito avr&agrave; il formato <code>"hh:mm:ss"</code> 
+     * dove i secondi non saranno gli effettivi secondi correnti 
+     * al momento del calcolo, ma i secondi allo scoccar del minuto 
+     * (cio&egrave; azzerati).</p>
+     * 
+     * @return <code>Time</code> - l'ora corrente, in formato "hh:mm:ss", con i secondi arbitrariamente impostati a zero
+     */
+    public static Time getCurrentTime() {
+        return Time.valueOf(getCurrentHour() + ":" + getCurrentMinutes() + ":00");
+    }
+
+    
     /**
      * Restituisce lo UNIX EPOCH sotto forma di GregorianCalendar.
      * 
