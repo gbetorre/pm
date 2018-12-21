@@ -137,6 +137,10 @@ public interface Query extends Serializable {
      */
     public static final String ADD_ACTIVITY_TO_PROJECT          = "add";
     /**
+     * <p>Costante per il parametro identificante la pagina di modifica di una parte di un progetto.</p>
+     */
+    public static final String UPDATE_PART_PROJECT              = "upd";
+    /**
      * <p>Costante per il parametro identificante la pagina di inserimento di un rischio di un progetto.</p>
      */
     public static final String ADD_RISK_TO_PROJECT              = "addRisk";
@@ -1053,6 +1057,9 @@ public interface Query extends Serializable {
             "   ,       descrizione = ?" +
             "   ,       workpackage = ?" +
             "   ,       id_wbs = ?" +
+            "   ,       dataultimamodifica = ?" +
+            "   ,       oraultimamodifica = ?" +
+            "   ,       autoreultimamodifica = ?" +
             "   WHERE id = ?";
 
         
