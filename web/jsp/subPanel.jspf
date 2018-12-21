@@ -14,6 +14,8 @@
   <c:if test="${param['q'] eq 'act'}">
     <a href="javascript:window.open('${addAct}${p.id}', 'newAttivita', true)" class="btn btn-primary">Aggiungi</a>
   </c:if>
-  <input type="button" class="btn btn-primary" name="modifica" value="Modifica" onclick="modify()">
-  <input type="submit" class="btn btn-primary" name="${distinguishingSubmitName}" value="Salva">
+  <c:if test="${param['q'] eq 'pol'}">
+    <input type="button" class="btn btn-primary" name="modifica" value="Modifica" onclick="modify()">
+  </c:if>
+    <input type="submit" class="btn btn-primary" name="${distinguishingSubmitName}" value="Salva">
 </c:if>
