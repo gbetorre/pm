@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Vector;
 import java.util.logging.Logger;
@@ -1698,7 +1699,7 @@ public class DBWrapper implements Query {
     /* ********************************************************** *
      *                        Metodi di POL                       *
     /* ********************************************************** *
-     *                   Metodi di INSERIMENTO                    *
+     *                    Metodi  di  INSERIMENTO                 *
      * ********************************************************** */    
     /**
      * <p>Metodo per fare un inserimento di un nuovo stato progetto.</p>
@@ -1763,53 +1764,91 @@ public class DBWrapper implements Query {
      * @param valuesActivity - Vector contenente tutti i valori che l'utente inserisce per la nuova attivit&agrave;
      * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
-    @SuppressWarnings({ "null", "static-method" })
+    @SuppressWarnings({ "null" })
     public void insertActivity (int idProj,
-                                int userId, 
-                                Vector<String> valuesActivity) 
+                                PersonBean user, 
+                                Vector<ProjectBean> projectsWritableByUser,
+                                HashMap<String, String> params) 
                          throws WebStorageException {
         Connection con = null;
-        PreparedStatement pst = null;
+        PreparedStatement pst, pst1 = null;
         try {
-            // Ottiene il progetto precaricato quando l'utente si &egrave; loggato corrispondente al progetto sul quale aggiungere un'attività
+            /* ** Controlla per prima cosa che l'id progetto sulla querystring ** 
+             * ** corrisponda a un id dei progetti scrivibili dall'utente      **/
+            // Ottiene la cardinalità della lista dei progetti precaricati 
+            // quando l'utente si &egrave; loggato, uno dei quali deve 
+            // corrispondere al progetto sul quale aggiungere un'attività
+            int lastIndexOf = projectsWritableByUser.size();
+            int index = 0;
+            do {
+                ProjectBean wp = projectsWritableByUser.elementAt(index);
+                // Se un id dei progetti scrivibili è uguale all'id sulla querystring è tutto ok 
+                if (wp.getId() == idProj) {
+                    break;
+                }
+                index++;
+            } while (index < lastIndexOf);
+            // In caso contrario, ovvero se abbiamo raggiunto la fine del Vector senza trovare l'id sulla querystring, sono guai...
+            if (index == lastIndexOf) {
+                String msg = FOR_NAME + "Attenzione: l'utente ha tentato di modificare un\'attivita\' legata ad un progetto su cui non ha i diritti di scrittura!\n";
+                LOG.severe(msg + "Problema durante il tentativo di inserire una nuova attivita\'.\n");
+                throw new WebStorageException(msg);
+            }            
+            // Se siamo qui vuol dire che l'id del progetto su cui si deve aggiungere un'attività è scrivibile dall'utente
             con = pol_manager.getConnection();
             con.setAutoCommit(false);
             pst = con.prepareStatement(INSERT_ACTIVITY);
             pst.clearParameters();
-            // 6 è il numero di date che ci sono in un'attività
-            // 3 è l'indice di posizione della prima data
+             // Prepara i parametri per l'inserimento
             try {
-                int nextVal = getMax("attivita") + 1;
-                Date[] valuesAsDate = new Date[6];
-                for ( int i = 0; i < 6; i++ ) {
-                    valuesAsDate[i] = DATA_FORMAT.parse(valuesActivity.get(3 + i));
+                int maxActId = getMax("attivita") + 1;
+                int nextParam = 0;
+                boolean milestone = params.get("act-milestone").equals("on") ? true : false;
+                pst.setInt(++nextParam, maxActId);
+                pst.setString(++nextParam, params.get("act-name"));
+                pst.setString(++nextParam, params.get("act-descr"));
+                pst.setDate(++nextParam, Utils.convert(Utils.format(params.get("act-datainizio"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN))); // non accetta una data italiana, ma java.sql.Date
+                pst.setDate(++nextParam, Utils.convert(Utils.format(params.get("act-datafine"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN))); // non accetta una data gg/mm/aaaa, ma java.sql.Date
+                pst.setDate(++nextParam, null);   // campo residuale
+                pst.setDate(++nextParam, null);   // campo residuale
+                java.sql.Date date = null;
+                if (params.get("act-datainiziovera") != null) {
+                    date = Utils.convert(Utils.format(params.get("act-datainiziovera"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN));
                 }
-                pst.setInt(1, nextVal);
-                pst.setString(2, valuesActivity.get(1));
-                pst.setString(3, valuesActivity.get(2));
-                pst.setDate(4, Utils.convert(valuesAsDate[0])); // non accetta una data java.util.Date, ma java.sql.Date
-                pst.setDate(5, Utils.convert(valuesAsDate[1])); // non accetta una data java.util.Date, ma java.sql.Date
-                pst.setDate(6, Utils.convert(valuesAsDate[2])); // non accetta una data java.util.Date, ma java.sql.Date
-                pst.setDate(7, Utils.convert(valuesAsDate[3])); // non accetta una data java.util.Date, ma java.sql.Date
-                pst.setDate(8, Utils.convert(valuesAsDate[4])); // non accetta una data java.util.Date, ma java.sql.Date
-                pst.setDate(9, Utils.convert(valuesAsDate[5])); // non accetta una data java.util.Date, ma java.sql.Date
-                pst.setInt(10, Integer.parseInt(valuesActivity.get(9)));
-                pst.setInt(11, Integer.parseInt(valuesActivity.get(10)));
-                pst.setInt(12, Integer.parseInt(valuesActivity.get(11)));
-                pst.setString(13, valuesActivity.get(12));
-                pst.setBoolean(14, Boolean.parseBoolean(valuesActivity.get(13)));
-                pst.setInt(15, Integer.parseInt(valuesActivity.get(14)));
-                pst.setInt(16, Integer.parseInt(valuesActivity.get(15)));
-                pst.setInt(17, Integer.parseInt(valuesActivity.get(16)));
-                pst.setInt(18, Integer.parseInt(valuesActivity.get(17)));
-                pst.setInt(19, Integer.parseInt(valuesActivity.get(18)));
-                pst.setInt(20, Integer.parseInt(valuesActivity.get(19)));
+                pst.setDate(++nextParam, date); // non accetta una data italiana, ma java.sql.Date
+                date = null;
+                if (params.get("act-datafinevera") != null) {
+                    date = Utils.convert(Utils.format(params.get("act-datafinevera"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN));
+                }
+                pst.setDate(++nextParam, date); // non accetta una data italiana, ma java.sql.Date
+                pst.setInt(++nextParam,  Integer.parseInt(params.get("act-guprevisti")));
+                pst.setInt(++nextParam,  Integer.parseInt(params.get("act-gueffettivi")));
+                pst.setInt(++nextParam,  Integer.parseInt(params.get("act-gurimanenti")));
+                pst.setString(++nextParam, params.get("act-progress"));
+                pst.setBoolean(++nextParam, milestone);
+                pst.setInt(++nextParam, idProj);
+                pst.setInt(++nextParam, Integer.parseInt(params.get("act-wbs")));
+                pst.setInt(++nextParam, Integer.parseInt(params.get("act-compl")));
+                pst.setInt(++nextParam, Integer.parseInt(params.get("act-status")));
+                // Campi automatici: id utente, ora ultima modifica, data ultima modifica
+                pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+                pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringe, ma un oggetto java.sql.Time
+                pst.setString(++nextParam, user.getCognome() + String.valueOf(Utils.BLANK_SPACE) + user.getNome());
+                // Query di inserimento in attivitagestione
+                int maxActGestId = getMax("attivitagestione") + 1;
+                pst1 = con.prepareStatement(INSERT_PERSON_ON_ACTIVITY);
+                pst1.clearParameters();
+                pst1.setInt(1, maxActGestId);
+                pst1.setInt(2, maxActId);
+                pst1.setInt(3, Integer.parseInt(params.get("act-people")));
+                pst1.setInt(4, Integer.parseInt(params.get("act-role")));
                 pst.executeUpdate();
+                pst1.executeUpdate();
                 con.commit();
-            } catch (ParseException pe) {
-                String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di date.\n" + pe.getMessage();
+            } catch (CommandException ce) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di date.\n" + ce.getMessage();
                 LOG.severe(msg);
-                throw new WebStorageException(msg, pe);
+                throw new WebStorageException(msg, ce);
             } catch (NumberFormatException nfe) {
                 String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di interi.\n" + nfe.getMessage();
                 LOG.severe(msg);
@@ -1826,10 +1865,6 @@ public class DBWrapper implements Query {
                 String msg = FOR_NAME + "Si e\' verificato un problema in un puntamento a null.\n" + npe.getMessage();
                 LOG.severe(msg);
                 throw new WebStorageException(msg, npe);
-            } catch (RuntimeException re) { // A scopo didattico
-                String msg = FOR_NAME + "Si e\' verificato un problema a tempo di esecuzione.\n" + re.getMessage();
-                LOG.severe(msg);
-                throw new WebStorageException(msg, re);
             } catch (Exception e) {
                 String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
                 LOG.severe(msg);
@@ -1839,6 +1874,10 @@ public class DBWrapper implements Query {
                 LOG.severe(msg);
                 throw new WebStorageException(msg, t);
             }
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Si e\' tentato di accedere a un attributo di un bean obbligatorio ma non valorizzato.\n" + anve.getMessage();
+            LOG.severe(msg + "Probabile problema nel tentativo di recuperare l'id del bean di un progetto scrivibile dall\'utente.\n");
+            throw new WebStorageException(msg, anve);
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto RiskBean non valorizzato; problema nella query dell\'utente.\n";
             LOG.severe(msg); 
@@ -2083,5 +2122,5 @@ public class DBWrapper implements Query {
             }
         }
     }
-    
+        
 }
