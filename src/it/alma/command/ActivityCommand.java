@@ -185,7 +185,7 @@ public class ActivityCommand extends ItemBean implements Command {
          *                    Recupera parametri e attributi                    *
          * ******************************************************************** */
         // Recupera o inizializza 'id progetto'
-        int idPrj = parser.getIntParameter("id", -1); 
+        int idPrj = parser.getIntParameter("id", Utils.DEFAULT_ID);
         // Recupera o inizializza 'tipo pagina'   
         String part = parser.getStringParameter("p", "-");
         // Flag di scrittura
@@ -239,10 +239,6 @@ public class ActivityCommand extends ItemBean implements Command {
                 runtimeProject = db.getProject(idPrj, user.getId());
                 // Verifica se è presente il parametro 'p'
                 if (nomeFile.containsKey(part)) {
-                    // TODO: workaround...
-                    //if (part.equalsIgnoreCase(Query.ADD_ACTIVITY_TO_PROJECT)) {
-                    //    write = true;
-                    //}
                     // Verifica se deve eseguire un'operazione di scrittura
                     if (write) {
                         // Creazione della tabella che conterrà i valori dei parametri passati dalle form
@@ -275,7 +271,7 @@ public class ActivityCommand extends ItemBean implements Command {
                              * ************************************************ */
                             loadParams(part, parser, params);
                             isHeader = isFooter = false;
-                            //db.insertActivityPart(idPrj, user.getId(), writableProjects, userWritableActivitiesByProjectId, params);
+                            db.insertActivity(idPrj, user, writablePrj, params.get(Query.ADD_ACTIVITY_TO_PROJECT));
                         }
 
                         // Aggiorna i progetti, le attività dell'utente in sessione
@@ -399,16 +395,26 @@ public class ActivityCommand extends ItemBean implements Command {
          *           Ramo di INSERT di una Attivita'            *
          * **************************************************** */
         else if (part.equalsIgnoreCase(Query.ADD_ACTIVITY_TO_PROJECT)) {
-            // Recupero e caricamento parametri di add activity
-            //int totActivities = Integer.parseInt(parser.getStringParameter("pcm-loop-status", Utils.VOID_STRING));
+            GregorianCalendar date = Utils.getUnixEpoch();
+            String dateAsString = Utils.format(date, Query.DATA_SQL_PATTERN);
             HashMap<String, String> act = new HashMap<String, String>();
-            act.put("pcv-situazione", parser.getStringParameter("pcv-situazione", Utils.VOID_STRING));
-            act.put("pcv-descrizione", parser.getStringParameter("pcv-descrizione", Utils.VOID_STRING));
-            act.put("pcv-obiettivi", parser.getStringParameter("pcv-obiettivi", Utils.VOID_STRING));
-            act.put("pcv-minacce", parser.getStringParameter("pcv-minacce", Utils.VOID_STRING));
-            // Caricamento della tabella valori parametri
-            
-            formParams.put(Query.PART_PROJECT_CHARTER_MILESTONE, act);
+            act.put("act-name",         parser.getStringParameter("act-name", Utils.VOID_STRING));
+            act.put("act-descr",        parser.getStringParameter("act-descr", null));
+            act.put("act-datainizio",       parser.getStringParameter("act-datainizio", dateAsString));
+            act.put("act-datafine",         parser.getStringParameter("act-datafine", dateAsString));
+            act.put("act-datainiziovera",   parser.getStringParameter("act-datainiziovera", null));
+            act.put("act-datafinevera",     parser.getStringParameter("act-datafinevera", null));
+            act.put("act-guprevisti",   parser.getStringParameter("act-guprevisti", null));
+            act.put("act-gueffettivi",  parser.getStringParameter("act-gueffettivi", null));
+            act.put("act-gurimanenti",  parser.getStringParameter("act-gurimanenti", null));
+            act.put("act-progress",     parser.getStringParameter("act-progress", null));
+            act.put("act-people",       parser.getStringParameter("act-people", Utils.VOID_STRING));
+            act.put("act-role",         parser.getStringParameter("act-role", Utils.VOID_STRING));
+            act.put("act-milestone",    parser.getStringParameter("act-milestone", Utils.VOID_STRING));
+            act.put("act-wbs",          parser.getStringParameter("act-wbs", Utils.VOID_STRING));
+            act.put("act-compl",        parser.getStringParameter("act-compl", Utils.VOID_STRING));
+            act.put("act-status",       parser.getStringParameter("act-status", Utils.VOID_STRING));
+            formParams.put(Query.ADD_ACTIVITY_TO_PROJECT, act);
         }
     }
     
