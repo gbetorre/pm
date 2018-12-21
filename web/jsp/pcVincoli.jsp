@@ -56,7 +56,6 @@
             'pcc-descrizione': "Inserire almeno " + offsetcharacter + " caratteri."
           },
           submitHandler: function (form) {
-            alert('valid form submitted');
             return true;
           }
         });
