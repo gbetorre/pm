@@ -91,11 +91,16 @@ public class SessionManager extends HttpServlet {
      * <p>Nome e percorso della pagina di errore cui ridirigere in caso
      * di eccezioni rilevate.</p>
      */
-    private String errorJsp;
+    private static String errorJsp;
+    /**
+     * <p>Nome del template in cui vengono assemblati i vari 'pezzi'
+     * che compongono l'output html finale.</p>
+     */
+    private static String templateJsp;
     
     
     /** 
-     * Inizializza (staticamente) alcune variabili globali 
+     * <p>Inizializza, staticamente, alcune variabili globali.</p> 
      * 
      * @param config la configurazione usata dal servlet container per passare informazioni alla servlet <strong>durante l'inizializzazione</strong>
      * @throws ServletException una eccezione che puo' essere sollevata quando la servlet incontra difficolta'
@@ -109,6 +114,16 @@ public class SessionManager extends HttpServlet {
         errorJsp = getServletContext().getInitParameter("errorJsp");
         if (errorJsp == null)
             throw new ServletException(FOR_NAME + "\n\nManca il parametro di contesto 'errorJsp'!\n\n");
+        /*
+         * Nome del template da invocare per l'assemblaggio dei vari componenti 
+         * dell'output - nel contesto della servlet di autenticazione 
+         * serve piu' che altro per redirigere sulla maschera di login
+         * in caso di invalidamento della sessione 
+         */
+        templateJsp = getServletContext().getInitParameter("templateJsp");
+        if (templateJsp == null) {
+            throw new ServletException(FOR_NAME + "\n\nManca il parametro di contesto 'templateJsp'!\n\n");
+        }
     }
     
     
@@ -130,13 +145,13 @@ public class SessionManager extends HttpServlet {
             // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
             HttpSession session = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
             session.invalidate();
-            final RequestDispatcher rd = getServletContext().getRequestDispatcher("/jsp/login.jsp");
+            final RequestDispatcher rd = getServletContext().getRequestDispatcher(templateJsp);
             rd.forward(req, res);
         } catch (IllegalStateException e) {
             throw new ServletException("Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n" + e.getMessage(), e);
         } catch (NullPointerException e) {
             throw new ServletException("Errore nell'estrazione dei dipartimenti che gestiscono il corso.\n" + e.getMessage(), e);
-        } catch (Exception e) {
+        } catch (Exception ignored) {
             ;
         }
     }
@@ -159,7 +174,6 @@ public class SessionManager extends HttpServlet {
         String username = null;                             // Credenziali
         String password = null;                             // Credenziali
         StringBuffer msg = new StringBuffer();              // Messaggio
-        //String fileJsp = null;      // Pagina in cui riversare l'output prodotto
         // Effettua la connessione al databound
         try {
             db = new DBWrapper();
@@ -225,13 +239,13 @@ public class SessionManager extends HttpServlet {
      * Inserisce la sessione creata nella HttpServletRequest, modificandola
      * per riferimento <code>ByRef</code>.</p>
      * 
-     * @param matricola
-     * @param idCorso
-     * @param aa
-     * @param req
-     * @param db
-     * @return
-     * @throws CommandException
+     * @param username nome utente inserito ai fini di login
+     * @param password password inserita ai fini di login
+     * @param req   HttpServletRequest per la creazione della sessione
+     * @param db    DataBound per la query riguardo le credenziali
+     * @param message messaggio per l'output circa l'esito della login 
+     * @return <code>boolean</code> - true se l'autenticazione e' andata a buon fine, false in caso contrario
+     * @throws CommandException se si verifica un problema nel recupero dell'utente in base alle credenziali fornite
      */
     public static boolean authenticate(String username, 
                                        String password, 
@@ -239,7 +253,6 @@ public class SessionManager extends HttpServlet {
                                        DBWrapper db, 
                                        StringBuffer message) 
                                 throws CommandException {
-
         boolean authenticated = false;
         HttpSession session = req.getSession();
         // Se la sessione non è nuova ci sono già dentro dei valori
