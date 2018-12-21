@@ -1132,8 +1132,9 @@ public interface Query extends Serializable {
             "   ,   id_wbs" +
             "   ,   id_complessita" +
             "   ,   id_stato" +
-            "   ,   id_ruolo" +
-            "   ,   id_persona )" +
+            "   ,   dataultimamodifica" +
+            "   ,   oraultimamodifica" +
+            "   ,   autoreultimamodifica)" +
             "   VALUES (? " +          // id
             "   ,       ? " +          // nome
             "   ,       ? " +          // descrizione
@@ -1152,8 +1153,23 @@ public interface Query extends Serializable {
             "   ,       ? " +          // id wbs
             "   ,       ? " +          // id complessità
             "   ,       ? " +          // id stato attività
-            "   ,       ? " +          // id ruolo
-            "   ,       ?)" ;          // id persona
+            "   ,       ? " +          // data ultima modifica
+            "   ,       ? " +          // ora ultima modifica
+            "   ,       ?)" ;          // autore ultima modifica
+    
+    /**
+     * <p>Query per inserimento di persona su una attivit&agrave;.</p>
+     */
+    public static final String INSERT_PERSON_ON_ACTIVITY = 
+            "INSERT INTO attivitagestione" +
+            "   (   id" +
+            "   ,   id_attivita" +
+            "   ,   id_persona" +
+            "   ,   id_competenza)" +
+            "   VALUES (? " +          // id
+            "   ,       ? " +          // id attività
+            "   ,       ? " +          // id persona
+            "   ,       ?)" ;          // id competenza
     
     /**
      * <p>Query per inserimento di una nuova competenza.</p>
