@@ -286,30 +286,20 @@ public class Main extends HttpServlet {
          * Cerca la command associata al parametro 'ent'
          * e, se la trova, ne invoca il metodo execute()
          */
-        //JOptionPane.showMessageDialog(null, "Chiamata GET arrivata dall\'applicazione!", "Main: esito OK", JOptionPane.INFORMATION_MESSAGE, null);
         try {
             q = req.getParameter(entToken);
         } catch (NullPointerException npe) { // Potrebbe già uscire qui
             req.setAttribute("javax.servlet.jsp.jspException", npe);
-            fileJsp = errorJsp;
             log(FOR_NAME + "Problema di puntamento: applicazione terminata!" + npe);
-            final RequestDispatcher rd = getServletContext().getRequestDispatcher(fileJsp + "?" + req.getQueryString());
-            rd.forward(req, res);
-            return;
+            flush(req, res, errorJsp);
         } catch (NumberFormatException nfe) { // Controllo sull'input
             req.setAttribute("javax.servlet.jsp.jspException", nfe);
-            fileJsp = errorJsp;
             log(FOR_NAME + "Parametro in formato non valido: applicazione terminata!" + nfe);
-            final RequestDispatcher rd = getServletContext().getRequestDispatcher(fileJsp + "?" + req.getQueryString());
-            rd.forward(req, res);
-            return;
+            flush(req, res, errorJsp);
         } catch (Exception e) { // Just in case
             req.setAttribute("javax.servlet.jsp.jspException", e);
-            fileJsp = errorJsp;
             log(FOR_NAME + "Eccezione generica: " + e);
-            final RequestDispatcher rd = getServletContext().getRequestDispatcher(fileJsp + "?" + req.getQueryString());
-            rd.forward(req, res);
-            return;
+            flush(req, res, errorJsp);
         }
         try {
             /*
@@ -326,10 +316,9 @@ public class Main extends HttpServlet {
                          ", presente nella pagina: " + 
                          req.getHeader("Referer");
             log.log(Level.WARNING, msg, ce);
-            fileJsp = errorJsp;
             req.setAttribute("message", ce.getMessage());
             req.setAttribute("javax.servlet.jsp.jspException", ce);
-            flush(req, res, fileJsp);
+            flush(req, res, errorJsp);
         } catch (Exception e) {
             String msg = FOR_NAME +  
                          "L'errore è stato generato dalla seguente chiamata: " + 
@@ -337,10 +326,9 @@ public class Main extends HttpServlet {
                          ", presente nella pagina: " + 
                          req.getHeader("Referer");
             log.log(Level.SEVERE, msg, e);
-            fileJsp = errorJsp;
             req.setAttribute("message", e.getMessage());
             req.setAttribute("javax.servlet.jsp.jspException", e);
-            flush(req, res, fileJsp);
+            flush(req, res, errorJsp);
         }
         /*
          * Mantiene tutti i parametri di navigazione
@@ -367,12 +355,12 @@ public class Main extends HttpServlet {
             res.setDateHeader("Expires", 0); // Proxies.
             /* 
              * Il template compone il risultato con vari pezzi 
-             * (testata, aside, etc.)
+             * (testata, aside, etc.) che decide lui se includere o meno
              */
             fileJsp = templateJsp;
             /*
              * Recupero di tutte le informazioni 'fisse' da mostrare
-             * nella navigazione (liste di strutture per l'header, anno corrente,
+             * nella navigazione (info per l'header, anno corrente,
              * baseHref, etc.)
              */
             retrieveFixedInfo(req);
@@ -401,10 +389,6 @@ public class Main extends HttpServlet {
                        HttpServletResponse res) 
                throws ServletException, IOException {
         /*
-         * Dichiara la variabile per la pagina in cui riversare l'output prodotto
-         */
-        String fileJsp = null;
-        /*
          * Dichiara le variabili in base a cui ricercare la Command
          */
         String q = null;
@@ -417,25 +401,16 @@ public class Main extends HttpServlet {
             q = req.getParameter(entToken);
         } catch (NullPointerException npe) { // Potrebbe già uscire qui
             req.setAttribute("javax.servlet.jsp.jspException", npe);
-            fileJsp = errorJsp;
             log(FOR_NAME + "Problema di puntamento: applicazione terminata!" + npe);
-            final RequestDispatcher rd = getServletContext().getRequestDispatcher(fileJsp + "?" + req.getQueryString());
-            rd.forward(req, res);
-            return;
+            flush(req, res, errorJsp);
         } catch (NumberFormatException nfe) { // Controllo sull'input
             req.setAttribute("javax.servlet.jsp.jspException", nfe);
-            fileJsp = errorJsp;
             log(FOR_NAME + "Parametro in formato non valido: applicazione terminata!" + nfe);
-            final RequestDispatcher rd = getServletContext().getRequestDispatcher(fileJsp + "?" + req.getQueryString());
-            rd.forward(req, res);
-            return;
+            flush(req, res, errorJsp);
         } catch (Exception e) { // Just in case
             req.setAttribute("javax.servlet.jsp.jspException", e);
-            fileJsp = errorJsp;
             log(FOR_NAME + "Eccezione generica: " + e);
-            final RequestDispatcher rd = getServletContext().getRequestDispatcher(fileJsp + "?" + req.getQueryString());
-            rd.forward(req, res);
-            return;
+            flush(req, res, errorJsp);
         }
         try {
             /*
@@ -447,22 +422,13 @@ public class Main extends HttpServlet {
             cmd.execute(req);
         } catch (CommandException e) { // Potrebbe già uscire qui
             req.setAttribute("javax.servlet.jsp.jspException", e);
-            fileJsp = errorJsp;
-            log("Errore: " + e);
-            final RequestDispatcher rd = getServletContext().getRequestDispatcher(fileJsp + "?" + req.getQueryString());
-            rd.forward(req, res);
-            return;
+            log("Problema: " + e);
+            flush(req, res, errorJsp);
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        /* 
-         * Il template compone il risultato con vari pezzi 
-         * (testata, aside, etc.)
-         */
-        fileJsp = templateJsp;
-        final RequestDispatcher rd = getServletContext().getRequestDispatcher(fileJsp + "?" + req.getQueryString());
-        rd.forward(req, res);
+        flush(req, res, templateJsp);
     }
 
     
@@ -484,26 +450,26 @@ public class Main extends HttpServlet {
         if (cmd == null)
             cmd = homePage;
         if (commands.containsKey(cmd))
-            return (Command) commands.get(cmd);
-        else
-            throw new CommandException(FOR_NAME + "Classe Command non valida: " + cmd);
+            return commands.get(cmd);
+        // Se non è zuppa è pan bagnato...
+        throw new CommandException(FOR_NAME + "Classe Command non valida: " + cmd);
     }    
 
     
     /** 
-     * Esegue pezzi di codice richiamabili direttamente dalla Main,
+     * <p>Esegue pezzi di codice richiamabili direttamente dalla Main,
      * che &egrave; invocata ad ogni richiesta del client e quindi gi&agrave;
      * presente in memoria.<br />
      * Pu&ograve; essere invocata, implicitamente, dal template per 
      * recuperare 
      * <ul>
      * <li>elenchi di oggetti che servono all'header 
-     * per popolare le liste in esso mostrate</li>
+     * per popolare le liste eventualmente in esso mostrate</li>
      * <li>il baseHref</li>
      * <li>il flagsUrl</li>
      * <br />
      * e altri valori utili.
-     * </ul><br />
+     * </ul></p>
      * <p>L'invocazione &egrave; implicita nel senso che il presente
      * metodo non viene richiamato direttamente dal template, 
      * ma indirettamente attraverso l'invocazione della Main.
@@ -543,7 +509,7 @@ public class Main extends HttpServlet {
      * Restituisce tale percorso.<br />
      * Serve a ricostruire i percorsi dei fogli di stile, dei files inclusi, ecc.
      * 
-     * @param req  la HttpServletRequest contenente il protocollo usato (p.es.: <code>http, https,</code> o <code>ftp</code>)
+     * @param req  HttpServletRequest contenente il protocollo usato (p.es.: <code>http, https,</code> o <code>ftp</code>)
      * @return <code>String</code> - una stringa che rappresenta la root, da settare nelle jsp (p.es.: <code>&lt;base href="http://www.univr.it/"&gt;</code>)
      */
     public static String getBaseHref(HttpServletRequest req) {
@@ -561,6 +527,15 @@ public class Main extends HttpServlet {
     }
     
     
+    /**
+     * <p>Inoltra la richiesta ad una pagina passata come argomento.</p>
+     * 
+     * @param req  HttpServletRequest contenente i parametri sulla QueryString
+     * @param res  HttpServletResponse per inoltrare la chiamata
+     * @param fileJspT pagina JSP a cui puntare nell'inoltro
+     * @throws ServletException se si verifica un'eccezione nella redirezione
+     * @throws IOException se si verifica un problema di input/output
+     */
     private void flush(HttpServletRequest req,
                        HttpServletResponse res,
                        String fileJspT) 
