@@ -1465,10 +1465,10 @@ public class DBWrapper implements Query {
                     pst = con.prepareStatement(UPDATE_PROJECT_STATUS);
                     con.setAutoCommit(false);
                     pst.clearParameters();
-                    Date dateTemp = Utils.formatDate(paramsStatus.get("sts-datainizio"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
+                    Date dateTemp = Utils.format(paramsStatus.get("sts-datainizio"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
                     pst.setDate(1, Utils.convert(dateTemp));
                     dateTemp = null;
-                    dateTemp = Utils.formatDate(paramsStatus.get("sts-datafine"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
+                    dateTemp = Utils.format(paramsStatus.get("sts-datafine"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
                     pst.setDate(2, Utils.convert(dateTemp));
                     pst.setString(3, paramsStatus.get("sts-avanzamento"));
                     pst.setInt(4, Integer.parseInt(paramsStatus.get("sts-tempi")));
@@ -1481,7 +1481,7 @@ public class DBWrapper implements Query {
                     pst.setInt(11, Integer.parseInt(paramsStatus.get("sts-approvvigionamenti")));
                     pst.setInt(12, Integer.parseInt(paramsStatus.get("sts-stakeholder")));
                     pst.setDate(13, Utils.convert(Utils.convert(Utils.getCurrentDate())));
-                    pst.setDate(14, Utils.convert(Utils.convert(Utils.getCurrentDate())));
+                    pst.setTime(14, Utils.getCurrentTime());
                     pst.setString(15, getLogin(userId));
                     pst.setInt(16, idProj);
                     pst.setInt(17, Integer.parseInt(paramsStatus.get("sts-id")));
@@ -1619,6 +1619,82 @@ public class DBWrapper implements Query {
     }
     
     
+    /** <p>Metodo che aggiorna le WBS di progetto..</p>
+     * 
+     * @param idProj id del progetto da aggiornare 
+     * @param user utente che ha eseguito il login
+     * @param projects Map contenente la lista dei progetti su cui l'utente corrente e' abilitato alla modifica
+     * @param wbsRelatedToProject HashMap contenente le wbs  su cui l'utente e' abilitato alla modifica
+     * @param params hashmap che contiene i parametri che si vogliono aggiornare del progetto
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public void updateWbsPart(int idProj,
+                              PersonBean user,
+                              HashMap<Integer, ProjectBean> projects, 
+                              HashMap<Integer, Vector<WbsBean>> wbsRelatedToProject,
+                              HashMap<String, HashMap<String, String>>params) 
+                       throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        try {
+            // Ottiene la connessione
+            con = pol_manager.getConnection();
+            if (params.containsKey(PART_WBS)) {
+                HashMap<String, String> paramsWbs = params.get(PART_WBS);
+                if (Utils.containsValues(paramsWbs)) {
+                    // 4 è il numero di campi che compongono una WBS
+                    for (int i = 0; i < (paramsWbs.size() / 4); i++) {
+                        String isWorkpackageAsString = paramsWbs.get("wbs-workpackage" + String.valueOf(i));
+                        if ( (!isWorkpackageAsString.equalsIgnoreCase("true")) && (!isWorkpackageAsString.equalsIgnoreCase("false"))  ) {
+                            throw new ClassCastException("Attenzione: il valore del parametro \'wbs-workpackage\' non e\' riconducibile a un valore boolean!\n");
+                        }
+                        con.setAutoCommit(false);
+                        pst = con.prepareStatement(UPDATE_WBS);
+                        pst.clearParameters();
+                        pst.setString(1, paramsWbs.get("wbs-nome" + String.valueOf(i)));
+                        pst.setString(2, paramsWbs.get("wbs-descrizione" + String.valueOf(i)));
+                        pst.setBoolean(3, Boolean.parseBoolean(isWorkpackageAsString));
+                        pst.setInt(4, Integer.parseInt(paramsWbs.get("wbs-idpadre" + String.valueOf(i))));
+                        pst.setDate(5, Utils.convert(Utils.convert(Utils.getCurrentDate())));
+                        pst.setTime(6, Utils.getCurrentTime());
+                        pst.setString(7, user.getCognome() + " " + user.getNome());
+                        pst.setInt(8, Integer.parseInt(paramsWbs.get("wbs-id" + String.valueOf(i))));
+                        pst.executeUpdate();
+                        con.commit();
+                    }
+                }
+            }
+        } catch (NotFoundException nfe) {
+            String msg = FOR_NAME + "Probabile problema nel puntamento alla HashMap dei parametri.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + nfe.getMessage(), nfe);
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il progetto.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } catch (NumberFormatException nfe) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il progetto.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + nfe.getMessage(), nfe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il progetto.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + e.getMessage(), e);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
     /* ********************************************************** *
      *                        Metodi di POL                       *
     /* ********************************************************** *
@@ -1649,7 +1725,7 @@ public class DBWrapper implements Query {
                 pst.setDate(2, Utils.convert(Utils.convert(Utils.getCurrentDate())));
                 pst.setDate(3, Utils.convert(getDefaultEndDate(idProj)));
                 pst.setDate(4, Utils.convert(Utils.convert(Utils.getCurrentDate())));
-                pst.setDate(5, Utils.convert(Utils.convert(Utils.getCurrentDate().getTime())));
+                pst.setTime(5, Utils.getCurrentTime());
                 pst.setString(6, user.getCognome() + " " + user.getNome());
                 pst.setInt(7, idProj);
                 pst.executeUpdate();
@@ -1921,10 +1997,12 @@ public class DBWrapper implements Query {
     
     
     /**
+     * <p>Calcola una data di default dato in input l'id del progetto</p> 
+     * <p>Ritorna la data corrente sommata del periodo di avanzamento del progetto</p>
      * 
-     * @param idProj 
-     * @return 
-     * @throws WebStorageException 
+     * @param idProj id del progetto dal quale ricavare il periodo di avanzamento
+     * @return <code>java.util.Date</code> - un oggetto Date costruito partendo dalla data corrente e sommando il periodo di avanzamento del progetto
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
     private Date getDefaultEndDate (int idProj) 
                              throws WebStorageException {
@@ -1962,6 +2040,8 @@ public class DBWrapper implements Query {
         }
         return Utils.convert(endDate);
     }
+    
+    
     /* ********************************************************** *
      *                        Metodi di QOL                       *
      *                          (ValDid)                          *
