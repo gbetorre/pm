@@ -66,12 +66,13 @@ import it.alma.exception.WebStorageException;
 
 
 /** 
- * <p><code>ActivityCommand.java</code><br />
- * Implementa la logica per la gestione delle attività di un progetto on line (POL).</p>
+ * <p><code>WbsCommand.java</code><br />
+ * Implementa la logica per la gestione delle WBS� di un progetto on line (POL).</p>
  * 
- * <p>Created on martedì 27 novembre 2018 12:56</p>
+ * <p>Created on marted� 27 novembre 2018 12:56</p>
  * 
- * TODO::@author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
+ * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
+ * @author <a href="mailto:andrea.tonel@studenti.univr.it">Andrea Tonel</a>
  */
 public class WbsCommand extends ItemBean implements Command {
     
@@ -85,19 +86,14 @@ public class WbsCommand extends ItemBean implements Command {
      */
     protected static Logger LOG = Logger.getLogger(Main.class.getName());
     /**
-     * Pagina a cui la command reindirizza per mostrare la lista delle attivit&agrave; del progetto
+     * Pagina a cui la command reindirizza per mostrare la lista delle WBS del progetto
      */
-    //private static final String nomeFileElenco = "/jsp/projActivities.jsp";
-    /**
-     * Pagina a cui la command fa riferimento per mostrare la lista delle 
-     * attivit&agrave; del progetto nel contesto del Project Charter
-     */
-    //private static final String nomeFileMilestone = "/jsp/pcMilestone.jsp";
+    private static final String nomeFileElenco = "/jsp/projWBS.jsp";
     /**
      * Pagina a cui la command fa riferimento per permettere l'aggiunta 
      * di una nuova attivit&agrave; al progetto
      */
-    //private static final String nomeFileActivity = "/jsp/pcAttivita.jsp";
+    //private static final String nomeFileWbs = "/jsp/addWBS.jsp";
     /**
      * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutti gli attributi del progetto
      */    
@@ -109,7 +105,7 @@ public class WbsCommand extends ItemBean implements Command {
     
     
     /** 
-     * Crea una nuova istanza di ActivityCommand 
+     * Crea una nuova istanza di WbsCommand 
      */
     public WbsCommand() {
         /*;*/   // It doesn't Anything
@@ -134,12 +130,9 @@ public class WbsCommand extends ItemBean implements Command {
           String msg = FOR_NAME + "La voce menu' " + this.getNome() + " non ha il campo paginaJsp. Impossibile visualizzare i risultati.\n";
           throw new CommandException(msg);
         }
-        /* Carica la hashmap contenente le pagine da includere in funzione dei parametri sulla querystring
-        nomeFile.put(Query.PART_ACTIVITY, nomeFileElenco);
-        nomeFile.put(Query.PART_PROJECT_CHARTER_MILESTONE, nomeFileMilestone);
-        nomeFile.put(Query.ADD_ACTIVITY_TO_PROJECT, nomeFileActivity);
-        nomeFile.put(Query.PART_PROJECT, this.getPaginaJsp());
-        */
+        // Carica la hashmap contenente le pagine da includere in funzione dei parametri sulla querystring
+        nomeFile.put(Query.PART_WBS, "/jsp/projWBS.jsp");
+        nomeFile.put(Query.UPDATE_PART_PROJECT,"/jsp/updateWBS.jsp");
     }  
   
     
@@ -170,8 +163,8 @@ public class WbsCommand extends ItemBean implements Command {
         PersonBean user = null;
         // Dichiara elenco di progetti
         Vector<ProjectBean> v = new Vector<ProjectBean>();
-        // Dichiara elenco di attività
-        //Vector<ActivityBean> vActivities = new Vector<ActivityBean>();
+        // Dichiara elenco di wbs
+        Vector<WbsBean> vWbs = new Vector<WbsBean>();
         // Dichiara struttura di persone che possono essere aggiunte a un'attività
         //Vector<PersonBean> candidates = null;
         // Dichiara struttura di Work Package cui può essere aggiunta un'attività
@@ -238,12 +231,13 @@ public class WbsCommand extends ItemBean implements Command {
             if (idPrj > Query.NOTHING) {
                 // Recupera in ogni caso il progetto richiesto dalla navigazione utente
                 runtimeProject = db.getProject(idPrj, user.getId());
-                // Verifica se è presente il parametro 'p'
+                // Verifica se � presente il parametro 'p'
                 if (nomeFile.containsKey(part)) {
                     // Verifica se deve eseguire un'operazione di scrittura
                     if (write) {
-                        // Creazione della tabella che conterrà i valori dei parametri passati dalle form
+                        // Creazione della tabella che conterr� i valori dei parametri passati dalle form
                         HashMap<String, HashMap<String, String>> params = new HashMap<String, HashMap<String, String>>();
+                        loadParams(part, parser, params);
                         // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
                         HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
                         // Recupera i progetti su cui l'utente ha diritti di scrittura
@@ -255,51 +249,36 @@ public class WbsCommand extends ItemBean implements Command {
                             throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
                         }
                         // Recupera dalla sessione le attività su cui l'utente ha diritti di scrittura
-                        LinkedHashMap<Integer, Vector<ActivityBean>> userWritableActivitiesByProjectId = (LinkedHashMap<Integer, Vector<ActivityBean>>) ses.getAttribute("writableActivity");
+                        LinkedHashMap<Integer, Vector<WbsBean>> userWritableWbsByProjectId = (LinkedHashMap<Integer, Vector<WbsBean>>) ses.getAttribute("writableWbs");
                         // Trasforma un Vector di progetti scrivibili dall'utente loggato in un dictionary degli stessi
                         HashMap<Integer, ProjectBean> writableProjects = ProjectCommand.decant(writablePrj);
                         // Controlla se deve effettuare un inserimento o un aggiornamento
-                        if (part.equalsIgnoreCase(Query.PART_PROJECT_CHARTER_MILESTONE)) {
+                        if (part.equalsIgnoreCase(Query.PART_WBS)) {
                             /* ************************************************ *
-                             *                UPDATE Activity Part              *
+                             *                  UPDATE Wbs Part                 *
                              * ************************************************ */
-                            loadParams(part, parser, params);
-                            //Vector<ProjectBean> userWritableProjects = db.getProjects(user.getId(), Query.GET_WRITABLE_PROJECTS_ONLY);
-                            db.updateActivityPart(idPrj, user.getId(), writableProjects, userWritableActivitiesByProjectId, params);
-                        } else if (part.equalsIgnoreCase(Query.ADD_ACTIVITY_TO_PROJECT)) {
-                            /* ************************************************ *
-                             *                INSERT Activity Part              *
-                             * ************************************************ */
-                            loadParams(part, parser, params);
-                            isHeader = isFooter = false;
-                            db.insertActivity(idPrj, user, writablePrj, params.get(Query.ADD_ACTIVITY_TO_PROJECT));
+                            db.updateWbsPart(idPrj, user, writableProjects, userWritableWbsByProjectId, params);
                         }
-
                         // Aggiorna i progetti, le attività dell'utente in sessione
                         //ses.removeAttribute("writableProjects");
-                        ses.removeAttribute("writableActivity");
+                        ses.removeAttribute("writableWbs");
                         //ses.setAttribute("writableProjects", userWritableProjects);
-                        ses.setAttribute("writableActivity", userWritableActivitiesByProjectId);
+                        ses.setAttribute("writableWbs", userWritableWbsByProjectId);
                     }
                     /* **************************************************** *
-                     *                 SELECT Activity Part                 *
+                     *                   SELECT WBS Part                    *
                      * **************************************************** */
-                    // Recupera le Milestones
-                    if (part.equals(Query.PART_PROJECT_CHARTER_MILESTONE)) {
-                        //vActivities = db.getActivities(idPrj);
-                    } else if (part.equals(Query.ADD_ACTIVITY_TO_PROJECT)) {
+                    // Recupera eventuali campi dal Database
+                    if (part.equals(Query.UPDATE_PART_PROJECT)) {
                         isHeader = isFooter = false;
-                        //candidates = db.getPeople(runtimeProject.getId());
-                        //workPackage = db.getWbs(runtimeProject.getId(), Query.GET_WORK_PACKAGES_ONLY); 
-                        //complexity = HomePageCommand.getComplessita();
-                        states = HomePageCommand.getStatiAttivita();
+                        String idWbs = HomePageCommand.getParameters(req, Utils.MIME_TYPE_TEXT);
                         today = Utils.format(Utils.getCurrentDate());
                     }
                     fileJspT = nomeFile.get(part);
                 } else {
-                    // Se il parametro 'p' non è presente, deve solo selezionare le attività 
-                    //vActivities = db.getActivities(idPrj);
-                    //fileJspT = nomeFileElenco;
+                    // Se il parametro 'p' non è presente, deve solo selezionare le wbs
+                    vWbs = db.getWbs(idPrj, true);
+                    fileJspT = nomeFileElenco;
                 }
             } else {
                 // Se siamo qui vuol dire che l'id del progetto non è > zero, il che è un guaio
@@ -344,7 +323,7 @@ public class WbsCommand extends ItemBean implements Command {
         // Imposta nella request dettaglio progetto
         req.setAttribute("progetto", runtimeProject);
         // Imposta nella request elenco attivita del progetto
-        //req.setAttribute("attivita", vActivities);
+        req.setAttribute("wbs", vWbs);
         // Imposta nella request elenco persone del dipartimento
         //req.setAttribute("people", candidates);
         // Imposta nella request elenco wbs associabili
@@ -374,26 +353,26 @@ public class WbsCommand extends ItemBean implements Command {
                                    HashMap<String, HashMap<String, String>> formParams)
                             throws CommandException {
         /* **************************************************** *
-         *          Ramo di Project Charter - Milestone         *
+         *                      Ramo di Wbs                     *
          * **************************************************** */
-        if (part.equalsIgnoreCase(Query.PART_PROJECT_CHARTER_MILESTONE)) {
+        if (part.equalsIgnoreCase(Query.PART_WBS)) {
             // Recupero e caricamento parametri di project charter/milestone
-            int totActivities = Integer.parseInt(parser.getStringParameter("pcm-loop-status", Utils.VOID_STRING));
-            HashMap<String, String> pcm = new HashMap<String, String>();
-            for (int i = 0; i <= totActivities; i++) {
-                String milestone = "false";
-                pcm.put("pcm-id" + String.valueOf(i), parser.getStringParameter("pcm-id" + String.valueOf(i), Utils.VOID_STRING));
-                pcm.put("pcm-nome" + String.valueOf(i), parser.getStringParameter("pcm-nome" + String.valueOf(i), Utils.VOID_STRING));
-                pcm.put("pcm-descrizione" + String.valueOf(i), parser.getStringParameter("pcm-descrizione" + String.valueOf(i), Utils.VOID_STRING));
-                if((parser.getStringParameter("pcm-milestone" + String.valueOf(i), Utils.VOID_STRING)) != "") {
-                    milestone = "true";
+            int totWbs = Integer.parseInt(parser.getStringParameter("wbs-loop-status", Utils.VOID_STRING));
+            HashMap<String, String> wbs = new HashMap<String, String>();
+            for (int i = 0; i <= totWbs; i++) {
+                String workpackage = "false";
+                wbs.put("wbs-id" + String.valueOf(i), parser.getStringParameter("wbs-id" + String.valueOf(i), Utils.VOID_STRING));
+                wbs.put("wbs-nome" + String.valueOf(i), parser.getStringParameter("wbs-nome" + String.valueOf(i), Utils.VOID_STRING));
+                wbs.put("wbs-descrizione" + String.valueOf(i), parser.getStringParameter("wbs-descrizione" + String.valueOf(i), Utils.VOID_STRING));
+                if (parser.getStringParameter("wbs-workpackage" + String.valueOf(i), Utils.VOID_STRING) != "") {
+                    workpackage = "true";
                 }
-                pcm.put("pcm-milestone" + String.valueOf(i), milestone);
+                wbs.put("wbs-workpackage" + String.valueOf(i), workpackage);
             }
-            formParams.put(Query.PART_PROJECT_CHARTER_MILESTONE, pcm);
+            formParams.put(Query.PART_WBS, wbs);
         } 
         /* **************************************************** *
-         *           Ramo di INSERT di una Attivita'            *
+         *              Ramo di INSERT di una Wbs               *
          * **************************************************** */
         else if (part.equalsIgnoreCase(Query.ADD_ACTIVITY_TO_PROJECT)) {
             GregorianCalendar date = Utils.getUnixEpoch();
