@@ -362,8 +362,6 @@ public class ProjectCommand extends ItemBean implements Command {
         req.setAttribute("competenze", vSkills);
         // Salva nella request elenco rischi del progetto
         req.setAttribute("rischi", vRisks);
-        // Salva nella request elenco delle wbs di un progetto
-        req.setAttribute("wbs", vWBS);
         // Salva nella request elenco degli status di un progetto
         req.setAttribute("listProjectStatus", projectStatusList);
         // Salva nella request l'avanzamento progetto più recente
