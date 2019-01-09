@@ -1,6 +1,14 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<c:set var="addNew" value="${false}" scope="page" />
+<c:set var="modify" value="${false}" scope="page" />
+<c:if test="${(param['q'] eq 'wbs') and empty param['p']}">
+  <c:set var="addNew" value="${true}" scope="page" />
+</c:if>
+<c:if test="${param['q'] eq 'pol'}">
+  <c:set var="modify" value="${true}" scope="page" />
+</c:if>
 <c:set var="ruoli" value="${sessionScope.usr.ruoli}" scope="page" />
 <c:set var="ruolo" value="" scope="page" />
 <fmt:parseNumber var="found" type="number" value="${fn:length(ruoli)}" />
@@ -10,12 +18,16 @@
     <c:set var="found" value="${loop.getIndex()}" scope="page" />
   </c:if>
 </c:forEach>
+<c:set var="superuser" value="${false}" scope="page" />
 <c:if test="${(ruolo eq 'PMOATE') or (ruolo eq 'PMODIP') or (ruolo eq 'PM') or (ruolo eq 'TL')}">
-  <c:if test="${param['q'] eq 'act'}">
+  <c:set var="superuser" value="${true}" scope="page" />
+</c:if>
+<c:if test="${pageScope.superuser}">
+  <c:if test="${pageScope.addNew}">
     <a href="javascript:window.open('${addAct}${p.id}', 'newAttivita', true)" class="btn btn-primary">Aggiungi</a>
   </c:if>
-  <c:if test="${param['q'] eq 'pol'}">
+  <c:if test="${pageScope.modify}">
     <input type="button" class="btn btn-primary" name="modifica" value="Modifica" onclick="modify()">
   </c:if>
-    <input type="submit" class="btn btn-primary" name="${distinguishingSubmitName}" value="Salva">
+    <input type="submit" class="btn btn-primary" name="${distinguishingSubmitName}" id="${distinguishingSubmitId}" value="Salva">
 </c:if>
