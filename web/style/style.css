@@ -166,7 +166,7 @@ body.loginbody {
 	background-image: radial-gradient(#ffffff, #ddeeff);
 }
 
-/*Page header and footer styles*/
+/* Page header and footer styles */
 .header, .footer {
     clear: both;
     margin: 0px 0px;
@@ -176,4 +176,10 @@ body.loginbody {
 .header {
 	 background-image: linear-gradient(to bottom, #b2cfcd, #ffffff);
 	 height: 10%;
+}
+
+/* Additional styles */
+.mandatory {
+	font-weight: bold;
+  color: maroon;
 }
