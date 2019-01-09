@@ -1,11 +1,12 @@
 <%@ include file="pcURL.jspf" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"  %>
+<c:set var="distinguishingSubmitId" value="pcAttivita" scope="page" />
     <form id="newAct_form" action="#" method="post">
       <h3>Inserisci una nuova attivit&agrave;:</h3>
       <br />
       <c:set var="skills" value="" scope="page" />
       <div class="row">
-        <div class="col-sm-5">
+        <div class="col-sm-5 mandatory">
           Identificativo della persona 
           <sup>&#10039;</sup>
         </div>
@@ -22,7 +23,7 @@
       </div>
       <br />
       <div class="row">
-        <div class="col-sm-5">
+        <div class="col-sm-5 mandatory">
           Identificativo del ruolo ricoperto nell'attivit&agrave;
           <sup>&#10039;</sup>
           <div id="act-role-label">
@@ -48,7 +49,7 @@
       <hr />
       <div class="additional-fields">
         <div class="row">
-          <div class="col-sm-5">Nome attivit&agrave;</div>
+          <div class="col-sm-5 mandatory">Nome attivit&agrave; <sup>&#10039;</sup></div>
           <div class="col-sm-5"><input type="text" class="form-control" id="act-name" name="act-name" value="" readonly></div>
         </div>
         <br />
@@ -67,7 +68,7 @@
         </div>
         <br />
         <div class="row">
-          <div class="col-sm-5">Data di fine dell'attivit&agrave;</div>
+          <div class="col-sm-5 mandatory">Data di fine dell'attivit&agrave; <sup>&#10039;</sup></div>
           <div class="col-sm-5">
             <input type="text" class="form-control calendarData" id="act-datafine" name="act-datafine" value="" readonly></div>
         </div>
@@ -125,7 +126,7 @@
         </div>
         <br />
         <div class="row">
-          <div class="col-sm-5">Identificativo WBS</div>
+          <div class="col-sm-5 mandatory">Identificativo WBS <sup>&#10039;</sup></div>
           <div class="col-sm-5">
           <select class="form-control" id="act-wbs" name="act-wbs">
           <c:forEach var="wp" items="${requestScope.wbs}" varStatus="status">
@@ -136,7 +137,7 @@
         </div>
         <br />
         <div class="row">
-          <div class="col-sm-5">Identificativo complessit&agrave; dell'attivit&agrave;</div>
+          <div class="col-sm-5 mandatory">Identificativo complessit&agrave; dell'attivit&agrave; <sup>&#10039;</sup></div>
           <div class="col-sm-5">
             <select class="form-control" id="act-compl" name="act-compl">
             <c:forEach var="status" items="${requestScope.complessita}" varStatus="loop">
@@ -147,7 +148,7 @@
         </div>
         <br />
         <div class="row">
-          <div class="col-sm-5">Stato attivit&agrave;</div>
+          <div class="col-sm-5 mandatory">Stato attivit&agrave; <sup>&#10039;</sup></div>
           <div class="col-sm-5">
             <select class="form-control" id="act-status" name="act-status">
             <c:forEach var="status" items="${requestScope.statiAttivita}" varStatus="loop">
@@ -157,13 +158,13 @@
           </div>
         </div>
         <br />
-        <input type='button' id='btn' value='Close' class="btn btn-primary" />
+        <input type='button' id='btn' value='Chiudi' class="btn btn-primary" onclick="window.self.close();" />
         <%@ include file="subPanel.jspf" %>
       </div>
     </form>
     <script type="text/javascript">
       $(document).ready(function () {
-          $('#btn').click(function () {
+          $('${pageScope.distinguishingSubmitId}').click(function () {
               window.opener.location.reload(true);
               window.self.close();
           });
@@ -210,7 +211,7 @@
         return true;
       }
       });
-
+      
       $('textarea').keyup(function (e) {
           var len = $(this).val().length;
           var dblength = 16384;
