@@ -1629,7 +1629,6 @@ public class DBWrapper implements Query {
      * @param params hashmap che contiene i parametri che si vogliono aggiornare del progetto
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
      */
-    @SuppressWarnings({ "null", "static-method" })
     public void updateWbsPart(int idProj,
                               PersonBean user,
                               HashMap<Integer, ProjectBean> projects, 
@@ -1913,17 +1912,18 @@ public class DBWrapper implements Query {
         try {
             // Ottiene il progetto precaricato quando l'utente si è loggato corrispondente al progetto sul quale aggiungere un'attività
             Integer key = new Integer(idProj);
+            int nextParam = 0;
             con = pol_manager.getConnection();
             con.setAutoCommit(false);
             pst = con.prepareStatement(INSERT_RISK);
             pst.clearParameters();
-            pst.setInt(1, Integer.parseInt(valuesRisk.get(0)));
-            pst.setString(2, valuesRisk.get(1));
-            pst.setString(3, valuesRisk.get(2));
-            pst.setString(4, valuesRisk.get(3));
-            pst.setString(5, valuesRisk.get(4));
-            pst.setString(6, valuesRisk.get(5));
-            pst.setInt(7, key);
+            pst.setInt(++nextParam, Integer.parseInt(valuesRisk.get(0)));
+            pst.setString(++nextParam, valuesRisk.get(1));
+            pst.setString(++nextParam, valuesRisk.get(2));
+            pst.setString(++nextParam, valuesRisk.get(3));
+            pst.setString(++nextParam, valuesRisk.get(4));
+            pst.setString(++nextParam, valuesRisk.get(5));
+            pst.setInt(++nextParam, key);
             pst.executeUpdate();
             con.commit();
         } catch (SQLException sqle) {
@@ -1953,30 +1953,86 @@ public class DBWrapper implements Query {
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
     public void insertSkill (int idProj,
-                            int userId, 
-                            Vector<String> valuesSkill)
-                     throws WebStorageException {
+                             int userId, 
+                             Vector<String> valuesSkill)
+                      throws WebStorageException {
         Connection con = null;
         PreparedStatement pst = null;
         try {
             // Ottiene il progetto precaricato quando l'utente si è loggato corrispondente al progetto sul quale aggiungere un'attività
             Integer key = new Integer(idProj);
+            int nextParam = 0;
             con = pol_manager.getConnection();
             con.setAutoCommit(false);
             pst = con.prepareStatement(INSERT_SKILL);
             pst.clearParameters();
-            pst.setInt(1, Integer.parseInt(valuesSkill.get(0)));
-            pst.setString(2, valuesSkill.get(1));
-            pst.setString(3, valuesSkill.get(2));
-            pst.setBoolean(4, Boolean.parseBoolean(valuesSkill.get(3)));
-            pst.setInt(5, key);
-            pst.setInt(6, Integer.parseInt(valuesSkill.get(5)));
+            pst.setInt(++nextParam, Integer.parseInt(valuesSkill.get(0)));
+            pst.setString(++nextParam, valuesSkill.get(1));
+            pst.setString(++nextParam, valuesSkill.get(2));
+            pst.setBoolean(++nextParam, Boolean.parseBoolean(valuesSkill.get(3)));
+            pst.setInt(++nextParam, key);
+            pst.setInt(++nextParam, Integer.parseInt(valuesSkill.get(5)));
             pst.executeUpdate();
             con.commit();
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto RiskBean non valorizzato; problema nella query dell\'utente.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    /** 
+     * <p>Metodo per fare un nuovo inserimento di una nuova wbs relativa al progetto.</p>
+     * 
+     * @param idProj  - identificativo del progetto, al quale l'attivit&agrave; fa riferimento
+     * @param user - utente loggato
+     * @param params - hashmap contenente i valori inseriti dall'utente per inserimento nuova wbs
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    public void insertWbs (int idProj,
+                           PersonBean user,
+                           HashMap<String, String> params)
+                    throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        try {
+            // Ottiene il progetto precaricato quando l'utente si è loggato corrispondente al progetto sul quale aggiungere un'attività
+            Integer key = new Integer(idProj);
+            int nextParam = 0;
+            int maxWbsId = getMax("wbs") + 1;
+            con = pol_manager.getConnection();
+            con.setAutoCommit(false);
+            pst = con.prepareStatement(INSERT_WBS);
+            pst.clearParameters();
+            pst.setInt(++nextParam, maxWbsId);
+            pst.setInt(++nextParam, Integer.parseInt(params.get("wbs-wbs")));
+            pst.setInt(++nextParam, key);
+            pst.setString(++nextParam, params.get("wbs-nome"));
+            pst.setString(++nextParam, params.get("wbs-descrizione"));
+            pst.setBoolean(++nextParam, Boolean.parseBoolean(params.get("wbs-workpackage")));
+            pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+            pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
+            pst.setString(++nextParam, user.getCognome() + String.valueOf(Utils.BLANK_SPACE) + user.getNome());
+            pst.executeUpdate();
+            con.commit();
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto RiskBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query di inserimento WBS.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
         } finally {
             try {
                 con.close();
