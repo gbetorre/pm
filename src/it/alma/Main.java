@@ -215,7 +215,7 @@ public class Main extends HttpServlet {
                 commands.put(voceMenu.getNome(), classCommand);
             } catch (ClassNotFoundException cnfe) { // Se non riesce a istanziare la Command in generali la cerca in un sottopackage
                 try {
-                    classCommand = (Command) Class.forName("it.alma.pol.command." + voceMenu.getNomeClasse()).newInstance();
+                    classCommand = (Command) Class.forName("it.alma.qol.command." + voceMenu.getNomeClasse()).newInstance();
                     classCommand.init(voceMenu);
                     commands.put(voceMenu.getNome(), classCommand);
                 }
@@ -401,14 +401,17 @@ public class Main extends HttpServlet {
             q = req.getParameter(entToken);
         } catch (NullPointerException npe) { // Potrebbe già uscire qui
             req.setAttribute("javax.servlet.jsp.jspException", npe);
+            req.setAttribute("message", npe.getMessage());
             log(FOR_NAME + "Problema di puntamento: applicazione terminata!" + npe);
             flush(req, res, errorJsp);
         } catch (NumberFormatException nfe) { // Controllo sull'input
             req.setAttribute("javax.servlet.jsp.jspException", nfe);
+            req.setAttribute("message", nfe.getMessage());
             log(FOR_NAME + "Parametro in formato non valido: applicazione terminata!" + nfe);
             flush(req, res, errorJsp);
         } catch (Exception e) { // Just in case
             req.setAttribute("javax.servlet.jsp.jspException", e);
+            req.setAttribute("message", e.getMessage());
             log(FOR_NAME + "Eccezione generica: " + e);
             flush(req, res, errorJsp);
         }
@@ -422,6 +425,7 @@ public class Main extends HttpServlet {
             cmd.execute(req);
         } catch (CommandException e) { // Potrebbe già uscire qui
             req.setAttribute("javax.servlet.jsp.jspException", e);
+            req.setAttribute("message", e.getMessage());
             log("Problema: " + e);
             flush(req, res, errorJsp);
         } catch (Exception e) {
