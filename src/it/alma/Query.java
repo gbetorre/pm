@@ -133,9 +133,13 @@ public interface Query extends Serializable {
      */
     public static final String ADD_STATUS_TO_PROJECT            = "addSts";
     /**
-     * <p>Costante per il parametro identificante la pagina di inserimento di un'Attivit&agrave; di un progetto.</p>
+     * <p>Costante per il parametro identificante la pagina di inserimento di un'attivit&agrave; di un progetto.</p>
      */
     public static final String ADD_ACTIVITY_TO_PROJECT          = "add";
+    /**
+     * <p>Costante per il parametro identificante la pagina di modifica di una entit&agrave;.</p>
+     */
+    public static final String MODIFY_PART                      = "mod";
     /**
      * <p>Costante per il parametro identificante la pagina di modifica di una parte di un progetto.</p>
      */
@@ -468,20 +472,51 @@ public interface Query extends Serializable {
             "   ,   W.workpackage   AS \"workPackage\"" + 
             "   FROM wbs W" +
             "   WHERE id_progetto = ?" +
-            "       AND W.workpackage = true";
+            "     AND W.workpackage = true";
     
     /**
-     * <p>Estrae tutte le persone che hanno un ruolo in un determinato progetto,
-     * identificato tramite id, passato come parametro.</p>
+     * <p>Estrae tutte le persone che hanno un (qualsivoglia) ruolo 
+     * in un determinato progetto, identificato tramite id, 
+     * passato come parametro.</p>
+     * <p>In pratica, se la query restituisce almeno una riga vuol dire che sul
+     * progetto, il cui identificativo viene passato come parametro,
+     * c'&egrave; almeno una persona.</p>
      */
     public static final String GET_PEOPLE_ON_PROJECT = 
             "SELECT " + 
             "       P.id            AS \"id\"" +
             "   ,   P.nome          AS \"nome\"" +
             "   ,   P.cognome       AS \"cognome\"" +
-            "   FROM ruologestione RG" +
+            "   FROM ruologestione  RG" +
             "       INNER JOIN persona P ON RG.id_persona = P.id" +
             "   WHERE RG.id_progetto = ?";
+
+    /**
+     * <p>Verifica se una persona, il cui identificativo viene
+     * passato come parametro, sia presente, a qualunque titolo, 
+     * cio&egrave; con qualunque ruolo, in un determinato progetto, 
+     * identificato tramite id, passato come parametro.</p>
+     * <p>In pratica, se la query restituisce una riga vuol dire che sul
+     * progetto, il cui identificativo viene passato come parametro,
+     * c'&egrave; la persona, il cui identificativo 
+     * viene passato come parametro.<br />
+     * Se la query non restituisce nulla vuol dire che la persona,
+     * il cui identificativo viene passato come parametro, non &egrave;
+     * presente sul progetto a nessun titolo, cio&egrave; in alcun ruolo.</p>
+     */
+    public static final String IS_PEOPLE_ON_PROJECT = 
+            "SELECT " +
+            "           persona.id " +
+            "   FROM    persona "   +
+            "   WHERE   persona.id " +
+            "   IN (" +
+            "       SELECT " + 
+            "               P.id            AS \"id\"" +
+            "           FROM ruologestione  RG" +
+            "               INNER JOIN persona P ON RG.id_persona = P.id" +
+            "           WHERE RG.id_progetto = ?" +
+            "      )" +
+            "     AND   persona.id = ?";
     
     /**
      * <p>Estrae tutte le persone che appartengono al dipartimento 
@@ -628,8 +663,10 @@ public interface Query extends Serializable {
             "   WHERE id_progetto = ?";
     
     /**
-     * <p>Estrae l'attivit&agrave; specificata tramite id relativa ad un progetto, identificato 
-     * tramite l'id, passato come parametro.</p>
+     * <p>Estrae l'attivit&agrave; specificata tramite id 
+     * passato come parametro, 
+     * relativa ad un progetto, identificato tramite id, 
+     * passato come parametro.</p>
      */
     public static final String GET_ACTIVITY = 
             "SELECT " +
@@ -649,7 +686,7 @@ public interface Query extends Serializable {
             "   ,   A.milestone             AS  \"milestone\"" +
             "   FROM attivita A" + 
             "   WHERE id_progetto = ?" +
-            "       AND id = ? ";
+            "     AND id = ?";
     
     /**
      * <p>Estrae le persone che sono collegate ad una attivit&agrave;</p>
