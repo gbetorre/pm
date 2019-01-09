@@ -138,6 +138,7 @@ public class ActivityCommand extends ItemBean implements Command {
         nomeFile.put(Query.PART_ACTIVITY, nomeFileElenco);
         nomeFile.put(Query.PART_PROJECT_CHARTER_MILESTONE, nomeFileMilestone);
         nomeFile.put(Query.ADD_ACTIVITY_TO_PROJECT, nomeFileActivity);
+        nomeFile.put(Query.MODIFY_PART, nomeFileActivity);
         nomeFile.put(Query.PART_PROJECT, this.getPaginaJsp());
     }  
   
@@ -272,6 +273,13 @@ public class ActivityCommand extends ItemBean implements Command {
                             loadParams(part, parser, params);
                             isHeader = isFooter = false;
                             db.insertActivity(idPrj, user, writablePrj, params.get(Query.ADD_ACTIVITY_TO_PROJECT));
+                        } else if (part.equalsIgnoreCase(Query.MODIFY_PART)) {
+                            /* ************************************************ *
+                             *             UPDATE Which One Activity            *
+                             * ************************************************ */
+                            loadParams(part, parser, params);
+                            //Vector<ProjectBean> userWritableProjects = db.getProjects(user.getId(), Query.GET_WRITABLE_PROJECTS_ONLY);
+                            db.updateActivity(idPrj, user, writableProjects, userWritableActivitiesByProjectId, params);
                         }
 
                         // Aggiorna i progetti, le attività dell'utente in sessione
@@ -283,11 +291,22 @@ public class ActivityCommand extends ItemBean implements Command {
                     /* **************************************************** *
                      *                 SELECT Activity Part                 *
                      * **************************************************** */
-                    // Recupera le Milestones
                     if (part.equals(Query.PART_PROJECT_CHARTER_MILESTONE)) {
+                        // Recupera le Milestones
                         vActivities = db.getActivities(idPrj);
+                        //TODO: CAMBIARE IL METODO CON:  db.getActivities(idPrj, user, ONLY_MILESTONES);
                     } else if (part.equals(Query.ADD_ACTIVITY_TO_PROJECT)) {
+                        // Effettua le selezioni che servono all'inserimento di una nuova attività
                         isHeader = isFooter = false;
+                        candidates = db.getPeople(runtimeProject.getId());
+                        workPackage = db.getWbs(runtimeProject.getId(), Query.GET_WORK_PACKAGES_ONLY); 
+                        complexity = HomePageCommand.getComplessita();
+                        states = HomePageCommand.getStatiAttivita();
+                        today = Utils.format(Utils.getCurrentDate());
+                    } else if (part.equals(Query.MODIFY_PART)) {
+                        // Effettua le selezioni che servono all'aggiornamento di una data attività
+                        isHeader = isFooter = false;
+                        ActivityBean activity = db.getActivity(1, 1, user);
                         candidates = db.getPeople(runtimeProject.getId());
                         workPackage = db.getWbs(runtimeProject.getId(), Query.GET_WORK_PACKAGES_ONLY); 
                         complexity = HomePageCommand.getComplessita();
@@ -404,9 +423,9 @@ public class ActivityCommand extends ItemBean implements Command {
             act.put("act-datafine",         parser.getStringParameter("act-datafine", dateAsString));
             act.put("act-datainiziovera",   parser.getStringParameter("act-datainiziovera", null));
             act.put("act-datafinevera",     parser.getStringParameter("act-datafinevera", null));
-            act.put("act-guprevisti",   parser.getStringParameter("act-guprevisti", null));
-            act.put("act-gueffettivi",  parser.getStringParameter("act-gueffettivi", null));
-            act.put("act-gurimanenti",  parser.getStringParameter("act-gurimanenti", null));
+            act.put("act-guprevisti",   parser.getStringParameter("act-guprevisti", Utils.VOID_STRING));
+            act.put("act-gueffettivi",  parser.getStringParameter("act-gueffettivi", Utils.VOID_STRING));
+            act.put("act-gurimanenti",  parser.getStringParameter("act-gurimanenti", Utils.VOID_STRING));
             act.put("act-progress",     parser.getStringParameter("act-progress", null));
             act.put("act-people",       parser.getStringParameter("act-people", Utils.VOID_STRING));
             act.put("act-role",         parser.getStringParameter("act-role", Utils.VOID_STRING));
