@@ -1203,7 +1203,7 @@ public interface Query extends Serializable {
             "   ,   id_progetto )" +
             "   VALUES (? " +          // id
             "   ,       ? " +          // descrizione
-            "   ,       ? " +          // probabilit√†
+            "   ,       ? " +          // probabilita†
             "   ,       ? " +          // impatto
             "   ,       ? " +          // livello
             "   ,       ? " +          // stato
@@ -1215,9 +1215,17 @@ public interface Query extends Serializable {
     public static final String INSERT_WBS = 
             "INSERT INTO wbs" +
             "   (   id" +
-            "   ,   id_progetto )" +
+            "   ,   id_wbs" +
+            "   ,   id_progetto" +
+            "   ,   nome" +
+            "   ,   descrizione" +
+            "   ,   workpackage)" +
             "   VALUES (? " +       // id
-            "   ,       ? )";       // id progetto
+            "   ,       ? " +       // id_wbs
+            "   ,       ? " +       // id_progetto
+            "   ,       ? " +       // nome
+            "   ,       ? " +       // descrizione
+            "   ,       ? )";       // workpackage
     
     
     /* ************************************************************************ *
