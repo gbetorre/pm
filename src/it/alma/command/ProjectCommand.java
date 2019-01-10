@@ -326,7 +326,7 @@ public class ProjectCommand extends ItemBean implements Command {
                     } else if (part.contains(Query.PART_PROJECT_CHARTER_RISK)) {
                         vRisks = db.getRisks(idPrj);
                     } else if(part.equals(Query.PART_WBS)) {
-                        vWBS = db.getWbs(idPrj, Query.GET_ALL);
+                        vWBS = db.getWbs(idPrj, Query.WBS_ALL);
                     }
                 }
                 fileJspT = nomeFile.get(part);
