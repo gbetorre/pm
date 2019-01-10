@@ -133,6 +133,10 @@ public interface Query extends Serializable {
      */
     public static final String ADD_STATUS_TO_PROJECT            = "addSts";
     /**
+     * <p>Costante per il parametro identificante la pagina di inserimento di una entit&agrave; nel progetto.</p>
+     */
+    public static final String ADD_TO_PROJECT                   = "add";
+    /**
      * <p>Costante per il parametro identificante la pagina di inserimento di un'attivit&agrave; di un progetto.</p>
      */
     public static final String ADD_ACTIVITY_TO_PROJECT          = "add";
@@ -152,6 +156,18 @@ public interface Query extends Serializable {
      * <p>Costante per il parametro identificante la pagina di inserimento di una competenza di un progetto.</p>
      */
     public static final String ADD_SKILL_TO_PROJECT             = "addSkill";
+    /**
+     * Costante identificante la query che tutte le WBS compresi i Workpackage
+     */
+    public static final int WBS_ALL = 1;
+    /**
+     * Costante identificante la query che tutte le WBS esclusi i Workpackage
+     */
+    public static final int WBS_NOT_WP = 2;
+    /**
+     * Costante identificante la query che tutte le WBS che sono Workpackage
+     */
+    public static final int WBS_ONLY_WP = 3;  
     /* ************************************************************************ *
      *   Enumerativi statici per incapsulare i valori di enumerativi dinamici   *
      * ************************************************************************ */
@@ -448,6 +464,19 @@ public interface Query extends Serializable {
             "   ,   W.workpackage   AS \"workPackage\"" + 
             "   FROM wbs W" +
             "   WHERE id = ?";
+    
+    /**
+     * <p>Estrae le wbs che non sono workpackage di un progetto,
+     * identificato tramite l'id, passato come parametro</p>
+     */
+    public static final String GET_WBS_NOT_WORKPACKAGE =
+            "SELECT " +
+            "       W.id            AS \"id\"" + 
+            "   ,   W.nome          AS \"nome\"" + 
+            "   ,   W.descrizione   AS \"descrizione\"" + 
+            "   FROM wbs W" +
+            "   WHERE W.id_progetto = ?" +
+            "     AND W.workpackage = false";
     
     /**
      * <p>Estrae le wbs relative ad un progetto, identificato tramite id, passato come parametro</p>
@@ -1256,13 +1285,19 @@ public interface Query extends Serializable {
             "   ,   id_progetto" +
             "   ,   nome" +
             "   ,   descrizione" +
-            "   ,   workpackage)" +
+            "   ,   workpackage" + 
+            "   ,   dataultimamodifica" + 
+            "   ,   oraultimamodifica" + 
+            "   ,   autoreultimamodifica)" +
             "   VALUES (? " +       // id
             "   ,       ? " +       // id_wbs
             "   ,       ? " +       // id_progetto
             "   ,       ? " +       // nome
             "   ,       ? " +       // descrizione
-            "   ,       ? )";       // workpackage
+            "   ,       ? " +       // workpackage
+            "   ,       ? " +       // dataultimamodifica
+            "   ,       ? " +       // oraultimamodifica
+            "   ,       ? )";       // autoreultimamodifica
     
     
     /* ************************************************************************ *
