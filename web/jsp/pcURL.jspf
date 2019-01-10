@@ -63,6 +63,11 @@
   <c:param name="p" value="add" />
   <c:param name="id" value="" />
 </c:url>
+<c:url var="modWbs" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="wbs" />
+  <c:param name="p" value="mod" />
+  <c:param name="id" value="" />
+</c:url>
 <c:url var="act" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="act" />
   <c:param name="id" value="" />
