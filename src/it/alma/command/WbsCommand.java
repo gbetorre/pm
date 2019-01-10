@@ -90,10 +90,10 @@ public class WbsCommand extends ItemBean implements Command {
      */
     private static final String nomeFileElenco = "/jsp/projWBS.jsp";
     /**
-     * Pagina a cui la command fa riferimento per permettere l'aggiunta 
-     * di una nuova attivit&agrave; al progetto
+     * Pagina a cui la command fa riferimento per permettere l'aggiunta o la modifica
+     * di una nuova wbs al progetto
      */
-    //private static final String nomeFileWbs = "/jsp/addWBS.jsp";
+    private static final String nomeFileWbs = "/jsp/wbs.jsp";
     /**
      * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutti gli attributi del progetto
      */    
@@ -101,7 +101,7 @@ public class WbsCommand extends ItemBean implements Command {
     /**
      *  Progetto di dato id
      */
-    ProjectBean runtimeProject = null;
+    ProjectBean runtimeProject = null; 
     
     
     /** 
@@ -131,8 +131,9 @@ public class WbsCommand extends ItemBean implements Command {
           throw new CommandException(msg);
         }
         // Carica la hashmap contenente le pagine da includere in funzione dei parametri sulla querystring
-        nomeFile.put(Query.PART_WBS, "/jsp/projWBS.jsp");
-        nomeFile.put(Query.UPDATE_PART_PROJECT,"/jsp/updateWBS.jsp");
+        nomeFile.put(Query.PART_WBS, nomeFileElenco);
+        nomeFile.put(Query.ADD_TO_PROJECT, nomeFileWbs);
+        nomeFile.put(Query.MODIFY_PART, nomeFileWbs);
     }  
   
     
@@ -165,6 +166,8 @@ public class WbsCommand extends ItemBean implements Command {
         Vector<ProjectBean> v = new Vector<ProjectBean>();
         // Dichiara elenco di wbs
         Vector<WbsBean> vWbs = new Vector<WbsBean>();
+        // Dichiara elenco di wbs non workpackage
+        Vector<WbsBean> wbs = new Vector<WbsBean>();
         // Dichiara struttura di persone che possono essere aggiunte a un'attivit√†
         //Vector<PersonBean> candidates = null;
         // Dichiara struttura di Work Package cui pu√≤ essere aggiunta un'attivit√†
@@ -242,7 +245,7 @@ public class WbsCommand extends ItemBean implements Command {
                         HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
                         // Recupera i progetti su cui l'utente ha diritti di scrittura
                         Vector<ProjectBean> writablePrj = (Vector<ProjectBean>) ses.getAttribute("writableProjects");
-                        // Se non ci sono progetti scrivibili e il flag "write" √® true c'√® qualcosa che non va...
+                        // Se non ci sono progetti scrivibili e il flag "write" Ë true c'È qualcosa che non va...
                         if (writablePrj == null) {
                             String msg = FOR_NAME + "Il flag di scrittura e\' true pero\' non sono stati trovati progetti scrivibili: problema!.\n";
                             LOG.severe(msg);
@@ -258,8 +261,14 @@ public class WbsCommand extends ItemBean implements Command {
                              *                  UPDATE Wbs Part                 *
                              * ************************************************ */
                             db.updateWbsPart(idPrj, user, writableProjects, userWritableWbsByProjectId, params);
+                        } else if (part.equalsIgnoreCase(Query.ADD_TO_PROJECT)) {
+                            /* ************************************************ *
+                             *                  INSERT Wbs Part                 *
+                             * ************************************************ */
+                            loadParams(part, parser, params);
+                            db.insertWbs(idPrj, user, params.get(Query.ADD_TO_PROJECT));
                         }
-                        // Aggiorna i progetti, le attivit√† dell'utente in sessione
+                        // Aggiorna i progetti, le wbs† dell'utente in sessione
                         //ses.removeAttribute("writableProjects");
                         ses.removeAttribute("writableWbs");
                         //ses.setAttribute("writableProjects", userWritableProjects);
@@ -270,14 +279,15 @@ public class WbsCommand extends ItemBean implements Command {
                      * **************************************************** */
                     // Recupera eventuali campi dal Database
                     if (part.equals(Query.UPDATE_PART_PROJECT)) {
-                        isHeader = isFooter = false;
                         String idWbs = HomePageCommand.getParameters(req, Utils.MIME_TYPE_TEXT);
                         today = Utils.format(Utils.getCurrentDate());
+                    } else if (part.equals(Query.ADD_TO_PROJECT)) {
+                        wbs = db.getWbs(idPrj, Query.WBS_NOT_WP);
                     }
                     fileJspT = nomeFile.get(part);
                 } else {
-                    // Se il parametro 'p' non √® presente, deve solo selezionare le wbs
-                    vWbs = db.getWbs(idPrj, true);
+                    // Se il parametro 'p' non Ë presente, deve solo selezionare tutte le wbs
+                    vWbs = db.getWbs(idPrj, Query.WBS_ALL);
                     fileJspT = nomeFileElenco;
                 }
             } else {
@@ -322,8 +332,10 @@ public class WbsCommand extends ItemBean implements Command {
         req.setAttribute("footer", isFooter);
         // Imposta nella request dettaglio progetto
         req.setAttribute("progetto", runtimeProject);
-        // Imposta nella request elenco attivita del progetto
-        req.setAttribute("wbs", vWbs);
+        // Imposta nella request elenco di tutte le wbs del progetto
+        req.setAttribute("allWbs", vWbs);
+        // Imposta nella request elenco di tutte le wbs non workpackage del progetto
+        req.setAttribute("wbs", wbs);
         // Imposta nella request elenco persone del dipartimento
         //req.setAttribute("people", candidates);
         // Imposta nella request elenco wbs associabili
@@ -362,8 +374,8 @@ public class WbsCommand extends ItemBean implements Command {
             for (int i = 0; i <= totWbs; i++) {
                 String workpackage = "false";
                 wbs.put("wbs-id" + String.valueOf(i), parser.getStringParameter("wbs-id" + String.valueOf(i), Utils.VOID_STRING));
-                wbs.put("wbs-nome" + String.valueOf(i), parser.getStringParameter("wbs-nome" + String.valueOf(i), Utils.VOID_STRING));
-                wbs.put("wbs-descrizione" + String.valueOf(i), parser.getStringParameter("wbs-descrizione" + String.valueOf(i), Utils.VOID_STRING));
+                wbs.put("wbs-name" + String.valueOf(i), parser.getStringParameter("wbs-name" + String.valueOf(i), Utils.VOID_STRING));
+                wbs.put("wbs-descr" + String.valueOf(i), parser.getStringParameter("wbs-descr" + String.valueOf(i), Utils.VOID_STRING));
                 if (parser.getStringParameter("wbs-workpackage" + String.valueOf(i), Utils.VOID_STRING) != "") {
                     workpackage = "true";
                 }
@@ -374,27 +386,15 @@ public class WbsCommand extends ItemBean implements Command {
         /* **************************************************** *
          *              Ramo di INSERT di una Wbs               *
          * **************************************************** */
-        else if (part.equalsIgnoreCase(Query.ADD_ACTIVITY_TO_PROJECT)) {
+        else if (part.equalsIgnoreCase(Query.ADD_TO_PROJECT)) {
             GregorianCalendar date = Utils.getUnixEpoch();
             String dateAsString = Utils.format(date, Query.DATA_SQL_PATTERN);
-            HashMap<String, String> act = new HashMap<String, String>();
-            act.put("act-name",         parser.getStringParameter("act-name", Utils.VOID_STRING));
-            act.put("act-descr",        parser.getStringParameter("act-descr", Utils.VOID_STRING));
-            act.put("act-datainizio",       parser.getStringParameter("act-datainizio", dateAsString));
-            act.put("act-datafine",         parser.getStringParameter("act-datafine", dateAsString));
-            act.put("act-datainiziovera",   parser.getStringParameter("act-datainiziovera", dateAsString));
-            act.put("act-datafinevera",     parser.getStringParameter("act-datafinevera", dateAsString));
-            act.put("act-guprevisti",   parser.getStringParameter("act-guprevisti", Utils.VOID_STRING));
-            act.put("act-gueffettivi",  parser.getStringParameter("act-gueffettivi", Utils.VOID_STRING));
-            act.put("act-gurimanenti",  parser.getStringParameter("act-gurimanenti", Utils.VOID_STRING));
-            act.put("act-progress",     parser.getStringParameter("act-progress", Utils.VOID_STRING));
-            act.put("act-people",       parser.getStringParameter("act-people", Utils.VOID_STRING));
-            act.put("act-role",         parser.getStringParameter("act-role", Utils.VOID_STRING));
-            act.put("act-milestone",    parser.getStringParameter("act-milestone", Utils.VOID_STRING));
-            act.put("act-wbs",          parser.getStringParameter("act-wbs", Utils.VOID_STRING));
-            act.put("act-compl",        parser.getStringParameter("act-compl", Utils.VOID_STRING));
-            act.put("act-status",       parser.getStringParameter("act-status", Utils.VOID_STRING));
-            formParams.put(Query.ADD_ACTIVITY_TO_PROJECT, act);
+            HashMap<String, String> wbs = new HashMap<String, String>();
+            wbs.put("wbs-idpadre",      parser.getStringParameter("wbs-idpadre", Utils.VOID_STRING));
+            wbs.put("wbs-name",         parser.getStringParameter("wbs-name", Utils.VOID_STRING));
+            wbs.put("wbs-descr",        parser.getStringParameter("wbs-descr", dateAsString));
+            wbs.put("wbs-workpackage",  parser.getStringParameter("wbs-workpackage", Utils.VOID_STRING));
+            formParams.put(Query.ADD_TO_PROJECT, wbs);
         }
     }
     
