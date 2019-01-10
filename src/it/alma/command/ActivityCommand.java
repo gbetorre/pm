@@ -36,8 +36,6 @@
 
 package it.alma.command;
 
-import java.util.Date;
-import java.util.Enumeration;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -112,7 +110,7 @@ public class ActivityCommand extends ItemBean implements Command {
      * Crea una nuova istanza di ActivityCommand 
      */
     public ActivityCommand() {
-        /*;*/   // It doesn't Anything
+        /*;*/   // It doesn't anything
     }
   
     
@@ -182,11 +180,15 @@ public class ActivityCommand extends ItemBean implements Command {
         LinkedList<CodeBean> states = null;
         // Data di oggi sotto forma di oggetto String
         String today = null;
+        // Attività da modificare, se l'utente ha scelto questa specifica funzionalità
+        ActivityBean activity = null;
         /* ******************************************************************** *
          *                    Recupera parametri e attributi                    *
          * ******************************************************************** */
         // Recupera o inizializza 'id progetto'
         int idPrj = parser.getIntParameter("id", Utils.DEFAULT_ID);
+        // Recupera o inizializza 'id attività' (da modificare)
+        int idAct = parser.getIntParameter("ida", Utils.DEFAULT_ID);
         // Recupera o inizializza 'tipo pagina'   
         String part = parser.getStringParameter("p", "-");
         // Flag di scrittura
@@ -247,7 +249,7 @@ public class ActivityCommand extends ItemBean implements Command {
                         // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
                         HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
                         // Recupera i progetti su cui l'utente ha diritti di scrittura
-                        Vector<ProjectBean> writablePrj = (Vector<ProjectBean>) ses.getAttribute("writableProjects");
+                        Vector<ProjectBean> writablePrj = (Vector<ProjectBean>) ses.getAttribute("writableProjects"); // I'm confident about the types...
                         // Se non ci sono progetti scrivibili e il flag "write" è true c'è qualcosa che non va...
                         if (writablePrj == null) {
                             String msg = FOR_NAME + "Il flag di scrittura e\' true pero\' non sono stati trovati progetti scrivibili: problema!.\n";
@@ -304,18 +306,26 @@ public class ActivityCommand extends ItemBean implements Command {
                         states = HomePageCommand.getStatiAttivita();
                         today = Utils.format(Utils.getCurrentDate());
                     } else if (part.equals(Query.MODIFY_PART)) {
+                        // Se siamo qui (p=mod) e l'id dell'attività non è significativo c'è qualcosa che non va...
+                        if (idAct == Utils.DEFAULT_ID) {
+                            HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
+                            ses.invalidate();
+                            String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id attivita\' non valida!.\n";
+                            LOG.severe(msg + "E\' presente il parametro \'p=mod\' ma non un valore \'ida\' - cioe\' id attivita\' - significativo!\n");
+                            throw new CommandException("Attenzione: indirizzo richiesto non valido!\n");
+                        }
                         // Effettua le selezioni che servono all'aggiornamento di una data attività
                         isHeader = isFooter = false;
-                        ActivityBean activity = db.getActivity(1, 1, user);
+                        activity = db.getActivity(idPrj, idAct, user);
                         candidates = db.getPeople(runtimeProject.getId());
-                        workPackage = db.getWbs(runtimeProject.getId(), Query.GET_WORK_PACKAGES_ONLY); 
+                        workPackage = db.getWbs(runtimeProject.getId(), Query.GET_WORK_PACKAGES_ONLY);
                         complexity = HomePageCommand.getComplessita();
                         states = HomePageCommand.getStatiAttivita();
                         today = Utils.format(Utils.getCurrentDate());
                     }
                     fileJspT = nomeFile.get(part);
                 } else {
-                    // Se il parametro 'p' non è presente, deve solo selezionare le attività 
+                    // Se il parametro 'p' non è presente, deve solo mostrare l'elenco delle attività 
                     vActivities = db.getActivities(idPrj);
                     fileJspT = nomeFileElenco;
                 }
@@ -363,18 +373,34 @@ public class ActivityCommand extends ItemBean implements Command {
         req.setAttribute("progetto", runtimeProject);
         // Imposta nella request elenco attivita del progetto
         req.setAttribute("attivita", vActivities);
-        // Imposta nella request elenco persone del dipartimento
-        req.setAttribute("people", candidates);
-        // Imposta nella request elenco wbs associabili
-        req.setAttribute("wbs", workPackage);
-        // Imposta nella request elenco wbs associabili
-        req.setAttribute("complessita", complexity);
-        // Imposta nella request elenco wbs associabili
-        req.setAttribute("statiAttivita", states);
         // Imposta nella request data di oggi 
         req.setAttribute("now", today);
         // Imposta la Pagina JSP di forwarding
         req.setAttribute("fileJsp", fileJspT);
+        /* ******************************************************************** *
+         * Settaggi in request di valori facoltativi: attenzione, il passaggio  *
+         * di questi attributi e' condizionato al fatto che siano significativi *
+         * ******************************************************************** */
+        if (candidates != null) {
+            // Imposta nella request elenco persone del dipartimento associabili a una attività
+            req.setAttribute("people", candidates);
+        }
+        if (workPackage != null) {
+            // Imposta nella request elenco wbs associabili
+            req.setAttribute("wbs", workPackage);
+        }
+        if (complexity != null) {
+            // Imposta nella request elenco wbs associabili
+            req.setAttribute("complessita", complexity);
+        }
+        if (states != null) {
+            // Imposta nella request elenco wbs associabili
+            req.setAttribute("statiAttivita", states);
+        }
+        if (activity != null) {
+            // Attività che l'utente vul visualizzare nei dettagli, e/o modificare
+            req.setAttribute("singolaAttivita", activity);
+        }
     }
     
     
