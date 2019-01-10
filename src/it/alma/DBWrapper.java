@@ -1107,21 +1107,28 @@ public class DBWrapper implements Query {
     /**
      * <p>Restituisce un vector contenente tutte le Wbs di un dato progetto.</p>
      * 
-     * @param idProj    id del progetto di cui caricare le wbs
-     * @param getAll    flag specificante se bisogna recuperare solo i WorkPackage (false) o tutte le WBS (true)
+     * @param idProj - id del progetto di cui caricare le wbs
+     * @param getPartOfWbs - flag specificante se bisogna recuperare solo i WorkPackage, solo le WBS oppure le WBS e i Workpackage
      * @return vectorWbs - vettore contenente tutte le Wbs di un progetto
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
-    @SuppressWarnings({ "null", "static-method" })
     public Vector<WbsBean> getWbs(int idProj, 
-                                  boolean getAll) 
+                                  int getPartOfWbs) 
                            throws WebStorageException {
         ResultSet rs = null;
         Connection con = null;
         PreparedStatement pst = null;
         WbsBean wbs = null;
         Vector<WbsBean> vWbs = new Vector<WbsBean>();
-        String query = getAll ? GET_WBS_BY_PROJECT : GET_WP_BY_PROJECT;
+        String query = null;
+        // Controllo qual � la query da eseguire, in base alla richiesta dell'utente
+        if (getPartOfWbs == WBS_ALL) {
+            query = GET_WBS_BY_PROJECT;
+        } else if (getPartOfWbs == WBS_NOT_WP) {
+            query = GET_WBS_NOT_WORKPACKAGE;
+        } else if (getPartOfWbs == WBS_ONLY_WP) {
+            query = Query.GET_WP_BY_PROJECT;
+        }
         try {
             // Ottiene il progetto precaricato quando l'utente si è loggato corrispondente al progetto sul quale aggiungere un'attività
             Integer key = new Integer(idProj);
@@ -1137,7 +1144,7 @@ public class DBWrapper implements Query {
             }
             return vWbs;
         }  catch (SQLException sqle) {
-            String msg = FOR_NAME + "Oggetto RiskBean non valorizzato; problema nella query dell\'utente.\n";
+            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
         } finally {
@@ -1765,8 +1772,8 @@ public class DBWrapper implements Query {
                         con.setAutoCommit(false);
                         pst = con.prepareStatement(UPDATE_WBS);
                         pst.clearParameters();
-                        pst.setString(1, paramsWbs.get("wbs-nome" + String.valueOf(i)));
-                        pst.setString(2, paramsWbs.get("wbs-descrizione" + String.valueOf(i)));
+                        pst.setString(1, paramsWbs.get("wbs-name" + String.valueOf(i)));
+                        pst.setString(2, paramsWbs.get("wbs-descr" + String.valueOf(i)));
                         pst.setBoolean(3, Boolean.parseBoolean(isWorkpackageAsString));
                         pst.setInt(4, Integer.parseInt(paramsWbs.get("wbs-idpadre" + String.valueOf(i))));
                         pst.setDate(5, Utils.convert(Utils.convert(Utils.getCurrentDate())));
@@ -2179,17 +2186,28 @@ public class DBWrapper implements Query {
             // Ottiene il progetto precaricato quando l'utente si è loggato corrispondente al progetto sul quale aggiungere un'attività
             Integer key = new Integer(idProj);
             int nextParam = 0;
+            // Definisce un valore boolean in funzione del checkbox
+            boolean workpackage = params.get("wbs-workpackage").equals("on") ? true : false;
             int maxWbsId = getMax("wbs") + 1;
             con = pol_manager.getConnection();
             con.setAutoCommit(false);
             pst = con.prepareStatement(INSERT_WBS);
             pst.clearParameters();
             pst.setInt(++nextParam, maxWbsId);
-            pst.setInt(++nextParam, Integer.parseInt(params.get("wbs-wbs")));
+            // Gestione wbs padre facoltativa
+            Integer idpadre = null;
+            if (!params.get("wbs-idpadre").equals(Utils.VOID_STRING)) {
+                idpadre = new Integer(params.get("wbs-idpadre"));
+                // giorni uomo effettivi
+                pst.setInt(++nextParam, idpadre);
+            } else {
+                // dato facoltativo non inserito
+                pst.setNull(++nextParam, Types.NULL);
+            }
             pst.setInt(++nextParam, key);
-            pst.setString(++nextParam, params.get("wbs-nome"));
-            pst.setString(++nextParam, params.get("wbs-descrizione"));
-            pst.setBoolean(++nextParam, Boolean.parseBoolean(params.get("wbs-workpackage")));
+            pst.setString(++nextParam, params.get("wbs-name"));
+            pst.setString(++nextParam, params.get("wbs-descr"));
+            pst.setBoolean(++nextParam, workpackage);
             pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
             pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
             pst.setString(++nextParam, user.getCognome() + String.valueOf(Utils.BLANK_SPACE) + user.getNome());
