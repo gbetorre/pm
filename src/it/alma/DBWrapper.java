@@ -41,12 +41,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Vector;
 import java.util.logging.Logger;
@@ -59,7 +57,6 @@ import javax.sql.DataSource;
 import it.alma.bean.ActivityBean;
 import it.alma.bean.BeanUtil;
 import it.alma.bean.CodeBean;
-import it.alma.bean.CourseBean;
 import it.alma.bean.DepartmentBean;
 import it.alma.bean.ItemBean;
 import it.alma.bean.PersonBean;
@@ -117,17 +114,9 @@ public class DBWrapper implements Query {
      */
     static final String FOR_NAME = "\n" + Logger.getLogger(new Throwable().getStackTrace()[0].getClassName()) + ": ";
     /**
-     * <p>Gestore del pool di connessioni al dbms locale per almalaurea.</p>
-     */
-    protected static DataSource alma_manager = null;
-    /**
-     * <p>Connessione db oracle ESSE3.</p>
+     * <p>Connessione db postgres di pol.</p>
      */
     protected static DataSource pol_manager = null;
-    /**
-     * <p>Connessione db postgres univr.</p>
-     */
-    protected static DataSource univr_manager = null;
 
     
     /**
@@ -208,8 +197,9 @@ public class DBWrapper implements Query {
      * @return <code>int</code> - un intero che rappresenta il massimo valore trovato, oppure zero se non sono stati trovati valori
      * @throws WebStorageException se si verifica un problema nella query o in qualche tipo di puntamento
      */
-    public int getMax (String table) 
-                throws WebStorageException {
+    @SuppressWarnings({ "static-method", "null" })
+    public int getMax(String table) 
+               throws WebStorageException {
         ResultSet rs = null;
         Connection con = null;
         PreparedStatement pst = null;
@@ -292,8 +282,8 @@ public class DBWrapper implements Query {
     /**
      * <p>Restituisce un PersonBean rappresentante un utente loggato.</p>
      * 
-     * @param username - username della persona che ha eseguito il login
-     * @param password - password della persona che ha eseguito il login
+     * @param username  username della persona che ha eseguito il login
+     * @param password  password della persona che ha eseguito il login
      * @return <code>PersonBean</code> - PersonBean rappresentante l'utente loggato
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e l'id della persona non &egrave; stato valorizzato (&egrave; un dato obbligatorio) 
@@ -302,7 +292,7 @@ public class DBWrapper implements Query {
     public PersonBean getUser(String username,
                               String password)
                        throws WebStorageException, AttributoNonValorizzatoException {
-        ResultSet rs, rs2 = null;
+        ResultSet rs, rs1 = null;
         Connection con = null;
         PreparedStatement pst = null;
         PersonBean usr = null;
@@ -321,10 +311,10 @@ public class DBWrapper implements Query {
             pst = con.prepareStatement(GET_RUOLIPERSONA);
             pst.clearParameters();
             pst.setInt(1, usr.getId());
-            rs2 = pst.executeQuery();
-            while(rs2.next()) {
+            rs1 = pst.executeQuery();
+            while(rs1.next()) {
                 CodeBean ruolo = new CodeBean();
-                BeanUtil.populate(ruolo, rs2);
+                BeanUtil.populate(ruolo, rs1);
                 vRuoli.add(ruolo);
             }
             usr.setRuoli(vRuoli);
@@ -356,7 +346,7 @@ public class DBWrapper implements Query {
      * un utente del dipartimento il cui identificativo viene 
      * passato come argomento.</p>
      * 
-     * @param projectId - username della persona che ha eseguito il login
+     * @param projectId username della persona che ha eseguito il login
      * @return <code>Vector&lt;PersonBean&gt;</code> - elenco di PersonBean rappresentante le persone del dipartimento a cui il progetto e' collegato
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e l'id della persona non &egrave; stato valorizzato (&egrave; un dato obbligatorio) 
@@ -426,7 +416,7 @@ public class DBWrapper implements Query {
     public Vector<ProjectBean> getProjects(int userId, 
                                            boolean getAll)
     							    throws WebStorageException {
-    	ResultSet rs, rs2 = null;
+    	ResultSet rs, rs1 = null;
     	Connection con = null;
         PreparedStatement pst = null;
         ProjectBean project = null;
@@ -451,22 +441,22 @@ public class DBWrapper implements Query {
                 pst = con.prepareStatement(GET_DIPART);
                 pst.clearParameters();
                 pst.setInt(1, idDipart);
-                rs2 = pst.executeQuery();
-                if (rs2.next()) {
+                rs1 = pst.executeQuery();
+                if (rs1.next()) {
                     dipart = new DepartmentBean();
-                    BeanUtil.populate(dipart, rs2);
+                    BeanUtil.populate(dipart, rs1);
                     project.setDipart(dipart);
                 }
-                rs2 = null;
+                rs1 = null;
                 //Recupera statoprogetto del progetto
                 idStatoProgetto = project.getIdStatoProgetto();
                 pst = con.prepareStatement(GET_STATOPROGETTO);
                 pst.clearParameters();
                 pst.setInt(1, idStatoProgetto);
-                rs2 = pst.executeQuery();
-                if (rs2.next()) {
+                rs1 = pst.executeQuery();
+                if (rs1.next()) {
                 	statoProgetto = new CodeBean();
-                	BeanUtil.populate(statoProgetto, rs2);
+                	BeanUtil.populate(statoProgetto, rs1);
                 	project.setStatoProgetto(statoProgetto);
                 }
                 // Aggiunge il progetto valorizzato all'elenco
@@ -506,7 +496,7 @@ public class DBWrapper implements Query {
     @SuppressWarnings({ "null", "static-method" })
     public Vector<ProjectBean> getWritableProjects(String userName)
                                             throws WebStorageException {
-        ResultSet rs, rs2 = null;
+        ResultSet rs, rs1 = null;
         Connection con = null;
         PreparedStatement pst = null;
         ProjectBean project = null;
@@ -529,22 +519,22 @@ public class DBWrapper implements Query {
                 pst = con.prepareStatement(GET_DIPART);
                 pst.clearParameters();
                 pst.setInt(1, idDipart);
-                rs2 = pst.executeQuery();
-                if (rs2.next()) {
+                rs1 = pst.executeQuery();
+                if (rs1.next()) {
                     dipart = new DepartmentBean();
-                    BeanUtil.populate(dipart, rs2);
+                    BeanUtil.populate(dipart, rs1);
                     project.setDipart(dipart);
                 }
-                rs2 = null;
+                rs1 = null;
                 //Recupera statoprogetto del progetto
                 idStatoProgetto = project.getIdStatoProgetto();
                 pst = con.prepareStatement(GET_STATOPROGETTO);
                 pst.clearParameters();
                 pst.setInt(1, idStatoProgetto);
-                rs2 = pst.executeQuery();
-                if (rs2.next()) {
+                rs1 = pst.executeQuery();
+                if (rs1.next()) {
                     statoProgetto = new CodeBean();
-                    BeanUtil.populate(statoProgetto, rs2);
+                    BeanUtil.populate(statoProgetto, rs1);
                     project.setStatoProgetto(statoProgetto);
                 }
                 // Aggiunge il progetto valorizzato all'elenco
@@ -576,8 +566,8 @@ public class DBWrapper implements Query {
     /**
      * <p>Restituisce un ProjectBean rappresentante un progetto dell'utente loggato.</p>
      * 
-     * @param projectId - identificativo del progetto che si vuol recuperare
-     * @param userId - identificativo della persona che si vuol recuperare
+     * @param projectId identificativo del progetto che si vuol recuperare
+     * @param userId    identificativo della persona che si vuol recuperare
      * @return <code>ProjectBean</code> - ProjectBean rappresentante il progetto selezionato
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
@@ -622,7 +612,7 @@ public class DBWrapper implements Query {
     /**
      * <p>Restituisce un Vector di StatusBean rappresentante tutti gli status del progetto attuale</p>
      * 
-     * @param projId - id del progetto di cui estrarre gli status
+     * @param projId  id del progetto di cui estrarre gli status
      * @return <code>ArrayList&lt;StatusBean&gt;</code> - ArrayList&lt;StatusBean&gt; rappresentante gli status del progetto.
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
      */
@@ -897,7 +887,7 @@ public class DBWrapper implements Query {
     /**
      * <p>Restituisce un Vector di ActivityBean rappresentante le attivit&agrave; del progetto attuale</p>
      * 
-     * @param projId - id del progetto di cui estrarre le attivit&agrave;
+     * @param projId  id del progetto di cui estrarre le attivit&agrave;
      * @return <code>Vector&lt;AttvitaBean&gt;</code> - ActivityBean rappresentante l'attivit&agrave; del progetto.
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
      */
@@ -962,7 +952,9 @@ public class DBWrapper implements Query {
      * essere leggibile dall'utente - e avente identificativo 
      * passato come argomento.</p>
      * 
-     * @param projId - id del progetto di cui estrarre le attivit&agrave;
+     * @param projId id del progetto di cui estrarre le attivit&agrave;
+     * @param activityId id dell'attivit&agrave; che si vuol recuperare
+     * @param user 
      * @return <code>Vector&lt;AttvitaBean&gt;</code> - ActivityBean rappresentante l'attivit&agrave; del progetto.
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
      */
@@ -974,7 +966,6 @@ public class DBWrapper implements Query {
         ResultSet rs, rs1 = null;
         Connection con = null;
         PreparedStatement pst = null;
-        ActivityBean attivita = null;
         PersonBean person = null;
         ActivityBean activity = null;
         Vector<PersonBean> people = new Vector<PersonBean>();
@@ -986,19 +977,19 @@ public class DBWrapper implements Query {
             pst.setInt(2, activityId);
             rs = pst.executeQuery();
             if (rs.next()) {
-                attivita = new ActivityBean();
-                BeanUtil.populate(attivita, rs);
+                activity = new ActivityBean();
+                BeanUtil.populate(activity, rs);
                 pst = null;
                 pst = con.prepareStatement(GET_PEOPLE_ON_ACTIVITY);
                 pst.clearParameters();
-                pst.setInt(1, attivita.getId());
+                pst.setInt(1, activity.getId());
                 rs1 = pst.executeQuery();
                 while (rs1.next()) {
                     person = new PersonBean();
                     BeanUtil.populate(person, rs1);
                     people.add(person);
                 }
-                attivita.setPersone(people);
+                activity.setPersone(people);
             }
             return activity;
         } catch (AttributoNonValorizzatoException anve) {
@@ -1026,7 +1017,7 @@ public class DBWrapper implements Query {
     /**
      * <p>Restituisce un Vector di SkillBean rappresentante le competenze del progetto attuale</p>
      * 
-     * @param projId - id del progetto di cui estrarre le competenze
+     * @param projId id del progetto di cui estrarre le competenze
      * @return <code>Vector&lt;SkillBean&gt;</code> - SkillBean rappresentante le competenze del progetto.
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
@@ -1071,7 +1062,7 @@ public class DBWrapper implements Query {
     /**
      * <p>Restituisce un Vector di RiskBean rappresentante i rischi del progetto attuale</p>
      * 
-     * @param projId - id del progetto di cui estrarre i rischi
+     * @param projId id del progetto di cui estrarre i rischi
      * @return <code>Vector&lt;RiskBean&gt;</code> - RiskBean rappresentante i rischi del progetto.
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
@@ -1116,8 +1107,8 @@ public class DBWrapper implements Query {
     /**
      * <p>Restituisce un vector contenente tutte le Wbs di un dato progetto.</p>
      * 
-     * @param idProj - id del progetto di cui caricare le wbs
-     * @param getAll - flag specificante se bisogna recuperare solo i WorkPackage (false) o tutte le WBS (true)
+     * @param idProj    id del progetto di cui caricare le wbs
+     * @param getAll    flag specificante se bisogna recuperare solo i WorkPackage (false) o tutte le WBS (true)
      * @return vectorWbs - vettore contenente tutte le Wbs di un progetto
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
@@ -1213,11 +1204,11 @@ public class DBWrapper implements Query {
     /**
      * <p>Metodo che controlla la query da eseguire e chiama il metodo opportuno.</p>
      * 
-     * @param idProj - id del progetto da aggiornare 
-     * @param userId - id dell'utente che ha eseguito il login
-     * @param projects - Map contenente la lista dei progetti su cui l'utente corrente e' abilitato alla modifica
-     * @param objectsRelatedToProject - Map contenente le hashmap che contengono le attività, i rischi e le competenze su cui l'utente e' abilitato alla modifica
-     * @param params - hashmap che contiene i parametri che si vogliono aggiornare del progetto
+     * @param idProj    id del progetto da aggiornare 
+     * @param userId    id dell'utente che ha eseguito il login
+     * @param projects  Map contenente la lista dei progetti su cui l'utente corrente e' abilitato alla modifica
+     * @param objectsRelatedToProject  Map contenente le hashmap che contengono le attività, i rischi e le competenze su cui l'utente e' abilitato alla modifica
+     * @param params    hashmap che contiene i parametri che si vogliono aggiornare del progetto
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
      */
     @SuppressWarnings({ "null" })
@@ -1546,11 +1537,11 @@ public class DBWrapper implements Query {
     
     /** <p>Metodo che aggiorna le attivit&agrave; di progetto..</p>
      * 
-     * @param idProj - id del progetto da aggiornare 
-     * @param userId - id dell'utente che ha eseguito il login
-     * @param projects - Map contenente la lista dei progetti su cui l'utente corrente e' abilitato alla modifica
-     * @param activitiesRelatedToProject - HashMap contenente le attività su cui l'utente e' abilitato alla modifica
-     * @param params - hashmap che contiene i parametri che si vogliono aggiornare del progetto
+     * @param idProj    id del progetto da aggiornare 
+     * @param userId    id dell'utente che ha eseguito il login
+     * @param projects  Map contenente la lista dei progetti su cui l'utente corrente e' abilitato alla modifica
+     * @param activitiesRelatedToProject    HashMap contenente le attività su cui l'utente e' abilitato alla modifica
+     * @param params    hashmap che contiene i parametri che si vogliono aggiornare del progetto
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
      */
     @SuppressWarnings({ "null", "static-method" })
@@ -1645,20 +1636,20 @@ public class DBWrapper implements Query {
     
     /** <p>Aggiorna una attivit&agrave; di un dato progetto.</p>
      * 
-     * @param idProj - id del progetto da aggiornare 
-     * @param userId - id dell'utente che ha eseguito il login
-     * @param projects - Map contenente la lista dei progetti su cui l'utente corrente e' abilitato alla modifica
-     * @param activitiesRelatedToProject - HashMap contenente le attività su cui l'utente e' abilitato alla modifica
-     * @param params - hashmap che contiene i parametri che si vogliono aggiornare del progetto
+     * @param idProj    id del progetto da aggiornare 
+     * @param user      utente che ha eseguito il login
+     * @param projects  Map contenente la lista dei progetti su cui l'utente corrente e' abilitato alla modifica
+     * @param activitiesRelatedToProject    HashMap contenente le attività su cui l'utente e' abilitato alla modifica
+     * @param params    hashmap che contiene i parametri che si vogliono aggiornare del progetto
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
      */
     @SuppressWarnings({ "null", "static-method" })
     public void updateActivity(int idProj,
-                                   PersonBean user,
-                                   HashMap<Integer, ProjectBean> projects, 
-                                   HashMap<Integer, Vector<ActivityBean>> activitiesRelatedToProject,
-                                   HashMap<String, HashMap<String, String>>params) 
-                            throws WebStorageException {
+                               PersonBean user,
+                               HashMap<Integer, ProjectBean> projects, 
+                               HashMap<Integer, Vector<ActivityBean>> activitiesRelatedToProject,
+                               HashMap<String, HashMap<String, String>>params) 
+                        throws WebStorageException {
         ResultSet rs = null;
         Connection con = null;
         PreparedStatement pst = null;        
@@ -1747,7 +1738,7 @@ public class DBWrapper implements Query {
      * @param idProj id del progetto da aggiornare 
      * @param user utente che ha eseguito il login
      * @param projects Map contenente la lista dei progetti su cui l'utente corrente e' abilitato alla modifica
-     * @param wbsRelatedToProject HashMap contenente le wbs� su cui l'utente e' abilitato alla modifica
+     * @param wbsRelatedToProject HashMap contenente le wbs su cui l'utente e' abilitato alla modifica
      * @param params hashmap che contiene i parametri che si vogliono aggiornare del progetto
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
      */
@@ -1825,9 +1816,9 @@ public class DBWrapper implements Query {
     /**
      * <p>Metodo per fare un inserimento di un nuovo stato progetto.</p>
      * 
-     * @param user - utente loggato
-     * @param idProj - id del progetto sul quale attribuire lo status
-     * @param idStatus - id dello status che si va ad inserire
+     * @param user      utente loggato
+     * @param idProj    id del progetto sul quale attribuire lo status
+     * @param idStatus  id dello status che si va ad inserire
      * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
     @SuppressWarnings("null")
@@ -1881,10 +1872,10 @@ public class DBWrapper implements Query {
     /**
      * <p>Metodo per fare un nuovo inserimento di una nuova attivit&agrave;.</p>
      * 
-     * @param idProj - identificativo del progetto, al quale l'attivit&agrave; fa riferimento
-     * @param user -  utente loggato
-     * @param projectsWritableByUser - Vector contenente tutti i progetti scrivibili dall'utente; l'attivita' deve essere agganciata ad uno di questi
-     * @param params - tabella contenente tutti i valori che l'utente inserisce per la nuova attivit&agrave;
+     * @param idProj    identificativo del progetto, al quale l'attivit&agrave; fa riferimento
+     * @param user      utente loggato
+     * @param projectsWritableByUser    Vector contenente tutti i progetti scrivibili dall'utente; l'attivita' deve essere agganciata ad uno di questi
+     * @param params    tabella contenente tutti i valori che l'utente inserisce per la nuova attivit&agrave;
      * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche puntamento
      */
     @SuppressWarnings({ "null" })
@@ -2077,15 +2068,15 @@ public class DBWrapper implements Query {
     /**
      * <p>Metodo per fare un nuovo inserimento di un nuovo rischio relativo al progetto.</p>
      * 
-     * @param idProj  - identificativo del progetto, al quale l'attivit&agrave; fa riferimento
-     * @param userId - identificativo dell'utente loggato
-     * @param valuesRisk - vector contenente i valori inseriti dall'utente per inserimento nuovo rischio
+     * @param idProj    identificativo del progetto, al quale l'attivit&agrave; fa riferimento
+     * @param userId    identificativo dell'utente loggato
+     * @param valuesRisk    Vector contenente i valori inseriti dall'utente per inserimento nuovo rischio
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
-    public void insertRisk (int idProj,
-                            int userId, 
-                            Vector<String> valuesRisk)
-                     throws WebStorageException {
+    public void insertRisk(int idProj,
+                           int userId, 
+                           Vector<String> valuesRisk)
+                    throws WebStorageException {
         Connection con = null;
         PreparedStatement pst = null;
         try {
@@ -2126,15 +2117,15 @@ public class DBWrapper implements Query {
     /**
      * <p>Metodo per fare un nuovo inserimento di una nuova competenza relativa al progetto.</p>
      * 
-     * @param idProj  - identificativo del progetto, al quale l'attivit&agrave; fa riferimento
-     * @param userId - identificativo dell'utente loggato
-     * @param valuesSkill - vector contenente i valori inseriti dall'utente per inserimento nuovo rischio
+     * @param idProj    identificativo del progetto, al quale l'attivit&agrave; fa riferimento
+     * @param userId    identificativo dell'utente loggato
+     * @param valuesSkill   Vector contenente i valori inseriti dall'utente per inserimento nuovo rischio
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
-    public void insertSkill (int idProj,
-                             int userId, 
-                             Vector<String> valuesSkill)
-                      throws WebStorageException {
+    public void insertSkill(int idProj,
+                            int userId, 
+                            Vector<String> valuesSkill)
+                     throws WebStorageException {
         Connection con = null;
         PreparedStatement pst = null;
         try {
@@ -2173,15 +2164,15 @@ public class DBWrapper implements Query {
     /** 
      * <p>Metodo per fare un nuovo inserimento di una nuova wbs relativa al progetto.</p>
      * 
-     * @param idProj  - identificativo del progetto, al quale l'attivit&agrave; fa riferimento
-     * @param user - utente loggato
-     * @param params - hashmap contenente i valori inseriti dall'utente per inserimento nuova wbs
+     * @param idProj    identificativo del progetto, al quale l'attivit&agrave; fa riferimento
+     * @param user      utente loggato
+     * @param params    hashmap contenente i valori inseriti dall'utente per inserimento nuova wbs
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
-    public void insertWbs (int idProj,
-                           PersonBean user,
-                           HashMap<String, String> params)
-                    throws WebStorageException {
+    public void insertWbs(int idProj,
+                          PersonBean user,
+                          HashMap<String, String> params)
+                   throws WebStorageException {
         Connection con = null;
         PreparedStatement pst = null;
         try {
@@ -2235,8 +2226,8 @@ public class DBWrapper implements Query {
      * di progetto), passati come argomenti, estrae i dati specificati
      * nella query e popola un CodeBean, che ritorna al chiamante.</p>
      * 
-     * @param query - Query che deve essere eseguita dal metodo
-     * @param idStatus - Id dello status del quale estrarre i dati
+     * @param query     Query che deve essere eseguita dal metodo
+     * @param idStatus  Id dello status del quale estrarre i dati
      * @return CodeBean - CodeBean contenente lo stato corrispondente alla query passata
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
@@ -2286,8 +2277,8 @@ public class DBWrapper implements Query {
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
     @SuppressWarnings({ "static-method", "null" })
-    private Date getDefaultEndDate (int idProj) 
-                             throws WebStorageException {
+    private Date getDefaultEndDate(int idProj) 
+                            throws WebStorageException {
         Connection con = null;
         PreparedStatement pst = null;
         ResultSet rs = null;
@@ -2324,6 +2315,17 @@ public class DBWrapper implements Query {
     }
 
     
+    /**
+     * <p>Dato in input un identificativo di progetto e un identificativo 
+     * di persona, restituisce <code>true</code> se la persona &egrave;
+     * presente (a qualunque titolo) sul progetto, 
+     * <code>false</code> altrimenti.</p>
+     * 
+     * @param idProj identificativo del progetto su cui si vuol verificare la presenza della persona
+     * @param idUser identificativo della persona relativamente alla quale si vuol verificare la presenza sul progetto (di dato id)
+     * @return <code>boolean</code> - valore true se la persona e' presente, in qualsivoglia ruolo, false altrimenti
+     * @throws WebStorageException se si verifica un problema SQL o in qualche puntamento
+     */
     @SuppressWarnings({ "static-method", "null" })
     private boolean heIsInHere(int idProj,
                                int idUser) 
