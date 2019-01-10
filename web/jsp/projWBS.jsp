@@ -1,20 +1,14 @@
 <%@ include file="pcURL.jspf" %>
 <form action="${updWbs}" method="post">
-  <c:url var="updWbs" context="${initParam.appName}" value="/" scope="page">
-    <c:param name="q" value="wbs" />
-    <c:param name="p" value="upd" />
-    <c:param name="id" value="${p.id}" />
-    <c:param name="idw" value="" />
-  </c:url>
   <h2>WBS del progetto <strong><c:out value="${p.titolo}" /></strong></h2>
   <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
     <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="">WBS</a></li>
     <li class="nav-item"><a class="nav-link" data-toggle="tab" href="">Attività</a></li>
     <li class="nav-item"><a class="nav-link" data-toggle="tab" href="">Report</a></li>
   </ul>
-  <hr class="separatore" />
   <div class="tab-content responsive hidden-xs hidden-sm">
-    <div role="tabpanel" class="tab-pane active" id="tab-pcvision">
+    <div role="tabpanel" class="tab-pane active" id="tab-wbs">
+      <br />
       <table class="table table-bordered table-hover">
         <thead class="thead-light">
         <tr>
@@ -26,7 +20,7 @@
         </thead>
         <tbody>
         <c:set var="status" value="" scope="page" />
-        <c:forEach var="wbs" items="${requestScope.wbs}" varStatus="loop">
+        <c:forEach var="wbs" items="${requestScope.allWbs}" varStatus="loop">
           <c:set var="status" value="${loop.index}" scope="page" />
           <tr>
             <td scope="col">
@@ -58,31 +52,7 @@
         </tbody>
       </table>
       <input type="hidden" id="wbs-loop-status" name="wbs-loop-status" value="<c:out value="${status}"/>">
-      <input type="submit" id="sumbit" name="submit" value="submit">
       <div id="container-fluid">
-      <div class="row">
-        <div class="col-1 text-center"></div>
-        <div class="col-1 text-center">
-          <button class="btn btn-primary" disabled>&and;</button>
-        </div>
-        <div class="col-1 text-center"></div>
-      </div>
-      <div class="row">
-        <div class="col-1 text-center">
-          <button class="btn btn-primary" disabled>&lt;</button>
-        </div>
-        <div class="col-1 text-center"></div>
-        <div class="col-1 text-center">
-          <button class="btn btn-primary" disabled>&gt;</button>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-1 text-center"></div>
-        <div class="col-1 text-center">
-          <button class="btn btn-primary" disabled>&or;</button>
-        </div>
-        <div class="col-1 text-center"></div>
-      </div>
         <hr class="separatore" />
         <div class="row">
           <div class="col-2">  
@@ -91,10 +61,23 @@
             </span>
           </div>
           <div class="col-8 text-center">
-            <%@ include file="subPanel.jspf" %>
+            <a class="btn btn-primary" href="${addWbs}${p.id}" id="add-wbs">Aggiungi</a>
+            <a class="btn btn-primary" href="${modWbs}${p.id}" id="mod-wbs">Modifica</a>
           </div>
         </div>
       </div>
     </div>
   </div>
 </form>
+<script type="text/javascript">
+$(document).ready(function() {
+  $("input[type='radio']").on('change', function() {
+    var $radioValue = $("input[name='wbs-select']:checked").val();
+    //alert($radioValue);
+    //var $modActUrl = $('#mod-act').attr('href', 'pippo'); //"${modAct}${p.id}&idAct="$(this).val()
+    var $modWbsUrl = '<c:out value="${modWbs}${p.id}" escapeXml="false" />' + "&idw=" + $(this).val();
+    //$('#mod-act').attr('href', $(this).val());
+    $('#mod-wbs').attr('href', $modWbsUrl);
+  });
+});
+</script>
