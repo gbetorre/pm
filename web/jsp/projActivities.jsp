@@ -61,7 +61,7 @@
             </span>
           </div>
           <div class="col-8 text-center">
-            <a href="javascript:window.open('${addAct}${p.id}', 'newAttivita', true)" class="btn btn-primary">Aggiungi</a>
+            <a href="${addAct}${p.id}" class="btn btn-primary" id="add-act">Aggiungi</a>
             <a href="" class="btn btn-primary" id="mod-act">Modifica</a>
             <input type="button" class="btn btn-primary" name="elimina" value="Elimina" onclick="modify()" disabled>
           </div>
@@ -74,9 +74,9 @@
         var $radioValue = $("input[name='act-select']:checked").val();
         //alert($radioValue);
         //var $modActUrl = $('#mod-act').attr('href', 'pippo'); //"${modAct}${p.id}&idAct="$(this).val()
-        //var $modActUrl = ${modAct}${p.id}// + "&idAct=" + $(this).val();
+        var $modActUrl = '<c:out value="${modAct}${p.id}" escapeXml="false" />' + "&ida=" + $(this).val();
         //$('#mod-act').attr('href', $(this).val());
-        $('#mod-act').attr('href', 'pippo');
+        $('#mod-act').attr('href', $modActUrl);
       });
     });
     </script>
