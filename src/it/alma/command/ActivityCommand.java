@@ -301,7 +301,7 @@ public class ActivityCommand extends ItemBean implements Command {
                         // Effettua le selezioni che servono all'inserimento di una nuova attività
                         isHeader = isFooter = false;
                         candidates = db.getPeople(runtimeProject.getId());
-                        workPackage = db.getWbs(runtimeProject.getId(), Query.GET_WORK_PACKAGES_ONLY); 
+                        workPackage = db.getWbs(runtimeProject.getId(), Query.WBS_ONLY_WP); 
                         complexity = HomePageCommand.getComplessita();
                         states = HomePageCommand.getStatiAttivita();
                         today = Utils.format(Utils.getCurrentDate());
@@ -318,7 +318,7 @@ public class ActivityCommand extends ItemBean implements Command {
                         isHeader = isFooter = false;
                         activity = db.getActivity(idPrj, idAct, user);
                         candidates = db.getPeople(runtimeProject.getId());
-                        workPackage = db.getWbs(runtimeProject.getId(), Query.GET_WORK_PACKAGES_ONLY);
+                        workPackage = db.getWbs(runtimeProject.getId(), Query.WBS_ONLY_WP);
                         complexity = HomePageCommand.getComplessita();
                         states = HomePageCommand.getStatiAttivita();
                         today = Utils.format(Utils.getCurrentDate());
