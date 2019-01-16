@@ -179,7 +179,7 @@ public class ActivityCommand extends ItemBean implements Command {
         // Dichiara lista di valori di stati attività
         LinkedList<CodeBean> states = null;
         // Data di oggi sotto forma di oggetto String
-        String today = null;
+        java.util.Date today = null;
         // Attività da modificare, se l'utente ha scelto questa specifica funzionalità
         ActivityBean activity = null;
         /* ******************************************************************** *
@@ -304,7 +304,7 @@ public class ActivityCommand extends ItemBean implements Command {
                         workPackage = db.getWbs(runtimeProject.getId(), Query.WBS_ONLY_WP); 
                         complexity = HomePageCommand.getComplessita();
                         states = HomePageCommand.getStatiAttivita();
-                        today = Utils.format(Utils.getCurrentDate());
+                        today = Utils.convert(Utils.getCurrentDate());
                     } else if (part.equals(Query.MODIFY_PART)) {
                         // Se siamo qui (p=mod) e l'id dell'attività non è significativo c'è qualcosa che non va...
                         if (idAct == Utils.DEFAULT_ID) {
@@ -321,7 +321,7 @@ public class ActivityCommand extends ItemBean implements Command {
                         workPackage = db.getWbs(runtimeProject.getId(), Query.WBS_ONLY_WP);
                         complexity = HomePageCommand.getComplessita();
                         states = HomePageCommand.getStatiAttivita();
-                        today = Utils.format(Utils.getCurrentDate());
+                        today = Utils.convert(Utils.getCurrentDate());
                     }
                     fileJspT = nomeFile.get(part);
                 } else {
