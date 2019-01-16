@@ -20,13 +20,12 @@
           <tr>
             <td scope="row">
               <input type="radio" id="act-${act.id}" name="act-select" value="${act.id}">
-              <input type="text" name="act-select" value="${act.id}" size="4">
             </td>
             <td scope="row">
-              <input type="text" class="form-control" id="act-nome${status}" name="act-nome${status}" value="<c:out value="${act.nome}"/>" readonly>
+              <c:out value="${act.nome}"/>
             </td>
             <td scope="row">
-              <input type="text" class="form-control" id="act-descrizione${status}" name="act-descrizione${status}" value="<c:out value="${act.descrizione}"/>" readonly>
+              <c:out value="${act.descrizione}"/>
             </td>
             <td scope="row">
               <c:choose>
@@ -62,7 +61,7 @@
           </div>
           <div class="col-8 text-center">
             <a href="${addAct}${p.id}" class="btn btn-primary" id="add-act">Aggiungi</a>
-            <a href="" class="btn btn-primary" id="mod-act">Modifica</a>
+            <a href="" class="btn btn-primary" id="mod-act" onclick="selectionEdit('Attivit&agrave;')">Modifica</a>
             <input type="button" class="btn btn-primary" name="elimina" value="Elimina" onclick="modify()" disabled>
           </div>
         </div>
