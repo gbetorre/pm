@@ -713,6 +713,9 @@ public interface Query extends Serializable {
             "   ,   A.gurimanenti           AS  \"guRimanenti\"" +
             "   ,   A.noteavanzamento       AS  \"noteAvanzamento\"" +
             "   ,   A.milestone             AS  \"milestone\"" +
+            "   ,   A.id_wbs                AS  \"idWbs\"" +
+            "   ,   A.id_stato              AS  \"idStato\"" +
+            "   ,   A.id_complessita        AS  \"idComplessita\"" +
             "   FROM attivita A" + 
             "   WHERE id_progetto = ?" +
             "     AND id = ?";
@@ -722,11 +725,14 @@ public interface Query extends Serializable {
      */
     public static final String GET_PEOPLE_ON_ACTIVITY = 
             "SELECT " +
-            "       P.id        AS \"id\"" +
-            "   ,   P.nome      AS \"nome\"" +
-            "   ,   P.cognome   AS \"cognome\"" +
-            "   FROM attivitagestione AG" +
+            "       P.id                AS \"id\"" +
+            "   ,   P.nome              AS \"nome\"" +
+            "   ,   P.cognome           AS \"cognome\"" +
+            "   ,   C.descrizione       AS \"mansione\"" +
+            "   ,   AG.id_competenza    AS \"idQualificaPrincipaleDip\"" +
+            "   FROM attivitagestione   AG" +
             "       INNER JOIN persona P ON AG.id_persona = P.id" +
+            "       INNER JOIN competenza C ON AG.id_competenza = C.id" + 
             "   WHERE AG.id_attivita = ?";
     
     /**
@@ -1269,7 +1275,7 @@ public interface Query extends Serializable {
             "   ,   id_progetto )" +
             "   VALUES (? " +          // id
             "   ,       ? " +          // descrizione
-            "   ,       ? " +          // probabilita 
+            "   ,       ? " +          // probabilitaï¿½
             "   ,       ? " +          // impatto
             "   ,       ? " +          // livello
             "   ,       ? " +          // stato
