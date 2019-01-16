@@ -9,17 +9,17 @@ body {
     margin:0;
 }
 
-a:link, a:visited {
+a:link:not(.cc-link), a:visited:not(.cc-link) {
     text-decoration:none;
     color:#4c6b87;
 }
 
-a:hover, a:focus {
+a:hover:not(.cc-link), a:focus:not(.cc-link) {
     text-decoration:none;
     color:#bb7a2a;
 }
 
-a:active {
+a:active:not(.cc-link) {
     text-decoration:none;
     color:#4c6b87;
 }
