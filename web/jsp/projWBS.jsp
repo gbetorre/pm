@@ -2,7 +2,7 @@
 <form action="${updWbs}" method="post">
   <h2>WBS del progetto <strong><c:out value="${p.titolo}" /></strong></h2>
   <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
-    <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="">WBS</a></li>
+    <li class="nav-item"><a class="nav-link active tabactive" data-toggle="tab" href="#">WBS</a></li>
     <li class="nav-item"><a class="nav-link" data-toggle="tab" href="">Attività</a></li>
     <li class="nav-item"><a class="nav-link" data-toggle="tab" href="">Report</a></li>
   </ul>
@@ -28,10 +28,10 @@
               <input type="hidden" id="wbs-id${status}" name="wbs-id${status}" value="<c:out value="${wbs.id}"/>">
             </td>
             <td scope="col">
-              <input type="text" class="form-control" id="wbs-nome${status}" name="wbs-nome${status}" value="<c:out value="${wbs.nome}"/>" readonly>
+              <c:out value="${wbs.nome}" />
             </td>
             <td scope="col">
-              <input type="text" class="form-control" id="wbs-descrizione${status}" name="wbs-descrizione${status}" value="<c:out value="${wbs.descrizione}"/>" readonly>
+              <c:out value="${wbs.descrizione}"/>
             </td>
             <td scope="col">
               <c:choose>
@@ -62,7 +62,7 @@
           </div>
           <div class="col-8 text-center">
             <a class="btn btn-primary" href="${addWbs}${p.id}" id="add-wbs">Aggiungi</a>
-            <a class="btn btn-primary" href="${modWbs}${p.id}" id="mod-wbs">Modifica</a>
+            <a class="btn btn-primary" href="" id="mod-wbs" onclick="selectionEdit('WBS')">Modifica</a>
           </div>
         </div>
       </div>
@@ -70,14 +70,14 @@
   </div>
 </form>
 <script type="text/javascript">
-$(document).ready(function() {
-  $("input[type='radio']").on('change', function() {
-    var $radioValue = $("input[name='wbs-select']:checked").val();
-    //alert($radioValue);
-    //var $modActUrl = $('#mod-act').attr('href', 'pippo'); //"${modAct}${p.id}&idAct="$(this).val()
-    var $modWbsUrl = '<c:out value="${modWbs}${p.id}" escapeXml="false" />' + "&idw=" + $(this).val();
-    //$('#mod-act').attr('href', $(this).val());
-    $('#mod-wbs').attr('href', $modWbsUrl);
+  $(document).ready(function() {
+    $("input[type='radio']").on('change', function() {
+      var $radioValue = $("input[name='wbs-select']:checked").val();
+      //alert($radioValue);
+      //var $modActUrl = $('#mod-act').attr('href', 'pippo'); //"${modAct}${p.id}&idAct="$(this).val()
+      var $modWbsUrl = '<c:out value="${modWbs}${p.id}" escapeXml="false" />' + "&idw=" + $(this).val();
+      //$('#mod-act').attr('href', $(this).val());
+      $('#mod-wbs').attr('href', $modWbsUrl);
+    });
   });
-});
 </script>
