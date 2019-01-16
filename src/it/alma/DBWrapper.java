@@ -1120,6 +1120,70 @@ public class DBWrapper implements Query {
     
     
     /**
+     * <p>Restituisce una specifica WBS del progetto, con identificativo progetto
+     * e identificativo WBS passati come parametri.</p>
+     * 
+     * @param idProj - id del progetto di cui caricare le wbs
+     * @param idWbs - id della wbs da estrarre
+     * @return WbsBean - bean contenente la wbs richiesta
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    public WbsBean getWbsInstance(int idProj, 
+                                  int idWbs) 
+                           throws WebStorageException {
+        ResultSet rs, rs1 = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        WbsBean wbs = null;
+        WbsBean wbsPadre = null;
+        try {
+            // Ottiene il progetto precaricato quando l'utente si Ã¨ loggato corrispondente al progetto sul quale aggiungere un'attivitÃ 
+            Integer keyPrj = new Integer(idProj);
+            Integer keyWbs = new Integer(idWbs);
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_WBS);
+            pst.clearParameters();
+            pst.setInt(1, keyPrj);
+            pst.setInt(2, keyWbs);
+            rs = pst.executeQuery();
+            if (rs.next()) {
+                wbs = new WbsBean();
+                BeanUtil.populate(wbs, rs);
+                pst = null;
+                pst = con.prepareStatement(GET_WBS_PADRE);
+                pst.clearParameters();
+                pst.setInt(1, wbs.getId());
+                rs1 = pst.executeQuery();
+                if(rs1.next()) {
+                    wbsPadre = new WbsBean();
+                    BeanUtil.populate(wbsPadre, rs1);
+                    wbs.setWbsPadre(wbsPadre);
+                }
+            }
+            return wbs;
+        }  catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Oggetto WbsBean non valorizzato; problema nella query della wbs del figlio.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
      * <p>Restituisce un vector contenente tutte le Wbs di un dato progetto.</p>
      * 
      * @param idProj - id del progetto di cui caricare le wbs
@@ -1136,7 +1200,21 @@ public class DBWrapper implements Query {
         WbsBean wbs = null;
         Vector<WbsBean> vWbs = new Vector<WbsBean>();
         String query = null;
-        // Controllo qual ï¿½ la query da eseguire, in base alla richiesta dell'utente
+        // Controllo qual è la query da eseguire, in base alla richiesta dell'utente
+        switch (getPartOfWbs) {
+            case WBS_ALL: 
+                query = GET_WBS_BY_PROJECT; 
+                break;
+            case WBS_NOT_WP:
+                query = GET_WBS_NOT_WORKPACKAGE;
+                break;
+            case WBS_ONLY_WP:
+                query = GET_WP_BY_PROJECT;
+                break;
+            default:
+                throw new WebStorageException("Query non selezionata dall'utente.\n");
+        }
+        // Controllo qual è la query da eseguire, in base alla richiesta dell'utente
         if (getPartOfWbs == WBS_ALL) {
             query = GET_WBS_BY_PROJECT;
         } else if (getPartOfWbs == WBS_NOT_WP) {
@@ -1182,7 +1260,6 @@ public class DBWrapper implements Query {
      * @return 
      * @throws WebStorageException 
      */
-    @SuppressWarnings({ "null", "static-method" })
     public LinkedList<CodeBean> getStati(String query)
                                   throws WebStorageException {
         ResultSet rs = null;
@@ -1775,29 +1852,24 @@ public class DBWrapper implements Query {
         try {
             // Ottiene la connessione
             con = pol_manager.getConnection();
-            if (params.containsKey(PART_WBS)) {
-                HashMap<String, String> paramsWbs = params.get(PART_WBS);
+            if (params.containsKey(MODIFY_PART)) {
+                HashMap<String, String> paramsWbs = params.get(MODIFY_PART);
                 if (Utils.containsValues(paramsWbs)) {
-                    // 4 ï¿½ il numero di campi che compongono una WBS
-                    for (int i = 0; i < (paramsWbs.size() / 4); i++) {
-                        String isWorkpackageAsString = paramsWbs.get("wbs-workpackage" + String.valueOf(i));
-                        if ( (!isWorkpackageAsString.equalsIgnoreCase("true")) && (!isWorkpackageAsString.equalsIgnoreCase("false"))  ) {
-                            throw new ClassCastException("Attenzione: il valore del parametro \'wbs-workpackage\' non e\' riconducibile a un valore boolean!\n");
-                        }
-                        con.setAutoCommit(false);
-                        pst = con.prepareStatement(UPDATE_WBS);
-                        pst.clearParameters();
-                        pst.setString(1, paramsWbs.get("wbs-name" + String.valueOf(i)));
-                        pst.setString(2, paramsWbs.get("wbs-descr" + String.valueOf(i)));
-                        pst.setBoolean(3, Boolean.parseBoolean(isWorkpackageAsString));
-                        pst.setInt(4, Integer.parseInt(paramsWbs.get("wbs-idpadre" + String.valueOf(i))));
-                        pst.setDate(5, Utils.convert(Utils.convert(Utils.getCurrentDate())));
-                        pst.setTime(6, Utils.getCurrentTime());
-                        pst.setString(7, user.getCognome() + " " + user.getNome());
-                        pst.setInt(8, Integer.parseInt(paramsWbs.get("wbs-id" + String.valueOf(i))));
-                        pst.executeUpdate();
-                        con.commit();
-                    }
+                    int nextParam = 0;
+                    boolean workpackage = paramsWbs.get("wbs-workpackage").equals("on") ? true : false;
+                    con.setAutoCommit(false);
+                    pst = con.prepareStatement(UPDATE_WBS);
+                    pst.clearParameters();
+                    pst.setString(++nextParam, paramsWbs.get("wbs-name"));
+                    pst.setString(++nextParam, paramsWbs.get("wbs-descr"));
+                    pst.setBoolean(++nextParam, workpackage);
+                    pst.setInt(++nextParam, Integer.parseInt(paramsWbs.get("wbs-idpadre")));
+                    pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate())));
+                    pst.setTime(++nextParam, Utils.getCurrentTime());
+                    pst.setString(++nextParam, user.getCognome() + " " + user.getNome());
+                    pst.setInt(++nextParam, Integer.parseInt(paramsWbs.get("wbs-id")));
+                    pst.executeUpdate();
+                    con.commit();
                 }
             }
         } catch (NotFoundException nfe) {
