@@ -11,7 +11,7 @@ error.jsp;meta ;;author
 error.jsp;a;countdown;
 login.jsp;input;input;usr
 login.jsp;input;pwd;pwd
-pcAttivita.jsp;form;newAct_form;
+pcAttivita.jsp;form;act_form;
 pcAttivita.jsp;select;actPeople;actPeople
 pcAttivita.jsp;input;show-extrainfo;
 pcAttivita.jsp;div;actNome;actNome
