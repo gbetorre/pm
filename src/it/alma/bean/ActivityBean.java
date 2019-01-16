@@ -62,6 +62,9 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
      *  Viene utilizzato per contestualizzare i messaggi di errore.
      */
     private final String FOR_NAME = "\n" + this.getClass().getName() + ": "; //$NON-NLS-1$
+    /* $NON-NLS-1$ silence a warning that Eclipse emits when it encounters string literals
+        The idea is that UI messages should not be embedded as string literals, 
+        but rather sourced from a resource file (so that they can be translated, proofed, etc).*/
     /* ************************************************************************ *  
      *                    Dati identificativi dell'attività                     *
      * ************************************************************************ */
@@ -101,7 +104,15 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
      * *********************************************** */
     /** Vector di persone che partecipano all'attivit&agrave; */
     private Vector<PersonBean> persone;
-    
+    /* *********************************************** *
+     *           Riferimenti ad altre entità           *
+     * *********************************************** */
+    /** Riferimento alla WBS (Work Package) sotto cui viene aggregata l'attivit&agrave; */
+    private int idWbs;
+    /** Riferimento al livello di complessit&agrave; dell'attivit&agrave; */
+    private int idComplessita;
+    /** Riferimento allo stato in cui si trova l'attivit&agrave; */
+    private int idStato;
     
     /**
      * <p>Costruttore: inizializza i campi a valori di default.</p>
@@ -115,7 +126,8 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
     	noteAvanzamento = null;
     	milestone = false;
     	persone = null;
-    };
+    	idWbs = idComplessita = idStato = -2;
+    }
     
     /* **************************************************** *
      *           Metodi getter e setter per id              *
@@ -456,6 +468,107 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
      */
     public void setPersone(Vector<PersonBean> persone) {
         this.persone = persone;
+    }
+
+    
+    /* ******************************************************** *
+     *   Metodi getter e setter per id della WBS dell'attivita' *
+     * ******************************************************** */
+    /**
+     * Restituisce l'id di una WBS sotto cui l'attivit&agrave;
+     * &egrave; aggregata. La WBS deve essere di tipo 'Work Package'. 
+     * 
+     * @return <code>idWbs</code> - l'id dela WBS sotto cui l'attivit&agrave; si trova
+     * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e l'id WBS non &egrave; stato valorizzato (&egrave; un dato obbligatorio)
+     */
+    public int getIdWbs() throws AttributoNonValorizzatoException {
+        if (idWbs == -2) {
+            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo id WBS non valorizzato!");
+        }
+        return idWbs;
+    }
+
+    /**
+     * Imposta la WBS che aggrega l'attivit&agrave;
+     * 
+     * @param idWbs id della Wbs da settare
+     */
+    public void setIdWbs(int idWbs) {
+        this.idWbs = idWbs;
+    }
+
+    
+    /* ******************************************************************** *
+     *  Metodi getter e setter per il grado di complessita' dell'attivita'  *
+     * ******************************************************************** */
+    /**
+     * Restituisce l'id del grado di complessit&agrave; di una attivit&agrave; 
+     * 
+     * @return <code>idComplessita</code> - l'id della complessit&agrave; che descrive l'attivit&agrave;
+     * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e questo attributo non &egrave; stato valorizzato (&egrave; un dato obbligatorio)
+     */
+    public int getIdComplessita() throws AttributoNonValorizzatoException {
+        if (idComplessita == -2) {
+            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo id complessita\' non valorizzato!");
+        }
+        return idComplessita;
+    }
+
+    /**
+     * <p>Imposta l'identificativo della complessit&agrave; che descrive, appunto,
+     * il grado di complessit&agrave; dell'attivit&agrave;</p>
+     * <p>Restituisce l'id del grado di complessit&agrave; dell'attivit&agrave;.
+     * Quantunque generalmente i metodi setter non restituiscano valori,
+     * nulla vieta di permettergli di restituire il valore oggetto del settaggio
+     * (valore del parametro o dell'argomento).
+     * Tuttavia ci&ograve; comporterebbe un problema nella reflection:
+     * <pre>
+     * java.util.logging.Logger@4893ccd0: Oggetto ActivityBean non valorizzato; problema nella query dell'attivita'.
+     * Problemi nel settare l'attributo 'idComplessita' nel bean di tipo 'class it.alma.bean.ActivityBean': Cannot set idComplessita
+     * Problemi nel settare l'attributo 'idComplessita' nel bean di tipo 'class it.alma.bean.ActivityBean': Cannot set idComplessita
+     * it.alma.bean.BeanUtil.populate(BeanUtil.java:185)
+     * </pre>
+     * Per cui nel costruttore NON facciamo:
+     * <pre>setIdWbs(setIdStato(setIdComplessita(-2)));</pre>
+     * ma usiamo il solito sistema di inizializzare tutto a un default negativo.</p>
+     * 
+     * @param idComplessita idComplessita da impostare
+     */
+    public void setIdComplessita(int idComplessita) {
+        this.idComplessita = idComplessita;
+    }
+    
+    
+    /* ******************************************************************** *
+     *    Metodi getter e setter per lo stato in cui si trova l'attivita'   *
+     * ******************************************************************** */
+    /**
+     * Restituisce l'id dello stato di avanzamento di una attivit&agrave; 
+     * 
+     * @return <code>idStato</code> - l'id dello stato che descrive l'avanzamento in cui l'attivit&agrave; si trova
+     * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e questo attributo non &egrave; stato valorizzato (&egrave; un dato obbligatorio)
+     */
+    public int getIdStato() throws AttributoNonValorizzatoException {
+        if (idStato == -2) {
+            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo id stato non valorizzato!");
+        }
+        return idStato;
+    }
+
+    /**
+     * <p>Imposta l'identificativo dello stato che descrive, appunto,
+     * il grado di avanzamento dell'attivit&agrave;</p>
+     * <p>Restituisce l'id del grado di avanzamento dell'attivit&agrave; (stato).
+     * Quantunque generalmente i metodi setter non restituiscano valori,
+     * Eclipse IDE propone questo pattern nel momento in cui i getter e 
+     * setter vengono generati automaticamente. Tuttavia questo modello
+     * collide con la reflection implementata dal BeanUtil, per cui
+     * lasciamo <code>void</code>.</p>
+     * 
+     * @param idStato identificativo dello stato di avanzamento da impostare
+     */
+    public void setIdStato(int idStato) {
+        this.idStato = idStato;
     }
 	
 }
