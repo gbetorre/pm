@@ -74,6 +74,8 @@ public class WbsBean implements Serializable, Query {
     private String descrizione;
     /** Work package true se WBS is work package */
     private boolean workPackage;
+    /** Attributo identificativo della WBS padre */
+    private WbsBean wbsPadre;
     
 	
     /**
@@ -84,6 +86,7 @@ public class WbsBean implements Serializable, Query {
 		nome = null;
 		descrizione = null;
 		workPackage = false;
+		wbsPadre = null;
 	}
 
 
@@ -173,5 +176,26 @@ public class WbsBean implements Serializable, Query {
 	public void setWorkPackage(boolean workPackage) {
 		this.workPackage = workPackage;
 	}
+
+	
+    /* ********************************************************* *
+     *         Metodi getter e setter per workPackage            *
+     * ********************************************************* */
+	/**
+	 * Restituisce il bean rappresentante la WBS padre.
+     * @return <code>wbsPadre</code> - WBS padre della WBS attuale
+     */
+    public WbsBean getWbsPadre() {
+        return wbsPadre;
+    }
+
+
+    /**
+     * Imposta il bean rappresentante la WBS padre.
+     * @param wbsPadre - WBS da impostare
+     */
+    public void setWbsPadre(WbsBean wbsPadre) {
+        this.wbsPadre = wbsPadre;
+    }
 
 }
