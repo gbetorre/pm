@@ -145,10 +145,6 @@ public interface Query extends Serializable {
      */
     public static final String MODIFY_PART                      = "mod";
     /**
-     * <p>Costante per il parametro identificante la pagina di modifica di una parte di un progetto.</p>
-     */
-    public static final String UPDATE_PART_PROJECT              = "upd";
-    /**
      * <p>Costante per il parametro identificante la pagina di inserimento di un rischio di un progetto.</p>
      */
     public static final String ADD_RISK_TO_PROJECT              = "addRisk";
@@ -463,7 +459,25 @@ public interface Query extends Serializable {
             "   ,   W.descrizione   AS \"descrizione\"" + 
             "   ,   W.workpackage   AS \"workPackage\"" + 
             "   FROM wbs W" +
-            "   WHERE id = ?";
+            "       INNER JOIN progetto PJ ON PJ.id = W.id_progetto" +
+            "   WHERE PJ.id = ?" +
+            "       AND W.id = ?";
+    
+    /**
+     * <p>Estrae la wbs padre data una wbs figlia, 
+     * identificata tramite l'id, passato come parametro.</p>
+     */
+    public static final String GET_WBS_PADRE = 
+            "SELECT " +
+            "       W.id            AS \"id\"" +
+            "   ,   W.nome          AS \"nome\"" +
+            "   ,   W.descrizione   AS \"descrizione\"" +
+            "   ,   W.workpackage   AS \"workPackage\"" + 
+            "   FROM wbs W" + 
+            "   WHERE W.id = (SELECT " +
+            "                        WF.id_wbs" + 
+            "                 FROM wbs WF" + 
+            "                 WHERE WF.id = ?)";
     
     /**
      * <p>Estrae le wbs che non sono workpackage di un progetto,
