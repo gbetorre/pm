@@ -963,12 +963,13 @@ public class DBWrapper implements Query {
                                     int activityId,
                                     PersonBean user) 
                              throws WebStorageException {
-        ResultSet rs, rs1 = null;
+        ResultSet rs, rs1, rs2 = null;
         Connection con = null;
         PreparedStatement pst = null;
         PersonBean person = null;
         ActivityBean activity = null;
         Vector<PersonBean> people = new Vector<PersonBean>();
+        Vector<SkillBean> skills = null;
         try {
             con = pol_manager.getConnection();
             pst = con.prepareStatement(GET_ACTIVITY);
@@ -986,7 +987,21 @@ public class DBWrapper implements Query {
                 rs1 = pst.executeQuery();
                 while (rs1.next()) {
                     person = new PersonBean();
+                    skills = new Vector<SkillBean>();
                     BeanUtil.populate(person, rs1);
+                    pst = null;
+                    // Recupera competenze di ogni persona
+                    pst = con.prepareStatement(GET_SKILLS_BY_PERSON);
+                    pst.clearParameters();
+                    pst.setInt(1, projId);
+                    pst.setInt(2, person.getId());
+                    rs2 = pst.executeQuery();
+                    while (rs2.next()) {
+                        SkillBean skill = new SkillBean();
+                        BeanUtil.populate(skill, rs2);
+                        skills.add(skill);
+                    }
+                    person.setCompetenze(skills);
                     people.add(person);
                 }
                 activity.setPersone(people);
@@ -1121,7 +1136,7 @@ public class DBWrapper implements Query {
         WbsBean wbs = null;
         Vector<WbsBean> vWbs = new Vector<WbsBean>();
         String query = null;
-        // Controllo qual è la query da eseguire, in base alla richiesta dell'utente
+        // Controllo qual ï¿½ la query da eseguire, in base alla richiesta dell'utente
         if (getPartOfWbs == WBS_ALL) {
             query = GET_WBS_BY_PROJECT;
         } else if (getPartOfWbs == WBS_NOT_WP) {
