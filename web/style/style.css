@@ -35,7 +35,7 @@ body {
 	overflow-x: hidden;
 }
 
-a:link:not(.btn):not(.cc-link), a:visited:not(.btn):not(.cc-link) {
+a:link:not(.btn):not(.cc-link):not(.linkFooter), a:visited:not(.btn):not(.cc-link):not(.linkFooter) {
 	color: #484f51; 
 }
 
@@ -45,12 +45,12 @@ a:hover:not(.btn):not(.logoHeader):not(.cc-link):not(.ui-datepicker-prev):not(.u
 	background-color: #d7d9d9;
 }
 
-a:visited.linkFooter, a:link.linkFooter {
+a:link.linkFooter, a:visited.linkFooter {
 	color: #729fa5;
 }
 
 a:hover.linkFooter {
-	color: white;
+	color: #c6ceda;
 	background-color: transparent;
 	text-decoration: underline;
 }
