@@ -42,7 +42,7 @@
         "theme": "classic",
         "position": "bottom-right",
         "content": {
-          "message": "Questo sito o gli strumenti terzi da questo utilizzati si avvalgono di cookie necessari al funzionamento ed utili alle finalità illustrate nella cookie policy. Se vuoi saperne di più o negare il consenso a tutti o ad alcuni cookie, consulta la cookie policy. Chiudendo questo banner, scorrendo questa pagina, cliccando su un link o proseguendo la navigazione in altra maniera, acconsenti all\'uso dei cookie.",
+          "message": "Questo sito o gli strumenti terzi da questo utilizzati si avvalgono di cookie necessari al funzionamento ed utili alle finalità illustrate nella <a href=\"https://www.univr.it/it/privacy\" target=\"_blank\">. Se vuoi saperne di più o negare il consenso a tutti o ad alcuni cookie, consulta la <a href=\"https://www.univr.it/it/privacy\" target=\"_blank\">. Cliccando su \'Acconsento\' dai l\'autorizzazione all\'uso dei cookie.",
           "dismiss": "Acconsento",
           "link": "Informazioni",
           "href": "https://www.univr.it/it/privacy"
