@@ -48,9 +48,18 @@ jQuery.validator.addMethod("greaterThan",
   }, 'Must be greater than {0}.'
 );
 
-function selectionEdit(element) {
+function selectionEdit(element, onCloseCallback) {
   if(!$("input[type='radio']").is(":checked")) {
     alert("E' necessario selezionare una " + element + " da modificare!");
     return false;
+    //$('<div></div>').html("E' necessario selezionare una " + element + " da modificare!").dialog({
+    //  title: "Attenzione!!!",
+    //  resizable: false,
+    //  buttons: {
+    //    'Ok': function()  {
+    //        $( this ).dialog( 'close' );
+    //    }
+    //  }
+    //});
   };
 }
