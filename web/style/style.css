@@ -39,7 +39,7 @@ a:link:not(.btn):not(.cc-link), a:visited:not(.btn):not(.cc-link) {
 	color: #484f51; 
 }
 
-a:hover:not(.btn):not(.cc-link):not(.ui-datepicker-prev):not(.ui-datepicker-next):not(.nav-link):not(.linkFooter) {
+a:hover:not(.btn):not(.logoHeader):not(.cc-link):not(.ui-datepicker-prev):not(.ui-datepicker-next):not(.nav-link):not(.linkFooter) {
 	text-decoration: underline;
 	color: black;
 	background-color: #d7d9d9;
@@ -111,6 +111,17 @@ div.additional-fields {
   display:none;
 }
 
+div.centerlayout {
+	text-align: center;
+}
+
+div.centre {
+  text-align: left;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 span.right {
 	margin-top: 5px;
 	float: right;
@@ -124,6 +135,11 @@ img.logo {
 img.logoHeader{
 	width: 65%;
 	height: 85%;
+}
+
+img.profile {
+	width: 50px;
+	height: 62px;
 }
 
 textarea {
