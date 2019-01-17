@@ -9,8 +9,6 @@
       </p>
       <div id="footer">
         &nbsp;
-        <a class="linkFooter" href="#4112">Privacy</a> | 
-        <a class="linkFooter" id="eduroam" href="http://www.univr.it/main?ent=servizioaol&idDest=1&sServ=284&serv=39&lang=it" title="EDUcation ROAMing per l'accesso wireless federato">Policy</a>                             
-        &nbsp;
-        <%-- |&nbsp; <a class="linkFooter" href="page=realizzazione">Credits</a> --%>
+        <a class="linkFooter" href="https://www.univr.it/it/privacy" target="_blank">Privacy / Policy</a>
+        |&nbsp; <a class="linkFooter" href="${credits}">Credits</a>
       </div>
