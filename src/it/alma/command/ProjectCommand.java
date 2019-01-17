@@ -139,6 +139,7 @@ public class ProjectCommand extends ItemBean implements Command {
         nomeFile.put(Query.PART_WBS, "/jsp/projWBS.jsp");
         nomeFile.put(Query.PART_ACTIVITY, "/jsp/projActivities.jsp");
         nomeFile.put(Query.PART_STATUS, "/jsp/projStatus.jsp");
+        nomeFile.put(Query.CREDITS, "/jsp/credits.jsp");
         nomeFile.put(Query.PART_PROJECT, this.getPaginaJsp());
     }  
   
