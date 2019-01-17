@@ -81,6 +81,10 @@ public interface Query extends Serializable {
      *      Costanti corrispondenti ai parametri ammessi sulla querystring      *
      * ************************************************************************ */
     /**
+     * <p>Costante per il parametro identificante la pagina dei credits dell'applicazione.</p>
+     */
+    public static final String CREDITS      = "credits";
+    /**
      * <p>Costante per il parametro identificante la pagina della Vision di un progetto.</p>
      */
     public static final String PART_PROJECT_CHARTER_VISION      = "pcv";
