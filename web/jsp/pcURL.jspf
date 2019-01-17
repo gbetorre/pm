@@ -82,6 +82,10 @@
   <c:param name="p" value="mod" />
   <c:param name="id" value="" />
 </c:url>
+<c:url var="credits" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="pol" />
+  <c:param name="p" value="credits" />
+</c:url> 
 <c:set var="p" value="${requestScope.progetto}" scope="page" />
 <c:set var="ps" value="${requestScope.projectStatus}" scope="page" />
 <c:set var="lps" value="${requestScope.listProjectStatus}" scope="page" />
