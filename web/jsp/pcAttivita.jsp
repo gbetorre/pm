@@ -1,18 +1,17 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"  %>
 <%@ include file="pcURL.jspf" %>
 <c:set var="distinguishingSubmitId" value="pcAttivita" scope="page" />
-<c:set var="actToEdit" value="${requestScope.singolaAttivita}" scope="page" />
+<c:set var="actInstance" value="${requestScope.singolaAttivita}" scope="page" />
 <jsp:useBean id="personInCharge" class="it.alma.bean.PersonBean" scope="page" />
 <c:set target="${pageScope.personInCharge}" property="id" value="-3" />
 <c:set target="${pageScope.personInCharge}" property="idQualificaPrincipaleDip" value="-3" />
 <c:set var="personInCharge" value="${personInCharge}" scope="page" />
 <c:catch var="exception">
-  <c:forEach var="chosenOne" items="${actToEdit.persone}" begin="0" end="0">
+  <c:forEach var="chosenOne" items="${actInstance.persone}" begin="0" end="0">
     <c:set var="personInCharge" value="${chosenOne}" scope="page" />
   </c:forEach>
   <c:set var="actName" value="" scope="page" />
   <c:set var="actDescr" value="" scope="page" />
-
   <c:set var="actEndDate" value="" scope="page" />
   <c:set var="actualStartDate" value="" scope="page" />
   <c:set var="actualEndDate" value="" scope="page" />
@@ -26,23 +25,23 @@
   <c:set var="state" value="-3" scope="page" />
   <c:set var="tP" value="" scope="page" />
   <c:choose>
-  <c:when test="${not empty actToEdit}">
-    <c:set var="actName" value="${actToEdit.nome}" scope="page"  />
-    <c:set var="actDescr" value="${actToEdit.descrizione}" scope="page" />
-    <c:set var="actStartDate" value="${actToEdit.dataInizio}" scope="page" />
-    <c:set var="actEndDate" value="${actToEdit.dataFine}" scope="page" />
-    <c:set var="actualStartDate" value="${actToEdit.dataInizioEffettiva}" scope="page" />
-    <c:set var="actualEndDate" value="${actToEdit.dataFineEffettiva}" scope="page" />
-    <c:set var="actDays" value="${actToEdit.guPrevisti}" scope="page" />
-    <c:set var="elapsedDays" value="${actToEdit.guEffettivi}" scope="page" />
-    <c:set var="remainingDays" value="${actToEdit.guRimanenti}" scope="page" />
-    <c:set var="actNotes" value="${actToEdit.noteAvanzamento}" scope="page" />
-    <c:if test="${actToEdit.milestone}">
+  <c:when test="${not empty actInstance}">
+    <c:set var="actName" value="${actInstance.nome}" scope="page"  />
+    <c:set var="actDescr" value="${actInstance.descrizione}" scope="page" />
+    <c:set var="actStartDate" value="${actInstance.dataInizio}" scope="page" />
+    <c:set var="actEndDate" value="${actInstance.dataFine}" scope="page" />
+    <c:set var="actualStartDate" value="${actInstance.dataInizioEffettiva}" scope="page" />
+    <c:set var="actualEndDate" value="${actInstance.dataFineEffettiva}" scope="page" />
+    <c:set var="actDays" value="${actInstance.guPrevisti}" scope="page" />
+    <c:set var="elapsedDays" value="${actInstance.guEffettivi}" scope="page" />
+    <c:set var="remainingDays" value="${actInstance.guRimanenti}" scope="page" />
+    <c:set var="actNotes" value="${actInstance.noteAvanzamento}" scope="page" />
+    <c:if test="${actInstance.milestone}">
       <c:set var="checked" value="checked" scope="page" />
     </c:if>
-    <c:set var="wbs" value="${actToEdit.idWbs}" scope="page" />
-    <c:set var="complexity" value="${actToEdit.idComplessita}" scope="page" />
-    <c:set var="state" value="${actToEdit.idStato}" scope="page" />
+    <c:set var="wbs" value="${actInstance.idWbs}" scope="page" />
+    <c:set var="complexity" value="${actInstance.idComplessita}" scope="page" />
+    <c:set var="state" value="${actInstance.idStato}" scope="page" />
     <c:set var="tP" value="Modifica attivit&agrave; &quot;${actName}&quot;:" scope="page" />
   </c:when>
   <c:otherwise>
@@ -52,7 +51,8 @@
   </c:choose>
     <h3><c:out value="${pageScope.tP}" escapeXml="false" /></h3>
     <br />
-    <form id="act_form" action="#" method="post">
+    <form id="act_form" action="" method="post">
+      <input type="hidden" id="act-id" name="act-id" value="${actInstance.id}" />
       <div class="row">
         <div class="col-sm-5 mandatory">
           Identificativo della persona 
@@ -69,10 +69,10 @@
               <c:out value="${person.nome} ${person.cognome}" />
             </option>
             <c:choose>
-              <c:when test="${empty actToEdit and (status.index eq pageScope.zero)}">
+              <c:when test="${empty actInstance and (status.index eq pageScope.zero)}">
                 <c:set var="skills" value="${person.competenze}" scope="page" />
               </c:when>
-              <c:when test="${not empty actToEdit}">
+              <c:when test="${not empty actInstance}">
                 <c:set var="skills" value="${personInCharge.competenze}" scope="page" />
               </c:when>
             </c:choose>
@@ -111,7 +111,7 @@
           <input type="button" id="show-extrainfo" class="btn extrainfo" value="Altre informazioni" onclick="modify()">
         </div>
       </div>
-      <hr />
+      <hr class="separatore" />
       <div class="additional-fields">
         <div class="row">
           <div class="col-sm-5 mandatory">Nome attivit&agrave; <sup>&#10039;</sup></div>
@@ -185,8 +185,7 @@
         <br />
         <div class="row">
           <div class="col-sm-5">Milestone</div>
-          <div class="col-sm-5">
-            &nbsp;&nbsp;&nbsp;
+          <div class="col-sm-5" style="margin-left:25px;">
             <input type="checkbox" class="form-check-input" id="act-milestone" name="act-milestone" <c:out value='${checked}' />>
           </div>
         </div>
