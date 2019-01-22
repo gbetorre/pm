@@ -1200,7 +1200,7 @@ public class DBWrapper implements Query {
         WbsBean wbs = null;
         Vector<WbsBean> vWbs = new Vector<WbsBean>();
         String query = null;
-        // Controllo qual � la query da eseguire, in base alla richiesta dell'utente
+        // Controllo qual � la query da eseguire, in base alla richiesta dell'utente
         switch (getPartOfWbs) {
             case WBS_ALL: 
                 query = GET_WBS_BY_PROJECT; 
@@ -1214,7 +1214,7 @@ public class DBWrapper implements Query {
             default:
                 throw new WebStorageException("Query non selezionata dall'utente.\n");
         }
-        // Controllo qual � la query da eseguire, in base alla richiesta dell'utente
+        // Controllo qual � la query da eseguire, in base alla richiesta dell'utente
         if (getPartOfWbs == WBS_ALL) {
             query = GET_WBS_BY_PROJECT;
         } else if (getPartOfWbs == WBS_NOT_WP) {
@@ -1745,79 +1745,200 @@ public class DBWrapper implements Query {
     @SuppressWarnings({ "null", "static-method" })
     public void updateActivity(int idProj,
                                PersonBean user,
-                               HashMap<Integer, ProjectBean> projects, 
-                               HashMap<Integer, Vector<ActivityBean>> activitiesRelatedToProject,
-                               HashMap<String, HashMap<String, String>>params) 
+                               Vector<ProjectBean> projectsWritableByUser, 
+                               HashMap<Integer, Vector<ActivityBean>> userWritableActivitiesByProjectId,
+                               HashMap<String, String> params) 
                         throws WebStorageException {
-        ResultSet rs = null;
         Connection con = null;
-        PreparedStatement pst = null;        
+        PreparedStatement pst, pst1 = null;
+        int calculatedId = -1;
         try {
-            // Ottiene il progetto precaricato quando l'utente si è loggato corrispondente al progetto che vuole aggiornare
-            Integer key = new Integer(idProj);
-            ProjectBean project = projects.get(key);
-            // Recuperare le liste di attività
-            Vector<ActivityBean> activities = activitiesRelatedToProject.get(key);
-            // Ottiene la connessione
-            con = pol_manager.getConnection();
-            /* **************************************************************** *
-             *   Gestisce gli update delle varie funzionalita' delle attivita'  *
-             * **************************************************************** */
-            if (params.containsKey(PART_PROJECT_CHARTER_MILESTONE)) {
-                HashMap<String, String> paramsMilestone = params.get(PART_PROJECT_CHARTER_MILESTONE);
-                if (Utils.containsValues(paramsMilestone)) {
-                    con.setAutoCommit(false);
-                    // 4 è il numero di campi che compongono un'attività
-                    for (int i = 0; i < (paramsMilestone.size() / 4); i++) {
-                        String isMilestoneAsString = paramsMilestone.get("pcm-milestone" + String.valueOf(i));
-                        if ( (!isMilestoneAsString.equalsIgnoreCase("true")) && (!isMilestoneAsString.equalsIgnoreCase("false"))  ) {
-                            throw new ClassCastException("Attenzione: il valore del parametro \'pcm-milestone\' non e\' riconducibile a un valore boolean!\n");
-                        }
-                        // Controllo che le attività del progetto non abbiano subito modifiche non visualizzate dall'utente
-                        /* TODO
-                         * Controllo di concorrenza da implementare
-                        pst = con.prepareStatement(GET_ACTIVITY);
-                        pst.clearParameters();
-                        pst.setInt(1, idProj);
-                        pst.setInt(2, Integer.parseInt(paramsMilestone.get("pcm-id" + String.valueOf(i)))); 
-                        rs = pst.executeQuery();
-                        if(rs.next()) {
-                            if ( (rs.getString("id").equals(activities.get(i).getId())) &&
-                                 (rs.getString("nome").equals(activities.get(i).getNome())) &&
-                                 (rs.getString("descrizione").equals(activities.get(i).getDescrizione())) &&
-                                 (rs.getBoolean("milestone") (activities.get(i).isMilestone())) ) {
-                                
-                            }
-                        }*/
-                        pst = null;
-                        pst = con.prepareStatement(UPDATE_ATTIVITA_FROM_PROGETTO);
-                        pst.clearParameters();
-                        pst.setString(1, paramsMilestone.get("pcm-nome" + String.valueOf(i)));
-                        pst.setString(2, paramsMilestone.get("pcm-descrizione" + String.valueOf(i)));
-                        pst.setBoolean(3, Boolean.parseBoolean(isMilestoneAsString));
-                        pst.setInt(4, Integer.parseInt(paramsMilestone.get("pcm-id" + String.valueOf(i))));
-                        pst.setInt(5, idProj);
-                        pst.executeUpdate();
-                        con.commit();
-                    }
+            /* ** Controlla per prima cosa che l'id progetto sulla querystring ** 
+             * ** corrisponda a un id dei progetti scrivibili dall'utente      **/
+            // Ottiene la cardinalità della lista dei progetti precaricati 
+            // quando l'utente si &egrave; loggato, uno dei quali deve 
+            // corrispondere al progetto sul quale aggiungere un'attività
+            int lastIndexOf = projectsWritableByUser.size();
+            int index = 0;
+            do {
+                ProjectBean wp = projectsWritableByUser.elementAt(index);
+                // Se un id dei progetti scrivibili è uguale all'id sulla querystring è tutto ok 
+                if (wp.getId() == idProj) {
+                    break;
                 }
+                index++;
+            } while (index < lastIndexOf);
+            // In caso contrario, ovvero se abbiamo raggiunto la fine del Vector senza trovare l'id sulla querystring, sono guai...
+            if (index == lastIndexOf) {
+                String msg = FOR_NAME + "Attenzione: l'utente ha tentato di modificare un\'attivita\' legata ad un progetto su cui non ha i diritti di scrittura!\n";
+                LOG.severe(msg + "Problema durante il tentativo di inserire una nuova attivita\'.\n");
+                throw new WebStorageException(msg);
+            }            
+            // Se siamo qui vuol dire che l'id del progetto su cui si deve aggiungere un'attività è scrivibile dall'utente
+            con = pol_manager.getConnection();        
+            // Ottiene l'id da aggiornare
+            calculatedId = Integer.parseInt(params.get("act-id"));
+            /* Controlla per prima cosa che l'id attivita' passato dalla    ** 
+             * form corrisponda a un id di attività scrivibili dall'utente  **/
+            // Ottiene la lista di attività scrivibili per il progetto in esame
+            Vector<ActivityBean> writableActivities = userWritableActivitiesByProjectId.get(new Integer(idProj));
+            // Ottiene la cardinalità della lista delle atività precaricate 
+            // quando l'utente si &egrave; loggato, una delle quali deve 
+            // corrispondere all'attività da modificare
+            lastIndexOf = writableActivities.size();
+            index = 0;
+            do {
+                ActivityBean aw = writableActivities.elementAt(index);
+                // Se un id di attività scrivibili è uguale all'id sulla querystring è tutto ok 
+                if (aw.getId() == calculatedId) {
+                    break;
+                }
+                index++;
+            } while (index < lastIndexOf);
+            // In caso contrario, ovvero se abbiamo raggiunto la fine del Vector senza trovare l'id sulla querystring, sono guai...
+            if (index == lastIndexOf) {
+                String msg = FOR_NAME + "Attenzione: l'utente ha tentato di modificare un\'attivita\' su cui non ha i diritti di scrittura!\n";
+                LOG.severe(msg + "Problema durante il tentativo di inserire una nuova attivita\'.\n");
+                throw new WebStorageException(msg);
+            }            
+            // Se siamo qui vuol dire che l'id dell'attività su cui si deve aggiungere un'attività è scrivibile dall'utente
+            // Begin: ==>
+            con.setAutoCommit(false);
+            pst = con.prepareStatement(UPDATE_ACTIVITY);
+            pst.clearParameters();
+             // Prepara i parametri per l'inserimento
+            try {
+                // Definisce un contatore per l'indice del parametro
+                int nextParam = 0;
+                // Definisce un valore boolean in funzione del checkbox
+                boolean milestone = params.get("act-milestone").equals("on") ? true : false;
+                // Nome
+                pst.setString(++nextParam, params.get("act-name"));
+                // Descrizione
+                pst.setString(++nextParam, params.get("act-descr"));
+                // Controllo lato server sull'input delle date
+                java.util.Date dataInizio = Utils.format(params.get("act-datainizio"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
+                java.util.Date dataFine = Utils.format(params.get("act-datafine"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
+                // Data fine non deve essere minore di Data inizio
+                if (dataInizio.compareTo(dataFine) > NOTHING) {
+                    throw new WebStorageException("La data di fine attivita\' e\' minore di quella di inizio attivita\'.\n");
+                }
+                // Data inizio (obbligatoria)
+                pst.setDate(++nextParam, Utils.convert(dataInizio)); // non accetta una data italiana, ma java.sql.Date
+                // Data fine (obbligatoria)
+                pst.setDate(++nextParam, Utils.convert(dataFine)); // non accetta una data gg/mm/aaaa, ma java.sql.Date
+                // Campo residuale
+                pst.setDate(++nextParam, null);
+                // Campo residuale
+                pst.setDate(++nextParam, null);   
+                // Gestione delle date facoltative
+                java.sql.Date date = null;
+                if (params.get("act-datainiziovera") != null) {
+                    dataInizio = Utils.format(params.get("act-datainiziovera"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
+                    date = Utils.convert(dataInizio);
+                }
+                // Data inizio effettiva
+                pst.setDate(++nextParam, date); // non accetta una data italiana, ma java.sql.Date
+                date = null;
+                if (params.get("act-datafinevera") != null) {
+                    dataFine = Utils.format(params.get("act-datafinevera"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
+                    date = Utils.convert(dataFine);
+                }
+                // Data fine effettiva
+                pst.setDate(++nextParam, date); // non accetta una data italiana, ma java.sql.Date
+                // Data fine non deve essere minore di Data inizio
+                if (dataInizio.compareTo(dataFine) > NOTHING) {
+                    throw new WebStorageException("La data di fine effettiva attivita\' e\' minore di quella di inizio effettiva attivita\'.\n");
+                }
+                // Gestione giorni uomo previsti
+                Integer gu = null;
+                if (!params.get("act-guprevisti").equals(Utils.VOID_STRING)) {
+                    gu = new Integer(params.get("act-guprevisti"));
+                    // Giorni uomo previsti
+                    pst.setInt(++nextParam, gu);
+                } else {
+                    // Dato facoltativo non inserito
+                    pst.setNull(++nextParam, Types.NULL);
+                }
+                // Gestione giorni uomo effettivi
+                gu = null;
+                if (!params.get("act-gueffettivi").equals(Utils.VOID_STRING)) {
+                    gu = new Integer(params.get("act-gueffettivi"));
+                    // Giorni uomo effettivi
+                    pst.setInt(++nextParam, gu);
+                } else {
+                    // Dato facoltativo non inserito
+                    pst.setNull(++nextParam, Types.NULL);
+                }
+                // Gestione giorni uomo rimanenti
+                gu = null;
+                if (!params.get("act-gurimanenti").equals(Utils.VOID_STRING)) {
+                    gu = new Integer(params.get("act-gurimanenti"));
+                    // Giorni uomo rimanenti
+                    pst.setInt(++nextParam, gu);
+                } else {
+                    // Dato facoltativo non inserito
+                    pst.setNull(++nextParam, Types.NULL);
+                }
+                pst.setString(++nextParam, params.get("act-progress"));
+                pst.setBoolean(++nextParam, milestone);
+                //pst.setInt(++nextParam, idProj);
+                pst.setInt(++nextParam, Integer.parseInt(params.get("act-wbs")));
+                pst.setInt(++nextParam, Integer.parseInt(params.get("act-compl")));
+                pst.setInt(++nextParam, Integer.parseInt(params.get("act-status")));
+                // Campi automatici: id utente, ora ultima modifica, data ultima modifica
+                pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+                pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringe, ma un oggetto java.sql.Time
+                pst.setString(++nextParam, user.getCognome() + String.valueOf(Utils.BLANK_SPACE) + user.getNome());
+                // Where id = ?
+                pst.setInt(++nextParam, calculatedId);
+                // Query contestuale di aggiornamento in attivitagestione 
+                pst1 = con.prepareStatement(UPDATE_PERSON_ON_ACTIVITY);
+                pst1.clearParameters();
+                pst1.setInt(1, Integer.parseInt(params.get("act-people")));
+                pst1.setInt(2, Integer.parseInt(params.get("act-role")));
+                pst1.setInt(3, calculatedId);
+                pst.executeUpdate();
+                pst1.executeUpdate();
+                // End: <==
+                con.commit();
+            } catch (CommandException ce) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di date.\n" + ce.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, ce);
+            } catch (NumberFormatException nfe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di interi.\n" + nfe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, nfe);
+            } catch (ClassCastException cce) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di tipo.\n" + cce.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, cce);
+            } catch (ArrayIndexOutOfBoundsException aiobe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nello scorrimento di liste.\n" + aiobe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, aiobe);
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema in un puntamento a null.\n" + npe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, npe);
+            } catch (Exception e) {
+                String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, e);
             }
-        } catch (NotFoundException nfe) {
-            String msg = FOR_NAME + "Probabile problema nel puntamento alla HashMap dei parametri.\n";
-            LOG.severe(msg); 
-            throw new WebStorageException(msg + nfe.getMessage(), nfe);
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Si e\' tentato di accedere a un attributo di un bean obbligatorio ma non valorizzato.\n" + anve.getMessage();
+            LOG.severe(msg + "Probabile problema nel tentativo di recuperare l'id del bean di un progetto scrivibile dall\'utente.\n");
+            throw new WebStorageException(msg, anve);
+        } catch (NumberFormatException nfe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di interi.\n" + nfe.getMessage();
+            LOG.severe(msg);
+            throw new WebStorageException(msg, nfe);
         } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il progetto.\n";
+            String msg = FOR_NAME + "Oggetto ActivityBean non valorizzato; problema nel codice SQL.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        } catch (NumberFormatException nfe) {
-            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il progetto.\n";
-            LOG.severe(msg); 
-            throw new WebStorageException(msg + nfe.getMessage(), nfe);
-        } catch (Exception e) {
-            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il progetto.\n";
-            LOG.severe(msg); 
-            throw new WebStorageException(msg + e.getMessage(), e);
         } finally {
             try {
                 con.close();
@@ -1981,7 +2102,8 @@ public class DBWrapper implements Query {
         Connection con = null;
         PreparedStatement pst, pst1 = null;
         try {
-            /* ** Controlla per prima cosa che l'id progetto sulla querystring ** 
+            /* **         Controllo lato server sui diritti dell'utente.       ** 
+             * ** Controlla per prima cosa che l'id progetto sulla querystring ** 
              * ** corrisponda a un id dei progetti scrivibili dall'utente      **/
             // Ottiene la cardinalità della lista dei progetti precaricati 
             // quando l'utente si &egrave; loggato, uno dei quali deve 
@@ -2004,23 +2126,24 @@ public class DBWrapper implements Query {
             }            
             // Se siamo qui vuol dire che l'id del progetto su cui si deve aggiungere un'attività è scrivibile dall'utente
             con = pol_manager.getConnection();
+            // Deve fare un inserimento
             // Begin: ==>
             con.setAutoCommit(false);
             pst = con.prepareStatement(INSERT_ACTIVITY);
             pst.clearParameters();
              // Prepara i parametri per l'inserimento
             try {
-                // Ottiene l'id
-                int maxActId = getMax("attivita") + 1;
                 // Definisce un contatore per l'indice del parametro
                 int nextParam = 0;
+                // Ottiene l'id
+                int maxActId = getMax("attivita") + 1;
                 // Definisce un valore boolean in funzione del checkbox
                 boolean milestone = params.get("act-milestone").equals("on") ? true : false;
-                // id
+                // Id
                 pst.setInt(++nextParam, maxActId);
-               // nome
+                // Nome
                 pst.setString(++nextParam, params.get("act-name"));
-                // descrizione
+                // Descrizione
                 pst.setString(++nextParam, params.get("act-descr"));
                 // Controllo lato server sull'input delle date
                 java.util.Date dataInizio = Utils.format(params.get("act-datainizio"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
@@ -2029,13 +2152,13 @@ public class DBWrapper implements Query {
                 if (dataInizio.compareTo(dataFine) > NOTHING) {
                     throw new WebStorageException("La data di fine attivita\' e\' minore di quella di inizio attivita\'.\n");
                 }
-                // data inizio (obbligatoria)
+                // Data inizio (obbligatoria)
                 pst.setDate(++nextParam, Utils.convert(dataInizio)); // non accetta una data italiana, ma java.sql.Date
-                // data fine (obbligatoria)
+                // Data fine (obbligatoria)
                 pst.setDate(++nextParam, Utils.convert(dataFine)); // non accetta una data gg/mm/aaaa, ma java.sql.Date
-                // campo residuale
+                // Campo residuale
                 pst.setDate(++nextParam, null);
-                // campo residuale
+                // Campo residuale
                 pst.setDate(++nextParam, null);   
                 // Gestione delle date facoltative
                 java.sql.Date date = null;
@@ -2043,7 +2166,7 @@ public class DBWrapper implements Query {
                     dataInizio = Utils.format(params.get("act-datainiziovera"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
                     date = Utils.convert(dataInizio);
                 }
-                // data inizio effettiva
+                // Data inizio effettiva
                 pst.setDate(++nextParam, date); // non accetta una data italiana, ma java.sql.Date
                 date = null;
                 if (params.get("act-datafinevera") != null) {
