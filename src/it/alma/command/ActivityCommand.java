@@ -158,8 +158,10 @@ public class ActivityCommand extends ItemBean implements Command {
         DBWrapper db = null;
         // Parser per la gestione assistita dei parametri di input
         ParameterParser parser = new ParameterParser(req);
-        // Dichiara la pagina a cui reindirizzare
+        // Dichiara la pagina a cui inoltrare
         String fileJspT = null;
+        // Dichiara URL a cui reindirizzare
+        String redirect = null;
         // Flag per decidere se mostrare l'header
         boolean isHeader = true;
         // Flag per decidere se mostrare il footer
@@ -275,55 +277,62 @@ public class ActivityCommand extends ItemBean implements Command {
                             loadParams(part, parser, params);
                             isHeader = isFooter = false;
                             db.insertActivity(idPrj, user, writablePrj, params.get(Query.ADD_ACTIVITY_TO_PROJECT));
+                            redirect = "q=" + Query.PART_ACTIVITY + "&id=" + idPrj;
                         } else if (part.equalsIgnoreCase(Query.MODIFY_PART)) {
                             /* ************************************************ *
                              *             UPDATE Which One Activity            *
                              * ************************************************ */
                             loadParams(part, parser, params);
                             //Vector<ProjectBean> userWritableProjects = db.getProjects(user.getId(), Query.GET_WRITABLE_PROJECTS_ONLY);
-                            db.updateActivity(idPrj, user, writableProjects, userWritableActivitiesByProjectId, params);
+                            db.updateActivity(idPrj, user, writablePrj, userWritableActivitiesByProjectId, params.get(Query.MODIFY_PART));
+                            redirect = "q=" + Query.PART_ACTIVITY + "&id=" + idPrj;
                         }
 
                         // Aggiorna i progetti, le attività dell'utente in sessione
                         //ses.removeAttribute("writableProjects");
                         ses.removeAttribute("writableActivity");
                         //ses.setAttribute("writableProjects", userWritableProjects);
-                        ses.setAttribute("writableActivity", userWritableActivitiesByProjectId);
-                    }
-                    /* **************************************************** *
-                     *                 SELECT Activity Part                 *
-                     * **************************************************** */
-                    if (part.equals(Query.PART_PROJECT_CHARTER_MILESTONE)) {
-                        // Recupera le Milestones
-                        vActivities = db.getActivities(idPrj);
-                        //TODO: CAMBIARE IL METODO CON:  db.getActivities(idPrj, user, ONLY_MILESTONES);
-                    } else if (part.equals(Query.ADD_ACTIVITY_TO_PROJECT)) {
-                        // Effettua le selezioni che servono all'inserimento di una nuova attività
-                        isHeader = isFooter = false;
-                        candidates = db.getPeople(runtimeProject.getId());
-                        workPackage = db.getWbs(runtimeProject.getId(), Query.WBS_ONLY_WP); 
-                        complexity = HomePageCommand.getComplessita();
-                        states = HomePageCommand.getStatiAttivita();
-                        today = Utils.convert(Utils.getCurrentDate());
-                    } else if (part.equals(Query.MODIFY_PART)) {
-                        // Se siamo qui (p=mod) e l'id dell'attività non è significativo c'è qualcosa che non va...
-                        if (idAct == Utils.DEFAULT_ID) {
-                            HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
-                            ses.invalidate();
-                            String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id attivita\' non valida!.\n";
-                            LOG.severe(msg + "E\' presente il parametro \'p=mod\' ma non un valore \'ida\' - cioe\' id attivita\' - significativo!\n");
-                            throw new CommandException("Attenzione: indirizzo richiesto non valido!\n");
+                        LinkedHashMap<Integer, Vector<ActivityBean>> userWritableActivitiesByProject = new LinkedHashMap<Integer, Vector<ActivityBean>>();
+                        Integer key = new Integer(idPrj);
+                        Vector<ActivityBean> userWritableActivities = db.getActivities(idPrj);
+                        userWritableActivitiesByProject.put(key, userWritableActivities);
+                        ses.setAttribute("writableActivity", userWritableActivitiesByProject);
+                    } else {
+                        /* **************************************************** *
+                         *                 SELECT Activity Part                 *
+                         * **************************************************** */
+                        if (part.equals(Query.PART_PROJECT_CHARTER_MILESTONE)) {
+                            // Recupera le Milestones
+                            vActivities = db.getActivities(idPrj);
+                            //TODO: CAMBIARE IL METODO CON:  db.getActivities(idPrj, user, ONLY_MILESTONES);
+                        } else if (part.equals(Query.ADD_ACTIVITY_TO_PROJECT)) {
+                            // Effettua le selezioni che servono all'inserimento di una nuova attività
+                            isHeader = isFooter = false;
+                            candidates = db.getPeople(runtimeProject.getId());
+                            workPackage = db.getWbs(runtimeProject.getId(), Query.WBS_ONLY_WP); 
+                            complexity = HomePageCommand.getComplessita();
+                            states = HomePageCommand.getStatiAttivita();
+                            today = Utils.convert(Utils.getCurrentDate());
+                        } else if (part.equals(Query.MODIFY_PART)) {
+                            // Se siamo qui (p=mod) e l'id dell'attività non è significativo c'è qualcosa che non va...
+                            if (idAct == Utils.DEFAULT_ID) {
+                                HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
+                                ses.invalidate();
+                                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id attivita\' non valida!.\n";
+                                LOG.severe(msg + "E\' presente il parametro \'p=mod\' ma non un valore \'ida\' - cioe\' id attivita\' - significativo!\n");
+                                throw new CommandException("Attenzione: indirizzo richiesto non valido!\n");
+                            }
+                            // Effettua le selezioni che servono all'aggiornamento di una data attività
+                            isHeader = isFooter = false;
+                            activity = db.getActivity(idPrj, idAct, user);
+                            candidates = db.getPeople(runtimeProject.getId());
+                            workPackage = db.getWbs(runtimeProject.getId(), Query.WBS_ONLY_WP);
+                            complexity = HomePageCommand.getComplessita();
+                            states = HomePageCommand.getStatiAttivita();
+                            today = Utils.convert(Utils.getCurrentDate());
                         }
-                        // Effettua le selezioni che servono all'aggiornamento di una data attività
-                        isHeader = isFooter = false;
-                        activity = db.getActivity(idPrj, idAct, user);
-                        candidates = db.getPeople(runtimeProject.getId());
-                        workPackage = db.getWbs(runtimeProject.getId(), Query.WBS_ONLY_WP);
-                        complexity = HomePageCommand.getComplessita();
-                        states = HomePageCommand.getStatiAttivita();
-                        today = Utils.convert(Utils.getCurrentDate());
+                        fileJspT = nomeFile.get(part);
                     }
-                    fileJspT = nomeFile.get(part);
                 } else {
                     // Se il parametro 'p' non è presente, deve solo mostrare l'elenco delle attività 
                     vActivities = db.getActivities(idPrj);
@@ -401,6 +410,9 @@ public class ActivityCommand extends ItemBean implements Command {
             // Attività che l'utente vul visualizzare nei dettagli, e/o modificare
             req.setAttribute("singolaAttivita", activity);
         }
+        if (redirect != null) {
+            req.setAttribute("redirect", redirect);
+        }
     }
     
     
@@ -439,10 +451,11 @@ public class ActivityCommand extends ItemBean implements Command {
         /* **************************************************** *
          *           Ramo di INSERT di una Attivita'            *
          * **************************************************** */
-        else if (part.equalsIgnoreCase(Query.ADD_ACTIVITY_TO_PROJECT)) {
+        else if (part.equalsIgnoreCase(Query.ADD_ACTIVITY_TO_PROJECT) || part.equalsIgnoreCase(Query.MODIFY_PART)) {
             GregorianCalendar date = Utils.getUnixEpoch();
             String dateAsString = Utils.format(date, Query.DATA_SQL_PATTERN);
             HashMap<String, String> act = new HashMap<String, String>();
+            act.put("act-id",           parser.getStringParameter("act-id", Utils.VOID_STRING));
             act.put("act-name",         parser.getStringParameter("act-name", Utils.VOID_STRING));
             act.put("act-descr",        parser.getStringParameter("act-descr", null));
             act.put("act-datainizio",       parser.getStringParameter("act-datainizio", dateAsString));
@@ -460,6 +473,7 @@ public class ActivityCommand extends ItemBean implements Command {
             act.put("act-compl",        parser.getStringParameter("act-compl", Utils.VOID_STRING));
             act.put("act-status",       parser.getStringParameter("act-status", Utils.VOID_STRING));
             formParams.put(Query.ADD_ACTIVITY_TO_PROJECT, act);
+            formParams.put(Query.MODIFY_PART, act);
         }
     }
     
