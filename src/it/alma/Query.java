@@ -993,18 +993,18 @@ public interface Query extends Serializable {
      * (tranne nella clausola WHERE dove il question mark sta ad indicare 
      * l'id dell'attivit&agrave; da modificare).</p>
      * <p>Ho considerato che nella tabella <code>attivita</code> 
-     * i seguenti attributi non possono essere modificati: <br />
-     *      - id<br />
-     *      - id_progetto<br />
-     *      - id_wbs<br />
-     *      - id_complessita<br />
-     *      - id_stato<br />
-     *      - id_ruolo<br />
-     *      - id_persona<br />
-     * Se potessero essere modificati, baster&agrave; aggiungere 
-     * la stringa da settare.</p>
+     * i seguenti attributi non possono essere modificati:
+     * <ul>
+     * <li>id</li>
+     * <li>id_progetto</li>
+     * </ul>
+     * I seguenti campi devono essere modificati in altra relazione:
+     * <ul>
+     * <li>id_ruolo</li>
+     * <li>id_persona</li>
+     * </ul></p>
      */
-    public static final String UPDATE_ATTIVITA = 
+    public static final String UPDATE_ACTIVITY = 
             "UPDATE attivita" +
             "   SET     nome = ?" +
             "   ,       descrizione = ?" + 
@@ -1019,8 +1019,24 @@ public interface Query extends Serializable {
             "   ,       gurimanenti = ?" + 
             "   ,       noteavanzamento = ?" + 
             "   ,       milestone = ?" + 
+          //"   ,       id_progetto = ?" +
+            "   ,       id_wbs = ?" +
+            "   ,       id_complessita = ?" +
+            "   ,       id_stato = ?" +
+            "   ,       dataultimamodifica = ?" +
+            "   ,       oraultimamodifica = ?" +
+            "   ,       autoreultimamodifica = ?" +
             "   WHERE id = ?";
 
+    /**
+     * <p>Query per aggiornamento di persona su una attivit&agrave;.</p>
+     */
+    public static final String UPDATE_PERSON_ON_ACTIVITY = 
+            "UPDATE attivitagestione" +
+            "   SET     id_persona  = ?" +
+            "   ,       id_competenza = ?" +
+            "   WHERE id_attivita = ?";
+    
     /**
      * <p>Modifica la tupla della tabella attivit&agrave; identificata dall'id, 
      * che &egrave; passato come parametro.</p>
