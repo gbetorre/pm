@@ -539,15 +539,20 @@ public class Main extends HttpServlet {
      * @param fileJspT pagina JSP a cui puntare nell'inoltro
      * @throws ServletException se si verifica un'eccezione nella redirezione
      * @throws IOException se si verifica un problema di input/output
+     * @throws IllegalStateException se la Response era committata o se un URL parziale e' fornito e non puo' essere convertito in un URL valido (v. {@link HttpServletResponse#sendRedirect(String)})
      */
     private void flush(HttpServletRequest req,
                        HttpServletResponse res,
                        String fileJspT) 
                 throws ServletException, 
-                       IOException {
-        final RequestDispatcher rd = getServletContext().getRequestDispatcher(fileJspT + "?" + req.getQueryString());
-        rd.forward(req, res);
-        return;
+                       IOException,
+                       IllegalStateException {
+        if (req.getAttribute("redirect") == null) {
+            final RequestDispatcher rd = getServletContext().getRequestDispatcher(fileJspT + "?" + req.getQueryString());
+            rd.forward(req, res);
+            return;
+        }
+        res.sendRedirect(getServletContext().getInitParameter("appName") + "/?" + (String) req.getAttribute("redirect"));
     }
     
 }
