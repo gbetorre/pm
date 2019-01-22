@@ -210,3 +210,36 @@ body.loginbody {
 	font-weight: bold;
   color: maroon;
 }
+
+hr  {
+	clear: both; height: 1px;
+  border-top: 1px solid transparent;
+  border-right: 0 solid #FFFFFF;
+  border-bottom: 0 solid #FFFFFF;
+  border-left: 0 solid #FFFFFF;
+}
+
+hr.separatore {
+  height: 1px; 
+  border-style: none;
+  background-color: transparent; 
+  display: block; 
+  clear: both;  
+  margin-bottom: 10px;  
+  margin-top: 10px;
+}
+
+hr.hrclear {
+	margin: 0px; 
+	padding: 0px; 
+	clear: both;  
+	visibility: hidden;
+}
+
+hr.riga       {
+  clear: left;
+  margin: 15px 0px; 
+  border-top-width: 1px;
+  border-top-style: dotted;
+  border-top-color: #CCC;
+}
