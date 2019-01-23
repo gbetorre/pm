@@ -149,6 +149,10 @@ public interface Query extends Serializable {
      */
     public static final String MODIFY_PART                      = "mod";
     /**
+     * <p>Costante per il parametro identificante la parte di eliminazione di una entit&agrave;.</p>
+     */
+    public static final String DELETE_PART                      = "del";
+    /**
      * <p>Costante per il parametro identificante la pagina di inserimento di un rischio di un progetto.</p>
      */
     public static final String ADD_RISK_TO_PROJECT              = "addRisk";
@@ -347,7 +351,8 @@ public interface Query extends Serializable {
     		"		INNER JOIN persona P ON RG.id_persona = P.id" + 
     		"		INNER JOIN identita I ON P.id = I.id1_persona" + 
     		"		INNER JOIN usr U ON I.id0_usr = U.id" + 
-    		"	WHERE 	P.id = ?";
+    		"	WHERE 	P.id = ?" +
+    		"   ORDER BY PJ.titolo ASC";
     
     /**
      * <p>Estrae i progetti dell'utente avente <code>username</code> 
@@ -481,7 +486,23 @@ public interface Query extends Serializable {
             "   WHERE W.id = (SELECT " +
             "                        WF.id_wbs" + 
             "                 FROM wbs WF" + 
-            "                 WHERE WF.id = ?)";
+            "                 WHERE WF.id = ?)" + 
+            "   ORDER BY W.dataultimamodifica ASC";
+    
+    /**
+     * <p>Estrae le wbs figlie data una wbs padre, 
+     * identificata tramite l'id, passato come parametro.</p>
+     */
+    public static final String GET_WBS_FIGLIE = 
+            "SELECT " +
+            "       W.id            AS \"id\"" +
+            "   ,   W.nome          AS \"nome\"" +
+            "   ,   W.descrizione   AS \"descrizione\"" +
+            "   ,   W.workpackage   AS \"workPackage\"" + 
+            "   FROM wbs W" + 
+            "   WHERE W.id_progetto = ?" +
+            "       AND W.id_wbs = ?" + 
+            "   ORDER BY W.dataultimamodifica ASC"; 
     
     /**
      * <p>Estrae le wbs che non sono workpackage di un progetto,
@@ -494,7 +515,8 @@ public interface Query extends Serializable {
             "   ,   W.descrizione   AS \"descrizione\"" + 
             "   FROM wbs W" +
             "   WHERE W.id_progetto = ?" +
-            "     AND W.workpackage = false";
+            "     AND W.workpackage = false" + 
+            "   ORDER BY W.dataultimamodifica ASC";
     
     /**
      * <p>Estrae le wbs relative ad un progetto, identificato tramite id, passato come parametro</p>
@@ -506,7 +528,8 @@ public interface Query extends Serializable {
             "   ,   W.descrizione   AS \"descrizione\"" + 
             "   ,   W.workpackage   AS \"workPackage\"" + 
             "   FROM wbs W" +
-            "   WHERE id_progetto = ?";
+            "   WHERE W.id_progetto = ?" + 
+            "   ORDER BY W.dataultimamodifica ASC";
     
     /**
      * <p>Estrae i workpackage relative ad un progetto, identificato tramite id, passato come parametro</p>
@@ -519,7 +542,8 @@ public interface Query extends Serializable {
             "   ,   W.workpackage   AS \"workPackage\"" + 
             "   FROM wbs W" +
             "   WHERE id_progetto = ?" +
-            "     AND W.workpackage = true";
+            "     AND W.workpackage = true" +
+            "   ORDER BY W.dataultimamodifica ASC";
     
     /**
      * <p>Estrae tutte le persone che hanno un (qualsivoglia) ruolo 
@@ -707,7 +731,37 @@ public interface Query extends Serializable {
             "   ,   A.noteavanzamento       AS  \"noteAvanzamento\"" +
             "   ,   A.milestone             AS  \"milestone\"" +
             "   FROM attivita A" + 
-            "   WHERE id_progetto = ?";
+            "   WHERE id_progetto = ?" +
+            "   ORDER BY A.dataultimamodifica ASC";
+    
+    /**
+     * <p>Estrae le attivit&agrave; di una specifica WBS,
+     * identificata tramite id, passato come parametro, relativa ad 
+     * un progetto, identificato tramite id, passato come parametro.</p>
+     */
+    public static final String GET_ACTIVITIES_OF_WBS =
+            "SELECT " + 
+            "       A.id                    AS  \"id\"" + 
+            "   ,   A.nome                  AS  \"nome\"" + 
+            "   ,   A.descrizione           AS  \"descrizione\"" + 
+            "   ,   A.datainizio            AS  \"dataInizio\"" + 
+            "   ,   A.datafine              AS  \"dataFine\"" + 
+            "   ,   A.datainizioattesa      AS  \"dataInizioAttesa\"" + 
+            "   ,   A.datafineattesa        AS  \"dataFineAttesa\"" + 
+            "   ,   A.datainizioeffettiva   AS  \"dataInizioEffettiva\"" + 
+            "   ,   A.datafineeffettiva     AS  \"dataFineEffettiva\"" + 
+            "   ,   A.guprevisti            AS  \"guPrevisti\"" + 
+            "   ,   A.gueffettivi           AS  \"guEffettivi\"" + 
+            "   ,   A.gurimanenti           AS  \"guRimanenti\"" + 
+            "   ,   A.noteavanzamento       AS  \"noteAvanzamento\"" + 
+            "   ,   A.milestone             AS  \"milestone\"" + 
+            "   ,   A.id_wbs                AS  \"idWbs\"" + 
+            "   ,   A.id_stato              AS  \"idStato\"" + 
+            "   ,   A.id_complessita        AS  \"idComplessita\"" + 
+            "   FROM attivita A" + 
+            "   WHERE id_progetto = ?" + 
+            "     AND id_wbs = ?" +
+            "   ORDER BY A.dataultimamodifica ASC";;
     
     /**
      * <p>Estrae l'attivit&agrave; specificata tramite id 
@@ -813,7 +867,8 @@ public interface Query extends Serializable {
             "   ,   R.livello       AS \"livello\"" +
             "   ,   R.stato         AS \"stato\"" +
             "   FROM rischio R" +
-            "   WHERE id_progetto = ?";
+            "   WHERE id_progetto = ?" +
+            "   ORDER BY R.descrizione ASC";
     
     
     /**
@@ -1345,6 +1400,25 @@ public interface Query extends Serializable {
      * ************************************************************************ *
      *                       4.  Query di eliminazione                          *
      * ************************************************************************ */
+    /**
+     * <p>Esegue una eliminazione logica di una WBS, identificata tramite id, 
+     * passato come parametro, dal progetto a cui appartiene.</p>
+     */
+    public String DELETE_WBS = 
+            "UPDATE wbs" +
+            "   SET id_progetto = ?" +
+            "   WHERE id = ?";
+    
+    /**
+     * <p>Estrae il primo progetto con id negativo, dato in input l'id del dipartimento.</p>
+     */
+    public String GET_PROJECT_FROM_ID_DIPART = 
+            "SELECT " +
+            "   P.id    AS \"id\"" +
+            "   FROM progetto P" + 
+            "   WHERE P.id_dipart = ?" +
+            "       AND P.id < 0";
+    
     
     /* ************************************************************************ *
      *                                   QOL                                    *
