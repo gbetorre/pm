@@ -68,7 +68,7 @@
           </div>
           <div class="col-2">
             <span class="float-right">
-              <a class="btn btn-primary" href="${project}${p.id}">Torna all'elenco progetti</a>
+              <a class="btn btn-primary" href="${project}">Torna all'elenco progetti</a>
             </span>
           </div>
         </div>

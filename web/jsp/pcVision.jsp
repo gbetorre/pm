@@ -8,54 +8,54 @@
   </c:if>
 </c:forTokens>
     <form id="pcvision_form" name="pcv" action="#" method="post">
-    	<ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
-     		<li class="nav-item"><a class="nav-link active tabactive" data-toggle="tab" href="#">Vision</a></li>
-     		<li class="nav-item"><a class="nav-link" data-toggle="tab" href="${stakeholder}${p.id}">Stakeholder</a></li>
-     		<li class="nav-item"><a class="nav-link" data-toggle="tab" href="${deliverable}${p.id}">Deliverable</a></li>
-     		<li class="nav-item"><a class="nav-link" data-toggle="tab" href="${risorse}${p.id}">Risorse</a></li>
-     		<li class="nav-item"><a class="nav-link" data-toggle="tab" href="${rischi}${p.id}">Rischi</a></li>
-     		<li class="nav-item"><a class="nav-link" data-toggle="tab" href="${vincoli}${p.id}">Vincoli</a></li>
-     		<li class="nav-item"><a class="nav-link" data-toggle="tab" href="${milestone}${p.id}">Milestone</a></li>
-    	</ul>
-    	<div class="tab-content responsive hidden-xs hidden-sm">
-  		  <div role="tabpanel" class="tab-pane active" id="tab-pcvision">
-  		    <label for="pcv-situazione">Situazione attuale</label>
-    		<br>
-    		<textarea id="pcv-situazione" name="pcv-situazione" class="form-control" aria-label="With textarea" maxlength="1024" readonly>${p.situazioneAttuale}</textarea>
-            <div class="charNum"></div>
-            <br><br>
-  		    <label for="pcv-descrizione">Descrizione del Progetto</label>
-    		<br>
-    		<textarea id="pcv-descrizione" name="pcv-descrizione" class="form-control" aria-label="With textarea" maxlength="8104" readonly>${p.descrizione}</textarea>
-    		<div class="charNum"></div>
-            <br><br>
-  		    <label for="pcv-obiettivi">Obiettivi misurabili di Progetto</label>
-    		<br>
-    		<textarea id="pcv-obiettivi" name="pcv-obiettivi" class="form-control" aria-label="With textarea" maxlength="1024" readonly>${p.obiettiviMisurabili}</textarea>
-    		<div class="charNum"></div>
-            <br><br>
-  		    <label for="pcv-minacce">Minacce</label>
-    		<br>
-    		<textarea id="pcv-minacce" name="pcv-minacce" class="form-control" aria-label="With textarea" maxlength="1024" readonly>${p.minacce}</textarea>
-    		<div class="charNum"></div>
-            <br><br>
-            <div id="container-fluid">
-              <div class="row">
-                <div class="col-2">
-                  <span class="float-left">
-                    <a class="btn btn-primary" href="${project}${p.id}">Torna all'elenco progetti</a>
-                  </span>
-                </div>
-                <div class="col-8 text-center">
-                  <%@ include file="subPanel.jspf" %>
-                </div>
-                <div class="col-2">
-                  <span class="float-right">
-              		  <a class="btn btn-primary" href="${stakeholder}${p.id}">Avanti &gt;</a>
-                  </span>
-                </div>
+  	<ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
+   		<li class="nav-item"><a class="nav-link active tabactive" data-toggle="tab" href="#">Vision</a></li>
+   		<li class="nav-item"><a class="nav-link" data-toggle="tab" href="${stakeholder}${p.id}">Stakeholder</a></li>
+   		<li class="nav-item"><a class="nav-link" data-toggle="tab" href="${deliverable}${p.id}">Deliverable</a></li>
+   		<li class="nav-item"><a class="nav-link" data-toggle="tab" href="${risorse}${p.id}">Risorse</a></li>
+   		<li class="nav-item"><a class="nav-link" data-toggle="tab" href="${rischi}${p.id}">Rischi</a></li>
+   		<li class="nav-item"><a class="nav-link" data-toggle="tab" href="${vincoli}${p.id}">Vincoli</a></li>
+   		<li class="nav-item"><a class="nav-link" data-toggle="tab" href="${milestone}${p.id}">Milestone</a></li>
+  	</ul>
+  	<div class="tab-content responsive hidden-xs hidden-sm">
+  	  <div role="tabpanel" class="tab-pane active" id="tab-pcvision">
+  	    <label for="pcv-situazione">Situazione attuale</label>
+  		<br>
+  		<textarea id="pcv-situazione" name="pcv-situazione" class="form-control" aria-label="With textarea" maxlength="1024" readonly>${p.situazioneAttuale}</textarea>
+          <div class="charNum"></div>
+          <br><br>
+  	    <label for="pcv-descrizione">Descrizione del Progetto</label>
+  		<br>
+  		<textarea id="pcv-descrizione" name="pcv-descrizione" class="form-control" aria-label="With textarea" maxlength="8104" readonly>${p.descrizione}</textarea>
+  		<div class="charNum"></div>
+          <br><br>
+  	    <label for="pcv-obiettivi">Obiettivi misurabili di Progetto</label>
+  		<br>
+  		<textarea id="pcv-obiettivi" name="pcv-obiettivi" class="form-control" aria-label="With textarea" maxlength="1024" readonly>${p.obiettiviMisurabili}</textarea>
+  		<div class="charNum"></div>
+          <br><br>
+  	    <label for="pcv-minacce">Minacce</label>
+  		<br>
+  		<textarea id="pcv-minacce" name="pcv-minacce" class="form-control" aria-label="With textarea" maxlength="1024" readonly>${p.minacce}</textarea>
+  		<div class="charNum"></div>
+          <br><br>
+          <div id="container-fluid">
+            <div class="row">
+              <div class="col-2">
+                <span class="float-left">
+                  <a class="btn btn-primary" href="${project}">Torna all'elenco progetti</a>
+                </span>
+              </div>
+              <div class="col-8 text-center">
+                <%@ include file="subPanel.jspf" %>
+              </div>
+              <div class="col-2">
+                <span class="float-right">
+            		  <a class="btn btn-primary" href="${stakeholder}${p.id}">Avanti &gt;</a>
+                </span>
               </div>
             </div>
+          </div>
         </div>
       </div>
     </form>
@@ -101,4 +101,3 @@
         });
       });
   	</script>
-    
