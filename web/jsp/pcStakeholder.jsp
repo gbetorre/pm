@@ -26,25 +26,25 @@
     	<hr class="separatore" />
     	<div class="tab-content responsive hidden-xs hidden-sm">
     		<div role="tabpanel" class="tab-pane active" id="tab-pcstakeholder">
-    		<label for="pcs-chiave">Chiave</label>
+    		<label for="pcs-chiave">Chiave: gestire con cura (interesse alto e potere alto)</label>
     		<br>
     		<textarea name="pcs-chiave" class="form-control" aria-label="With textarea" maxlength="1024" readonly>${p.stakeholderChiave}</textarea>
     		<div class="charNum"></div>
             <br><br>
-    		<label for="pcs-istituzionale">Istituzionale</label>
+    		<label for="pcs-istituzionale">Istituzionale: mantenere soddisfatto (interesse basso e potere alto)</label>
     		<br>
     		<textarea name="pcs-istituzionale" class="form-control" aria-label="With textarea" maxlength="1024" readonly>${p.stakeholderIstituzionali}</textarea>
     		<div class="charNum"></div>
             <br><br>
-    		<label for="pcs-marginale">Marginale</label>
+            <label for="pcs-operativo">Operativo: tenere informati (interesse alto e potere basso)</label>
+            <br>
+            <textarea name="pcs-operativo" class="form-control" aria-label="With textarea" maxlength="1024" readonly>${p.stakeholderOperativi}</textarea>
+            <div class="charNum"></div> 
+            <br><br>
+    		<label for="pcs-marginale">Marginale: monitorare (interesse basso e potere basso)</label>
     		<br>
     		<textarea name="pcs-marginale" class="form-control" aria-label="With textarea" maxlength="1024" readonly>${p.stakeholderMarginali}</textarea>
     		<div class="charNum"></div>
-            <br><br>
-    		<label for="pcs-operativo">Operativo</label>
-    		<br>
-    		<textarea name="pcs-operativo" class="form-control" aria-label="With textarea" maxlength="1024" readonly>${p.stakeholderOperativi}</textarea>
-          	<div class="charNum"></div>	
             <br><br>
     		<div id="container-fluid">
               <div class="row">
@@ -67,7 +67,7 @@
             <div class="row">
               <div class="col-2">
                 <span class="float-left">
-                  <a class="btn btn-primary" href="${project}${p.id}">Torna all'elenco progetti</a>
+                  <a class="btn btn-primary" href="${project}">Torna all'elenco progetti</a>
                 </span>
               </div>
             </div>
