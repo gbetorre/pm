@@ -48,7 +48,7 @@ jQuery.validator.addMethod("greaterThan",
   }, 'Must be greater than {0}.'
 );
 
-function selectionEdit(element, onCloseCallback) {
+function selectionEdit(element) {
   if(!$("input[type='radio']").is(":checked")) {
     alert("E' necessario selezionare una " + element + " da modificare!");
     return false;
@@ -62,4 +62,29 @@ function selectionEdit(element, onCloseCallback) {
     //  }
     //});
   };
+}
+
+function selectionDelete(element) {
+  if(!$("input[type='radio']").is(":checked")) {
+    alert("E' necessario selezionare una " + element + " da eliminare!");
+    return false;
+    //$('<div></div>').html("E' necessario selezionare una " + element + " da modificare!").dialog({
+    //  title: "Attenzione!!!",
+    //  resizable: false,
+    //  buttons: {
+    //    'Ok': function()  {
+    //        $( this ).dialog( 'close' );
+    //    }
+    //  }
+    //});
+  };
+}
+
+function confirmSubmit() {
+  if ($("input[name='wbs-select']:checked").length) {
+    var $radioValue = $("input[name='wbs-select']:checked").val();
+    return confirm("Sei sicuro di voler eliminare la wbs " + $radioValue + "?");
+  }
+  alert("Devi selezionare una wbs da eliminare");
+  return false;
 }
