@@ -1,7 +1,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <c:url var="project" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="pol" />
-  <c:param name="id" value="" />
 </c:url>
 <c:url var="progetto" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="pol" />
