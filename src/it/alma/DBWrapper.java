@@ -859,9 +859,8 @@ public class DBWrapper implements Query {
                 statiTemp.setInformativa(statoString.toString());
                 statiTemp.setOrdinale(ordinal++);
                 stati.put(statoString.toString(), statiTemp);
-                // Settaggio degli stati nel bean status
-                status.setStati(stati);
             }
+            status.setStati(stati);
             return status;
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto StatusBean non valorizzato; problema nella query dello status piu\' prossimo alla data passata come argomento.\n";
@@ -947,8 +946,7 @@ public class DBWrapper implements Query {
     }
     
     
-    /**
-     * <p>Restituisce un oggetto Vector&lt;ActivityBean&gt; contenente tutte le attivit&agrave; 
+    /** <p>Restituisce un oggetto Vector&lt;ActivityBean&gt; contenente tutte le attivit&agrave; 
      * che appartengono ad una WBS, identificata tramite id, passato come parametro, di un progetto, 
      * identificato tramite id, passato come parametro</p>
      * 
@@ -958,8 +956,8 @@ public class DBWrapper implements Query {
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
      */
     public Vector<ActivityBean> getActivitiesOfWbs(int idWbs,
-                                                   int idProj)
-                                            throws WebStorageException {
+                                                  int idProj)
+                                           throws WebStorageException {
         ResultSet rs = null;
         Connection con = null;
         PreparedStatement pst = null;
@@ -995,6 +993,77 @@ public class DBWrapper implements Query {
             }
         }
     }
+       
+    
+    /**
+     * <p>Restituisce un Vector di ActivityBean rappresentante le attivit&agrave; del progetto attuale</p>
+     * 
+     * @param projId  id del progetto di cui estrarre le attivit&agrave;
+     * @return <code>Vector&lt;AttvitaBean&gt;</code> - ActivityBean rappresentante l'attivit&agrave; del progetto.
+     * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
+     */
+    @SuppressWarnings({ "null" })
+    public Vector<ActivityBean> getActivities(int projId,
+                                              PersonBean user,
+                                              boolean getAll) 
+                                       throws WebStorageException {
+        ResultSet rs, rs1 = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        ActivityBean attivita = null;
+        PersonBean person = null;
+        Vector<ActivityBean> activities = new Vector<ActivityBean>();
+        Vector<PersonBean> people = new Vector<PersonBean>();
+        try {
+            // La connessione è gestita dal finally
+            con = pol_manager.getConnection();
+            // Per prima cosa verifica che l'utente abbia i diritti di accesso al progetto
+            if (!userCanRead(projId, user.getId())) {
+                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id progetto non valido!.\n";
+                LOG.severe(msg + "E\' presente il parametro \"q=act\" ma non un valore \"id\" - cioe\' id progetto - significativo!\n");
+                throw new WebStorageException("Attenzione: indirizzo richiesto non valido!\n");
+            }
+            pst = con.prepareStatement(GET_ACTIVITIES);
+            pst.clearParameters();
+            pst.setInt(1, projId);
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                attivita = new ActivityBean();
+                BeanUtil.populate(attivita, rs);
+                pst = null;
+                pst = con.prepareStatement(GET_PEOPLE_ON_ACTIVITY);
+                pst.clearParameters();
+                pst.setInt(1, attivita.getId());
+                rs1 = pst.executeQuery();
+                while (rs1.next()) {
+                    person = new PersonBean();
+                    BeanUtil.populate(person, rs1);
+                    people.add(person);
+                }
+                attivita.setPersone(people);
+                activities.add(attivita);
+            }
+            return activities;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto ActivityBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
     
     
     /**
@@ -1006,7 +1075,7 @@ public class DBWrapper implements Query {
      * @param projId id del progetto di cui estrarre le attivit&agrave;
      * @param activityId id dell'attivit&agrave; che si vuol recuperare
      * @param user 
-     * @return <code>AttivitaBean</code> - ActivityBean rappresentante l'attivit&agrave; del progetto.
+     * @return <code>Vector&lt;AttvitaBean&gt;</code> - ActivityBean rappresentante l'attivit&agrave; del progetto.
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
      */
     @SuppressWarnings({ "null", "static-method" })
@@ -1306,15 +1375,15 @@ public class DBWrapper implements Query {
     
     
     /**
-     * <p>Restituisce un Vector&lt;WbsBean&gt; contenente tutte le WBS figlie
-     * che hanno come padre la WBS identificata tramite id, passato come parametro.</p>
-     * 
-     * @param idProj  id del progetto di cui caricare le wbs
-     * @param idWbs id della wbs padre
-     * @return Vector&lt;WbsBean&gt; - vector contenente tutte le WBS figlie
-     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
-     * 
-     */
+    * <p>Restituisce un Vector&lt;WbsBean&gt; contenente tutte le WBS figlie
+    * che hanno come padre la WBS identificata tramite id, passato come parametro.</p>
+    * 
+    * @param idProj  id del progetto di cui caricare le wbs
+    * @param idWbs id della wbs padre
+    * @return Vector&lt;WbsBean&gt; - vector contenente tutte le WBS figlie
+    * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
+    * 
+    */
     public Vector<WbsBean> getWbsFiglie (int idProj, 
                                          int idWbs) 
                                   throws WebStorageException {
@@ -1353,7 +1422,7 @@ public class DBWrapper implements Query {
             }
         }
     }
-    
+       
     
     /**
      * 
@@ -2203,30 +2272,21 @@ public class DBWrapper implements Query {
         Connection con = null;
         PreparedStatement pst, pst1 = null;
         try {
-            /* **         Controllo lato server sui diritti dell'utente.       ** 
-             * ** Controlla per prima cosa che l'id progetto sulla querystring ** 
-             * ** corrisponda a un id dei progetti scrivibili dall'utente      **/
-            // Ottiene la cardinalità della lista dei progetti precaricati 
-            // quando l'utente si &egrave; loggato, uno dei quali deve 
-            // corrispondere al progetto sul quale aggiungere un'attività
-            int lastIndexOf = projectsWritableByUser.size();
-            int index = 0;
-            do {
-                ProjectBean wp = projectsWritableByUser.elementAt(index);
-                // Se un id dei progetti scrivibili è uguale all'id sulla querystring è tutto ok 
-                if (wp.getId() == idProj) {
-                    break;
+            // Effettua la connessione
+            con = pol_manager.getConnection();
+            // Controlla anzitutto che l'id progetto sulla querystring corrisponda a un id dei progetti scrivibili dall'utente    
+            try {
+                if (!userCanWrite(idProj, projectsWritableByUser)) {
+                    String msg = FOR_NAME + "Attenzione: l'utente ha tentato di modificare un\'attivita\' legata ad un progetto su cui non ha i diritti di scrittura!\n";
+                    LOG.severe(msg + "Problema durante il tentativo di inserire una nuova attivita\'.\n");
+                    throw new WebStorageException(msg);
                 }
-                index++;
-            } while (index < lastIndexOf);
-            // In caso contrario, ovvero se abbiamo raggiunto la fine del Vector senza trovare l'id sulla querystring, sono guai...
-            if (index == lastIndexOf) {
-                String msg = FOR_NAME + "Attenzione: l'utente ha tentato di modificare un\'attivita\' legata ad un progetto su cui non ha i diritti di scrittura!\n";
+            } catch (WebStorageException wse) {
+                String msg = FOR_NAME + "Problema nel tentativo di capire se l\'utente ha o non ha i diritti di scrittura!\n";
                 LOG.severe(msg + "Problema durante il tentativo di inserire una nuova attivita\'.\n");
                 throw new WebStorageException(msg);
-            }            
+            }
             // Se siamo qui vuol dire che l'id del progetto su cui si deve aggiungere un'attività è scrivibile dall'utente
-            con = pol_manager.getConnection();
             // Deve fare un inserimento
             // Begin: ==>
             con.setAutoCommit(false);
@@ -2361,10 +2421,6 @@ public class DBWrapper implements Query {
                 LOG.severe(msg);
                 throw new WebStorageException(msg, t);
             }
-        } catch (AttributoNonValorizzatoException anve) {
-            String msg = FOR_NAME + "Si e\' tentato di accedere a un attributo di un bean obbligatorio ma non valorizzato.\n" + anve.getMessage();
-            LOG.severe(msg + "Probabile problema nel tentativo di recuperare l'id del bean di un progetto scrivibile dall\'utente.\n");
-            throw new WebStorageException(msg, anve);
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto ActivityBean non valorizzato; problema nel codice SQL.\n";
             LOG.severe(msg); 
@@ -2712,9 +2768,9 @@ public class DBWrapper implements Query {
      * @throws WebStorageException se si verifica un problema SQL o in qualche puntamento
      */
     @SuppressWarnings({ "static-method", "null" })
-    private boolean heIsInHere(int idProj,
-                               int idUser) 
-                        throws WebStorageException {
+    private boolean userCanRead(int idProj,
+                                int idUser) 
+                         throws WebStorageException {
         Connection con = null;
         PreparedStatement pst = null;
         ResultSet rs = null;
@@ -2723,6 +2779,7 @@ public class DBWrapper implements Query {
             pst = con.prepareStatement(IS_PEOPLE_ON_PROJECT);
             pst.clearParameters();
             pst.setInt(1, idProj);
+            pst.setInt(2, idUser);
             rs = pst.executeQuery();
             if (rs.next()) {
                 return true;
@@ -2744,5 +2801,67 @@ public class DBWrapper implements Query {
             }
         }
     }
+    
+    
+    /**
+     * <p>Dato in input un identificativo di progetto e un Vector
+     * di progetti scrivibili dall'utente, restituisce <code>true</code> 
+     * se il progetto avente tale id &egrave; presente in lista progetti, 
+     * <code>false</code> altrimenti.</p>
+     * 
+     * @param idProj identificativo del progetto di cui si vuol verificare la presenza tra quelli scrivibili dall'utente
+     * @param projectsWritableByUser lista dei progetti scrivibili dall'utente
+     * @return <code>boolean</code> - valore true se la persona e' presente, in qualsivoglia ruolo, false altrimenti
+     * @throws WebStorageException se si verifica un problema nel recupero dell'id di un progetto o in qualche puntamento
+     */
+    @SuppressWarnings({ "static-method", "null" })
+    private boolean userCanWrite(int idProj,
+                                 Vector<ProjectBean> projectsWritableByUser) 
+                          throws WebStorageException {
+        try {
+            /* **         Controllo lato server sui diritti dell'utente.       ** 
+             * ** Controlla per prima cosa che l'id progetto sulla querystring ** 
+             * ** corrisponda a un id dei progetti scrivibili dall'utente      **/
+            // Ottiene la cardinalità della lista dei progetti precaricati 
+            // quando l'utente si &egrave; loggato, uno dei quali deve 
+            // corrispondere al progetto sul quale aggiungere un'attività
+            int lastIndexOf = projectsWritableByUser.size();
+            int index = 0;
+            // Controllo sull'input
+            if (lastIndexOf == index) {
+                // E' stata passata una lista di "progetti scrivibili" di cardinalità zero!
+                String msg = FOR_NAME + "Si e\' tentato di utilizzare una lista di progetti scrivibili dall\'utente che non ha alcun progetto.\n";
+                LOG.severe(msg + "E\' stata passata una lista di \"progetti scrivibili\" di cardinalità zero!.\n");
+                throw new WebStorageException(msg);
+            }
+            do {
+                ProjectBean wp = projectsWritableByUser.elementAt(index);
+                // Se un id dei progetti scrivibili è uguale all'id sulla querystring è tutto ok 
+                if (wp.getId() == idProj) {
+                    return true;
+                }
+                index++;
+            } while (index < lastIndexOf);
+            // In caso contrario, ovvero se abbiamo raggiunto la fine del Vector senza trovare l'id sulla querystring, sono guai...
+            return false;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Si e\' tentato di accedere a un attributo di un bean obbligatorio ma non valorizzato.\n" + anve.getMessage();
+            LOG.severe(msg + "Probabile problema nel tentativo di recuperare l'id del bean di un progetto scrivibile dall\'utente.\n");
+            throw new WebStorageException(msg, anve);
+        } catch (ArrayIndexOutOfBoundsException aiobe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nello scorrimento di liste.\n" + aiobe.getMessage();
+            LOG.severe(msg);
+            throw new WebStorageException(msg, aiobe);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema in un puntamento a null.\n" + npe.getMessage();
+            LOG.severe(msg);
+            throw new WebStorageException(msg, npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
+            LOG.severe(msg);
+            throw new WebStorageException(msg, e);
+        }
+    }
+
     
 }
