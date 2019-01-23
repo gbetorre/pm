@@ -885,6 +885,114 @@ public class DBWrapper implements Query {
     
     
     /**
+     * <p>Restituisce un Vector di ActivityBean rappresentante le attivit&agrave; che 
+     * a qualunque titolo intersecano un range di date passate come argomento.</p>
+     * 
+     * @param idProj                id del progetto a cui appartiene lo status
+     * @param dataInizio            data di inizio dello status progetto
+     * @param dataFine              data di fine dello status progetto
+     * @return Vector$lt;ActivityBean&gt; - contenente la lista di attivit&agrave; richiesta
+     * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    public Vector<ActivityBean> getActivitiesByRange (int idProj,
+                                                      Date dataInizio, 
+                                                      Date dataFine) 
+                                               throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+        ActivityBean activity = null;
+        Vector<ActivityBean> vectorActivity = new Vector<ActivityBean>();
+        int nextParam = 0;
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_CURRENT_ACTIVITIES);
+            pst.clearParameters();
+            pst.setInt(++nextParam, idProj);
+            pst.setDate(++nextParam, Utils.convert(dataInizio));
+            pst.setDate(++nextParam, Utils.convert(dataFine));
+            pst.setDate(++nextParam, Utils.convert(dataInizio));
+            pst.setDate(++nextParam, Utils.convert(dataFine));
+            pst.setDate(++nextParam, Utils.convert(dataInizio));
+            pst.setDate(++nextParam, Utils.convert(dataFine));
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                activity = new ActivityBean();
+                BeanUtil.populate(activity, rs);
+                vectorActivity.add(activity);
+            }
+            return vectorActivity;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto ActivityBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce un Vector di ActivityBean rappresentante le attivit&agrave; che 
+     * hanno data di inizio compresa tra due date, passate come argomento.</p>
+     * 
+     * @param idProj                id del progetto a cui appartiene lo status
+     * @param dataInizio            data di inizio dello status progetto
+     * @param dataFine              data di fine dello status progetto
+     * @return Vector$lt;ActivityBean&gt; - contenente la lista di attivit&agrave; richiesta
+     * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    public Vector<ActivityBean> getActivitiesByDate (int idProj,
+                                                     Date dataInizio, 
+                                                     Date dataFine) 
+                                              throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        ResultSet rs= null;
+        ActivityBean activity = null;
+        Vector<ActivityBean> vectorActivity = new Vector<ActivityBean>();
+        int nextParam = 0;
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_ACTIVITIES_OF_NEXT_STATUS);
+            pst.clearParameters();
+            pst.setInt(++nextParam, idProj);
+            pst.setDate(++nextParam, Utils.convert(dataInizio));
+            pst.setDate(++nextParam, Utils.convert(dataFine));
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                activity = new ActivityBean();
+                BeanUtil.populate(activity, rs);
+                vectorActivity.add(activity);
+            }
+            return vectorActivity;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto ActivityBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
      * <p>Restituisce un Vector di ActivityBean rappresentante le attivit&agrave; del progetto attuale</p>
      * 
      * @param projId  id del progetto di cui estrarre le attivit&agrave;
@@ -1333,14 +1441,6 @@ public class DBWrapper implements Query {
                 break;
             default:
                 throw new WebStorageException("Query non selezionata dall'utente.\n");
-        }
-        // Controllo qual � la query da eseguire, in base alla richiesta dell'utente
-        if (getPartOfWbs == WBS_ALL) {
-            query = GET_WBS_BY_PROJECT;
-        } else if (getPartOfWbs == WBS_NOT_WP) {
-            query = GET_WBS_NOT_WORKPACKAGE;
-        } else if (getPartOfWbs == WBS_ONLY_WP) {
-            query = Query.GET_WP_BY_PROJECT;
         }
         try {
             // Ottiene il progetto precaricato quando l'utente si è loggato corrispondente al progetto sul quale aggiungere un'attività
