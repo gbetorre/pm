@@ -859,8 +859,9 @@ public class DBWrapper implements Query {
                 statiTemp.setInformativa(statoString.toString());
                 statiTemp.setOrdinale(ordinal++);
                 stati.put(statoString.toString(), statiTemp);
+                // Settaggio degli stati nel bean status
+                status.setStati(stati);
             }
-            status.setStati(stati);
             return status;
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto StatusBean non valorizzato; problema nella query dello status piu\' prossimo alla data passata come argomento.\n";
@@ -947,6 +948,56 @@ public class DBWrapper implements Query {
     
     
     /**
+     * <p>Restituisce un oggetto Vector&lt;ActivityBean&gt; contenente tutte le attivit&agrave; 
+     * che appartengono ad una WBS, identificata tramite id, passato come parametro, di un progetto, 
+     * identificato tramite id, passato come parametro</p>
+     * 
+     * @param idWbs identificativo della WBS 
+     * @param idProj identificativo del progetto corrente
+     * @return <code>Vector&lt;AttivitaBean&gt;</code> - Vector contenente la lista delle attivit&agrave; della WBS
+     * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
+     */
+    public Vector<ActivityBean> getActivitiesOfWbs(int idWbs,
+                                                   int idProj)
+                                            throws WebStorageException {
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        ActivityBean activity = null;
+        Vector<ActivityBean> activities = new Vector<ActivityBean>();
+        int nextParam = 0;
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_ACTIVITIES_OF_WBS);
+            pst.clearParameters();
+            pst.setInt(++nextParam, idProj);
+            pst.setInt(++nextParam, idWbs);
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                activity = new ActivityBean();
+                BeanUtil.populate(activity, rs);
+                activities.add(activity);
+            }
+            return activities;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto ActivityBean non valorizzato; problema nella query dell\'attivita\'.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
      * <p>Restituisce un oggetto ActivityBean rappresentante una attivit&agrave; 
      * che deve appartenere al progetto corrente - che a sua volta deve 
      * essere leggibile dall'utente - e avente identificativo 
@@ -955,7 +1006,7 @@ public class DBWrapper implements Query {
      * @param projId id del progetto di cui estrarre le attivit&agrave;
      * @param activityId id dell'attivit&agrave; che si vuol recuperare
      * @param user 
-     * @return <code>Vector&lt;AttvitaBean&gt;</code> - ActivityBean rappresentante l'attivit&agrave; del progetto.
+     * @return <code>AttivitaBean</code> - ActivityBean rappresentante l'attivit&agrave; del progetto.
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
      */
     @SuppressWarnings({ "null", "static-method" })
@@ -1237,6 +1288,56 @@ public class DBWrapper implements Query {
             }
             return vWbs;
         }  catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce un Vector&lt;WbsBean&gt; contenente tutte le WBS figlie
+     * che hanno come padre la WBS identificata tramite id, passato come parametro.</p>
+     * 
+     * @param idProj  id del progetto di cui caricare le wbs
+     * @param idWbs id della wbs padre
+     * @return Vector&lt;WbsBean&gt; - vector contenente tutte le WBS figlie
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
+     * 
+     */
+    public Vector<WbsBean> getWbsFiglie (int idProj, 
+                                         int idWbs) 
+                                  throws WebStorageException {
+        Connection con = null;
+        ResultSet rs = null;
+        PreparedStatement pst = null;
+        WbsBean wbs = null;
+        Vector<WbsBean> vectorWbs = new Vector<WbsBean>();
+        int nextParam = 0;
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_WBS_FIGLIE);
+            pst.clearParameters();
+            pst.setInt(++nextParam, idProj);
+            pst.setInt(++nextParam, idWbs);
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                wbs = new WbsBean();
+                BeanUtil.populate(wbs, rs);
+                vectorWbs.add(wbs);
+            }
+            return vectorWbs;
+        } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
@@ -2431,6 +2532,62 @@ public class DBWrapper implements Query {
             String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query di inserimento WBS.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + anve.getMessage(), anve);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /* ********************************************************** *
+     *                        Metodi di POL                       *
+    /* ********************************************************** *
+     *                    Metodi  di  ELIMINAZIONE                *
+     * ********************************************************** */
+    /** 
+     * <p>Metodo per fare una dereferenziazione di una wbs relativa al progetto.</p>
+     * 
+     * @param idWbs     identificativo della WBS da dereferenziare
+     * @param idDipart  identificativo del dipartimento al quale appartiene la WBS da eliminare
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    public void deleteWbs(int idDipart, 
+                          int idWbs)
+                   throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+        int nextParam = 0;
+        int idProj = 0;
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_PROJECT_FROM_ID_DIPART);
+            pst.clearParameters();
+            pst.setInt(++nextParam, idDipart);
+            rs = pst.executeQuery();
+            if (rs.next()) {
+                idProj = rs.getInt("id");
+            }
+            con.setAutoCommit(false);
+            pst = null;
+            nextParam = 0;
+            pst = con.prepareStatement(DELETE_WBS);
+            pst.clearParameters();
+            pst.setInt(++nextParam, idProj);
+            pst.setInt(++nextParam, idWbs);
+            pst.executeUpdate();
+            con.commit();
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto idProj non valorizzato; problema nella query di eliminazione wbs.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
         } finally {
             try {
                 con.close();
