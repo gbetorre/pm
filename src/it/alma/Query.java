@@ -161,17 +161,37 @@ public interface Query extends Serializable {
      */
     public static final String ADD_SKILL_TO_PROJECT             = "addSkill";
     /**
-     * Costante identificante la query che tutte le WBS compresi i Workpackage
+     * <p>Costante identificante la query che estrae tutte le WBS compresi i Workpackage</p>
      */
     public static final int WBS_ALL = 1;
     /**
-     * Costante identificante la query che tutte le WBS esclusi i Workpackage
+     * <p>Costante identificante la query che estrae tutte le WBS esclusi i Workpackage</p>
      */
     public static final int WBS_NOT_WP = 2;
     /**
-     * Costante identificante la query che tutte le WBS che sono Workpackage
+     * <p>Costante identificante la query che estrae tutte le WBS che sono Workpackage</p>
      */
-    public static final int WBS_ONLY_WP = 3;  
+    public static final int WBS_ONLY_WP = 3;
+    /**
+     * <p>Costante identificante la query che estrae la WBS padre della WBS data</p>
+     */
+    public static final int WBS_PARENT_ONLY = 4;
+    /**
+     * <p>Costante identificante la query che estrae le WBS figlie della WBS data</p>
+     */
+    public static final int WBS_CHILDREN_ONLY = 5;
+    /**
+     * <p>Costante identificante la query che estrae le attivit&agrave; correnti nel periodo corrente di avanzamento progetto.</p>
+     */
+    public static final int ACT_GET_CURRENT_STATUS = 6;
+    /**
+     * <p>Costante identificante la query che estrae le attivit&agrave; correnti nel periodo prossimo di avanzamento progetto.</p>
+     */
+    public static final int ACT_GET_NEXT_STATUS = 7;
+    /**
+     * <p>Costante identificante la query che estrae le attivit&agrave; future rispetto al periodo corrente di avanzamento progetto.</p>
+     */
+    public static final int ACT_GET_FUTURE_ACTIVITIES = 8;
     /* ************************************************************************ *
      *   Enumerativi statici per incapsulare i valori di enumerativi dinamici   *
      * ************************************************************************ */
@@ -1033,7 +1053,56 @@ public interface Query extends Serializable {
             "   FROM avanzamentoprogetto AP " +
             "   WHERE AP.id_progetto = ?" +
             "   ORDER BY AP.datainizio";
-
+    
+    /**
+     * <p>Estrae le attivit&agrave; presenti nel periodo di avanzamento progetto corrente.</p>
+     */
+    public static final String GET_CURRENT_ACTIVITIES = 
+            "SELECT DISTINCT" +
+            "       A.id " +
+            "   FROM attivita A " +
+            "      INNER JOIN progetto P ON P.id = A.id_progetto " +
+            "   WHERE P.id = ? " +
+            "       AND ( " +
+            "                   (A.datainizio <= ? AND A.datafine >= ?) " +
+            "                OR (A.datainizio >= ? AND A.datafine <= ?) " +
+            "                OR (A.datainizio <= ? AND A.datafine >= ?)" +
+            "           )";
+    
+    /**
+     * <p>Estrae lo status di avanzamento di un progetto successivo, in ordine di datainizio, 
+     * a quello con datainizio passata come parametro.</p>
+     */
+    public static final String GET_NEXT_STATUS = 
+            "SELECT " +
+            "       AP.id                           AS \"id\"" +
+            "   ,   AP.datainizio                   AS \"dataInizio\"" + 
+            "   ,   AP.datafine                     AS \"dataFine\"" +
+            "   ,   AP.descrizioneavanzamento       AS \"descrizioneAvanzamento\"" +
+            "   ,   AP.dataultimamodifica           AS \"dataUltimaModifica\"" +
+            "   ,   AP.oraultimamodifica            AS \"oraUltimaModifica\"" +
+            "   ,   AP.autoreultimamodifica         AS \"autoreUltimaModifica\"" +
+            "   FROM    avanzamentoprogetto AP" +
+            "   WHERE AP.datainizio = (" +
+            "                           SELECT " +
+            "                               MIN(AP1.datainizio) " +
+            "                           FROM avanzamentoprogetto AP1 " +
+            "                           WHERE AP1.id_progetto = ? " +
+            "                               AND AP1.datainizio > ? "+
+            "                         )";
+    
+    /**
+     * <p>Estrae tutte le attivit&agrave; che avranno inizio nel periodo 
+     * di avanzamento progetto successivo a quello attuale, 
+     * identificato tramite data inizio, passata come parametro.</p>
+     */
+    public static final String GET_ACTIVITIES_OF_NEXT_STATUS = 
+            "SELECT DISTINCT " +
+            "       A.id " +
+            "   FROM attivita A " + 
+            "      INNER JOIN progetto P ON P.id = A.id_progetto " +
+            "   WHERE P.id = ? " +
+            "      AND (A.datainizio BETWEEN ? AND ?)";
     
     /* ************************************************************************ *
      *                               QUERY DI POL                               *
