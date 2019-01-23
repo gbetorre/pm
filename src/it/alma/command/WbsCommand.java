@@ -168,23 +168,25 @@ public class WbsCommand extends ItemBean implements Command {
         Vector<WbsBean> vWbs = new Vector<WbsBean>();
         // Dichiara elenco di wbs non workpackage
         Vector<WbsBean> wbs = new Vector<WbsBean>();
+        // Dichiara l'elenco di wbs figlie di una wbs
+        Vector<WbsBean> wbsOfWbs = new Vector<WbsBean>();
+        // Dichiara l'elenco delle attivit‡ di una wbs di tipo workpackage
+        Vector<ActivityBean> activitiesOfWbs = new Vector<ActivityBean>();
         // Dichiara la wbs richiesta dall'utente nel caso di modifica di una wbs
         WbsBean wbsInstance = null;
-        // Dichiara struttura di persone che possono essere aggiunte a un'attivit√†
-        //Vector<PersonBean> candidates = null;
-        // Dichiara struttura di Work Package cui pu√≤ essere aggiunta un'attivit√†
-        //Vector<WbsBean> workPackage = null;
-        // Dichiara lista di valori di complessit√†
-        //LinkedList<CodeBean> complexity = null;
         // Dichiara lista di valori di stati attivit√†
         LinkedList<CodeBean> states = null;
         // Data di oggi sotto forma di oggetto String
         String today = null;
+        // Variabile contenente l'indirizzo alla pagina di reindirizzamento
+        String redirect = null;
         /* ******************************************************************** *
          *                    Recupera parametri e attributi                    *
          * ******************************************************************** */
         // Recupera o inizializza 'id progetto'
         int idPrj = parser.getIntParameter("id", Utils.DEFAULT_ID);
+        // Recupera o inizializza 'id wbs' (per modifica=
+        int idWbs = parser.getIntParameter("idw", Utils.DEFAULT_ID);
         // Recupera o inizializza 'tipo pagina'   
         String part = parser.getStringParameter("p", "-");
         // Flag di scrittura
@@ -236,27 +238,27 @@ public class WbsCommand extends ItemBean implements Command {
             if (idPrj > Query.NOTHING) {
                 // Recupera in ogni caso il progetto richiesto dalla navigazione utente
                 runtimeProject = db.getProject(idPrj, user.getId());
-                // Verifica se Ë presente il parametro 'p'
-                if (nomeFile.containsKey(part)) {
-                    // Verifica se deve eseguire un'operazione di scrittura
-                    if (write) {
+                // Verifica se deve eseguire un'operazione di scrittura
+                if (write) {
+                    // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
+                    HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
+                    // Recupera i progetti su cui l'utente ha diritti di scrittura
+                    Vector<ProjectBean> writablePrj = (Vector<ProjectBean>) ses.getAttribute("writableProjects");
+                    // Se non ci sono progetti scrivibili e il flag "write" Ë true c'È qualcosa che non va...
+                    if (writablePrj == null) {
+                        String msg = FOR_NAME + "Il flag di scrittura e\' true pero\' non sono stati trovati progetti scrivibili: problema!.\n";
+                        LOG.severe(msg);
+                        throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
+                    }
+                    // Recupera dalla sessione le attivit√† su cui l'utente ha diritti di scrittura
+                    LinkedHashMap<Integer, Vector<WbsBean>> userWritableWbsByProjectId = (LinkedHashMap<Integer, Vector<WbsBean>>) ses.getAttribute("writableWbs");
+                    // Trasforma un Vector di progetti scrivibili dall'utente loggato in un dictionary degli stessi
+                    HashMap<Integer, ProjectBean> writableProjects = ProjectCommand.decant(writablePrj);
+                    // Controllo quale azione vuole fare l'utente
+                    if (nomeFile.containsKey(part)) {
                         // Creazione della tabella che conterr‡† i valori dei parametri passati dalle form
                         HashMap<String, HashMap<String, String>> params = new HashMap<String, HashMap<String, String>>();
                         loadParams(part, parser, params);
-                        // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
-                        HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
-                        // Recupera i progetti su cui l'utente ha diritti di scrittura
-                        Vector<ProjectBean> writablePrj = (Vector<ProjectBean>) ses.getAttribute("writableProjects");
-                        // Se non ci sono progetti scrivibili e il flag "write" Ë true c'È qualcosa che non va...
-                        if (writablePrj == null) {
-                            String msg = FOR_NAME + "Il flag di scrittura e\' true pero\' non sono stati trovati progetti scrivibili: problema!.\n";
-                            LOG.severe(msg);
-                            throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
-                        }
-                        // Recupera dalla sessione le attivit√† su cui l'utente ha diritti di scrittura
-                        LinkedHashMap<Integer, Vector<WbsBean>> userWritableWbsByProjectId = (LinkedHashMap<Integer, Vector<WbsBean>>) ses.getAttribute("writableWbs");
-                        // Trasforma un Vector di progetti scrivibili dall'utente loggato in un dictionary degli stessi
-                        HashMap<Integer, ProjectBean> writableProjects = ProjectCommand.decant(writablePrj);
                         // Controlla se deve effettuare un inserimento o un aggiornamento
                         if (part.equalsIgnoreCase(Query.MODIFY_PART)) {
                             /* ************************************************ *
@@ -264,36 +266,43 @@ public class WbsCommand extends ItemBean implements Command {
                              * ************************************************ */
                             loadParams(part, parser, params);
                             db.updateWbsPart(idPrj, user, writableProjects, userWritableWbsByProjectId, params);
+                            redirect = "q=" + Query.PART_WBS + "&id=" + idPrj;
                         } else if (part.equalsIgnoreCase(Query.ADD_TO_PROJECT)) {
                             /* ************************************************ *
                              *                  INSERT Wbs Part                 *
                              * ************************************************ */
                             loadParams(part, parser, params);
                             db.insertWbs(idPrj, user, params.get(Query.ADD_TO_PROJECT));
+                            redirect = "q=" + Query.PART_WBS + "&id=" + idPrj;
                         }
-                        // Aggiorna i progetti, le wbs† dell'utente in sessione
-                        //ses.removeAttribute("writableProjects");
-                        ses.removeAttribute("writableWbs");
-                        //ses.setAttribute("writableProjects", userWritableProjects);
-                        ses.setAttribute("writableWbs", userWritableWbsByProjectId);
+                    } else {
+                        // Deve eseguire una eliminazione
+                        /* ************************************************ *
+                         *                  DELETE Wbs Part                 *
+                         * ************************************************ */
+                        Integer idWbsToDel = Integer.parseInt(parser.getStringParameter("wbs-select",  Utils.VOID_STRING));
+                        wbsOfWbs = db.getWbsFiglie(idPrj, idWbsToDel);
+                        activitiesOfWbs = db.getActivitiesOfWbs(idWbsToDel, idPrj);
+                        if (activitiesOfWbs.isEmpty() && wbsOfWbs.isEmpty()) {
+                            db.deleteWbs(runtimeProject.getIdDipart(), idWbsToDel);
+                            redirect = "q=" + Query.PART_WBS + "&id=" + idPrj;
+                        }
                     }
-                    /* **************************************************** *
-                     *                   SELECT WBS Part                    *
-                     * **************************************************** */
-                    // Recupera eventuali campi dal Database
-                    if (part.equals(Query.MODIFY_PART)) {
-                        int idWbs = parser.getIntParameter("idw", Utils.DEFAULT_ID);
-                        today = Utils.format(Utils.getCurrentDate());
-                        wbsInstance = db.getWbsInstance(idPrj, idWbs);
-                        wbs = db.getWbs(idPrj, Query.WBS_NOT_WP);
-                    } else if (part.equals(Query.ADD_TO_PROJECT)) {
-                        wbs = db.getWbs(idPrj, Query.WBS_NOT_WP);
-                    }
-                    fileJspT = nomeFile.get(part);
                 } else {
-                    // Se il parametro 'p' non Ë presente, deve solo selezionare tutte le wbs
-                    vWbs = db.getWbs(idPrj, Query.WBS_ALL);
-                    fileJspT = nomeFileElenco;
+                    // Ramo di selezione
+                    if (nomeFile.containsKey(part)) {
+                        // Ramo per aggiunta e modifica wbs
+                        wbs = db.getWbs(idPrj, Query.WBS_NOT_WP);
+                        if (idWbs != Utils.DEFAULT_ID) {
+                            today = Utils.format(Utils.getCurrentDate());
+                            wbsInstance = db.getWbsInstance(idPrj, idWbs);
+                        }
+                        fileJspT = nomeFile.get(part);
+                    } else {
+                        // Se il parametro 'p' non Ë presente, deve solo selezionare tutte le wbs
+                        vWbs = db.getWbs(idPrj, Query.WBS_ALL);
+                        fileJspT = nomeFileElenco;
+                    }
                 }
             } else {
                 // Se siamo qui vuol dire che l'id del progetto non √® > zero, il che √® un guaio
@@ -343,12 +352,23 @@ public class WbsCommand extends ItemBean implements Command {
         req.setAttribute("wbs", wbs);
         // Imposta nella request la wbs richiesta dall'utente in fase di modifica di una wbs
         req.setAttribute("wbsInstance", wbsInstance);
+        // Imposta nella request l'elenco delle wbs che sono figlie di quella selezionata
+        req.setAttribute("wbsFiglie", wbsOfWbs);
+        // Imposta nella request l'elenco delle attivit‡ che appartengono alla wbs selezionata
+        req.setAttribute("attivitaWbs", activitiesOfWbs);
         // Imposta nella request elenco wbs associabili
         req.setAttribute("statiAttivita", states);
         // Imposta nella request data di oggi 
         req.setAttribute("now", today);
         // Imposta la Pagina JSP di forwarding
         req.setAttribute("fileJsp", fileJspT);
+        /* ******************************************************************** *
+         * Settaggi in request di valori facoltativi: attenzione, il passaggio  *
+         * di questi attributi e' condizionato al fatto che siano significativi *
+         * ******************************************************************** */
+        if (redirect != null) {
+            req.setAttribute("redirect", redirect);
+        }
     }
     
     
