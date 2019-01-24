@@ -188,6 +188,12 @@ public class ProjectCommand extends ItemBean implements Command {
         ArrayList<StatusBean> projectStatusList = new ArrayList<StatusBean>();
         // Dichiara l'avanzamento progetto più recente
         StatusBean projectStatus = null;
+        // Dichiara l'elenco delle attività presenti in un range di date
+        Vector<ActivityBean> activitiesByRange = null;
+        // Dichiara l'elenco delle attività con data inizio compresa tra due date
+        Vector<ActivityBean> activitiesByDate = null;
+        // Dichiara l'avanzamento progetto successivo a quello di partenza
+        StatusBean nextStatus = null;
         // Dichiara l'id massimo della tabella avanzamentoprogetto
         int newStatusId = -1;
         /* ******************************************************************** *
@@ -322,13 +328,25 @@ public class ProjectCommand extends ItemBean implements Command {
                             // Recupera uno specifico status di progetto a partire dalla sua data - assume UNIQUE(data, idProgetto)
                             projectStatus = db.getStatus(idPrj, dateProjectStatus);
                         }
+                        if (projectStatus != null) {
+                            // Recupera la lista di attività presenti in un range di date
+                            activitiesByRange = db.getActivitiesByRange(idPrj, projectStatus.getDataInizio(), projectStatus.getDataFine());
+                            nextStatus = db.getNextStatus(idPrj, projectStatus.getDataFine());
+                            if (nextStatus != null) {
+                                // Recupera la lista di attività con data inizio compresa tra due date
+                                activitiesByDate = db.getActivitiesByDate(idPrj, nextStatus.getDataInizio(), nextStatus.getDataFine());
+                            } else {
+                                // Recupera la lista di attività con data inizio nel futuro rispetto alla data di fine dello status attuale
+                                activitiesByDate = db.getActivities(idPrj, user, projectStatus.getDataFine(), false, true);
+                            }
+                        }
                     } else if (part.equals(Query.PART_PROJECT_CHARTER_RESOURCE)) {
                         vSkills = db.getSkills(idPrj);
                     } else if (part.contains(Query.PART_PROJECT_CHARTER_RISK)) {
                         vRisks = db.getRisks(idPrj);
-                    } else if(part.equals(Query.PART_WBS)) {
+                    } /*else if(part.equals(Query.PART_WBS)) {
                         vWBS = db.getWbs(idPrj, Query.WBS_ALL);
-                    }
+                    }*/
                 }
                 fileJspT = nomeFile.get(part);
             } else {
@@ -371,6 +389,10 @@ public class ProjectCommand extends ItemBean implements Command {
         req.setAttribute("statiValues", statiValues);
         // Salva nella request l'id massimo della tabella avanzamentoprogetto
         req.setAttribute("newStatusId", newStatusId);
+        // Salva nella request l'elenco delle attività presenti in un range di date
+        req.setAttribute("activitiesByRange", activitiesByRange);
+        // Salva nella request l'elenco delle attività con data inizio compresa tra due date
+        req.setAttribute("activitiesByDate", activitiesByDate);
         // Imposta la Pagina JSP di forwarding
         req.setAttribute("fileJsp", fileJspT);
     }
