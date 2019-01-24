@@ -859,8 +859,9 @@ public class DBWrapper implements Query {
                 statiTemp.setInformativa(statoString.toString());
                 statiTemp.setOrdinale(ordinal++);
                 stati.put(statoString.toString(), statiTemp);
+                // Settaggio degli stati nel bean status
+                status.setStati(stati);
             }
-            status.setStati(stati);
             return status;
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto StatusBean non valorizzato; problema nella query dello status piu\' prossimo alla data passata come argomento.\n";
@@ -870,6 +871,53 @@ public class DBWrapper implements Query {
             String msg = FOR_NAME + "Oggetto StatusBean non valorizzato; problema nella query dello status piu\' prossimo alla data passata come argomento.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + anve.getMessage(), anve);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce lo status di avanzamento progetto successivo a quello dato in input, 
+     * del quale viene passata la data di fine come parametro. </p>
+     * 
+     * @param idProj progetto richiesto dall'utente
+     * @param dataInizio data dopo la quale trovare lo status successivo
+     * @return StatusBean - contenente lo status successivo in ordine di dataInizio
+     * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
+     */
+    public StatusBean getNextStatus (int idProj, 
+                                     Date dataInizio) 
+                              throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+        StatusBean nextStatus = null;
+        int nextParam = 0;
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_NEXT_STATUS);
+            pst.clearParameters();
+            pst.setInt(++nextParam, idProj);
+            pst.setDate(++nextParam, Utils.convert(dataInizio));
+            rs = pst.executeQuery();
+            if (rs.next()) {
+                nextStatus = new StatusBean();
+                BeanUtil.populate(nextStatus, rs);
+            }
+            return nextStatus;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto ActivityBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
         } finally {
             try {
                 con.close();
@@ -911,9 +959,7 @@ public class DBWrapper implements Query {
             pst.clearParameters();
             pst.setInt(++nextParam, idProj);
             pst.setDate(++nextParam, Utils.convert(dataInizio));
-            pst.setDate(++nextParam, Utils.convert(dataFine));
             pst.setDate(++nextParam, Utils.convert(dataInizio));
-            pst.setDate(++nextParam, Utils.convert(dataFine));
             pst.setDate(++nextParam, Utils.convert(dataInizio));
             pst.setDate(++nextParam, Utils.convert(dataFine));
             rs = pst.executeQuery();
