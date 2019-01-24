@@ -1089,14 +1089,29 @@ public interface Query extends Serializable {
      */
     public static final String GET_CURRENT_ACTIVITIES = 
             "SELECT DISTINCT" +
-            "       A.id " +
+            "       A.id                    AS  \"id\"" +
+            "   ,   A.nome                  AS  \"nome\"" +
+            "   ,   A.descrizione           AS  \"descrizione\"" +
+            "   ,   A.datainizio            AS  \"dataInizio\"" +
+            "   ,   A.datafine              AS  \"dataFine\"" +
+            "   ,   A.datainizioattesa      AS  \"dataInizioAttesa\"" +
+            "   ,   A.datafineattesa        AS  \"dataFineAttesa\"" +
+            "   ,   A.datainizioeffettiva   AS  \"dataInizioEffettiva\"" +
+            "   ,   A.datafineeffettiva     AS  \"dataFineEffettiva\"" +
+            "   ,   A.guprevisti            AS  \"guPrevisti\"" +
+            "   ,   A.gueffettivi           AS  \"guEffettivi\"" +
+            "   ,   A.gurimanenti           AS  \"guRimanenti\"" +
+            "   ,   A.noteavanzamento       AS  \"noteAvanzamento\"" +
+            "   ,   A.milestone             AS  \"milestone\"" +
+            "   ,   A.id_wbs                AS  \"idWbs\"" +
+            "   ,   A.id_stato              AS  \"idStato\"" +
+            "   ,   A.id_complessita        AS  \"idComplessita\"" +
             "   FROM attivita A " +
             "      INNER JOIN progetto P ON P.id = A.id_progetto " +
             "   WHERE P.id = ? " +
             "       AND ( " +
             "                   (A.datainizio <= ? AND A.datafine >= ?) " +
-            "                OR (A.datainizio >= ? AND A.datafine <= ?) " +
-            "                OR (A.datainizio <= ? AND A.datafine >= ?)" +
+            "                OR ((A.datainizio BETWEEN ? AND ?))" +
             "           )";
     
     /**
@@ -1118,7 +1133,7 @@ public interface Query extends Serializable {
             "                               MIN(AP1.datainizio) " +
             "                           FROM avanzamentoprogetto AP1 " +
             "                           WHERE AP1.id_progetto = ? " +
-            "                               AND AP1.datainizio > ? "+
+            "                               AND AP1.datainizio > ? " +
             "                         )";
     
     /**
@@ -1128,7 +1143,23 @@ public interface Query extends Serializable {
      */
     public static final String GET_ACTIVITIES_OF_NEXT_STATUS = 
             "SELECT DISTINCT " +
-            "       A.id " +
+            "       A.id                    AS  \"id\"" +
+            "   ,   A.nome                  AS  \"nome\"" +
+            "   ,   A.descrizione           AS  \"descrizione\"" +
+            "   ,   A.datainizio            AS  \"dataInizio\"" +
+            "   ,   A.datafine              AS  \"dataFine\"" +
+            "   ,   A.datainizioattesa      AS  \"dataInizioAttesa\"" +
+            "   ,   A.datafineattesa        AS  \"dataFineAttesa\"" +
+            "   ,   A.datainizioeffettiva   AS  \"dataInizioEffettiva\"" +
+            "   ,   A.datafineeffettiva     AS  \"dataFineEffettiva\"" +
+            "   ,   A.guprevisti            AS  \"guPrevisti\"" +
+            "   ,   A.gueffettivi           AS  \"guEffettivi\"" +
+            "   ,   A.gurimanenti           AS  \"guRimanenti\"" +
+            "   ,   A.noteavanzamento       AS  \"noteAvanzamento\"" +
+            "   ,   A.milestone             AS  \"milestone\"" +
+            "   ,   A.id_wbs                AS  \"idWbs\"" +
+            "   ,   A.id_stato              AS  \"idStato\"" +
+            "   ,   A.id_complessita        AS  \"idComplessita\"" +
             "   FROM attivita A " + 
             "      INNER JOIN progetto P ON P.id = A.id_progetto " +
             "   WHERE P.id = ? " +
