@@ -168,8 +168,6 @@ public class ActivityCommand extends ItemBean implements Command {
         boolean isFooter = true;
         // Utente loggato
         PersonBean user = null;
-        // Dichiara elenco di progetti
-        Vector<ProjectBean> v = new Vector<ProjectBean>();
         // Dichiara elenco di attività
         Vector<ActivityBean> vActivities = new Vector<ActivityBean>();
         // Dichiara struttura di persone che possono essere aggiunte a un'attività
@@ -254,6 +252,7 @@ public class ActivityCommand extends ItemBean implements Command {
                         Vector<ProjectBean> writablePrj = (Vector<ProjectBean>) ses.getAttribute("writableProjects"); // I'm confident about the types...
                         // Se non ci sono progetti scrivibili e il flag "write" è true c'è qualcosa che non va...
                         if (writablePrj == null) {
+                            ses.invalidate();
                             String msg = FOR_NAME + "Il flag di scrittura e\' true pero\' non sono stati trovati progetti scrivibili: problema!.\n";
                             LOG.severe(msg);
                             throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
@@ -265,14 +264,14 @@ public class ActivityCommand extends ItemBean implements Command {
                         // Controlla se deve effettuare un inserimento o un aggiornamento
                         if (part.equalsIgnoreCase(Query.PART_PROJECT_CHARTER_MILESTONE)) {
                             /* ************************************************ *
-                             *                UPDATE Activity Part              *
+                             *            UPDATE Multiple Activity Part         *
                              * ************************************************ */
                             loadParams(part, parser, params);
                             //Vector<ProjectBean> userWritableProjects = db.getProjects(user.getId(), Query.GET_WRITABLE_PROJECTS_ONLY);
                             db.updateActivityPart(idPrj, user.getId(), writableProjects, userWritableActivitiesByProjectId, params);
                         } else if (part.equalsIgnoreCase(Query.ADD_ACTIVITY_TO_PROJECT)) {
                             /* ************************************************ *
-                             *                INSERT Activity Part              *
+                             *                 INSERT New Activity              *
                              * ************************************************ */
                             loadParams(part, parser, params);
                             isHeader = isFooter = false;
@@ -280,18 +279,15 @@ public class ActivityCommand extends ItemBean implements Command {
                             redirect = "q=" + Query.PART_ACTIVITY + "&id=" + idPrj;
                         } else if (part.equalsIgnoreCase(Query.MODIFY_PART)) {
                             /* ************************************************ *
-                             *             UPDATE Which One Activity            *
+                             *               UPDATE Single Activity             *
                              * ************************************************ */
                             loadParams(part, parser, params);
                             //Vector<ProjectBean> userWritableProjects = db.getProjects(user.getId(), Query.GET_WRITABLE_PROJECTS_ONLY);
                             db.updateActivity(idPrj, user, writablePrj, userWritableActivitiesByProjectId, params.get(Query.MODIFY_PART));
                             redirect = "q=" + Query.PART_ACTIVITY + "&id=" + idPrj;
                         }
-
-                        // Aggiorna i progetti, le attività dell'utente in sessione
-                        //ses.removeAttribute("writableProjects");
+                        // Aggiorna le attività dell'utente in sessione
                         ses.removeAttribute("writableActivity");
-                        //ses.setAttribute("writableProjects", userWritableProjects);
                         LinkedHashMap<Integer, Vector<ActivityBean>> userWritableActivitiesByProject = new LinkedHashMap<Integer, Vector<ActivityBean>>();
                         Integer key = new Integer(idPrj);
                         Vector<ActivityBean> userWritableActivities = db.getActivities(idPrj);
@@ -303,8 +299,7 @@ public class ActivityCommand extends ItemBean implements Command {
                          * **************************************************** */
                         if (part.equals(Query.PART_PROJECT_CHARTER_MILESTONE)) {
                             // Recupera le Milestones
-                            vActivities = db.getActivities(idPrj);
-                            //TODO: CAMBIARE IL METODO CON:  db.getActivities(idPrj, user, ONLY_MILESTONES);
+                            vActivities = db.getActivities(idPrj, user, Utils.convert(Utils.getUnixEpoch()), Query.GET_MILESTONES_ONLY, !Query.GET_ALL);
                         } else if (part.equals(Query.ADD_ACTIVITY_TO_PROJECT)) {
                             // Effettua le selezioni che servono all'inserimento di una nuova attività
                             isHeader = isFooter = false;
@@ -335,7 +330,7 @@ public class ActivityCommand extends ItemBean implements Command {
                     }
                 } else {
                     // Se il parametro 'p' non è presente, deve solo mostrare l'elenco delle attività 
-                    vActivities = db.getActivities(idPrj);
+                    vActivities = db.getActivities(idPrj, user, Utils.convert(Utils.getUnixEpoch()), !Query.GET_MILESTONES_ONLY, Query.GET_ALL);
                     fileJspT = nomeFileElenco;
                 }
             } else {
