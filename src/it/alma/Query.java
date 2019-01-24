@@ -72,6 +72,10 @@ public interface Query extends Serializable {
      */
     public static final boolean GET_WORK_PACKAGES_ONLY = false;
     /**
+     * <p>Costante parlante per flag di recupero attivit&agrave; eclusivamente di tipo milestone.</p>
+     */
+    public static final boolean GET_MILESTONES_ONLY = true;
+    /**
      * <p>Costante parlante per flag di recupero progetti utente 
      * indipendentemente dal livello di autorizzazione 
      * che l'utente ha sui progetti stessi.</p>
@@ -755,6 +759,32 @@ public interface Query extends Serializable {
             "   ORDER BY A.dataultimamodifica ASC";
     
     /**
+     * <p>Estrae le attivit&agrave; relative ad un progetto, identificato 
+     * tramite l'id, passato come parametro.</p>
+     */
+    public static final String  GET_ACTIVITIES_BY_DATE_AND_TYPE = 
+            "SELECT " +
+            "       A.id                    AS  \"id\"" +
+            "   ,   A.nome                  AS  \"nome\"" +
+            "   ,   A.descrizione           AS  \"descrizione\"" +
+            "   ,   A.datainizio            AS  \"dataInizio\"" +
+            "   ,   A.datafine              AS  \"dataFine\"" +
+            "   ,   A.datainizioattesa      AS  \"dataInizioAttesa\"" +
+            "   ,   A.datafineattesa        AS  \"dataFineAttesa\"" +
+            "   ,   A.datainizioeffettiva   AS  \"dataInizioEffettiva\"" +
+            "   ,   A.datafineeffettiva     AS  \"dataFineEffettiva\"" +
+            "   ,   A.guprevisti            AS  \"guPrevisti\"" +
+            "   ,   A.gueffettivi           AS  \"guEffettivi\"" +
+            "   ,   A.gurimanenti           AS  \"guRimanenti\"" +
+            "   ,   A.noteavanzamento       AS  \"noteAvanzamento\"" +
+            "   ,   A.milestone             AS  \"milestone\"" +
+            "   FROM attivita A" + 
+            "   WHERE id_progetto = ?" +
+            "       AND A.datainizio >= ?" +
+            "       AND (A.milestone = ? OR ?)" +
+            "   ORDER BY A.dataultimamodifica ASC";
+    
+    /**
      * <p>Estrae le attivit&agrave; di una specifica WBS,
      * identificata tramite id, passato come parametro, relativa ad 
      * un progetto, identificato tramite id, passato come parametro.</p>
@@ -781,7 +811,7 @@ public interface Query extends Serializable {
             "   FROM attivita A" + 
             "   WHERE id_progetto = ?" + 
             "     AND id_wbs = ?" +
-            "   ORDER BY A.dataultimamodifica ASC";;
+            "   ORDER BY A.dataultimamodifica ASC";
     
     /**
      * <p>Estrae l'attivit&agrave; specificata tramite id 
