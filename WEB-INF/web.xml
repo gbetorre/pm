@@ -97,7 +97,7 @@
             database that is configured in the context.xml file.
         </description>
         <res-ref-name>
-            jdbc/almalaurea
+            jdbc/poldev
         </res-ref-name>
         <res-type>
             javax.sql.DataSource
