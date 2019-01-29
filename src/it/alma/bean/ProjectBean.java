@@ -40,6 +40,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import it.alma.Query;
+import it.alma.Utils;
 import it.alma.exception.AttributoNonValorizzatoException;
 
 /**
@@ -145,6 +146,7 @@ public class ProjectBean implements Serializable, Query {
     /** Periodo base di cadenza del progetto */
     private float periodoBase;
     
+    
     /**
      * <p>Costruttore: inizializza i campi a valori di default.</p>
      */
@@ -225,10 +227,27 @@ public class ProjectBean implements Serializable, Query {
      *           Metodi getter e setter per descrizione     *
      * **************************************************** */
 	/**
-	 * Restituisce la descrizione di un progetto. 
+	 * <p>Restituisce la descrizione di un progetto.</p>
+	 * <p>Se la descrizione non &egrave; stata valorizzata ed &egrave;
+	 * rimasta impostata al valore di default (<code>null</code>) 
+	 * dato dal costruttore, si fa riferimento a <code>VOID_STRING</code> 
+	 * per inizializzarla, e quindi poterla cos&iacute; usare 
+	 * nei test dei confronti tra valori.<br />
+	 * Tuttavia, se si usa il metodo populate di BeanUtils, ci&ograve; 
+	 * &egrave; pleonastico, in quanto &egrave; la stessa <code>populate()</code>, 
+	 * in accordo con la direttiva 08, a restituire il valore "stringa vuota"
+	 * piuttosto che <code>null</code> in caso di colonne null, quindi al test
+	 * del confronto, dopo l'applicazione della <code>populate()</code>, 
+	 * i valori arrivano gi&agrave; pronti per essere comparati! (Ovvero:
+	 * valorizzati se &egrave; presente un valore, stringa vuota se &egrave;
+	 * presente <code> null</code>).</p>
+	 *  
 	 * @return <code>descrizione</code> - la descrizione del progetto
 	 */
 	public String getDescrizione() {
+	    if (descrizione == null) {
+	        return Utils.VOID_STRING;
+	    }
 		return descrizione;
 	}
 
@@ -607,10 +626,17 @@ public class ProjectBean implements Serializable, Query {
      *     Metodi getter e setter per situazioneAttuale     *
      * **************************************************** */
 	/**
-	 * Restituisce la situazione attuale del progetto
-	 * @return <code>situazioneAttuale</code> - situazione attuale
+	 * <p>Restituisce la situazione attuale del progetto.</p>
+	 * <p>Effettua un controllo sull'input per evitare puntamenti a null;
+	 * infatti controlli sulla concorrenza prenderebbero in esame
+	 * questo dato anche se non ancora inizializzato a un oggetto esistente.</p>
+	 * 
+	 * @return <code>String</code> - situazione attuale
 	 */
 	public String getSituazioneAttuale() {
+	    if (situazioneAttuale == null) {
+	        return Utils.VOID_STRING;
+	    }
 		return situazioneAttuale;
 	}
 
@@ -647,10 +673,19 @@ public class ProjectBean implements Serializable, Query {
      *     Metodi getter e setter per obiettiviMisurabili     *
      * ****************************************************** */
 	/**
-	 * Restituisce gli obiettivi misurabili del progetto
+	 * <p>Restituisce gli obiettivi misurabili del progetto, 
+	 * inizializzandoli a stringa vuota in caso non siano stati
+	 * mai valorizzati nel contesto del progetto caricato a
+	 * runtime.</p>
+	 * <p>Questo tipo di comportamento &egrave; un po' l'opposto
+	 * del trattamento riservato agli attributi obbligatori.</p>
+	 * 
 	 * @return <code>obiettiviMisurabili</code> - obiettivi misurabili
 	 */
 	public String getObiettiviMisurabili() {
+	    if (obiettiviMisurabili == null) {
+	        return Utils.VOID_STRING;
+	    }
 		return obiettiviMisurabili;
 	}
 
@@ -667,10 +702,28 @@ public class ProjectBean implements Serializable, Query {
      *        Metodi getter e setter per minacce        *
      * ************************************************ */
 	/**
-	 * Restituisce le minacce di un progetto
+	 * <p>Restituisce le minacce di un progetto.<p>
+	 * <p>Si comporta in maniera opposta a un metodo <code>get</code> che
+	 * restituisce un attributo obbligatorio:
+	 * <ol>
+	 * <li>metodo che restituisce un attributo obbligatorio solleva
+	 * una <code>AttributoNonValorizzatoException</code> se l'attributo non 
+	 * ha ricevuto un valore diverso dal default dato dal costruttore</li>
+	 * <li>questo metodo, che restituisce un dato facoltativo 
+	 * ma da investigare ai fini di alcuni controlli, restituisce un default 
+	 * anche se l'attributo non &egrave; stato inizializzato.</li>
+	 * </ol></p>
+	 * <p>In realt&agrave; questo controllo non &egrave; necessario
+	 * se si utilizza la <code>populate()</code> della classe di
+	 * utilit&agrave; <code>BeanUtil</code> in quanto esso viene implementato
+	 * dalla populate() stessa (seguendo la direttiva 08).</p>
+	 * 
 	 * @return <code>minacce</code> - minacce del progetto attuale
 	 */
 	public String getMinacce() {
+	    if (minacce == null) {
+	        return Utils.VOID_STRING;
+	    }
 		return minacce;
 	}
 
@@ -958,22 +1011,26 @@ public class ProjectBean implements Serializable, Query {
 		this.statoProgetto = statoProgetto;
 	}
 
+	
 	/* *************************************************** *
      *        Metodi getter e setter per periodoBase       *
      * *************************************************** */
     /**
-     * Restituisce un intero periodoBase che rappresenta la cadenza delle riunioni di progetto
+     * Restituisce un numerico a virgola mobile che rappresenta 
+     * la cadenza delle riunioni di progetto. Il progettista
+     * stabilire ogni quanto stima di fare il punto sull'avanzamento
+     * di progetto (status) ed indica un valore numero in frazione
+     * di mese solare (da cui la scelta del tipo <code>float</code>).
      * 
      * @return <code>periodoBase</code> - periodoBase del progetto
      * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e periodoBase non      &egrave; stato valorizzato (&egrave; un dato obbligatorio)
      */
     public float getPeriodoBase() throws AttributoNonValorizzatoException {
-        if(periodoBase == -2) {
+        if (periodoBase == -2) {
             throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo periodoBase non valorizzato!");
         }
         return periodoBase;
     }
-
 
     /**
      * Imposta il periodo base del progetto
