@@ -67,9 +67,9 @@ import it.alma.exception.WebStorageException;
 
 /** 
  * <p><code>WbsCommand.java</code><br />
- * Implementa la logica per la gestione delle WBS  di un progetto on line (POL).</p>
+ * Implementa la logica per la gestione delle WBSï¿½ di un progetto on line (POL).</p>
  * 
- * <p>Created on martedì 27 novembre 2018 12:56</p>
+ * <p>Created on martedï¿½ 27 novembre 2018 12:56</p>
  * 
  * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
  * @author <a href="mailto:andrea.tonel@studenti.univr.it">Andrea Tonel</a>
@@ -170,7 +170,7 @@ public class WbsCommand extends ItemBean implements Command {
         Vector<WbsBean> wbs = new Vector<WbsBean>();
         // Dichiara l'elenco di wbs figlie di una wbs
         Vector<WbsBean> wbsOfWbs = new Vector<WbsBean>();
-        // Dichiara l'elenco delle attività di una wbs di tipo workpackage
+        // Dichiara l'elenco delle attivitï¿½ di una wbs di tipo workpackage
         Vector<ActivityBean> activitiesOfWbs = new Vector<ActivityBean>();
         // Dichiara la wbs richiesta dall'utente nel caso di modifica di una wbs
         WbsBean wbsInstance = null;
@@ -244,7 +244,7 @@ public class WbsCommand extends ItemBean implements Command {
                     HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
                     // Recupera i progetti su cui l'utente ha diritti di scrittura
                     Vector<ProjectBean> writablePrj = (Vector<ProjectBean>) ses.getAttribute("writableProjects");
-                    // Se non ci sono progetti scrivibili e il flag "write" è true c'é qualcosa che non va...
+                    // Se non ci sono progetti scrivibili e il flag "write" ï¿½ true c'ï¿½ qualcosa che non va...
                     if (writablePrj == null) {
                         String msg = FOR_NAME + "Il flag di scrittura e\' true pero\' non sono stati trovati progetti scrivibili: problema!.\n";
                         LOG.severe(msg);
@@ -256,7 +256,7 @@ public class WbsCommand extends ItemBean implements Command {
                     HashMap<Integer, ProjectBean> writableProjects = ProjectCommand.decant(writablePrj);
                     // Controllo quale azione vuole fare l'utente
                     if (nomeFile.containsKey(part)) {
-                        // Creazione della tabella che conterrà  i valori dei parametri passati dalle form
+                        // Creazione della tabella che conterrï¿½ i valori dei parametri passati dalle form
                         HashMap<String, HashMap<String, String>> params = new HashMap<String, HashMap<String, String>>();
                         loadParams(part, parser, params);
                         // Controlla se deve effettuare un inserimento o un aggiornamento
@@ -282,7 +282,7 @@ public class WbsCommand extends ItemBean implements Command {
                          * ************************************************ */
                         Integer idWbsToDel = Integer.parseInt(parser.getStringParameter("wbs-select",  Utils.VOID_STRING));
                         wbsOfWbs = db.getWbsFiglie(idPrj, idWbsToDel);
-                        activitiesOfWbs = db.getActivitiesOfWbs(idWbsToDel, idPrj);
+                        activitiesOfWbs = db.getActivitiesByWbs(idWbsToDel, idPrj);
                         if (activitiesOfWbs.isEmpty() && wbsOfWbs.isEmpty()) {
                             db.deleteWbs(runtimeProject.getIdDipart(), idWbsToDel);
                             redirect = "q=" + Query.PART_WBS + "&id=" + idPrj;
@@ -299,7 +299,7 @@ public class WbsCommand extends ItemBean implements Command {
                         }
                         fileJspT = nomeFile.get(part);
                     } else {
-                        // Se il parametro 'p' non è presente, deve solo selezionare tutte le wbs
+                        // Se il parametro 'p' non ï¿½ presente, deve solo selezionare tutte le wbs
                         vWbs = db.getWbs(idPrj, Query.WBS_ALL);
                         fileJspT = nomeFileElenco;
                     }
@@ -354,7 +354,7 @@ public class WbsCommand extends ItemBean implements Command {
         req.setAttribute("wbsInstance", wbsInstance);
         // Imposta nella request l'elenco delle wbs che sono figlie di quella selezionata
         req.setAttribute("wbsFiglie", wbsOfWbs);
-        // Imposta nella request l'elenco delle attività che appartengono alla wbs selezionata
+        // Imposta nella request l'elenco delle attivitï¿½ che appartengono alla wbs selezionata
         req.setAttribute("attivitaWbs", activitiesOfWbs);
         // Imposta nella request elenco wbs associabili
         req.setAttribute("statiAttivita", states);
