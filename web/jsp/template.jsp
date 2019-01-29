@@ -73,7 +73,7 @@
     <div class="page">
       <jsp:include page="${fileJsp}" />
     </div>
-    <br /><br /><br /><br />
+    <br /><br />
     <c:if test="${not empty foot and foot}">    
       <!-- Footer -->
       <footer>
