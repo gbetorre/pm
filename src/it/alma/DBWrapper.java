@@ -1821,24 +1821,6 @@ public class DBWrapper implements Query {
                 HashMap<String, String> paramsResource = params.get(PART_PROJECT_CHARTER_RESOURCE);
                 if (Utils.containsValues(paramsResource)) {
                     con.setAutoCommit(false);
-                    // 3 - Numero di campi fissi presenti in paramsResource (fornitoriChiaveEsterni, fornitoriChiaveInterni, ServiziAteneo)
-                    // 4 - Numero di campi che contengono una competenza (id, nome, informativa, presenza)
-                    for (int i = 0; i < ((paramsResource.size() - 3) / 4); i++) {
-                        String isPresenzaAsString = paramsResource.get("pcr-presenza" + String.valueOf(i));
-                        if ( (!isPresenzaAsString.equalsIgnoreCase("true")) && (!isPresenzaAsString.equalsIgnoreCase("false"))  ) {
-                            throw new ClassCastException("Attenzione: il valore del parametro \'pcr-presenza\' non e\' riconducibile a un valore boolean!\n");
-                        }
-                        pst = null;
-                        pst = con.prepareStatement(UPDATE_SKILL_FROM_PROJECT);
-                        pst.clearParameters();
-                        pst.setString(1, paramsResource.get("pcr-nome" + String.valueOf(i)));
-                        pst.setString(2, paramsResource.get("pcr-informativa" + String.valueOf(i)));
-                        pst.setBoolean(3, Boolean.parseBoolean(paramsResource.get("pcr-presenza" + String.valueOf(i))));
-                        pst.setInt(4, Integer.parseInt(paramsResource.get("pcr-id" + String.valueOf(i))));
-                        pst.setInt(5, idProj);
-                        pst.executeUpdate();
-                        con.commit();
-                    }
                     //Controllo che i campi (fornitoriChiaveEsterni, fornitoriChiaveInterni, ServiziAteneo) non siano stati modificati da altri utenti
                     /*  TODO
                      * pst = null;
