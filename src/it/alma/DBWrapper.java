@@ -1820,10 +1820,10 @@ public class DBWrapper implements Query {
             if (params.containsKey(PART_PROJECT_CHARTER_RESOURCE)) {
                 HashMap<String, String> paramsResource = params.get(PART_PROJECT_CHARTER_RESOURCE);
                 if (Utils.containsValues(paramsResource)) {
+                    con.setAutoCommit(false);
                     // 3 - Numero di campi fissi presenti in paramsResource (fornitoriChiaveEsterni, fornitoriChiaveInterni, ServiziAteneo)
                     // 4 - Numero di campi che contengono una competenza (id, nome, informativa, presenza)
                     for (int i = 0; i < ((paramsResource.size() - 3) / 4); i++) {
-                        con.setAutoCommit(false);
                         String isPresenzaAsString = paramsResource.get("pcr-presenza" + String.valueOf(i));
                         if ( (!isPresenzaAsString.equalsIgnoreCase("true")) && (!isPresenzaAsString.equalsIgnoreCase("false"))  ) {
                             throw new ClassCastException("Attenzione: il valore del parametro \'pcr-presenza\' non e\' riconducibile a un valore boolean!\n");
@@ -2364,7 +2364,15 @@ public class DBWrapper implements Query {
                     pst.setString(++nextParam, paramsWbs.get("wbs-name"));
                     pst.setString(++nextParam, paramsWbs.get("wbs-descr"));
                     pst.setBoolean(++nextParam, workpackage);
-                    pst.setInt(++nextParam, Integer.parseInt(paramsWbs.get("wbs-idpadre")));
+                    // Gestione wbs padre facoltativa
+                    Integer idpadre = null;
+                    if (!paramsWbs.get("wbs-idpadre").equals(Utils.VOID_STRING)) {
+                        idpadre = new Integer(paramsWbs.get("wbs-idpadre"));
+                        pst.setInt(++nextParam, idpadre);
+                    } else {
+                        // dato facoltativo non inserito
+                        pst.setNull(++nextParam, Types.NULL);
+                    }
                     pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate())));
                     pst.setTime(++nextParam, Utils.getCurrentTime());
                     pst.setString(++nextParam, user.getCognome() + " " + user.getNome());
@@ -2775,7 +2783,7 @@ public class DBWrapper implements Query {
             Integer idpadre = null;
             if (!params.get("wbs-idpadre").equals(Utils.VOID_STRING)) {
                 idpadre = new Integer(params.get("wbs-idpadre"));
-                // giorni uomo effettivi
+                // id wbs padre effettivo
                 pst.setInt(++nextParam, idpadre);
             } else {
                 // dato facoltativo non inserito
