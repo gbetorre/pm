@@ -22,7 +22,7 @@
             </tr>
             </thead>
             <tbody>
-              <c:set var="status" value="" scope="page" />
+              <c:set var="status" value="0" scope="page" />
               <c:forEach var="skill" items="${requestScope.competenze}" varStatus="loop">
                 <c:set var="status" value="${loop.index}" scope="page" />
                 <input type="hidden" id="pcr-id${status}" name="pcr-id${status}" value="<c:out value="${skill.id}"/>">
