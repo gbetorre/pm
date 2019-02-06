@@ -452,18 +452,7 @@ public class ProjectCommand extends ItemBean implements Command {
          * **************************************************** */
         else if (part.equalsIgnoreCase(Query.PART_PROJECT_CHARTER_RESOURCE)) {
             // Recupero e caricamento parametri di project charter/risorse
-            int totSkills = Integer.parseInt(parser.getStringParameter("pcr-loop-status", Utils.VOID_STRING));
             HashMap<String, String> pcr = new HashMap<String, String>();
-            for (int i = 0; i <= totSkills; i++) {
-                String presenza = "false";
-                pcr.put("pcr-id" + String.valueOf(i), parser.getStringParameter("pcr-id" + String.valueOf(i), Utils.VOID_STRING));
-                pcr.put("pcr-nome" + String.valueOf(i), parser.getStringParameter("pcr-nome" + String.valueOf(i), Utils.VOID_STRING));
-                pcr.put("pcr-informativa" + String.valueOf(i), parser.getStringParameter("pcr-informativa" + String.valueOf(i), Utils.VOID_STRING));
-                if((parser.getStringParameter("pcr-presenza" + String.valueOf(i), Utils.VOID_STRING)) != "") {
-                    presenza = "true";
-                }
-                pcr.put("pcr-presenza" + String.valueOf(i), presenza);
-            }
             pcr.put("pcr-chiaveesterni", parser.getStringParameter("pcr-chiaveesterni", Utils.VOID_STRING));
             pcr.put("pcr-chiaveinterni", parser.getStringParameter("pcr-chiaveinterni", Utils.VOID_STRING));
             pcr.put("pcr-serviziateneo", parser.getStringParameter("pcr-serviziateneo", Utils.VOID_STRING));
