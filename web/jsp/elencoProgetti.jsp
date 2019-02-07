@@ -22,9 +22,9 @@
               <td scope="row"><c:out value="${prj.statoProgetto.nome}" escapeXml="false" /></td>
               <td width="40%" scope="row">
                 <a href="<c:out value= "${vision}${prj.id}" />"  class="btn btn-primary">Project Charter</a>
-                <a href="<c:out value= "${lastStatus}${prj.id}" />"  class="btn btn-primary">Status</a>
                 <a href="<c:out value= "${wbs}${prj.id}" />"  class="btn btn-primary">WBS</a>
                 <a href="<c:out value= "${act}${prj.id}" />" class="btn btn-primary">Attivit&agrave;</a>
+                <a href="<c:out value= "${lastStatus}${prj.id}" />"  class="btn btn-primary">Status</a>
               </td>
             </tr>
           </c:forEach>
