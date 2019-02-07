@@ -12,10 +12,12 @@
       <table class="table table-bordered table-hover">
         <thead class="thead-light">
         <tr>
-          <th scope="col"></th>
-          <th scope="col">Nome</th>
-          <th scope="col">Descrizione</th>
-          <th scope="col"><div class="text-center">Workpackage</div></th>
+          <th scope="col" width="5%"></th>
+          <th scope="col" width="23%">Nome</th>
+          <th scope="col" width="23%">Descrizione</th>
+          <th scope="col" width="22%">Note di avanzamento</th>
+          <th scope="col" width="22%">Risultati raggiunti</th>
+          <th scope="col" width="5%"><div class="text-center">Workpackage</div></th>
         </tr>
         </thead>
         <tbody>
@@ -32,6 +34,12 @@
             </td>
             <td scope="col">
               <c:out value="${wbs.descrizione}"/>
+            </td>
+            <td scope="col">
+              <c:out value="${wbs.noteAvanzamento}" />
+            </td>
+            <td scope="col">
+              <c:out value="${wbs.risultatiRaggiunti}" />
             </td>
             <td scope="col">
               <c:choose>
