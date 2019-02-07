@@ -76,6 +76,10 @@ public class WbsBean implements Serializable, Query {
     private boolean workPackage;
     /** Attributo identificativo della WBS padre */
     private WbsBean wbsPadre;
+    /** Note di avanzamento della WBS */
+    private String noteAvanzamento;
+    /** Risultati raggiunti da questa WBS */
+    private String risultatiRaggiunti;
     
 	
     /**
@@ -87,6 +91,7 @@ public class WbsBean implements Serializable, Query {
 		descrizione = null;
 		workPackage = false;
 		wbsPadre = null;
+		noteAvanzamento = risultatiRaggiunti = null;
 	}
 
 
@@ -189,7 +194,6 @@ public class WbsBean implements Serializable, Query {
         return wbsPadre;
     }
 
-
     /**
      * Imposta il bean rappresentante la WBS padre.
      * @param wbsPadre - WBS da impostare
@@ -198,4 +202,47 @@ public class WbsBean implements Serializable, Query {
         this.wbsPadre = wbsPadre;
     }
 
+    /* ********************************************************* *
+     *       Metodi getter e setter per noteAvanzamento          *
+     * ********************************************************* */
+    /**
+     * Restituisce le note di avanzamento della WBS
+     * 
+     * @return <code>noteAvanzamento</code> - note di avanzamento della WBS
+     */
+    public String getNoteAvanzamento() {
+        return noteAvanzamento;
+    }
+
+    /**
+     * Imposta le note di avanzamento di una WBS
+     * 
+     * @param noteAvanzamento - note di avanzamento da impostare
+     */
+    public void setNoteAvanzamento(String noteAvanzamento) {
+        this.noteAvanzamento = noteAvanzamento;
+    }
+
+    
+    /* ********************************************************* *
+     *      Metodi getter e setter per risultatiRaggiunti        *
+     * ********************************************************* */
+    /**
+     * Restituisce i risultati raggiunti dalla WBS
+     * 
+     * @return <code>String</code> - risultati realizzati dalla WBS
+     */
+    public String getRisultatiRaggiunti() {
+        return risultatiRaggiunti;
+    }
+
+    /**
+     * Imposta i risultati raggiunti dalla WBS
+     * 
+     * @param risultatiRaggiunti i risultatiRaggiunti da impostare
+     */
+    public void setRisultatiRaggiunti(String risultatiRaggiunti) {
+        this.risultatiRaggiunti = risultatiRaggiunti;
+    }
+    
 }
