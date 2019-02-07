@@ -97,6 +97,8 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
     private int guRimanenti;
     /** Note di avanzamento dell'attivit&agrave; */
     private String noteAvanzamento;
+    /** Risultati raggiunti da questa attivit&agrave; */
+    private String risultatiRaggiunti;
     /** Milestone attivit&agrave; */
     private boolean milestone;
     /* *********************************************** *
@@ -123,7 +125,7 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
     	descrizione = null;
     	dataInizio = dataFine = dataInizioAttesa = dataFineAttesa = dataInizioEffettiva = dataFineEffettiva = new Date(0);
     	guPrevisti = guEffettivi = guRimanenti = -2;
-    	noteAvanzamento = null;
+    	noteAvanzamento = risultatiRaggiunti = null;
     	milestone = false;
     	persone = null;
     	idWbs = idComplessita = idStato = -2;
@@ -427,7 +429,29 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
 	}
 
 	
-	/* ********************************************************* *
+    /* ********************************************************* *
+     *      Metodi getter e setter per risultatiRaggiunti        *
+     * ********************************************************* */
+	/**
+	 * Restituisce i risultati raggiunti dall'attivit&agrave;
+	 * 
+     * @return <code>String</code> - risultati realizzati dall'attivit&agrave;
+     */
+    public String getRisultatiRaggiunti() {
+        return risultatiRaggiunti;
+    }
+
+    /**
+     * Imposta i risultati raggiunti dall'attivit&agrave;
+     * 
+     * @param risultatiRaggiunti i risultatiRaggiunti da impostare
+     */
+    public void setRisultatiRaggiunti(String risultatiRaggiunti) {
+        this.risultatiRaggiunti = risultatiRaggiunti;
+    }
+
+    
+    /* ********************************************************* *
      *          Metodi getter e setter per milestone             *
      * ********************************************************* */
 	/**
