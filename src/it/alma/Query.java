@@ -156,26 +156,26 @@ public interface Query extends Serializable {
      * <p>Costante per il parametro identificante la parte di eliminazione di una entit&agrave;.</p>
      */
     public static final String DELETE_PART                      = "del";
-    /**
+    /*
      * <p>Costante per il parametro identificante la pagina di inserimento di un rischio di un progetto.</p>
-     */
+     *
     public static final String ADD_RISK_TO_PROJECT              = "addRisk";
-    /**
+    /*
      * <p>Costante per il parametro identificante la pagina di inserimento di una competenza di un progetto.</p>
-     */
-    public static final String ADD_SKILL_TO_PROJECT             = "addSkill";
+     *
+    public static final String ADD_SKILL_TO_PROJECT             = "addSkill";*/
     /**
      * <p>Costante identificante la query che estrae tutte le WBS compresi i Workpackage</p>
      */
-    public static final int WBS_ALL = 1;
+    public static final int WBS_GET_ALL = 1;
     /**
      * <p>Costante identificante la query che estrae tutte le WBS esclusi i Workpackage</p>
      */
-    public static final int WBS_NOT_WP = 2;
+    public static final int WBS_BUT_WP = 2;
     /**
      * <p>Costante identificante la query che estrae tutte le WBS che sono Workpackage</p>
      */
-    public static final int WBS_ONLY_WP = 3;
+    public static final int WBS_WP_ONLY = 3;
     /**
      * <p>Costante identificante la query che estrae la WBS padre della WBS data</p>
      */
