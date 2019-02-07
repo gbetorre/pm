@@ -395,6 +395,8 @@ public class WbsCommand extends ItemBean implements Command {
             wbs.put("wbs-descr",        parser.getStringParameter("wbs-descr", Utils.VOID_STRING));
             wbs.put("wbs-workpackage",  parser.getStringParameter("wbs-workpackage", Utils.VOID_STRING));
             wbs.put("wbs-idpadre",      parser.getStringParameter("wbs-idpadre", Utils.VOID_STRING));
+            wbs.put("wbs-note",         parser.getStringParameter("wbs-note", Utils.VOID_STRING));
+            wbs.put("wbs-result",       parser.getStringParameter("wbs-result", Utils.VOID_STRING));
             formParams.put(Query.MODIFY_PART, wbs);
         } 
         /* **************************************************** *
@@ -406,6 +408,8 @@ public class WbsCommand extends ItemBean implements Command {
             wbs.put("wbs-name",         parser.getStringParameter("wbs-name", Utils.VOID_STRING));
             wbs.put("wbs-descr",        parser.getStringParameter("wbs-descr", Utils.VOID_STRING));
             wbs.put("wbs-workpackage",  parser.getStringParameter("wbs-workpackage", Utils.VOID_STRING));
+            wbs.put("wbs-note",         parser.getStringParameter("wbs-note", Utils.VOID_STRING));
+            wbs.put("wbs-result",       parser.getStringParameter("wbs-result", Utils.VOID_STRING));
             formParams.put(Query.ADD_TO_PROJECT, wbs);
         }
     }
