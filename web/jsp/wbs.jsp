@@ -19,6 +19,8 @@
             <c:set var="wbsNome" value="${wbsInstance.nome}" scope="page" />
             <c:set var="wbsDescr" value="${wbsInstance.descrizione}" scope="page" />
             <c:set var="isWorkpackage" value="${wbsInstance.workPackage}" scope="page" />
+            <c:set var="wbsNote" value="${wbsInstance.noteAvanzamento}" scope="page" />
+            <c:set var="wbsRisultati" value="${wbsInstance.risultatiRaggiunti}" scope="page" />
           </c:when>
         <c:otherwise>
           <h3>Inserisci una nuova WBS:</h3>
@@ -56,6 +58,22 @@
         <div class="col-sm-5">Descrizione della WBS</div>
         <div class="col-sm-5">
           <textarea class="form-control" name="wbs-descr">${wbsDescr}</textarea>
+          <div class="charNum"></div>
+        </div>
+      </div>
+      <br />
+      <div class="row">
+        <div class="col-sm-5">Note di avanzamento della WBS</div>
+        <div class="col-sm-5">
+          <textarea class="form-control" name="wbs-note">${wbsNote}</textarea>
+          <div class="charNum"></div>
+        </div>
+      </div>
+      <br />
+      <div class="row">
+        <div class="col-sm-5">Risultati raggiunti</div>
+        <div class="col-sm-5">
+          <textarea class="form-control" name="wbs-result">${wbsRisultati}</textarea>
           <div class="charNum"></div>
         </div>
       </div>
