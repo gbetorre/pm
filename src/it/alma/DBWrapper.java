@@ -133,7 +133,7 @@ public class DBWrapper implements Query {
     public DBWrapper() throws WebStorageException {
         if (pol_manager == null) {
             try {
-                pol_manager = (DataSource) ((Context) new InitialContext()).lookup("java:comp/env/jdbc/pol");
+                pol_manager = (DataSource) ((Context) new InitialContext()).lookup("java:comp/env/jdbc/poldev");
                 if (pol_manager == null)
                     throw new WebStorageException(FOR_NAME + "La risorsa `jdbc/pol' non e\' disponibile. Verificare configurazione e collegamenti.\n");
                 //JOptionPane.showMessageDialog(null, "Accesso al DB di POL", "Inizializzazione Completata", 0, null);
@@ -1449,6 +1449,7 @@ public class DBWrapper implements Query {
      * @return WbsBean - bean contenente la wbs richiesta
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
+    @SuppressWarnings({ "null", "static-method" })
     public WbsBean getWbsInstance(int idProj, 
                                   int idWbs) 
                            throws WebStorageException {
@@ -1512,6 +1513,7 @@ public class DBWrapper implements Query {
      * @return vectorWbs - vettore contenente tutte le Wbs di un progetto
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
+    @SuppressWarnings({ "null", "static-method" })
     public Vector<WbsBean> getWbs(int idProj, 
                                   int getPartOfWbs) 
                            throws WebStorageException {
@@ -1521,15 +1523,15 @@ public class DBWrapper implements Query {
         WbsBean wbs = null;
         Vector<WbsBean> vWbs = new Vector<WbsBean>();
         String query = null;
-        // Controllo qual � la query da eseguire, in base alla richiesta dell'utente
+        // Controllo qual è la query da eseguire, in base alla richiesta dell'utente
         switch (getPartOfWbs) {
-            case WBS_ALL: 
+            case WBS_GET_ALL: 
                 query = GET_WBS_BY_PROJECT; 
                 break;
-            case WBS_NOT_WP:
+            case WBS_BUT_WP:
                 query = GET_WBS_NOT_WORKPACKAGE;
                 break;
-            case WBS_ONLY_WP:
+            case WBS_WP_ONLY:
                 query = GET_WP_BY_PROJECT;
                 break;
             default:
@@ -1575,8 +1577,8 @@ public class DBWrapper implements Query {
     * @param idWbs id della wbs padre
     * @return Vector&lt;WbsBean&gt; - vector contenente tutte le WBS figlie
     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
-    * 
     */
+    @SuppressWarnings({ "null", "static-method" })
     public Vector<WbsBean> getWbsFiglie (int idProj, 
                                          int idWbs) 
                                   throws WebStorageException {
