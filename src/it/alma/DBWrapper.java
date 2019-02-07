@@ -2357,6 +2357,8 @@ public class DBWrapper implements Query {
                         // dato facoltativo non inserito
                         pst.setNull(++nextParam, Types.NULL);
                     }
+                    pst.setString(++nextParam, paramsWbs.get("wbs-note"));
+                    pst.setString(++nextParam, paramsWbs.get("wbs-result"));
                     pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate())));
                     pst.setTime(++nextParam, Utils.getCurrentTime());
                     pst.setString(++nextParam, user.getCognome() + " " + user.getNome());
@@ -2780,6 +2782,8 @@ public class DBWrapper implements Query {
             pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
             pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
             pst.setString(++nextParam, user.getCognome() + String.valueOf(Utils.BLANK_SPACE) + user.getNome());
+            pst.setString(++nextParam, params.get("wbs-note"));
+            pst.setString(++nextParam, params.get("wbs-result"));
             pst.executeUpdate();
             con.commit();
         } catch (SQLException sqle) {
