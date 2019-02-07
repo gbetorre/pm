@@ -22,7 +22,9 @@
               <input type="radio" id="act-${act.id}" name="act-select" value="${act.id}">
             </td>
             <td scope="row" id="nameColumn">
-              <c:out value="${act.nome}"/>
+              <a href="${modAct}${p.id}&ida=${act.id}">
+                <c:out value="${act.nome}"/>
+              </a>
             </td>
             <td scope="row">
               <c:out value="${act.descrizione}"/>
