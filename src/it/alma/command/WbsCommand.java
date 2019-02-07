@@ -36,9 +36,6 @@
 
 package it.alma.command;
 
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -108,7 +105,7 @@ public class WbsCommand extends ItemBean implements Command {
      * Crea una nuova istanza di WbsCommand 
      */
     public WbsCommand() {
-        /*;*/   // It doesn't Anything
+        /*;*/   // It doesn't anything
     }
   
     
@@ -256,7 +253,7 @@ public class WbsCommand extends ItemBean implements Command {
                     HashMap<Integer, ProjectBean> writableProjects = ProjectCommand.decant(writablePrj);
                     // Controllo quale azione vuole fare l'utente
                     if (nomeFile.containsKey(part)) {
-                        // Creazione della tabella che conterr� i valori dei parametri passati dalle form
+                        // Creazione della tabella che conterrà i valori dei parametri passati dalle form
                         HashMap<String, HashMap<String, String>> params = new HashMap<String, HashMap<String, String>>();
                         loadParams(part, parser, params);
                         // Controlla se deve effettuare un inserimento o un aggiornamento
@@ -289,18 +286,20 @@ public class WbsCommand extends ItemBean implements Command {
                         }
                     }
                 } else {
-                    // Ramo di selezione
+                    /* ************************************************ *
+                     *                  SELECT Wbs Part                 *
+                     * ************************************************ */
                     if (nomeFile.containsKey(part)) {
                         // Ramo per aggiunta e modifica wbs
-                        wbs = db.getWbs(idPrj, Query.WBS_NOT_WP);
+                        wbs = db.getWbs(idPrj, Query.WBS_BUT_WP);
                         if (idWbs != Utils.DEFAULT_ID) {
                             today = Utils.format(Utils.getCurrentDate());
                             wbsInstance = db.getWbsInstance(idPrj, idWbs);
                         }
                         fileJspT = nomeFile.get(part);
                     } else {
-                        // Se il parametro 'p' non � presente, deve solo selezionare tutte le wbs
-                        vWbs = db.getWbs(idPrj, Query.WBS_ALL);
+                        // Se il parametro 'p' non è presente, deve solo selezionare tutte le wbs
+                        vWbs = db.getWbs(idPrj, Query.WBS_GET_ALL);
                         fileJspT = nomeFileElenco;
                     }
                 }
