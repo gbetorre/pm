@@ -487,10 +487,12 @@ public interface Query extends Serializable {
      */
     public static final String GET_WBS =
             "SELECT " +
-            "       W.id            AS \"id\"" + 
-            "   ,   W.nome          AS \"nome\"" + 
-            "   ,   W.descrizione   AS \"descrizione\"" + 
-            "   ,   W.workpackage   AS \"workPackage\"" + 
+            "       W.id                    AS \"id\"" + 
+            "   ,   W.nome                  AS \"nome\"" + 
+            "   ,   W.descrizione           AS \"descrizione\"" + 
+            "   ,   W.workpackage           AS \"workPackage\"" + 
+            "   ,   W.noteavanzamento       AS \"noteAvanzamento\"" +
+            "   ,   W.risultatiraggiunti    AS \"risultatiRaggiunti\"" +
             "   FROM wbs W" +
             "       INNER JOIN progetto PJ ON PJ.id = W.id_progetto" +
             "   WHERE PJ.id = ?" +
@@ -502,10 +504,12 @@ public interface Query extends Serializable {
      */
     public static final String GET_WBS_PADRE = 
             "SELECT " +
-            "       W.id            AS \"id\"" +
-            "   ,   W.nome          AS \"nome\"" +
-            "   ,   W.descrizione   AS \"descrizione\"" +
-            "   ,   W.workpackage   AS \"workPackage\"" + 
+            "       W.id                    AS \"id\"" +
+            "   ,   W.nome                  AS \"nome\"" +
+            "   ,   W.descrizione           AS \"descrizione\"" +
+            "   ,   W.workpackage           AS \"workPackage\"" + 
+            "   ,   W.noteavanzamento       AS \"noteAvanzamento\"" +
+            "   ,   W.risultatiraggiunti    AS \"risultatiRaggiunti\"" +
             "   FROM wbs W" + 
             "   WHERE W.id = (SELECT " +
             "                        WF.id_wbs" + 
@@ -519,10 +523,12 @@ public interface Query extends Serializable {
      */
     public static final String GET_WBS_FIGLIE = 
             "SELECT " +
-            "       W.id            AS \"id\"" +
-            "   ,   W.nome          AS \"nome\"" +
-            "   ,   W.descrizione   AS \"descrizione\"" +
-            "   ,   W.workpackage   AS \"workPackage\"" + 
+            "       W.id                    AS \"id\"" +
+            "   ,   W.nome                  AS \"nome\"" +
+            "   ,   W.descrizione           AS \"descrizione\"" +
+            "   ,   W.workpackage           AS \"workPackage\"" + 
+            "   ,   W.noteavanzamento       AS \"noteAvanzamento\"" +
+            "   ,   W.risultatiraggiunti    AS \"risultatiRaggiunti\"" +
             "   FROM wbs W" + 
             "   WHERE W.id_progetto = ?" +
             "       AND W.id_wbs = ?" + 
@@ -534,9 +540,11 @@ public interface Query extends Serializable {
      */
     public static final String GET_WBS_NOT_WORKPACKAGE =
             "SELECT " +
-            "       W.id            AS \"id\"" + 
-            "   ,   W.nome          AS \"nome\"" + 
-            "   ,   W.descrizione   AS \"descrizione\"" + 
+            "       W.id                    AS \"id\"" + 
+            "   ,   W.nome                  AS \"nome\"" + 
+            "   ,   W.descrizione           AS \"descrizione\"" + 
+            "   ,   W.noteavanzamento       AS \"noteAvanzamento\"" +
+            "   ,   W.risultatiraggiunti    AS \"risultatiRaggiunti\"" +
             "   FROM wbs W" +
             "   WHERE W.id_progetto = ?" +
             "     AND W.workpackage = false" + 
@@ -547,10 +555,12 @@ public interface Query extends Serializable {
      */
     public static final String GET_WBS_BY_PROJECT =
             "SELECT " +
-            "       W.id            AS \"id\"" + 
-            "   ,   W.nome          AS \"nome\"" + 
-            "   ,   W.descrizione   AS \"descrizione\"" + 
-            "   ,   W.workpackage   AS \"workPackage\"" + 
+            "       W.id                    AS \"id\"" + 
+            "   ,   W.nome                  AS \"nome\"" + 
+            "   ,   W.descrizione           AS \"descrizione\"" + 
+            "   ,   W.workpackage           AS \"workPackage\"" + 
+            "   ,   W.noteavanzamento       AS \"noteAvanzamento\"" +
+            "   ,   W.risultatiraggiunti    AS \"risultatiRaggiunti\"" +
             "   FROM wbs W" +
             "   WHERE W.id_progetto = ?" + 
             "   ORDER BY W.dataultimamodifica ASC";
@@ -560,10 +570,12 @@ public interface Query extends Serializable {
      */
     public static final String GET_WP_BY_PROJECT =
             "SELECT " +
-            "       W.id            AS \"id\"" + 
-            "   ,   W.nome          AS \"nome\"" + 
-            "   ,   W.descrizione   AS \"descrizione\"" + 
-            "   ,   W.workpackage   AS \"workPackage\"" + 
+            "       W.id                    AS \"id\"" + 
+            "   ,   W.nome                  AS \"nome\"" + 
+            "   ,   W.descrizione           AS \"descrizione\"" + 
+            "   ,   W.workpackage           AS \"workPackage\"" + 
+            "   ,   W.noteavanzamento       AS \"noteAvanzamento\"" +
+            "   ,   W.risultatiraggiunti    AS \"risultatiRaggiunti\"" +
             "   FROM wbs W" +
             "   WHERE id_progetto = ?" +
             "     AND W.workpackage = true" +
@@ -1348,6 +1360,8 @@ public interface Query extends Serializable {
             "   ,       descrizione = ?" +
             "   ,       workpackage = ?" +
             "   ,       id_wbs = ?" +
+            "   ,       noteavanzamento = ?" +
+            "   ,       risultatiraggiunti = ?" +
             "   ,       dataultimamodifica = ?" +
             "   ,       oraultimamodifica = ?" +
             "   ,       autoreultimamodifica = ?" +
@@ -1513,7 +1527,9 @@ public interface Query extends Serializable {
             "   ,   workpackage" + 
             "   ,   dataultimamodifica" + 
             "   ,   oraultimamodifica" + 
-            "   ,   autoreultimamodifica)" +
+            "   ,   autoreultimamodifica" +
+            "   ,   noteavanzamento" +
+            "   ,   risultatiraggiunti)" +
             "   VALUES (? " +       // id
             "   ,       ? " +       // id_wbs
             "   ,       ? " +       // id_progetto
@@ -1522,7 +1538,9 @@ public interface Query extends Serializable {
             "   ,       ? " +       // workpackage
             "   ,       ? " +       // dataultimamodifica
             "   ,       ? " +       // oraultimamodifica
-            "   ,       ? )";       // autoreultimamodifica
+            "   ,       ? " +       // autoreultimamodifica
+            "   ,       ? " +       // noteavanzamento
+            "   ,       ?)";        // risultati raggiunti
     
     
     /* ************************************************************************ *
