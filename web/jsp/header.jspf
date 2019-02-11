@@ -4,7 +4,7 @@
       <div class="header">
         <div class="row justify-content-center">
           <div class="col-3">
-            <a class="logoHeader" href="${project}${p.id}"><img class="logoHeader" src="${initParam.urlDirectoryImmagini}/logo1.png" /></a>
+            <a class="logoHeader" href="${project}"><img class="logoHeader" src="${initParam.urlDirectoryImmagini}/logo1.png" /></a>
           </div>
           <div class="col-9">
             <p class="pHeader">
