@@ -432,6 +432,7 @@ public class Main extends HttpServlet {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        retrieveFixedInfo(req);
         flush(req, res, templateJsp);
     }
 
