@@ -19,6 +19,7 @@
   <c:set var="elapsedDays" value="" scope="page" />
   <c:set var="remainingDays" value="" scope="page" />
   <c:set var="actNotes" value="" scope="page" />
+  <c:set var="actResult" value="" scope="page" />
   <c:set var="checked" value="" scope="page" />
   <c:set var="wbs" value="-3" scope="page" />
   <c:set var="complexity" value="-3" scope="page" />
@@ -36,6 +37,7 @@
     <c:set var="elapsedDays" value="${actInstance.guEffettivi}" scope="page" />
     <c:set var="remainingDays" value="${actInstance.guRimanenti}" scope="page" />
     <c:set var="actNotes" value="${actInstance.noteAvanzamento}" scope="page" />
+    <c:set var="actResult" value="${actInstance.risultatiRaggiunti}" scope="page" />
     <c:if test="${actInstance.milestone}">
       <c:set var="checked" value="checked" scope="page" />
     </c:if>
@@ -51,7 +53,7 @@
   </c:choose>
     <h3><c:out value="${pageScope.tP}" escapeXml="false" /></h3>
     <br />
-    <form id="act_form" action="" method="post">
+    <form id="act_form" action="" method="post" class="subfields">
       <input type="hidden" id="act-id" name="act-id" value="${actInstance.id}" />
       <div class="row">
         <div class="col-sm-5 mandatory">
@@ -123,7 +125,7 @@
         <div class="row">
           <div class="col-sm-5">Descrizione dell'attivit&agrave;</div>
           <div class="col-sm-5">
-            <textarea class="form-control" name="act-descr" readonly><c:out value="${actDescr}" escapeXml="false" /></textarea>
+            <textarea class="form-control" name="act-descr" class="form-control" aria-label="With textarea" maxlength="8104" readonly><c:out value="${actDescr}" escapeXml="false" /></textarea>
             <div class="charNum"></div>
           </div>
         </div>
@@ -178,7 +180,15 @@
         <div class="row">
           <div class="col-sm-5">Note di avanzamento</div>
           <div class="col-sm-5">
-            <textarea class="form-control" name="act-progress" readonly><c:out value="${actNotes}" escapeXml="false" /></textarea>
+            <textarea class="form-control" name="act-progress" class="form-control" aria-label="With textarea" maxlength="8104" readonly><c:out value="${actNotes}" escapeXml="false" /></textarea>
+            <div class="charNum"></div>
+          </div>
+        </div>
+        <br />
+        <div class="row">
+          <div class="col-sm-5">Risultati raggiunti</div>
+          <div class="col-sm-5">
+            <textarea class="form-control" name="act-result" class="form-control" aria-label="With textarea" maxlength="1024" readonly><c:out value="${actResult}" escapeXml="false" /></textarea>
             <div class="charNum"></div>
           </div>
         </div>
@@ -283,18 +293,19 @@
       }
       });
       
-      $('textarea').keyup(function (e) {
-          var len = $(this).val().length;
-          var dblength = 16384;
-          if(len >= dblength) {
-            this.value = this.value.substring(0, dblength);
-            $(this).next('div').text(' è stato raggiunto il limite di caratteri');
-          } else {
-            var chars = dblength - len;
-            $(this).next('div').text(chars + ' caratteri rimanenti');
-          }
+      $('textarea[maxlength]').keyup(function () {
+        var len = $(this).val().length;
+        var dblength = parseInt($(this).attr('maxlength'));
+        if(len >= dblength) {
+          this.value = this.value.substring(0, dblength);
+          $(this).next('div').text(' hai raggiunto il limite massimo di caratteri inseribili');
+        } else {
+          var chars = dblength - len;
+          $(this).next('div').text(chars + ' caratteri rimanenti');
+        }
       });
     });
+    
 
     $('.extrainfo').click(function() {
       var $body = $('.additional-fields');
