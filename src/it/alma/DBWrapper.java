@@ -47,6 +47,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import javax.naming.Context;
@@ -59,6 +60,7 @@ import it.alma.bean.BeanUtil;
 import it.alma.bean.CodeBean;
 import it.alma.bean.DepartmentBean;
 import it.alma.bean.ItemBean;
+import it.alma.bean.MonitorBean;
 import it.alma.bean.PersonBean;
 import it.alma.bean.ProjectBean;
 import it.alma.bean.RiskBean;
@@ -441,6 +443,7 @@ public class DBWrapper implements Query {
                 pst = con.prepareStatement(GET_DIPART);
                 pst.clearParameters();
                 pst.setInt(1, idDipart);
+                pst.setInt(2, 0);
                 rs1 = pst.executeQuery();
                 if (rs1.next()) {
                     dipart = new DepartmentBean();
@@ -519,6 +522,7 @@ public class DBWrapper implements Query {
                 pst = con.prepareStatement(GET_DIPART);
                 pst.clearParameters();
                 pst.setInt(1, idDipart);
+                pst.setInt(2, 0);
                 rs1 = pst.executeQuery();
                 if (rs1.next()) {
                     dipart = new DepartmentBean();
@@ -547,6 +551,161 @@ public class DBWrapper implements Query {
             throw new WebStorageException(msg + anve.getMessage(), anve);
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto ProjectBean non valorizzato; problema nella query dei progetti su cui l\'utente ha diritti di scrittura.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }        
+    }
+    
+    
+    /**
+     * <p>Restituisce una mappa contenente i progetti visibili dall'utente
+     * loggato, indicizzati per identificativo del dipartimento.</p>
+     * 
+     * @param userId identificativo della persona di cui si vogliono recuperare i progetti
+     * @return <code>Vector&lt;ProjectBean&gt;</code> - ProjectBean rappresentante i progetti dell'utente loggato
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public HashMap<Integer, Vector<ProjectBean>> getProjectsByDepart(int userId)
+                                                              throws WebStorageException {
+        ResultSet rs, rs1, rs2 = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        ProjectBean project = null;
+        DepartmentBean dipart = null;
+        CodeBean statoProgetto = null;
+        int idDipart = -1;
+        int idStatoProgetto = -1;
+        Integer key = null;
+        Vector<ProjectBean> v = null;
+        HashMap<Integer, Vector<ProjectBean>> projects = new HashMap<Integer, Vector<ProjectBean>>();
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_DIPART);
+            pst.clearParameters();
+            pst.setInt(1, -1);
+            pst.setInt(2, -1);            
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                dipart = new DepartmentBean();
+                v = new Vector<ProjectBean>();
+                BeanUtil.populate(dipart, rs);
+                idDipart = dipart.getId();
+                key = new Integer(idDipart);
+                // Recupera progetti del dipartimento
+                pst = con.prepareStatement(GET_PROJECTS_BY_DEPART);
+                pst.clearParameters();
+                pst.setInt(1, userId);
+                pst.setInt(2, idDipart);
+                rs1 = pst.executeQuery();
+                while (rs1.next()) {
+                    project = new ProjectBean();
+                    BeanUtil.populate(project, rs1);
+                    // Recupera statoprogetto del progetto
+                    idStatoProgetto = project.getIdStatoProgetto();
+                    pst = con.prepareStatement(GET_STATOPROGETTO);
+                    pst.clearParameters();
+                    pst.setInt(1, idStatoProgetto);
+                    rs2 = pst.executeQuery();
+                    if (rs2.next()) {
+                        statoProgetto = new CodeBean();
+                        BeanUtil.populate(statoProgetto, rs2);
+                        project.setStatoProgetto(statoProgetto);
+                    }
+                    // Aggiunge il progetto valorizzato all'elenco
+                    v.add(project);
+                }
+                // Aggiunge la lista progetti del dipartimento e la chiave id dipartimento
+                projects.put(key, v);
+            }
+            return projects;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Oggetto ProjectBean.idDipart non valorizzato; problema nella query dei progetti.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto ProjectBean non valorizzato; problema nella query dei progetti.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Recupera i dipartimenti su cui un utente, il cui username viene
+     * passato come argomento, ha i diritti di scrittura/editing.</p>
+     * <p>Esempio:<pre>
+     * id  id_ruolo  id_progetto  id_persona
+     * 12    1         11           53
+     * 13    2          1           47
+     * 14    2          3           55
+     * 15    3         11           55
+     * 16    4          5           55
+     * 17    5          4           55
+     * </pre>
+     * La persona con id 53 ('sfedeli') &egrave; PMOATE (ruolo 1) sul dipartimento
+     * del progetto di id 11.<br />
+     * La persona con id 47 ('amiorelli') &egrave; PMODIP (ruolo 2) sul dipartimento
+     * del progetto di id 1.<br />
+     * La persona con id 55 ('stroiano') &egrave; sia PMODIP, sia PM, sia TL, 
+     * sia USER; se il progetto con id 4, su cui &egrave; USER o TL, appartiene 
+     * allo stesso dipartimento dei progetti su cui &egrave; utente con privilegi
+     * pi&uacute; alti, ci&ograve; non pregiudica la sua possibilit&agrave;
+     * di editare il monitoraggio dipartimentale: &egrave; sufficiente,
+     * quindi, che sullo stesso dipartimento sia presente 
+     * almeno un ruolo superiore ad USER ed a TEAM LEADER.</p> 
+     * 
+     * @param userName login dell'utente di cui si vogliono ottenere i progetti editabili
+     * @return <code>Vector&lt;DepartmentBean&gt;</code> - un Vector di dipartimenti, che rappresentano quelli su cui l'utente ha i diritti di scrittura
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di attributi obbligatori non valorizzati o in qualche altro tipo di puntamento
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public Vector<DepartmentBean> getWritableDeparts(String userName)
+                                              throws WebStorageException {
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        DepartmentBean dipart = null;
+        Vector<DepartmentBean> departs = new Vector<DepartmentBean>();
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_WRITABLE_DEPARTMENTS_BY_USER_NAME);
+            pst.clearParameters();
+            pst.setString(1, userName);
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                dipart = new DepartmentBean();
+                BeanUtil.populate(dipart, rs);
+                // Aggiunge il dipartimento valorizzato all'elenco
+                departs.add(dipart);
+            }
+            return departs;
+        } catch (ClassCastException cce) {
+            String msg = FOR_NAME + "Oggetto non valorizzato; problema nella query dei dipartimenti su cui l\'utente ha diritti di scrittura.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + cce.getMessage(), cce);
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto non valorizzato; problema nella query dei dipartimenti su cui l\'utente ha diritti di scrittura.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
         } finally {
@@ -608,6 +767,60 @@ public class DBWrapper implements Query {
         }
     }
 
+    
+    /**
+     * <p>Restituisce una mappa dei dipartimenti indicizzata per identificativo
+     * dipartimento.</p>
+     * 
+     * @return <code>HashMap&lt;Integer, DepartmentBean&gt;</code> - mappa rappresentante i dipartimenti indicizzati per id.
+     * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public HashMap<Integer, DepartmentBean> getDeparts() 
+                                                throws WebStorageException {
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        DepartmentBean dipart = null;
+        int idDipart = -1;
+        Integer key = null;
+        HashMap<Integer, DepartmentBean> departs = new HashMap<Integer, DepartmentBean>();
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_DIPART);
+            pst.clearParameters();
+            pst.setInt(1, -1);
+            pst.setInt(2, -1);            
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                dipart = new DepartmentBean();
+                BeanUtil.populate(dipart, rs);
+                idDipart = dipart.getId();
+                key = new Integer(idDipart);
+                departs.put(key, dipart);
+            }
+            return departs;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Oggetto dipart.idDipart non valorizzato; problema nella query dei dipartimenti.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
     
     /**
      * <p>Restituisce un Vector di StatusBean rappresentante tutti gli status del progetto attuale</p>
@@ -895,9 +1108,9 @@ public class DBWrapper implements Query {
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
      */
     @SuppressWarnings({ "null", "static-method" })
-    public StatusBean getNextStatus (int idProj, 
-                                     Date dataInizio) 
-                              throws WebStorageException {
+    public StatusBean getNextStatus(int idProj, 
+                                    Date dataInizio) 
+                             throws WebStorageException {
         Connection con = null;
         PreparedStatement pst = null;
         ResultSet rs = null;
@@ -1170,10 +1383,10 @@ public class DBWrapper implements Query {
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento
      */
     @SuppressWarnings({ "null", "static-method" })
-    public Vector<ActivityBean> getActivitiesByRange (int idProj,
-                                                      Date dataInizio, 
-                                                      Date dataFine) 
-                                               throws WebStorageException {
+    public Vector<ActivityBean> getActivitiesByRange(int idProj,
+                                                     Date dataInizio, 
+                                                     Date dataFine) 
+                                              throws WebStorageException {
         Connection con = null;
         PreparedStatement pst = null;
         ResultSet rs = null;
@@ -1225,10 +1438,10 @@ public class DBWrapper implements Query {
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento
      */
     @SuppressWarnings({ "null", "static-method" })
-    public Vector<ActivityBean> getActivitiesByDate (int idProj,
-                                                     Date dataInizio, 
-                                                     Date dataFine) 
-                                              throws WebStorageException {
+    public Vector<ActivityBean> getActivitiesByDate(int idProj,
+                                                    Date dataInizio, 
+                                                    Date dataFine) 
+                                             throws WebStorageException {
         Connection con = null;
         PreparedStatement pst = null;
         ResultSet rs= null;
@@ -1579,9 +1792,9 @@ public class DBWrapper implements Query {
     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
     */
     @SuppressWarnings({ "null", "static-method" })
-    public Vector<WbsBean> getWbsFiglie (int idProj, 
-                                         int idWbs) 
-                                  throws WebStorageException {
+    public Vector<WbsBean> getWbsFiglie(int idProj, 
+                                        int idWbs) 
+                                 throws WebStorageException {
         Connection con = null;
         ResultSet rs = null;
         PreparedStatement pst = null;
@@ -1645,6 +1858,54 @@ public class DBWrapper implements Query {
             return new LinkedList<CodeBean>(stati);
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto non valorizzato; problema nella query.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+    * <p>Restituisce un Vector&lt;WbsBean&gt; contenente tutte le WBS figlie
+    * che hanno come padre la WBS identificata tramite id, passato come parametro.</p>
+    * 
+    * @param idProj  id del progetto di cui caricare le wbs
+    * @param idWbs id della wbs padre
+    * @return Vector&lt;WbsBean&gt; - vector contenente tutte le WBS figlie
+    * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
+    */
+    @SuppressWarnings({ "null", "static-method" })
+    public MonitorBean getMonitor(int idDip, 
+                                      int anno) 
+                               throws WebStorageException {
+        Connection con = null;
+        ResultSet rs = null;
+        PreparedStatement pst = null;
+        MonitorBean mon = null;
+        int nextParam = 0;
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_MONITOR_BY_DEPART);
+            pst.clearParameters();
+            pst.setInt(++nextParam, anno);
+            pst.setInt(++nextParam, idDip);
+            rs = pst.executeQuery();
+            if (rs.next()) {
+                mon = new MonitorBean();
+                BeanUtil.populate(mon, rs);
+            }
+            return mon;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto MonitorBean non valorizzato; problema nella query dell\'utente.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
         } finally {
@@ -2244,6 +2505,7 @@ public class DBWrapper implements Query {
                     pst.setNull(++nextParam, Types.NULL);
                 }
                 pst.setString(++nextParam, params.get("act-progress"));
+                pst.setString(++nextParam, params.get("act-result"));
                 pst.setBoolean(++nextParam, milestone);
                 //pst.setInt(++nextParam, idProj);
                 pst.setInt(++nextParam, Integer.parseInt(params.get("act-wbs")));
@@ -2316,7 +2578,7 @@ public class DBWrapper implements Query {
     }
     
     
-    /** <p>Metodo che aggiorna le WBS di progetto..</p>
+    /** <p>Metodo che aggiorna le WBS di progetto.</p>
      * 
      * @param idProj id del progetto da aggiornare 
      * @param user utente che ha eseguito il login
@@ -2383,6 +2645,76 @@ public class DBWrapper implements Query {
             String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il progetto.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + e.getMessage(), e);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Aggiorna un monitoraggio relativo a un dato anno solare, 
+     * passato come argomento, e a un relativo dipartimento, il cui 
+     * identificativo viene passato come argomento.</p>
+     * 
+     * @param year  anno del monitoraggio
+     * @param idDip identificativo del dipartimento oggetto del monitoraggio
+     * @param user  utente che ha effettuato la modifica
+     * @param deptWhereUserIsBoss   lista dei dipartimenti su cui l'utente e' autorizzato con un ruolo elevato (> TL)
+     * @param params    lista dei valori provenienti dalla form compilata dall'utente
+     * @throws WebStorageException se si verifica un problema nel recupero di qualche attributo, nella query o in qualche altro tipo di puntamento
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public void updateMonitorPart(int year,
+                                  int idDip,
+                                  PersonBean user,
+                                  Vector<DepartmentBean> deptWhereUserIsBoss,
+                                  ConcurrentHashMap<String, String> params) 
+                           throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;        
+        try {
+            // Ottiene la connessione
+            con = pol_manager.getConnection();
+            con.setAutoCommit(false);
+            pst = con.prepareStatement(UPDATE_MONITOR_BY_DEPART);
+            pst.clearParameters();
+            pst.setString(1, params.get("mon-d4"));
+            pst.setString(2, params.get("mon-d5"));
+            pst.setString(3, params.get("mon-d6"));
+            pst.setString(4, params.get("mon-d7"));
+            pst.setString(5, params.get("mon-d8"));
+            // Campi automatici: id utente, ora ultima modifica, data ultima modifica
+            pst.setDate(6, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+            pst.setTime(7, Utils.getCurrentTime());   // non accetta una Stringe, ma un oggetto java.sql.Time
+            pst.setString(8, user.getCognome() + String.valueOf(Utils.BLANK_SPACE) + user.getNome());
+            pst.setInt(9, year);
+            pst.setInt(10, idDip);
+            pst.executeUpdate();
+            con.commit();
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Probabile problema nel recupero dei dati dell\'autore ultima modifica.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il monitoraggio.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } catch (NumberFormatException nfe) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il monitoraggio.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + nfe.getMessage(), nfe);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il monitoraggio.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + npe.getMessage(), npe);
         } finally {
             try {
                 con.close();
@@ -2575,6 +2907,7 @@ public class DBWrapper implements Query {
                     pst.setNull(++nextParam, Types.NULL);
                 }
                 pst.setString(++nextParam, params.get("act-progress"));
+                pst.setString(++nextParam, params.get("act-result"));
                 pst.setBoolean(++nextParam, milestone);
                 pst.setInt(++nextParam, idProj);
                 pst.setInt(++nextParam, Integer.parseInt(params.get("act-wbs")));
@@ -2739,6 +3072,7 @@ public class DBWrapper implements Query {
         }
     }
     
+    
     /** 
      * <p>Metodo per fare un nuovo inserimento di una nuova wbs relativa al progetto.</p>
      * 
@@ -2747,6 +3081,7 @@ public class DBWrapper implements Query {
      * @param params    hashmap contenente i valori inseriti dall'utente per inserimento nuova wbs
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
+    @SuppressWarnings("null")
     public void insertWbs(int idProj,
                           PersonBean user,
                           HashMap<String, String> params)
@@ -3044,6 +3379,67 @@ public class DBWrapper implements Query {
                 ProjectBean wp = projectsWritableByUser.elementAt(index);
                 // Se un id dei progetti scrivibili è uguale all'id sulla querystring è tutto ok 
                 if (wp.getId() == idProj) {
+                    return true;
+                }
+                index++;
+            } while (index < lastIndexOf);
+            // In caso contrario, ovvero se abbiamo raggiunto la fine del Vector senza trovare l'id sulla querystring, sono guai...
+            return false;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Si e\' tentato di accedere a un attributo di un bean obbligatorio ma non valorizzato.\n" + anve.getMessage();
+            LOG.severe(msg + "Probabile problema nel tentativo di recuperare l'id del bean di un progetto scrivibile dall\'utente.\n");
+            throw new WebStorageException(msg, anve);
+        } catch (ArrayIndexOutOfBoundsException aiobe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nello scorrimento di liste.\n" + aiobe.getMessage();
+            LOG.severe(msg);
+            throw new WebStorageException(msg, aiobe);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema in un puntamento a null.\n" + npe.getMessage();
+            LOG.severe(msg);
+            throw new WebStorageException(msg, npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
+            LOG.severe(msg);
+            throw new WebStorageException(msg, e);
+        }
+    }
+    
+    
+    /**
+     * <p>Dato in input un identificativo di progetto e un Vector
+     * di dipartimenti scrivibili dall'utente, restituisce <code>true</code> 
+     * se il progetto avente tale id &egrave; presente in lista progetti, 
+     * <code>false</code> altrimenti.</p>
+     * 
+     * @param idProj identificativo del progetto di cui si vuol verificare la presenza tra quelli scrivibili dall'utente
+     * @param projectsWritableByUser lista dei progetti scrivibili dall'utente
+     * @return <code>boolean</code> - valore true se la persona e' presente, in qualsivoglia ruolo, false altrimenti
+     * @throws WebStorageException se si verifica un problema nel recupero dell'id di un progetto o in qualche puntamento
+     */
+    @SuppressWarnings({ "static-method" })
+    public boolean userCanMonitor(int idDip,
+                                   Vector<DepartmentBean> departmentWritableByUser) 
+                            throws WebStorageException {
+        try {
+            /* **         Controllo lato server sui diritti dell'utente.       ** 
+             * ** Controlla per prima cosa che l'id progetto sulla querystring ** 
+             * ** corrisponda a un id dei progetti scrivibili dall'utente      **/
+            // Ottiene la cardinalità della lista dei progetti precaricati 
+            // quando l'utente si &egrave; loggato, uno dei quali deve 
+            // corrispondere al progetto sul quale aggiungere un'attività
+            int lastIndexOf = departmentWritableByUser.size();
+            int index = 0;
+            // Controllo sull'input
+            if (lastIndexOf == index) {
+                // E' stata passata una lista di "progetti scrivibili" di cardinalità zero!
+                String msg = FOR_NAME + "Si e\' tentato di utilizzare una lista di progetti scrivibili dall\'utente che non ha alcun progetto.\n";
+                LOG.severe(msg + "E\' stata passata una lista di \"progetti scrivibili\" di cardinalità zero!.\n");
+                throw new WebStorageException(msg);
+            }
+            do {
+                DepartmentBean dip = departmentWritableByUser.elementAt(index);
+                // Se un id dei progetti scrivibili è uguale all'id sulla querystring è tutto ok 
+                if (dip.getId() == idDip) {
                     return true;
                 }
                 index++;
