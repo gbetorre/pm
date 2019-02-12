@@ -85,10 +85,6 @@ public interface Query extends Serializable {
      *      Costanti corrispondenti ai parametri ammessi sulla querystring      *
      * ************************************************************************ */
     /**
-     * <p>Costante per il parametro identificante la pagina dei credits dell'applicazione.</p>
-     */
-    public static final String CREDITS      = "credits";
-    /**
      * <p>Costante per il parametro identificante la pagina della Vision di un progetto.</p>
      */
     public static final String PART_PROJECT_CHARTER_VISION      = "pcv";
@@ -156,14 +152,14 @@ public interface Query extends Serializable {
      * <p>Costante per il parametro identificante la parte di eliminazione di una entit&agrave;.</p>
      */
     public static final String DELETE_PART                      = "del";
-    /*
-     * <p>Costante per il parametro identificante la pagina di inserimento di un rischio di un progetto.</p>
-     *
-    public static final String ADD_RISK_TO_PROJECT              = "addRisk";
-    /*
-     * <p>Costante per il parametro identificante la pagina di inserimento di una competenza di un progetto.</p>
-     *
-    public static final String ADD_SKILL_TO_PROJECT             = "addSkill";*/
+    /**
+     * <p>Costante per il parametro identificante la pagina dei monitoraggio.</p>
+     */
+    public static final String PART_MONITOR      = "";
+    /**
+     * <p>Costante per il parametro identificante la pagina dei credits dell'applicazione.</p>
+     */
+    public static final String CREDITS      = "credits";
     /**
      * <p>Costante identificante la query che estrae tutte le WBS compresi i Workpackage</p>
      */
@@ -379,6 +375,42 @@ public interface Query extends Serializable {
     		"   ORDER BY PJ.titolo ASC";
     
     /**
+     * <p>Estrae i progetti dell'utente 
+     * avente identificativo passato come parametro
+     * appartenenti al dipartimento avente identificativo passato come parametro.</p>
+     */
+    public static final String GET_PROJECTS_BY_DEPART = 
+            "SELECT " +
+            "       PJ.id           " + 
+            "   ,   PJ.id_dipart                AS \"idDipart\"" + 
+            "   ,   PJ.titolo                   AS \"titolo\"" + 
+            "   ,   PJ.descrizione              AS \"descrizione\"" + 
+            "   ,   PJ.datainizio               AS \"dataInizio\"" + 
+            "   ,   PJ.datafine                 AS \"dataFine\"" + 
+            "   ,   PJ.id_statoprogetto         AS \"idStatoProgetto\"" + 
+            //"   ,   PJ.situazioneattuale        AS \"situazioneAttuale\"" + 
+            //"   ,   PJ.situazionefinale         AS \"situazioneFinale\"" + 
+            //"   ,   PJ.obiettivimisurabili      AS \"obiettiviMisurabili\"" + 
+            //"   ,   PJ.minacce                  AS \"minacce\"" + 
+            //"   ,   PJ.stakeholdermarginali     AS \"stakeholderMarginali\"" + 
+            //"   ,   PJ.stakeholderoperativi     AS \"stakeholderOperativi\"" + 
+            //"   ,   PJ.stakeholderistituzionali AS \"stakeholderIstituzionali\"" + 
+            //"   ,   PJ.stakeholderchiave        AS \"stakeholderChiave\"" + 
+            //"   ,   PJ.deliverable              AS \"deliverable\"" + 
+            //"   ,   PJ.fornitorichiaveinterni   AS \"fornitoriChiaveInterni\"" + 
+            //"   ,   PJ.fornitorichiaveesterni   AS \"fornitoriChiaveEsterni\"" + 
+            //"   ,   PJ.serviziateneo            AS \"serviziAteneo\"" + 
+            //"   ,   PJ.vincoli                  AS \"vincoli\"" + 
+            "   FROM progetto PJ" + 
+            "       INNER JOIN ruologestione RG ON PJ.id = RG.id_progetto" + 
+            "       INNER JOIN persona P ON RG.id_persona = P.id" + 
+            "       INNER JOIN identita I ON P.id = I.id1_persona" + 
+            "       INNER JOIN usr U ON I.id0_usr = U.id" + 
+            "   WHERE   P.id = ?" +
+            "       AND PJ.id_dipart = ?" + 
+            "   ORDER BY PJ.titolo ASC";
+    
+    /**
      * <p>Estrae i progetti dell'utente avente <code>username</code> 
      * passato come parametro e nel contesto dei quali lo stesso risulta essere 
      * un utente che pu&ograve; modificare i dati del progetto.</p>
@@ -449,6 +481,26 @@ public interface Query extends Serializable {
             "       INNER JOIN usr U ON I.id0_usr = U.id" + 
             "   WHERE   U.id = ?" + 
             "       AND R.nome IN ('PM', 'TL', 'PMOATE', 'PMODIP')";
+    
+    /**
+     * <p>Estrae i dipartimenti dell'utente avente <code>username</code> 
+     * passato come parametro e nel contesto dei quali lo stesso risulta essere 
+     * un utente che pu&ograve; modificare i dati dei relativi progetti
+     * con elevato livello di privilegi.</p>
+     */
+    public static final String GET_WRITABLE_DEPARTMENTS_BY_USER_NAME = 
+            "SELECT DISTINCT" +
+            "       PJ.id_dipart                AS \"id\"" + 
+            "   ,   D.nome                      AS \"nome\"" + 
+            "   FROM progetto PJ" + 
+            "       INNER JOIN dipartimento D ON PJ.id_dipart = D.id" +
+            "       INNER JOIN ruologestione RG ON PJ.id = RG.id_progetto" + 
+            "       INNER JOIN ruolo R ON RG.id_ruolo = R.id" +
+            "       INNER JOIN persona P ON RG.id_persona = P.id" + 
+            "       INNER JOIN identita I ON P.id = I.id1_persona" + 
+            "       INNER JOIN usr U ON I.id0_usr = U.id" + 
+            "   WHERE   U.login = ?" + 
+            "       AND R.nome IN ('PM', 'PMOATE', 'PMODIP')";
     
     /**
      * <p>Estrae un progetto di dato id, passato come parametro.</p>
@@ -733,7 +785,7 @@ public interface Query extends Serializable {
             "   ,   D.prefisso        AS \"prefisso\"" + 
             "   ,   D.indirizzosede   AS \"indirizzoSede\"" + 
             "   FROM dipartimento D" + 
-            "   WHERE   D.id = ?";
+            "   WHERE   D.id = ? OR -1 = ?";
     
     /** 
      * Estrae lo stato di un progetto dato il suo id, passato come parametro
@@ -846,6 +898,7 @@ public interface Query extends Serializable {
             "   ,   A.gueffettivi           AS  \"guEffettivi\"" +
             "   ,   A.gurimanenti           AS  \"guRimanenti\"" +
             "   ,   A.noteavanzamento       AS  \"noteAvanzamento\"" +
+            "   ,   A.risultatiraggiunti    AS  \"risultatiRaggiunti\"" +
             "   ,   A.milestone             AS  \"milestone\"" +
             "   ,   A.id_wbs                AS  \"idWbs\"" +
             "   ,   A.id_stato              AS  \"idStato\"" +
@@ -1177,6 +1230,24 @@ public interface Query extends Serializable {
             "   WHERE P.id = ? " +
             "      AND (A.datainizio BETWEEN ? AND ?)";
     
+    /**
+     * <p>Estrae tutti i monitoraggi di dato anno e dato dipartimento
+     * il cui identificativo viene passato come parametro.</p>
+     */
+    public static final String GET_MONITOR_BY_DEPART = 
+            "SELECT DISTINCT " +
+            "       M.id                    AS  \"id\"" +
+            "   ,   M.anno                  AS  \"anno\"" +        
+            "   ,   M.d4_reclutamento       AS  \"quadroD4\"" +
+            "   ,   M.d5_infrastrutture     AS  \"quadroD5\"" +
+            "   ,   M.d6_premialita         AS  \"quadroD6\"" +
+            "   ,   M.d7_didattica          AS  \"quadroD7\"" +
+            "   ,   M.d8_modalitafasi       AS  \"quadroD8\"" +
+            "   FROM monitoraggio M " + 
+            "   WHERE M.anno = ? " +
+            "      AND M.id_dipart = ?";    
+    
+    
     /* ************************************************************************ *
      *                               QUERY DI POL                               *
      * ************************************************************************ *
@@ -1215,6 +1286,7 @@ public interface Query extends Serializable {
             "   ,       gueffettivi = ?" + 
             "   ,       gurimanenti = ?" + 
             "   ,       noteavanzamento = ?" + 
+            "   ,       risultatiraggiunti = ?" + 
             "   ,       milestone = ?" + 
           //"   ,       id_progetto = ?" +
             "   ,       id_wbs = ?" +
@@ -1367,6 +1439,22 @@ public interface Query extends Serializable {
             "   ,       autoreultimamodifica = ?" +
             "   WHERE id = ?";
 
+    /**
+     * <p>Aggiorna un monitoraggio dipartimentale di un dato anno.</p>
+     */
+    public static final String UPDATE_MONITOR_BY_DEPART = 
+            "UPDATE monitoraggio " +
+            "   SET     d4_reclutamento = ?" +
+            "   ,       d5_infrastrutture = ?" +
+            "   ,       d6_premialita = ?" +
+            "   ,       d7_didattica = ?" +
+            "   ,       d8_modalitafasi = ?" +
+            "   ,       dataultimamodifica = ?" +
+            "   ,       oraultimamodifica = ?" +
+            "   ,       autoreultimamodifica = ?" +
+            "   WHERE  anno = ? " +
+            "      AND id_dipart = ?";   
+    
         
     /* ************************************************************************ *
      *                               QUERY DI POL                               *
@@ -1432,6 +1520,7 @@ public interface Query extends Serializable {
             "   ,   gueffettivi" +
             "   ,   gurimanenti" +
             "   ,   noteavanzamento" +
+            "   ,   risultatiraggiunti" +
             "   ,   milestone" +
             "   ,   id_progetto" +
             "   ,   id_wbs" +
@@ -1453,6 +1542,7 @@ public interface Query extends Serializable {
             "   ,       ? " +          // giorni/uomo effettivi
             "   ,       ? " +          // giorni/uomo rimanenti
             "   ,       ? " +          // note di avanzamento
+            "   ,       ? " +          // risultati raggiunti
             "   ,       ? " +          // milestone
             "   ,       ? " +          // id progetto
             "   ,       ? " +          // id wbs
@@ -1567,241 +1657,5 @@ public interface Query extends Serializable {
             "   WHERE P.id_dipart = ?" +
             "       AND P.id < 0";
     
-    
-    /* ************************************************************************ *
-     *                                   QOL                                    *
-    /* ************************************************************************ *
-     *                  Costanti per applicazione QOL (ValDid)                  *
-     * ************************************************************************ */
-    /**
-     *  Carica la lista con i codici U-GOV dei corsi elettivi.
-     */
-    public String[] CODICI_CORSI_ELETTIVI = {"4S000766",  
-                                             "0813M",
-                                             "4S004786",
-                                             "4S004102",
-                                             "4S006311",
-                                             "0763M",
-                                             "0783M",
-                                             "4S003529",
-                                             "4S006312",
-                                             "4S00183",
-                                             "0729M",
-                                             "0660M",
-                                             "0699M",
-                                             "0656M",
-                                             "0820M",
-                                             "4S000825",
-                                             "4S006318",
-                                             "4S004785",
-                                             "4S006319",
-                                             "4S001136",
-                                             "4S004783",
-                                             "4S006320",
-                                             "4S000768",
-                                             "4S001459",
-                                             "0828M",
-                                             "4S000823",
-                                             "4S000770",
-                                             "0738M",
-                                             "0728M",
-                                             "4S001137",
-                                             "0758M",
-                                             "4S01927",
-                                             "DF-0022",
-                                             "4S001007",
-                                             "0854M",
-                                             "0760M",
-                                             "4S004103",
-                                             "4S007217",
-                                             "0752M",
-                                             "4S006321",
-                                             "4S006322",
-                                             "4S006422",
-                                             "0808M",
-                                             "4S000771",
-                                             "0810M",
-                                             "0716M",
-                                             "0811M",
-                                             "4S006323",
-                                             "4S001139",
-                                             "0812M",
-                                             "4S001462",
-                                             "4S006324",
-                                             "4S004505",
-                                             "4S001008",
-                                             "0665M",
-                                             "0800M",
-                                             "4S003471",
-                                             "4S004787",
-                                             "0890M",
-                                             "0858M",
-                                             "4S000821",
-                                             "4S000797",
-                                             "4S003472",
-                                             "0775M",
-                                             "0794M",
-                                             "4S006325",
-                                             "4S004105",
-                                             "0903M",
-                                             "DF-0020",
-                                             "0650M",
-                                             "4S004106",
-                                             "0671M",
-                                             "4S003525",
-                                             "0746M",
-                                             "4S003474",
-                                             "0837M",
-                                             "0672M",
-                                             "0889M",
-                                             "0859M",
-                                             "0857M",
-                                             "0855M",
-                                             "0856M",
-                                             "0860M",
-                                             "4S006326",
-                                             "4S001012",
-                                             "DF-0009",
-                                             "4S006327",
-                                             "0781M",
-                                             "4S007166",
-                                             "0648M",
-                                             "4S001013",
-                                             "4S006328",
-                                             "4S006329",
-                                             "4S001014",
-                                             "0649M",
-                                             "4S000794",
-                                             "4S006330",
-                                             "0902M",
-                                             "0891M",
-                                             "4S006331",
-                                             "4S006332",
-                                             "0745M",
-                                             "DF-0023",
-                                             "4S006333"
-                                            };
-    
-    /* ************************************************************************ *
-     *                              QUERY DI QOL                                *
-     * ************************************************************************ *
-     *                       4.  Query di eliminazione                          *
-     * ************************************************************************ */
-    /**
-     * Query per estrarre le tuple delle AD Semplici.
-     */
-    public static final String AD_SEMPLICI = 
-            "SELECT " 
-          + " \"row.names\"             AS \"id\""
-          + ",\"CodiceCDSWI\"           AS \"codiceCdSWI\""
-          + ",\"CodiceCDSUGOV\"         AS \"codiceCdSUGOV\""
-          + ",\"NomeCDS\"               AS \"nomeCdSWI\""
-          + ",\"NOMECDS2\"              AS \"nomeCdSUGOV\""
-          + ",\"DipartimentoScuola\"    AS \"dipartimentoScuola\""
-          + ",\"SedePrimariaCDS\"       AS \"sedePrimariaCDS\""
-          + ",\"CodiceADWI\"            AS \"codiceADWI\""
-          + ",\"CodiceADUGOV\"          AS \"codiceADUGOV\""
-          + ",\"AD\"                    AS \"nomeInsegnamento\""
-          + ",\"Modulo\"                AS \"modulo\""
-          + ",\"UL\"                    AS \"ul\""
-          + ",\"Discriminante\"         AS \"discriminante\""
-          + ",\"CFUtotali\"             AS \"crediti\""
-          + ",\"CFUtotali\"             AS \"creditiTotali\""
-          + ",\"CFUlezione\"            AS \"creditiLezione\""
-          + ",\"SSD\"                   AS \"SSD\""
-          + ",\"CognomeDocente\"        AS \"cognomeDocente\""
-          + ",\"NomeDocente\"           AS \"nomeDocente\""
-          + ",\"CodiceFiscaleDocente\"  AS \"codiceFiscaleDocente\""
-          + ",\"Coordinatore\"          AS \"coordinatore\""
-          + ",\"Orelezione\"            AS \"oreLezione\""
-          + ",\"Orelaboratorio\"        AS \"oreLaboratorio\""
-          + ",\"Orealtro\"              AS \"oreAltro\""
-          + ",\"Oreseminario\"          AS \"oreSeminario\""
-          + ",\"Oreesercitazione\"      AS \"oreEsercitazione\""
-          + ",\"Oretirocinio\"          AS \"oreTirocinio\""
-          + ",\"InizioPerDid\"          AS \"inizioPerDid\""
-          + ",\"FinePerDid\"            AS \"finePerDid\""
-          //+ " FROM \"AD-Semplici-II2017\" AD"
-          + " FROM \"ADSemplici-2018-I\" AD"
-          + " ORDER BY \"codiceFiscaleDocente\", \"codiceADUGOV\", \"codiceCdSUGOV\", \"inizioPerDid\", \"finePerDid\""
-          + " --ORDER BY \"id\" "
-          + " --LIMIT 30";
-    
-    /**
-     * Query per estrarre le tuple delle AD Moduli.
-     */
-    public static final String AD_MODULI = 
-            "SELECT " 
-          + " \"row.names\"             AS \"id\""
-          + ",\"CodiceCDSWI\"           AS \"codiceCdSWI\""
-          + ",\"CodiceCDSUGOV\"         AS \"codiceCdSUGOV\""
-          + ",\"NomeCDS\"               AS \"nomeCdSWI\""
-          + ",\"NOMECDS2\"              AS \"nomeCdSUGOV\""
-          + ",\"DipartimentoScuola\"    AS \"dipartimentoScuola\""
-          + ",\"SedePrimariaCDS\"       AS \"sedePrimariaCDS\""
-          + ",\"CodiceADWI\"            AS \"codiceADWI\""
-          + ",\"CodiceADUGOV\"          AS \"codiceADUGOV\""
-          + ",\"AD\"                    AS \"nomeInsegnamento\""
-          + ",\"Modulo\"                AS \"nomeModulo\""
-          + ",\"MODULO2\"               AS \"motivo\""
-          + ",\"UL\"                    AS \"nomeUl\""
-          + ",\"Discriminante\"         AS \"discriminante\""
-          + ",\"CFUtotali\"             AS \"crediti\""
-          + ",\"CFUtotali\"             AS \"creditiTotali\""
-          + ",\"CFUlezione\"            AS \"creditiLezione\""
-          + ",\"SSD\"                   AS \"SSD\""
-          + ",\"CognomeDocente\"        AS \"cognomeDocente\""
-          + ",\"NomeDocente\"           AS \"nomeDocente\""
-          + ",\"CodiceFiscaleDocente\"  AS \"codiceFiscaleDocente\""
-          + ",\"Coordinatore\"          AS \"coordinatore\""
-          + ",\"Orelezione\"            AS \"oreLezione\""
-          + ",\"Orelaboratorio\"        AS \"oreLaboratorio\""
-          + ",\"Orealtro\"              AS \"oreAltro\""
-          + ",\"Oreseminario\"          AS \"oreSeminario\""
-          + ",\"Oreesercitazione\"      AS \"oreEsercitazione\""
-          + ",\"Oretirocinio\"          AS \"oreTirocinio\""
-          + ",\"InizioPerDid\"          AS \"inizioPerDid\""
-          + ",\"FinePerDid\"            AS \"finePerDid\""
-          + " FROM \"ADModuli-2018-I\" MOD"
-          + " ORDER BY \"codiceFiscaleDocente\", \"codiceADUGOV\", \"codiceCdSUGOV\", \"inizioPerDid\", \"finePerDid\"";
-    
-    /**
-     * Query per estrarre le tuple delle Unit&agrave; Logistiche.
-     */
-    public static final String UL = 
-            "SELECT " 
-          + " \"row.names\"             AS \"id\""
-          + ",\"CodiceCDSWI\"           AS \"codiceCdSWI\""
-          + ",\"CodiceCDSUGOV\"         AS \"codiceCdSUGOV\""
-          + ",\"NomeCDS\"               AS \"nomeCdSWI\""
-          //+ ",\"NOMECDS2\"              AS \"nomeCdSUGOV\""
-          + ",\"DipartimentoScuola\"    AS \"dipartimentoScuola\""
-          + ",\"SedePrimariaCDS\"       AS \"sedePrimariaCDS\""
-          + ",\"CodiceADWI\"            AS \"codiceADWI\""
-          + ",\"CodiceADUGOV\"          AS \"codiceADUGOV\""
-          + ",\"AD\"                    AS \"nomeInsegnamento\""
-          + ",\"Modulo\"                AS \"modulo\""
-          + ",\"UL\"                    AS \"ul\""
-          + ",\"Discriminante\"         AS \"discriminante\""
-          + ",\"CFUtotali\"             AS \"crediti\""
-          + ",\"CFUtotali\"             AS \"creditiTotali\""
-          //+ ",\"CFUlezione\"            AS \"creditiLezione\""
-          + ",\"SSD\"                   AS \"SSD\""
-          + ",\"CognomeDocente\"        AS \"cognomeDocente\""
-          + ",\"NomeDocente\"           AS \"nomeDocente\""
-          + ",\"CodiceFiscaleDocente\"  AS \"codiceFiscaleDocente\""
-          + ",\"Coordinatore\"          AS \"coordinatore\""
-          + ",\"Orelezione\"            AS \"oreLezione\""
-          + ",\"Orelaboratorio\"        AS \"oreLaboratorio\""
-          + ",\"Orealtro\"              AS \"oreAltro\""
-          + ",\"Oreseminario\"          AS \"oreSeminario\""
-          + ",\"Oreesercitazione\"      AS \"oreEsercitazione\""
-          + ",\"Oretirocinio\"          AS \"oreTirocinio\""
-          + ",\"InizioPerDid\"          AS \"inizioPerDid\""
-          + ",\"FinePerDid\"            AS \"finePerDid\""
-          + " FROM \"UL-2018-I\" UL"
-          + " ORDER BY \"codiceFiscaleDocente\", \"codiceADUGOV\", \"codiceCdSUGOV\", \"inizioPerDid\", \"finePerDid\""
-          + " --ORDER BY \"id\" "
-          + " --LIMIT 30";
     
 }
