@@ -50,7 +50,7 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 
 import it.alma.qol.DBWrapper;
-import it.alma.Query;
+import it.alma.qol.Query;
 import it.alma.bean.CourseBean;
 import it.alma.bean.ItemBean;
 import it.alma.command.Command;
