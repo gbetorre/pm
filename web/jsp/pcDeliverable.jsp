@@ -26,7 +26,7 @@
       <hr class="separatore" /> 
       <div class="tab-content responsive hidden-xs hidden-sm">
         <div role="tabpanel" class="tab-pane active" id="tab-pcdeliverable">
-          <textarea name="pcd-descrizione" class="form-control" aria-label="With textarea" maxlength="1024" readonly>${p.deliverable}</textarea>
+          <textarea name="pcd-descrizione" class="form-control" aria-label="With textarea" maxlength="8104" readonly>${p.deliverable}</textarea>
           <div class="charNum"></div>
         </div>
       </div>
