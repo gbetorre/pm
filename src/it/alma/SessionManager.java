@@ -52,6 +52,7 @@ import javax.servlet.http.HttpSession;
 import com.oreilly.servlet.ParameterParser;
 
 import it.alma.bean.ActivityBean;
+import it.alma.bean.DepartmentBean;
 import it.alma.bean.PersonBean;
 import it.alma.bean.ProjectBean;
 import it.alma.bean.RiskBean;
@@ -199,6 +200,7 @@ public class SessionManager extends HttpServlet {
                 req.getRequestDispatcher("/jsp/login.jsp").include(req, res);
             }
             else {
+                Vector<DepartmentBean> userWritableDepts = db.getWritableDeparts(username);
                 Vector<ProjectBean> userWritableProjects = db.getWritableProjects(username);
                 LinkedHashMap<Integer, Vector<ActivityBean>> userWritableActivitiesByProject = new LinkedHashMap<Integer, Vector<ActivityBean>>();
                 LinkedHashMap<Integer, Vector<SkillBean>> userWritableSkillsByProject = new LinkedHashMap<Integer, Vector<SkillBean>>();
@@ -213,6 +215,7 @@ public class SessionManager extends HttpServlet {
                     Vector<RiskBean> userWritableRisks = db.getRisks(idPrj);
                     userWritableARisksByProject.put(key, userWritableRisks);
                 }
+                session.setAttribute("writableDeparments", userWritableDepts);
                 session.setAttribute("writableProjects", userWritableProjects);
                 session.setAttribute("writableActivity", userWritableActivitiesByProject);
                 session.setAttribute("writableSkills", userWritableSkillsByProject);
