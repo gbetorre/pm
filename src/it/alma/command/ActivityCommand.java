@@ -444,7 +444,7 @@ public class ActivityCommand extends ItemBean implements Command {
             formParams.put(Query.PART_PROJECT_CHARTER_MILESTONE, pcm);
         } 
         /* **************************************************** *
-         *           Ramo di INSERT di una Attivita'            *
+         *       Ramo di INSERT / UPDATE di una Attivita'       *
          * **************************************************** */
         else if (part.equalsIgnoreCase(Query.ADD_ACTIVITY_TO_PROJECT) || part.equalsIgnoreCase(Query.MODIFY_PART)) {
             GregorianCalendar date = Utils.getUnixEpoch();
@@ -461,6 +461,7 @@ public class ActivityCommand extends ItemBean implements Command {
             act.put("act-gueffettivi",  parser.getStringParameter("act-gueffettivi", Utils.VOID_STRING));
             act.put("act-gurimanenti",  parser.getStringParameter("act-gurimanenti", Utils.VOID_STRING));
             act.put("act-progress",     parser.getStringParameter("act-progress", null));
+            act.put("act-result",       parser.getStringParameter("act-result", null));
             act.put("act-people",       parser.getStringParameter("act-people", Utils.VOID_STRING));
             act.put("act-role",         parser.getStringParameter("act-role", Utils.VOID_STRING));
             act.put("act-milestone",    parser.getStringParameter("act-milestone", Utils.VOID_STRING));
