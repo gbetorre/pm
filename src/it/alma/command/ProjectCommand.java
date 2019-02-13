@@ -40,15 +40,17 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import com.oreilly.servlet.ParameterNotFoundException;
 import com.oreilly.servlet.ParameterParser;
 
 import it.alma.DBWrapper;
@@ -57,6 +59,7 @@ import it.alma.Query;
 import it.alma.Utils;
 import it.alma.bean.ActivityBean;
 import it.alma.bean.CodeBean;
+import it.alma.bean.DepartmentBean;
 import it.alma.bean.ItemBean;
 import it.alma.bean.PersonBean;
 import it.alma.bean.ProjectBean;
@@ -136,8 +139,8 @@ public class ProjectCommand extends ItemBean implements Command {
         nomeFile.put(Query.PART_PROJECT_CHARTER_RISK, "/jsp/pcRischi.jsp");
         nomeFile.put(Query.PART_PROJECT_CHARTER_CONSTRAINT, "/jsp/pcVincoli.jsp");
         nomeFile.put(Query.PART_PROJECT_CHARTER_MILESTONE, "/jsp/pcMilestone.jsp");
-        nomeFile.put(Query.PART_WBS, "/jsp/projWBS.jsp");
-        nomeFile.put(Query.PART_ACTIVITY, "/jsp/projActivities.jsp");
+        //nomeFile.put(Query.PART_WBS, "/jsp/projWBS.jsp");
+        //nomeFile.put(Query.PART_ACTIVITY, "/jsp/projActivities.jsp");
         nomeFile.put(Query.PART_STATUS, "/jsp/projStatus.jsp");
         nomeFile.put(Query.CREDITS, "/jsp/credits.jsp");
         nomeFile.put(Query.PART_PROJECT, this.getPaginaJsp());
@@ -175,27 +178,29 @@ public class ProjectCommand extends ItemBean implements Command {
         // Dichiara la pagina a cui reindirizzare
         String fileJspT = null;
         // Dichiara elenco di progetti
-        Vector<ProjectBean> v = new Vector<ProjectBean>();
-        // Dichiara lista di valori di stati avanzamento 
+        ConcurrentHashMap<Integer, Vector<ProjectBean>> m = new ConcurrentHashMap<Integer, Vector<ProjectBean>>();
+        // Dichiara mappa di dipartimenti indicizzata per id
+        HashMap<Integer, DepartmentBean> d = null;
+        // Dichiara lista di valori di stati avanzamento
         LinkedList<CodeBean> statiValues = null;
         // Dichiara elenco di competenze
         Vector<SkillBean> vSkills = new Vector<SkillBean>();
         // Dichiara elenco di rischi
         Vector<RiskBean> vRisks = new Vector<RiskBean>();
-        // Dichiara elenco di wbs
-        Vector<WbsBean> vWBS = new Vector<WbsBean>();
         // Dichiara l'elenco degli status di un progetto
         ArrayList<StatusBean> projectStatusList = new ArrayList<StatusBean>();
-        // Dichiara l'avanzamento progetto più recente
+        // Dichiara l'avanzamento progetto piÃ¹ recente
         StatusBean projectStatus = null;
-        // Dichiara l'elenco delle attività presenti in un range di date
+        // Dichiara l'elenco delle attivitÃ  presenti in un range di date
         Vector<ActivityBean> activitiesByRange = null;
-        // Dichiara l'elenco delle attività con data inizio compresa tra due date
+        // Dichiara l'elenco delle attivitï¿½ con data inizio compresa tra due date
         Vector<ActivityBean> activitiesByDate = null;
         // Dichiara l'avanzamento progetto successivo a quello di partenza
         StatusBean nextStatus = null;
         // Dichiara l'id massimo della tabella avanzamentoprogetto
         int newStatusId = -1;
+        // Flag specificante se l'utente vede almeno un progetto
+        boolean checkThisOut = false;
         /* ******************************************************************** *
          *      Instanzia nuova classe WebStorage per il recupero dei dati      *
          * ******************************************************************** */
@@ -266,7 +271,7 @@ public class ProjectCommand extends ItemBean implements Command {
                                  * **************************************************** */
                                 db.updateProjectPart(idPrj, user.getId(), writableProjects, objectsMap, params);
                                 Vector<ProjectBean> userWritableProjects = db.getProjects(user.getId(), Query.GET_WRITABLE_PROJECTS_ONLY);
-                                // Aggiorna i progetti, le attività  dell'utente in sessione
+                                // Aggiorna i progetti, le attivita dell'utente in sessione
                                 ses.removeAttribute("writableProjects");
                                 ses.removeAttribute("writableActivity");
                                 ses.setAttribute("writableProjects", userWritableProjects);
@@ -306,12 +311,12 @@ public class ProjectCommand extends ItemBean implements Command {
                     if (part.equals(Query.PART_PROJECT)) {
                         ; // Codice per mostrare dati aggregati sul progetto, o relazioni o altro
                     } else if (part.equals(Query.PART_STATUS)) {
-                        // Testa se l'id dello status è significativo
+                        // Testa se l'id dello status Ã¨ significativo
                         if (idStatus > Query.NOTHING) {
                             // Recupera uno specifico status di progetto di dato id
                             projectStatus = db.getStatus(idStatus);
-                        } else if (idStatus == Query.NOTHING) { // Valore fittizio (nessuno status può avere id = 0!)
-                            // Recupera l'ultimo Status, cioè quello avente datainizio più prossima alla data odierna
+                        } else if (idStatus == Query.NOTHING) { // Valore fittizio (nessuno status puÃ² avere id = 0!)
+                            // Recupera l'ultimo Status, cioÃ¨ quello avente datainizio piï¿½ prossima alla data odierna
                             Date dateProjectStatus = new Date(0);
                             if (!projectStatusList.isEmpty()) {
                                 for (int i = 0; i < projectStatusList.size(); i++) {
@@ -329,14 +334,14 @@ public class ProjectCommand extends ItemBean implements Command {
                             projectStatus = db.getStatus(idPrj, dateProjectStatus);
                         }
                         if (projectStatus != null) {
-                            // Recupera la lista di attività presenti in un range di date
+                            // Recupera la lista di attivitÃ  presenti in un range di date
                             activitiesByRange = db.getActivitiesByRange(idPrj, projectStatus.getDataInizio(), projectStatus.getDataFine());
                             nextStatus = db.getNextStatus(idPrj, projectStatus.getDataFine());
                             if (nextStatus != null) {
-                                // Recupera la lista di attività con data inizio compresa tra due date
+                                // Recupera la lista di attivitï¿½ con data inizio compresa tra due date
                                 activitiesByDate = db.getActivitiesByDate(idPrj, nextStatus.getDataInizio(), nextStatus.getDataFine());
                             } else {
-                                // Recupera la lista di attività con data inizio nel futuro rispetto alla data di fine dello status attuale
+                                // Recupera la lista di attivitï¿½ con data inizio nel futuro rispetto alla data di fine dello status attuale
                                 activitiesByDate = db.getActivities(idPrj, user, projectStatus.getDataFine(), false, true);
                             }
                         }
@@ -345,12 +350,14 @@ public class ProjectCommand extends ItemBean implements Command {
                     } else if (part.contains(Query.PART_PROJECT_CHARTER_RISK)) {
                         vRisks = db.getRisks(idPrj);
                     } /*else if(part.equals(Query.PART_WBS)) {
-                        vWBS = db.getWbs(idPrj, Query.WBS_ALL);
+                        vWBS = db.getWbs(idPrj, Query.WBS_GET_ALL);
                     }*/
                 }
                 fileJspT = nomeFile.get(part);
             } else {
-                v = db.getProjects(user.getId(), Query.GET_ALL);
+                m = db.getProjectsByDepart(user.getId());
+                d = db.getDeparts();
+                checkThisOut = decant(m);
                 fileJspT = nomeFileElenco;
             }
         } catch (AttributoNonValorizzatoException anve) {
@@ -372,26 +379,32 @@ public class ProjectCommand extends ItemBean implements Command {
         }
         /* ******************************************************************** *
          *              Settaggi in request dei valori calcolati                *
-         * ******************************************************************** */    
-        // Salva nella request elenco progetti
-        req.setAttribute("progetti", v);
-        // Salva nella request dettaglio progetto
+         * ******************************************************************** */  
+        // Imposta nella request elenco dipartimenti, se presente
+        if (d != null) {
+            req.setAttribute("dipart", d);
+        }
+        // Imposta flag 'true' se l'utente loggato vede almeno un progetto
+        req.setAttribute("checkThisOut", checkThisOut);
+        // Imposta nella request elenco progetti
+        req.setAttribute("progetti", m);
+        // Imposta nella request dettaglio progetto
         req.setAttribute("progetto", runtimeProject);
-        // Salva nella request elenco competenze del progetto
+        // Imposta nella request elenco competenze del progetto
         req.setAttribute("competenze", vSkills);
-        // Salva nella request elenco rischi del progetto
+        // Imposta nella request elenco rischi del progetto
         req.setAttribute("rischi", vRisks);
-        // Salva nella request elenco degli status di un progetto
+        // Imposta nella request elenco degli status di un progetto
         req.setAttribute("listProjectStatus", projectStatusList);
-        // Salva nella request l'avanzamento progetto più recente
+        // Imposta nella request l'avanzamento progetto piï¿½ recente
         req.setAttribute("projectStatus", projectStatus);
-        // Salva nella request i valori degli stati di un'avanzamento progetto
+        // Imposta nella request i valori degli stati di un'avanzamento progetto
         req.setAttribute("statiValues", statiValues);
-        // Salva nella request l'id massimo della tabella avanzamentoprogetto
+        // Imposta nella request l'id massimo della tabella avanzamentoprogetto
         req.setAttribute("newStatusId", newStatusId);
-        // Salva nella request l'elenco delle attività presenti in un range di date
+        // Imposta nella request l'elenco delle attivitÃ  presenti in un range di date
         req.setAttribute("activitiesByRange", activitiesByRange);
-        // Salva nella request l'elenco delle attività con data inizio compresa tra due date
+        // Imposta nella request l'elenco delle attivitÃ  con data inizio compresa tra due date
         req.setAttribute("activitiesByDate", activitiesByDate);
         // Imposta la Pagina JSP di forwarding
         req.setAttribute("fileJsp", fileJspT);
@@ -591,6 +604,59 @@ public class ProjectCommand extends ItemBean implements Command {
         map.put(Query.PART_PROJECT_CHARTER_RESOURCE, skillsByProject);
         map.put(Query.PART_PROJECT_CHARTER_RISK, risksByProject);
         return map;
+    }
+    
+    
+    /**
+     * <p>Restituisce 'true' se almeno uno dei dipartimenti il cui identificativo
+     * viene usato come chiave di una mappa sincronizzata passata come 
+     * argomento ha progetti associati per l'utente loggato. 'False' 
+     * se neanche un dipartimento di cui sopra ha almeno 
+     * un progetto associato per l'utente loggato.</p>
+     * <p>Attenzione: 'false' di questo metodo non significa che nessun 
+     * dipartimento ha alcun progetto, cio&egrave; che non esistono progetti,
+     * ma semplicemente che l'utente che si &egrave; loggato (in base al
+     * quale la mappa sincronizzata viene costruita) non ha diritto di vederne
+     * alcuno.</p>
+     * <p>Pi&uacute; in generale, questo metodo potrebbe essere usato per 
+     * verificare se in una mappa esiste almeno un valore significativo
+     * (quantunque le chiavi esistano, ed &egrave; per questo che c'&egrave;
+     * bisogno di un metodo di calcolo, in quanto il test JSTL fatto nella
+     * pagina JSP con ${not empty map} non funziona: perch&eacute; in effetti 
+     * la map non &egrave; empty!).</p>
+     * 
+     * @param map una mappa sincronizzata contenente i progetti indicizzati per Wrapper di identificativo dipartimentale
+     * @return <code>boolean</code> - true se e' stato estratto almeno un progetto in uno dei possibili dipartimenti, false altrimenti
+     * @throws CommandException se si verifica un problema nello scorrimento di liste o in qualche tipo di puntmaneto
+     */
+    private static boolean decant(ConcurrentHashMap<Integer, Vector<ProjectBean>> map) 
+                           throws CommandException {
+        try {
+            Iterator<Map.Entry<Integer, Vector<ProjectBean>>> it = map.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry<Integer, Vector<ProjectBean>> entry = it.next();
+                if (entry.getValue().size() > 0) {
+                    return true;
+                }
+            }
+            return false;
+        } catch (ArrayIndexOutOfBoundsException aiobe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento fuori tabella.\n" + aiobe.getMessage();
+            LOG.severe(msg);
+            throw new CommandException(msg, aiobe);
+        } catch (ClassCastException cce) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di conversione di tipo.\n" + cce.getMessage();
+            LOG.severe(msg);
+            throw new CommandException(msg, cce);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento.\n" + npe.getMessage();
+            LOG.severe(msg);
+            throw new CommandException(msg, npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel calcolo di un boolean da un Dictionary.\n" + e.getMessage();
+            LOG.severe(msg);
+            throw new CommandException(msg, e);
+        }
     }
     
 }
