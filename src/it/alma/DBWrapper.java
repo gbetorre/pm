@@ -568,16 +568,20 @@ public class DBWrapper implements Query {
     
     
     /**
-     * <p>Restituisce una mappa contenente i progetti visibili dall'utente
-     * loggato, indicizzati per identificativo del dipartimento.</p>
+     * <p>Restituisce una mappa sincronizzata contenente 
+     * i progetti visibili dall'utente loggato, indicizzati 
+     * per identificativo del dipartimento.<br />
+     * L'identificativo del dipartimento &egrave incapsulato 
+     * in un oggetto Wrapper di tipo primitivo, a causa dell'implementazione
+     * delle mappe di Java, che accettano solo oggetti come chiavi.</p>
      * 
      * @param userId identificativo della persona di cui si vogliono recuperare i progetti
      * @return <code>Vector&lt;ProjectBean&gt;</code> - ProjectBean rappresentante i progetti dell'utente loggato
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
     @SuppressWarnings({ "null", "static-method" })
-    public HashMap<Integer, Vector<ProjectBean>> getProjectsByDepart(int userId)
-                                                              throws WebStorageException {
+    public ConcurrentHashMap<Integer, Vector<ProjectBean>> getProjectsByDepart(int userId)
+                                                                        throws WebStorageException {
         ResultSet rs, rs1, rs2 = null;
         Connection con = null;
         PreparedStatement pst = null;
@@ -588,7 +592,7 @@ public class DBWrapper implements Query {
         int idStatoProgetto = -1;
         Integer key = null;
         Vector<ProjectBean> v = null;
-        HashMap<Integer, Vector<ProjectBean>> projects = new HashMap<Integer, Vector<ProjectBean>>();
+        ConcurrentHashMap<Integer, Vector<ProjectBean>> projects = new ConcurrentHashMap<Integer, Vector<ProjectBean>>();
         try {
             con = pol_manager.getConnection();
             pst = con.prepareStatement(GET_DIPART);
