@@ -44,9 +44,7 @@ import java.util.Vector;
 
 
 /**
- * <p>PersonBean &egrave; l'oggetto che rappresenta l'elemento
- * pi&uacute; importante, ed uno dei pi&uacute; complessi, dell'applicazione
- * web <code>alma on line</code>.</p>
+ * <p>PersonBean &egrave; l'oggetto che rappresenta una persona fisica.</p>
  * 
  * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
  */
@@ -72,7 +70,7 @@ public class PersonBean implements Serializable {
     /** Attributo che memorizza la data di nascita della persona */
     private Date dataNascita;
     /** Sesso attuale della persona */
-    private char sesso;
+    private String sesso;
     /** Numero telefonico dell'ufficio della persona */
     private String telefono;
     /** Cellulare (di servizio) della persona */
@@ -153,7 +151,7 @@ public class PersonBean implements Serializable {
         mansione = sezione = null;
         dataNascita = new Date(0);
         esterno = mostraPersonale = mostraTelefono = tempoPieno = oblio = false;
-        sesso = ' ';
+        sesso = null;
         caricaInOrganoCol = null;
         nomeCiclo = null;
         skypeid = null;
@@ -686,8 +684,8 @@ public class PersonBean implements Serializable {
      * Getter for property sesso.
      * @return Value of property sesso.
      */
-    public char getSesso() throws AttributoNonValorizzatoException {
-        if (sesso == ' ') {
+    public String getSesso() throws AttributoNonValorizzatoException {
+        if (sesso == null) {
             throw new AttributoNonValorizzatoException("PersonBean: attributo sesso non valorizzato!");
         } else {
             return this.sesso;
@@ -698,7 +696,7 @@ public class PersonBean implements Serializable {
      * Setter for property sesso.
      * @param sesso New value of property sesso.
      */
-    public void setSesso(char sesso) {
+    public void setSesso(String sesso) {
         // lun giu 13 15:37:39 CEST 2005
         // NO BUONO: non mettere i controlli nel bean altrimenti nel debug
         // si impazzisce (in genere non si va a pensare a inizializzazioni
@@ -709,8 +707,8 @@ public class PersonBean implements Serializable {
         
         /* if (sesso == '1' ) this.sesso = 'M'; else this.sesso = 'F'; */
         
-        if ((sesso != 'M') && (sesso != 'F') && (sesso != 'm') && (sesso != 'f'))  
-            this.sesso = 'm';
+        if (!sesso.equals("M") && !sesso.equals("F") && !sesso.equals("m") && !sesso.equals("f"))  
+            this.sesso = "m";
         else
             this.sesso = sesso;
     }
