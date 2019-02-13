@@ -9,7 +9,11 @@
           <div class="col-9">
             <p class="pHeader">
               <span class="right">
-                BENVENUTO
+              <c:set var="benve" value="BENVENUTO" scope="page" />
+              <c:if test="${sessionScope.usr.sesso eq 'F'}">
+                <c:set var="benve" value="BENVENUTA" scope="page" />
+              </c:if>
+                <c:out value="${benve}" />
                 <c:out value="${sessionScope.usr.nome}" />
                 <c:out value="${sessionScope.usr.cognome}" />&nbsp;
                 <a class="btn btn-outline-danger" href="${initParam.appName}/auth?q=logout" >Esci</a>
