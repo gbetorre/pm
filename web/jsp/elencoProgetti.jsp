@@ -1,6 +1,6 @@
 <%@ include file="pcURL.jspf" %>
 <c:choose>
-  <c:when test="${not empty requestScope.progetti}">
+  <c:when test="${requestScope.checkThisOut}">
     <br />
     <h3>Elenco dei sottoprogetti di ${sessionScope.usr.nome} ${sessionScope.usr.cognome}</h3>
     <br />
