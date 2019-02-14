@@ -262,3 +262,11 @@ hr.riga       {
   padding: 10px 10px 10px 10px;
   margin-bottom: 10px;
 }
+
+.module2 {
+  background-image: linear-gradient(to top, #ff99ff, white);
+  border-style: groove;
+  border-radius: 10px 10px 10px 10px;
+  padding: 10px 10px 10px 10px;
+  margin-bottom: 10px;
+}
