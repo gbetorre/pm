@@ -159,16 +159,14 @@ public class WbsCommand extends ItemBean implements Command {
         boolean isFooter = true;
         // Utente loggato
         PersonBean user = null;
-        // Dichiara elenco di progetti
-        Vector<ProjectBean> v = new Vector<ProjectBean>();
         // Dichiara elenco di wbs
         Vector<WbsBean> vWbs = new Vector<WbsBean>();
         // Dichiara elenco di wbs non workpackage
         Vector<WbsBean> wbs = new Vector<WbsBean>();
         // Dichiara l'elenco di wbs figlie di una wbs
         Vector<WbsBean> wbsOfWbs = new Vector<WbsBean>();
-        // Dichiara l'elenco delle attivit� di una wbs di tipo workpackage
-        Vector<ActivityBean> activitiesOfWbs = new Vector<ActivityBean>();
+        // Dichiara l'elenco delle attivit di una wbs di tipo workpackage
+        Vector<ActivityBean> wbsActivities = new Vector<ActivityBean>();
         // Dichiara la wbs richiesta dall'utente nel caso di modifica di una wbs
         WbsBean wbsInstance = null;
         // Dichiara lista di valori di stati attività
@@ -279,8 +277,8 @@ public class WbsCommand extends ItemBean implements Command {
                          * ************************************************ */
                         Integer idWbsToDel = Integer.parseInt(parser.getStringParameter("wbs-select",  Utils.VOID_STRING));
                         wbsOfWbs = db.getWbsFiglie(idPrj, idWbsToDel);
-                        activitiesOfWbs = db.getActivitiesByWbs(idWbsToDel, idPrj);
-                        if (activitiesOfWbs.isEmpty() && wbsOfWbs.isEmpty()) {
+                        wbsActivities = db.getActivitiesByWbs(idWbsToDel, idPrj);
+                        if (wbsActivities.isEmpty() && wbsOfWbs.isEmpty()) {
                             db.deleteWbs(runtimeProject.getIdDipart(), idWbsToDel);
                             redirect = "q=" + Query.PART_WBS + "&id=" + idPrj;
                         }
@@ -289,12 +287,14 @@ public class WbsCommand extends ItemBean implements Command {
                     /* ************************************************ *
                      *                  SELECT Wbs Part                 *
                      * ************************************************ */
-                    if (nomeFile.containsKey(part)) {
-                        // Ramo per aggiunta e modifica wbs
+                    // Ramo per aggiunta e modifica wbs
+                    if (nomeFile.containsKey(part)) { 
+                        // Seleziona tutte le WBS non workpackage per mostrare i possibili padri nella pagina di dettaglio
                         wbs = db.getWbs(idPrj, Query.WBS_BUT_WP);
                         if (idWbs != Utils.DEFAULT_ID) {
                             today = Utils.format(Utils.getCurrentDate());
                             wbsInstance = db.getWbsInstance(idPrj, idWbs);
+                            wbsActivities = db.getActivitiesByWbs(idWbs, idPrj);
                         }
                         fileJspT = nomeFile.get(part);
                     } else {
@@ -354,7 +354,7 @@ public class WbsCommand extends ItemBean implements Command {
         // Imposta nella request l'elenco delle wbs che sono figlie di quella selezionata
         req.setAttribute("wbsFiglie", wbsOfWbs);
         // Imposta nella request l'elenco delle attivit� che appartengono alla wbs selezionata
-        req.setAttribute("attivitaWbs", activitiesOfWbs);
+        req.setAttribute("attivitaWbs", wbsActivities);
         // Imposta nella request elenco wbs associabili
         req.setAttribute("statiAttivita", states);
         // Imposta nella request data di oggi 
