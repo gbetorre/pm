@@ -8,7 +8,7 @@
     <c:set var="distinguishingSubmitName" value="${fn:substring(fn:substringAfter(paramAsToken, '='), 0, 3)}" scope="page" />
   </c:if>
 </c:forTokens>
-    <c:set var="years" value="2018,2019,2020,2021,2022,2023" scope="page" />
+    <c:set var="years" value="2018,2019,2020,2021,2022" scope="page" />
     <form id="monitor_form" name="miur" action="#" method="post">
       <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
       <c:forTokens var="year" items="${years}" delims=",">
@@ -28,23 +28,23 @@
       <div class="tab-content responsive hidden-xs hidden-sm">
         <div role="tabpanel" class="tab-pane active" id="tab-pcvision">
           <label for="mon-d4">QUADRO D.4 Reclutamento del personale</label><br />
-          <textarea id="mon-d4" name="mon-d4" class="form-control" aria-label="With textarea" maxlength="8104" readonly>${m.quadroD4}</textarea>
+          <textarea id="mon-d4" name="mon-d4" class="form-control" aria-label="With textarea" maxlength="22000" readonly>${m.quadroD4}</textarea>
           <div class="charNum"></div>
           <br /><br />
           <label for="mon-d5">QUADRO D.5 Infrastrutture</label><br />
-          <textarea id="mon-d5" name="mon-d5" class="form-control" aria-label="With textarea" maxlength="8104" readonly>${m.quadroD5}</textarea>
+          <textarea id="mon-d5" name="mon-d5" class="form-control" aria-label="With textarea" maxlength="22000" readonly>${m.quadroD5}</textarea>
           <div class="charNum"></div>
           <br /><br />
           <label for="mon-d6">QUADRO D.6 Premialit&agrave;</label><br />
-          <textarea id="mon-d6" name="mon-d6" class="form-control" aria-label="With textarea" maxlength="8104" readonly>${m.quadroD6}</textarea>
+          <textarea id="mon-d6" name="mon-d6" class="form-control" aria-label="With textarea" maxlength="22000" readonly>${m.quadroD6}</textarea>
           <div class="charNum"></div>
           <br /><br />
           <label for="mon-d7">QUADRO D.7 Attivit&agrave; didattiche di eleveta qualificazione</label><br />
-          <textarea id="mon-d7" name="mon-d7" class="form-control" aria-label="With textarea" maxlength="8104" readonly>${m.quadroD7}</textarea>
+          <textarea id="mon-d7" name="mon-d7" class="form-control" aria-label="With textarea" maxlength="22000" readonly>${m.quadroD7}</textarea>
           <div class="charNum"></div>
           <br /><br />
           <label for="mon-d8">QUADRO D.8 Modalit&agrave; e fasi del monitoraggio</label><br />
-          <textarea id="mon-d8" name="mon-d8" class="form-control" aria-label="With textarea" maxlength="8104" readonly>${m.quadroD8}</textarea>
+          <textarea id="mon-d8" name="mon-d8" class="form-control" aria-label="With textarea" maxlength="22000" readonly>${m.quadroD8}</textarea>
           <div class="charNum"></div>
           <br /><br />
           <div id="container-fluid">
