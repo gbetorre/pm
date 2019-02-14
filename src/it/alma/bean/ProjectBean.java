@@ -135,6 +135,8 @@ public class ProjectBean implements Serializable, Query {
     private String serviziAteneo;
     /** Vincoli del progetto */
     private String vincoli;
+    /** Etichetta di classificazione sottoprogetto */
+    private String tag;
     /** Id del dipartimento del progetto*/
     private int idDipart;
     /** Dipartimento del progetto */
@@ -167,6 +169,7 @@ public class ProjectBean implements Serializable, Query {
     	fornitoriChiaveInterni =  fornitoriChiaveEsterni = null;
     	serviziAteneo = null; 
     	vincoli = null;
+    	tag = null;
     	idDipart = -2;
     	dipart = null;
     	idStatoProgetto = -2;
@@ -914,6 +917,26 @@ public class ProjectBean implements Serializable, Query {
 	}
 
 	
+    /* ************************************************* *
+     *        Metodi getter e setter per etichetta       *
+     * ************************************************* */
+    /**
+     * Restituisce l'etichetta del progetto
+     * @return <code>tag</code> - etichetta del progetto
+     */
+    public String getTag() {
+        return tag;
+    }
+
+    /**
+     * Imposta etichetta classificatoria del progetto
+     * @param label - etichetta del progetto da impostare
+     */
+    public void setTag(String label) {
+        tag = label;
+    }
+    
+    
 	/* ************************************************** *
      *         Metodi getter e setter per idDipart        *
      * ************************************************** */
