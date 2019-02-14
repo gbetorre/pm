@@ -401,6 +401,7 @@ public interface Query extends Serializable {
             //"   ,   PJ.fornitorichiaveesterni   AS \"fornitoriChiaveEsterni\"" + 
             //"   ,   PJ.serviziateneo            AS \"serviziAteneo\"" + 
             //"   ,   PJ.vincoli                  AS \"vincoli\"" + 
+            "   ,   PJ.sottotipo                AS \"tag\"" +
             "   FROM progetto PJ" + 
             "       INNER JOIN ruologestione RG ON PJ.id = RG.id_progetto" + 
             "       INNER JOIN persona P ON RG.id_persona = P.id" + 
