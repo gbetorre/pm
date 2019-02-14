@@ -10,24 +10,19 @@
       <div class="module">
         <c:set var="key" value="${entry.key}" scope="page" />
         <c:set var="d" value="${requestScope.dipart.get(key)}" />
-        
-<%--         <c:forEach var="a" items="${requestScope.dipart}"> --%>
-<%--         ${a.value.id} --%>
-<%--         </c:forEach> --%>
         <h4>Dipartimento di ${d.nome}</h4>
         <table class="table table-hover">
           <thead class="thead-light">
             <tr>
-  <!--        <th scope="col">ID</th> -->
-              <th scope="col">Titolo</th>
-              <th scope="col">Stato</th>
-              <th scope="col">Funzioni</th>
+              <th width="50%" scope="col">Titolo</th>
+              <th width="5%" scope="col">Stato</th>
+              <th width="40%" scope="col">Funzioni</th>
+              <th width="5%"scope="col">&nbsp;</th>
             </tr>
           </thead>
           <tbody>
             <c:forEach var="prj" items="${entry.value}" varStatus="loop">
             <tr>
-<%--          <td scope="row"><c:out value="${prj.id}" /></td> --%>
               <td scope="row"><a href="<c:out value="${progetto}${prj.id}" />"><c:out value="${prj.titolo}" /></a></td>
               <td scope="row"><c:out value="${prj.statoProgetto.nome}" escapeXml="false" /></td>
               <td width="40%" scope="row">
@@ -36,6 +31,7 @@
                 <a href="<c:out value= "${act}${prj.id}" />" class="btn btn-primary">Attivit&agrave;</a>
                 <a href="<c:out value= "${lastStatus}${prj.id}" />"  class="btn btn-primary">Status</a>
               </td>
+              <td><cite><c:out value="${prj.tag}" /></cite></td>
             </tr>
             </c:forEach>
             <c:if test="${not empty sessionScope.writableDeparments}">
