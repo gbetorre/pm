@@ -9,7 +9,7 @@
       <c:set var="wbsDescr" value="" scope="page" />
       <c:set var="isWorkpackage" value="" scope="page" />
       <c:set var="distinguishingSubmitId" value="${wbs}${p.id}" scope="page" />
-      <form id="newWbs_form" action="#" method="post">
+      <form id="newWbs_form" action="#" method="post" class="module2">
         <hr class="separatore" />
         <c:choose>
           <c:when test="${not empty wbsInstance}" >
@@ -153,3 +153,54 @@
           window.location = '${wbs}${p.id}';
         });*/
       </script>
+    <c:choose>
+      <c:when test="${not empty requestScope.attivitaWbs}">
+      <div class="subfields">
+      <h4>Attivit&agrave; di questa WBS</h4>
+      <table class="table table-bordered table-hover ">
+        <thead class="thead-light">
+        <tr>
+          <th scope="col">Nome</th>
+          <th scope="col">Descrizione</th>
+          <th scope="col"><div class="text-center">Milestone</div></th>
+        </tr>
+        </thead>
+        <tbody>
+        <c:set var="status" value="" scope="page" />
+        <c:forEach var="act" items="${requestScope.attivitaWbs}" varStatus="loop">
+          <c:set var="status" value="${loop.index}" scope="page" />
+          <tr>
+            <td scope="row" id="nameColumn">
+              <a href="${modAct}${p.id}&ida=${act.id}">
+                <c:out value="${act.nome}"/>
+              </a>
+            </td>
+            <td scope="row">
+              <c:out value="${act.descrizione}"/>
+            </td>
+            <td scope="row">
+              <c:choose>
+                <c:when test="${act.milestone}">
+                  <div class="form-check text-center">
+                    <input type="checkbox" class="form-check-input" id="act-milestone${status}" name="act-milestone${status}" checked disabled>
+                  </div>
+                </c:when>
+                <c:otherwise>
+                  <div class="form-check text-center">
+                    <input type="checkbox" class="form-check-input" id="act-milestone${status}" name="act-milestone${status}" disabled>
+                  </div>
+                </c:otherwise>
+              </c:choose>
+            </td>
+          </tr>
+        </c:forEach>
+        </tbody>
+      </table>
+      </div>
+      </c:when>
+      <c:otherwise>
+      <div class="alert alert-danger">
+        <p>Non &egrave; stata trovata alcuna attivit&agrave; associata alla WBS &quot;${wbsNome}&quot;.</p>
+      </div>
+      </c:otherwise>
+    </c:choose>
