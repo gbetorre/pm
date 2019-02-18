@@ -619,6 +619,23 @@ public interface Query extends Serializable {
             "   ORDER BY W.dataultimamodifica ASC";
     
     /**
+     * <p>Estrae le wbs di primo livello (= che non hanno padri) 
+     * relative ad un progetto, identificato tramite id, passato come parametro</p>
+     */
+    public static final String GET_TOP_WBS_BY_PROJECT =
+            "SELECT " +
+            "       W.id                    AS \"id\"" + 
+            "   ,   W.nome                  AS \"nome\"" + 
+            "   ,   W.descrizione           AS \"descrizione\"" + 
+            "   ,   W.workpackage           AS \"workPackage\"" + 
+            "   ,   W.noteavanzamento       AS \"noteAvanzamento\"" +
+            "   ,   W.risultatiraggiunti    AS \"risultatiRaggiunti\"" +
+            "   FROM wbs W" +
+            "   WHERE W.id_progetto = ?" + 
+            "       AND W.id_wbs IS NULL" +
+            "   ORDER BY W.dataultimamodifica ASC";
+    
+    /**
      * <p>Estrae i workpackage relative ad un progetto, identificato tramite id, passato come parametro</p>
      */
     public static final String GET_WP_BY_PROJECT =
