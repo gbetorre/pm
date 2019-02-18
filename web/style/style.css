@@ -270,3 +270,21 @@ hr.riga       {
   padding: 10px 10px 10px 10px;
   margin-bottom: 10px;
 }
+
+.moduleThin {
+  background-image: linear-gradient(to top, #ffff99, white);
+  border-style: groove;
+  border-width: thin;
+  border-radius: 10px 10px 10px 10px;
+  padding: 10px 10px 10px 10px;
+  margin-top: 10px;
+}
+
+.moduleThin2 {
+  background-image: linear-gradient(to top, #999966, white);
+  border-style: groove;
+  border-width: thin;
+  border-radius: 10px 10px 10px 10px;
+  padding: 10px 10px 10px 10px;
+  margin-top: 10px;
+}
