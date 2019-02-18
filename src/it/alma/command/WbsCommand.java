@@ -161,6 +161,8 @@ public class WbsCommand extends ItemBean implements Command {
         PersonBean user = null;
         // Dichiara elenco di wbs
         Vector<WbsBean> vWbs = new Vector<WbsBean>();
+        // Dichiara elenco di wbs in gerarchia
+        Vector<WbsBean> vWbsAncestors  = new Vector<WbsBean>();
         // Dichiara elenco di wbs non workpackage
         Vector<WbsBean> wbs = new Vector<WbsBean>();
         // Dichiara l'elenco di wbs figlie di una wbs
@@ -287,7 +289,7 @@ public class WbsCommand extends ItemBean implements Command {
                     /* ************************************************ *
                      *                  SELECT Wbs Part                 *
                      * ************************************************ */
-                    // Ramo per aggiunta e modifica wbs
+                    // Selezioni per visualizzazione, aggiunta e modifica wbs
                     if (nomeFile.containsKey(part)) { 
                         // Seleziona tutte le WBS non workpackage per mostrare i possibili padri nella pagina di dettaglio
                         wbs = db.getWbs(idPrj, Query.WBS_BUT_WP);
@@ -300,6 +302,7 @@ public class WbsCommand extends ItemBean implements Command {
                     } else {
                         // Se il parametro 'p' non è presente, deve solo selezionare tutte le wbs
                         vWbs = db.getWbs(idPrj, Query.WBS_GET_ALL);
+                        vWbsAncestors = db.getWbsHierarchy(idPrj);
                         fileJspT = nomeFileElenco;
                     }
                 }
@@ -349,6 +352,7 @@ public class WbsCommand extends ItemBean implements Command {
         req.setAttribute("allWbs", vWbs);
         // Imposta nella request elenco di tutte le wbs non workpackage del progetto
         req.setAttribute("wbs", wbs);
+        req.setAttribute("wbsHierarchy", vWbsAncestors);
         // Imposta nella request la wbs richiesta dall'utente in fase di modifica di una wbs
         req.setAttribute("wbsInstance", wbsInstance);
         // Imposta nella request l'elenco delle wbs che sono figlie di quella selezionata
