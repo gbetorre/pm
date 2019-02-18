@@ -37,6 +37,7 @@
 package it.alma.bean;
 
 import java.io.Serializable;
+import java.util.Vector;
 
 import it.alma.Query;
 import it.alma.exception.AttributoNonValorizzatoException;
@@ -74,8 +75,10 @@ public class WbsBean implements Serializable, Query {
     private String descrizione;
     /** Work package true se WBS is work package */
     private boolean workPackage;
-    /** Attributo identificativo della WBS padre */
+    /** Attributo identificativo della WBS padre della WBS corrente */
     private WbsBean wbsPadre;
+    /** Attributo identificativo delle WBS figlie della WBS corrente */
+    private Vector<WbsBean> wbsFiglie;
     /** Note di avanzamento della WBS */
     private String noteAvanzamento;
     /** Risultati raggiunti da questa WBS */
@@ -91,6 +94,7 @@ public class WbsBean implements Serializable, Query {
 		descrizione = null;
 		workPackage = false;
 		wbsPadre = null;
+		wbsFiglie = null;
 		noteAvanzamento = risultatiRaggiunti = null;
 	}
 
@@ -201,6 +205,31 @@ public class WbsBean implements Serializable, Query {
     public void setWbsPadre(WbsBean wbsPadre) {
         this.wbsPadre = wbsPadre;
     }
+    
+    
+    /* ********************************************************* *
+     *         Metodi getter e setter per workPackage            *
+     * ********************************************************* */
+    /**
+     * Restituisce il Vector di bean rappresentante l'elenco 
+     * delle WBS figlie della WBS corrente.
+     * 
+     * @return <code>Vector&lt;WbsBean&gt;</code> -  elenco WBS figlie da restituire
+     */
+    public Vector<WbsBean> getWbsFiglie() {
+        return wbsFiglie;
+    }
+
+    /**
+     * Imposta il Vector di bean rappresentante l'elenco 
+     * delle WBS figlie della WBS corrente.
+     * 
+     * @param wbsFiglie - elenco WBS figlie da impostare
+     */
+    public void setWbsFiglie(Vector<WbsBean> wbsFiglie) {
+        this.wbsFiglie = wbsFiglie;
+    }
+    
 
     /* ********************************************************* *
      *       Metodi getter e setter per noteAvanzamento          *
