@@ -40,15 +40,15 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Vector;
 
-import it.alma.Query;
 import it.alma.exception.AttributoNonValorizzatoException;
 
 /**
  * <p>Classe usata per rappresentare un'attivit&agrave;.</p>
  * 
  * @author <a href="mailto:andrea.tonel@studenti.univr.it">Andrea Tonel</a>
+ * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
  */
-public class ActivityBean extends CodeBean implements Serializable, Query {
+public class ActivityBean extends CodeBean implements Serializable {
 
 	/**
      * La serializzazione necessita di dichiarare una costante di tipo long
@@ -115,6 +115,8 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
     private int idComplessita;
     /** Riferimento allo stato in cui si trova l'attivit&agrave; */
     private int idStato;
+    /** Stato esatto in cui si trova l'attivit&agrave; */
+    private CodeBean stato;
     
     /**
      * <p>Costruttore: inizializza i campi a valori di default.</p>
@@ -129,6 +131,7 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
     	milestone = false;
     	persone = null;
     	idWbs = idComplessita = idStato = -2;
+    	stato = null;
     }
     
     /* **************************************************** *
@@ -595,4 +598,26 @@ public class ActivityBean extends CodeBean implements Serializable, Query {
         this.idStato = idStato;
     }
 	
+    
+    /* ********************************************************* *
+     *          Metodi getter e setter per lo stato              *
+     * ********************************************************* */
+    /**
+     * <p>Restituisce lo stato esatto (stato calcolato) per l'attivit&agrave;
+     * contestualmente al momento presente (right now, right here).</p>
+     * 
+     * @return <code>CodeBean</code> - oggetto rappresentante lo stato dell'attivit&agrave;
+     */
+    public CodeBean getStato() {
+        return stato;
+    }
+
+    /**
+     * <p>Imposta lo stato esatto (stato calcolato) relativo all'attivit&agrave;</p>
+     * 
+     * @param stato - stato da impostare
+     */
+    public void setStato(CodeBean stato) {
+        this.stato = stato;
+    }
 }
