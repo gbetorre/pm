@@ -156,6 +156,7 @@
           </div>
         </div>
         <br />
+        <%-- 
         <div class="row">
           <div class="col-sm-5">Giorni/Uomo previsti</div>
           <div class="col-sm-5">
@@ -177,6 +178,7 @@
           </div>
         </div>
         <br />
+        --%>
         <div class="row">
           <div class="col-sm-5">Note di avanzamento</div>
           <div class="col-sm-5">
@@ -201,7 +203,7 @@
         </div>
         <br />
         <div class="row">
-          <div class="col-sm-5 mandatory">Identificativo WBS <sup>&#10039;</sup></div>
+          <div class="col-sm-5 mandatory">WBS <sup>&#10039;</sup></div>
           <div class="col-sm-5">
             <select class="form-control" id="act-wbs" name="act-wbs">
             <c:forEach var="wp" items="${requestScope.wbs}" varStatus="status">
@@ -216,7 +218,7 @@
         </div>
         <br />
         <div class="row">
-          <div class="col-sm-5 mandatory">Identificativo complessit&agrave; dell'attivit&agrave; <sup>&#10039;</sup></div>
+          <div class="col-sm-5 mandatory">Complessit&agrave; dell'attivit&agrave; <sup>&#10039;</sup></div>
           <div class="col-sm-5">
             <select class="form-control" id="act-compl" name="act-compl">
             <c:forEach var="status" items="${requestScope.complessita}" varStatus="loop">
