@@ -1263,7 +1263,7 @@ public class DBWrapper implements Query {
                                               boolean getMilestoneOnly,
                                               boolean getAll) 
                                        throws WebStorageException {
-        ResultSet rs, rs1 = null;
+        ResultSet rs, rs1, rs2 = null;
         Connection con = null;
         PreparedStatement pst = null;
         ActivityBean attivita = null;
@@ -1348,7 +1348,7 @@ public class DBWrapper implements Query {
         int nextParam = 0;
         try {
             con = pol_manager.getConnection();
-            pst = con.prepareStatement(GET_ACTIVITIES_OF_WBS);
+            pst = con.prepareStatement(GET_ACTIVITIES_BY_WBS);
             pst.clearParameters();
             pst.setInt(++nextParam, idProj);
             pst.setInt(++nextParam, idWbs);
@@ -1792,8 +1792,7 @@ public class DBWrapper implements Query {
      * ciascuna contenente tutte le proprie wbs figlie.</p>
      * 
      * @param idProj - id del progetto di cui caricare le wbs
-     * @param getPartOfWbs - flag specificante se bisogna recuperare solo i WorkPackage, solo le WBS oppure le WBS e i Workpackage
-     * @return vectorWbs - vettore contenente tutte le Wbs di un progetto
+     * @return vectorWbs - vettore contenente tutte la gerarchia di Wbs di un progetto
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
     @SuppressWarnings({ "null", "static-method" })
@@ -1903,6 +1902,110 @@ public class DBWrapper implements Query {
     }
     
     
+    public WbsBean getWbsHierarchyByOffspring(int idProj,
+                                                      int idWbs) 
+                                               throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        ResultSet rs, rs1, rs2, rs3 = null;
+        WbsBean wbs = null, wbsP, wbsF, wbsN, wbsPN, wbsPPN = null;
+        Vector<WbsBean> wbsFiglie = null;
+        try {
+            // Valorizza WBS di partenza (livello 0)
+            wbsPPN = getWbsInstance(idProj, idWbs);
+            // Ne cerca il padre
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_WBS_PADRE);
+            pst.clearParameters();
+            pst.setInt(1, wbsPPN.getId());
+            rs = pst.executeQuery();
+            // Valorizza padre di L0
+            if (rs.next()) {
+                wbsPN = new WbsBean();
+                BeanUtil.populate(wbsPN, rs);
+                pst = null;
+                pst = con.prepareStatement(GET_WBS_PADRE);
+                pst.clearParameters();
+                pst.setInt(1, wbsPN.getId());
+                rs1 = pst.executeQuery();
+                // Valorizza nonno di L0
+                if (rs1.next()) {
+                    wbsN = new WbsBean();
+                    BeanUtil.populate(wbsN, rs1);
+                    pst = null;
+                    pst = con.prepareStatement(GET_WBS_PADRE);
+                    pst.clearParameters();
+                    pst.setInt(1, wbsN.getId());
+                    rs2 = pst.executeQuery();
+                    // Valorizza bisnonno di L0
+                    if (rs2.next()) {
+                        wbsF = new WbsBean();
+                        BeanUtil.populate(wbsF, rs2);
+                        pst = null;
+                        pst = con.prepareStatement(GET_WBS_PADRE);
+                        pst.clearParameters();
+                        pst.setInt(1, wbsF.getId());
+                        rs3 = pst.executeQuery();
+                        // Valorizza trisavolo di L0
+                        if (rs3.next()) {
+                            wbsP = new WbsBean();
+                            BeanUtil.populate(wbsP, rs3);
+                            // Sono stati trovati padre, nonno e trisavolo
+                            wbsFiglie = new Vector<WbsBean>();
+                            wbsFiglie.add(wbsPPN);
+                            wbsPN.setWbsFiglie(wbsFiglie);
+                            wbsFiglie = new Vector<WbsBean>();
+                            wbsFiglie.add(wbsPN);
+                            wbsN.setWbsFiglie(wbsFiglie);
+                            wbsFiglie = new Vector<WbsBean>();
+                            wbsFiglie.add(wbsN);
+                            wbsP.setWbsFiglie(wbsFiglie);
+                            wbs = wbsP;
+                        }   
+                    } else {
+                        // Sono stati trovati padre e nonno
+                        wbsFiglie = new Vector<WbsBean>();
+                        wbsFiglie.add(wbsPPN);
+                        wbsPN.setWbsFiglie(wbsFiglie);
+                        wbsFiglie = new Vector<WbsBean>();
+                        wbsFiglie.add(wbsPN);
+                        wbsN.setWbsFiglie(wbsFiglie);
+                        wbs = wbsN;
+                    }
+                } else {
+                    // E' stato trovato solo un padre
+                    wbs = wbsPN;
+                    wbsFiglie = new Vector<WbsBean>();
+                    wbsFiglie.add(wbsPPN);
+                    wbs.setWbsFiglie(wbsFiglie);
+                }
+            } else {
+                // Non è stato trovato nemmeno un padre
+                wbs = wbsPPN;
+            }
+           return wbs;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "id WBS padre non valorizzato; problema nella query delle WBS figlie.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        }  catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+
+    
     /**
     * <p>Restituisce un Vector&lt;WbsBean&gt; contenente tutte le WBS figlie
     * che hanno come padre la WBS identificata tramite id, passato come parametro.</p>
@@ -1996,18 +2099,19 @@ public class DBWrapper implements Query {
     
     
     /**
-    * <p>Restituisce un Vector&lt;WbsBean&gt; contenente tutte le WBS figlie
-    * che hanno come padre la WBS identificata tramite id, passato come parametro.</p>
+    * <p>Restituisce un MonitorBean contenente tutti i campi del monitoraggio
+    * relativo al dipartimento identificato tramite id, passato come parametro
+    * e ad un anno solare passato come parametro.</p>
     * 
-    * @param idProj  id del progetto di cui caricare le wbs
-    * @param idWbs id della wbs padre
-    * @return Vector&lt;WbsBean&gt; - vector contenente tutte le WBS figlie
+    * @param idDip  id del dipartimento di cui si deve recuperare il monitoraggio
+    * @param anno   anno di cui si vuol recuperare il monitoraggio
+    * @return MonitorBean - oggetto contenente tutti i campi del monitoraggio 
     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
     */
     @SuppressWarnings({ "null", "static-method" })
     public MonitorBean getMonitor(int idDip, 
-                                      int anno) 
-                               throws WebStorageException {
+                                  int anno) 
+                           throws WebStorageException {
         Connection con = null;
         ResultSet rs = null;
         PreparedStatement pst = null;
@@ -2572,28 +2676,33 @@ public class DBWrapper implements Query {
                 pst.setDate(++nextParam, Utils.convert(dataInizio)); // non accetta una data italiana, ma java.sql.Date
                 // Data fine (obbligatoria)
                 pst.setDate(++nextParam, Utils.convert(dataFine)); // non accetta una data gg/mm/aaaa, ma java.sql.Date
-                // Campo residuale
+                // Campo residuale (Data inizio attesa)
                 pst.setDate(++nextParam, null);
-                // Campo residuale
+                // Campo residuale (Data fine attesa)
                 pst.setDate(++nextParam, null);   
                 // Gestione delle date facoltative
+                java.util.Date dataInizioEffettiva = null;
+                java.util.Date dataFineEffettiva = null;
                 java.sql.Date date = null;
                 if (params.get("act-datainiziovera") != null) {
-                    dataInizio = Utils.format(params.get("act-datainiziovera"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
-                    date = Utils.convert(dataInizio);
+                    dataInizioEffettiva = Utils.format(params.get("act-datainiziovera"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
+                    date = Utils.convert(dataInizioEffettiva);
                 }
                 // Data inizio effettiva
                 pst.setDate(++nextParam, date); // non accetta una data italiana, ma java.sql.Date
                 date = null;
                 if (params.get("act-datafinevera") != null) {
-                    dataFine = Utils.format(params.get("act-datafinevera"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
-                    date = Utils.convert(dataFine);
+                    dataFineEffettiva = Utils.format(params.get("act-datafinevera"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
+                    date = Utils.convert(dataFineEffettiva);
                 }
                 // Data fine effettiva
                 pst.setDate(++nextParam, date); // non accetta una data italiana, ma java.sql.Date
-                // Data fine non deve essere minore di Data inizio
-                if (dataInizio.compareTo(dataFine) > NOTHING) {
-                    throw new WebStorageException("La data di fine effettiva attivita\' e\' minore di quella di inizio effettiva attivita\'.\n");
+                // Una o entrambe le date potrebbero essere null
+                if (dataInizioEffettiva != null && dataFineEffettiva != null) {
+                    // Data fine non deve essere minore di Data inizio
+                    if (dataInizioEffettiva.compareTo(dataFineEffettiva) > NOTHING) {
+                        throw new WebStorageException("La data di fine effettiva attivita\' e\' minore di quella di inizio effettiva attivita\'.\n");
+                    }
                 }
                 // Gestione giorni uomo previsti
                 Integer gu = null;
@@ -2631,7 +2740,14 @@ public class DBWrapper implements Query {
                 //pst.setInt(++nextParam, idProj);
                 pst.setInt(++nextParam, Integer.parseInt(params.get("act-wbs")));
                 pst.setInt(++nextParam, Integer.parseInt(params.get("act-compl")));
-                pst.setInt(++nextParam, Integer.parseInt(params.get("act-status")));
+                // Gestione congruenza tra stato e date
+                Date today = Utils.convert(Utils.getCurrentDate());
+                int idStato = Integer.parseInt(params.get("act-status"));
+                if (dataFineEffettiva != null && dataFineEffettiva.before(today)) {
+                    // Se ha messo la data di fine effettiva, forza lo stato a "chiuso", qualunque sia stata la scelta dell'utente
+                    idStato = 3;
+                }
+                pst.setInt(++nextParam, idStato);
                 // Campi automatici: id utente, ora ultima modifica, data ultima modifica
                 pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
                 pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringe, ma un oggetto java.sql.Time
@@ -2849,6 +2965,115 @@ public class DBWrapper implements Query {
         }
     }
     
+    
+    /**
+     * <p>Verifica se per l'utente loggato esiste una tupla che indica
+     * un precedente login. 
+     * <ul>
+     * <li>Se non esiste una tupla per l'utente loggato, la inserisce.</li>
+     * <li>Se esiste una tupla per l'utente loggato, la aggiorna.</li>
+     * </ul>
+     * In questo modo, il metodo gestisce nella tabella degli accessi
+     * sempre l'ultimo accesso e non quelli precedenti.</p>
+     * 
+     * @param username      login dell'utente (username usato per accedere)
+     * @param ip            indirizzo IPv4 assegnato all'utente
+     * @param remoteHost    nome del client da cui l'utente ha fatto il login
+     * @param serverName    nome del server su cui l'utente ha fatto il login
+     * @throws WebStorageException se si verifica un problema SQL o in qualche tipo di puntamento
+     */
+    @SuppressWarnings({ "null" })
+    public void manageAccess(String username,
+                             StringBuffer ip,
+                             StringBuffer remoteHost,
+                             String serverName)
+                      throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null; 
+        ResultSet rs = null;
+        CodeBean accessRow = null;
+        int nextParam = NOTHING;
+        try {
+            // Ottiene la connessione
+            con = pol_manager.getConnection();
+            // Verifica se la login abbia già fatto un accesso
+            pst = con.prepareStatement(GET_ACCESSLOG_BY_LOGIN);
+            pst.clearParameters();
+            pst.setString(++nextParam, username);
+            rs = pst.executeQuery();
+            if (rs.next()) {    // Esiste già un accesso: lo aggiorna
+                accessRow = new CodeBean();
+                BeanUtil.populate(accessRow, rs);
+                pst = null;
+                con.setAutoCommit(false);
+                pst = con.prepareStatement(UPDATE_ACCESSLOG_BY_USER);
+                pst.clearParameters();
+                pst.setString(nextParam, username);
+                pst.setString(++nextParam, new String(ip));
+                pst.setString(++nextParam, new String(remoteHost));
+                pst.setString(++nextParam, serverName);
+                // Campi automatici: ora ultimo accesso, data ultimo accesso
+                pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+                pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringe, ma un oggetto java.sql.Time
+                pst.setInt(++nextParam, accessRow.getId());
+                pst.executeUpdate();
+                con.commit();
+            } else {            // Non esiste un accesso: ne crea uno nuovo
+                // Chiude e annulla il PreparedStatement rimasto inutilizzato
+                pst.close();
+                pst = null;
+                // BEGIN;
+                con.setAutoCommit(false);
+                pst = con.prepareStatement(INSERT_ACCESSLOG_BY_USER);
+                pst.clearParameters();
+                int nextVal = getMax("accesslog") + 1;
+                pst.setInt(nextParam, nextVal);
+                pst.setString(++nextParam, username);
+                pst.setString(++nextParam, new String(ip));
+                pst.setString(++nextParam, new String(remoteHost));
+                pst.setString(++nextParam, serverName);
+                pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate())));
+                pst.setTime(++nextParam, Utils.getCurrentTime());
+                pst.executeUpdate();
+                // END;
+                con.commit();
+            }
+            String msg = "Si e\' loggato l\'utente: " + username + 
+                         " dall\'IP:" + ip + 
+                         " dal client:" + remoteHost +
+                         " sul server:" + serverName + 
+                         " in data:" + Utils.format(Utils.getCurrentDate()) +
+                         " alle ore:" + Utils.getCurrentTime() +
+                         ".\n";
+            LOG.info(msg);
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Probabile problema nel recupero dell'id dell\'ultimo accesso\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che inserisce o in quella che aggiorna ultimo accesso al sistema.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } catch (NumberFormatException nfe) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che inserisce o in quella che aggiorna ultimo accesso al sistema.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + nfe.getMessage(), nfe);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che inserisce o in quella che aggiorna ultimo accesso al sistema.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + npe.getMessage(), npe);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
     
     /* ********************************************************** *
      *                        Metodi di POL                       *
@@ -3270,7 +3495,15 @@ public class DBWrapper implements Query {
      *                    Metodi  di  ELIMINAZIONE                *
      * ********************************************************** */
     /** 
-     * <p>Metodo per fare una dereferenziazione di una wbs relativa al progetto.</p>
+     * <p>Metodo per fare una dereferenziazione di una wbs 
+     * relativa al progetto.</p>
+     * <p>A partire dall'identificativo del dipartimento, passato come 
+     * argomento, identifica un progetto "fantasma" di dipartimento
+     * (avente come identificativo lo stesso identificativo del dipartimento
+     * moltiplicato per -1), e vi associa la wbs che si vuol eliminare.
+     * In questo modo la cancellazione della wbs non sar&agrave; fisica,
+     * ma sar&agrave; logica, in quanto consister&agrave; di una 
+     * de-referenziazione della wbs stessa dal progetto corrente.</p> 
      * 
      * @param idWbs     identificativo della WBS da dereferenziare
      * @param idDipart  identificativo del dipartimento al quale appartiene la WBS da eliminare
@@ -3286,7 +3519,7 @@ public class DBWrapper implements Query {
         int idProj = 0;
         try {
             con = pol_manager.getConnection();
-            pst = con.prepareStatement(GET_PROJECT_FROM_ID_DIPART);
+            pst = con.prepareStatement(GET_PROJECT_BY_DIPART);
             pst.clearParameters();
             pst.setInt(++nextParam, idDipart);
             rs = pst.executeQuery();
@@ -3304,6 +3537,79 @@ public class DBWrapper implements Query {
             con.commit();
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto idProj non valorizzato; problema nella query di eliminazione wbs.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /** 
+     * <p>Metodo per fare una dereferenziazione di una attivit&agrave; 
+     * relativa a un progetto.</p>
+     * <p>A partire dall'identificativo del dipartimento 
+     * e da quello dell'attivit&agrave;, passati come 
+     * argomenti, identifica un progetto "fantasma" di dipartimento
+     * (avente come identificativo lo stesso identificativo del dipartimento
+     * moltiplicato per -1), una wbs parimenti "fantasma" 
+     * ed associa ad entrambi l'attivit&agrave; che si vuol eliminare.
+     * In questo modo la cancellazione dell'attivit&agrave; 
+     * non sar&agrave; fisica, ma sar&agrave; logica, in quanto 
+     * consister&agrave; di una de-referenziazione della wbs stessa 
+     * dal progetto corrente.</p> 
+     * 
+     * @param idActivity     identificativo dell'attivita' da dereferenziare
+     * @param idDipart  identificativo del dipartimento al quale appartiene l'attivita' da eliminare
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    public void deleteActivity(PersonBean user,
+                               int idDipart, 
+                               int idActivity)
+                   throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+        CodeBean dipart = null;
+        int nextParam = 0;
+        int idProj = 0;
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_PROJECT_BY_DIPART);
+            pst.clearParameters();
+            pst.setInt(++nextParam, idDipart);
+            rs = pst.executeQuery();
+            if (rs.next()) {
+                dipart = new CodeBean();
+                BeanUtil.populate(dipart, rs);
+                idProj = dipart.getId();
+            }
+            con.setAutoCommit(false);
+            pst = null;
+            nextParam = 0;
+            pst = con.prepareStatement(DELETE_ACTIVITY);
+            pst.clearParameters();
+            pst.setInt(++nextParam, idProj);
+            pst.setInt(++nextParam, idProj);
+            pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+            pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
+            pst.setString(++nextParam, user.getCognome() + String.valueOf(Utils.BLANK_SPACE) + user.getNome());
+            pst.executeUpdate();
+            con.commit();
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Attributi di PersonBean o CodeBean non valorizzati; problema nella query di eliminazione attivita\'.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema nella query di eliminazione attivita\'.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
         } finally {
@@ -3539,8 +3845,8 @@ public class DBWrapper implements Query {
      */
     @SuppressWarnings({ "static-method" })
     public boolean userCanMonitor(int idDip,
-                                   Vector<DepartmentBean> departmentWritableByUser) 
-                            throws WebStorageException {
+                                  Vector<DepartmentBean> departmentWritableByUser) 
+                           throws WebStorageException {
         try {
             /* **         Controllo lato server sui diritti dell'utente.       ** 
              * ** Controlla per prima cosa che l'id progetto sulla querystring ** 
