@@ -53,7 +53,12 @@ import java.util.LinkedList;
 public interface Query extends Serializable {
 
     /**
-     * <p>Costante parlante per i test che controllano che interi abbiano un valore significativo.</p>
+     * <p>Costante parlante per i test che controllano 
+     * che interi abbiano un valore maggiore di zero.</p>
+     * <p>Maggiormente visibile e chiara del valore che incapsula (0) 
+     * per questo motivo può essere utilizzata in inizializzazioni di 
+     * variabili e in test che controllano che specifici parametri
+     * abbiano un valore significativo.</p> 
      */
     public static final byte NOTHING = 0;
     /* ************************************************************************ *
@@ -860,18 +865,19 @@ public interface Query extends Serializable {
             "   ,   A.gurimanenti           AS  \"guRimanenti\"" +
             "   ,   A.noteavanzamento       AS  \"noteAvanzamento\"" +
             "   ,   A.milestone             AS  \"milestone\"" +
+            "   ,   A.id_stato              AS  \"idStato\"" +
             "   FROM attivita A" + 
             "   WHERE id_progetto = ?" +
             "       AND A.datainizio >= ?" +
             "       AND (A.milestone = ? OR ?)" +
-            "   ORDER BY A.dataultimamodifica ASC";
+            "   ORDER BY A.datainizio, A.datafine, A.id_stato, A.dataultimamodifica ASC";
     
     /**
      * <p>Estrae le attivit&agrave; di una specifica WBS,
      * identificata tramite id, passato come parametro, relativa ad 
      * un progetto, identificato tramite id, passato come parametro.</p>
      */
-    public static final String GET_ACTIVITIES_OF_WBS =
+    public static final String GET_ACTIVITIES_BY_WBS =
             "SELECT " + 
             "       A.id                    AS  \"id\"" + 
             "   ,   A.nome                  AS  \"nome\"" + 
@@ -1003,7 +1009,6 @@ public interface Query extends Serializable {
             "   WHERE id_progetto = ?" +
             "   ORDER BY R.descrizione ASC";
     
-    
     /**
      * <p>Estrae lo stato costi dell'avanzamento di un progetto, identificato tramite id, passato
      * come parametro.</p>
@@ -1016,7 +1021,6 @@ public interface Query extends Serializable {
             "       INNER JOIN statoavanzamento SAV1 ON AP.id_statocosti = SAV1.id" +
             "   WHERE AP.id = ?";
     
-
     /**
      * <p>Estrae lo stato tempi dell'avanzamento di un progetto, identificato tramite id, passato
      * come parametro.</p>
@@ -1028,7 +1032,6 @@ public interface Query extends Serializable {
             "   FROM avanzamentoprogetto AP" +
             "       INNER JOIN statoavanzamento SAV1 ON AP.id_statotempi = SAV1.id" +
             "   WHERE AP.id = ?";
-    
     
     /**
      * <p>Estrae lo stato rischi dell'avanzamento di un progetto, identificato tramite id, passato
@@ -1042,7 +1045,6 @@ public interface Query extends Serializable {
             "       INNER JOIN statoavanzamento SAV1 ON AP.id_statorischi = SAV1.id" +
             "   WHERE AP.id = ?";
     
-    
     /**
      * <p>Estrae lo stato risorse dell'avanzamento di un progetto, identificato tramite id, passato
      * come parametro.</p>
@@ -1054,7 +1056,6 @@ public interface Query extends Serializable {
             "   FROM avanzamentoprogetto AP" +
             "       INNER JOIN statoavanzamento SAV1 ON AP.id_statorisorse = SAV1.id" +
             "   WHERE AP.id = ?";
-    
     
     /**
      * <p>Estrae lo stato scope dell'avanzamento di un progetto, identificato tramite id, passato
@@ -1068,7 +1069,6 @@ public interface Query extends Serializable {
             "       INNER JOIN statoavanzamento SAV1 ON AP.id_statoscope = SAV1.id" +
             "   WHERE AP.id = ?";
     
-    
     /**
      * <p>Estrae lo stato risorse dell'avanzamento di un progetto, identificato tramite id, passato
      * come parametro.</p>
@@ -1080,7 +1080,6 @@ public interface Query extends Serializable {
             "   FROM avanzamentoprogetto AP" +
             "       INNER JOIN statoavanzamento SAV1 ON AP.id_statocomunicazione = SAV1.id" +
             "   WHERE AP.id = ?";
-    
     
     /**
      * <p>Estrae lo stato qualit&agrave; dell'avanzamento di un progetto, identificato tramite id, passato
@@ -1094,7 +1093,6 @@ public interface Query extends Serializable {
             "       INNER JOIN statoavanzamento SAV1 ON AP.id_statoqualita = SAV1.id" +
             "   WHERE AP.id = ?";
     
-    
     /**
      * <p>Estrae lo stato approvvigionamenti dell'avanzamento di un progetto, identificato tramite id, passato
      * come parametro.</p>
@@ -1106,7 +1104,6 @@ public interface Query extends Serializable {
             "   FROM avanzamentoprogetto AP" +
             "       INNER JOIN statoavanzamento SAV1 ON AP.id_statoapprovvigionamenti = SAV1.id" +
             "   WHERE AP.id = ?";
-    
     
     /**
      * <p>Estrae lo stato stakeholder dell'avanzamento di un progetto, identificato tramite id, passato
@@ -1120,6 +1117,17 @@ public interface Query extends Serializable {
             "       INNER JOIN statoavanzamento SAV1 ON AP.id_statostakeholder = SAV1.id" +
             "   WHERE AP.id = ?";
     
+    /**
+     * <p>Seleziona i valori di uno stato attivit&agrave; a partire dal
+     * proprio identificativo passato come parametro.</p>
+     */
+    public static final String GET_STATO_ATTIVITA = 
+            "SELECT " +
+            "       SA.id        AS \"id\"" +
+            "   ,   SA.nome      AS \"nome\"" +
+            "   ,   SA.valore    AS \"informativa\"" +
+            "   FROM statoattivita SA" +
+            "   WHERE SA.id = ?";
     
     /**
      * <p>Estrae lo stato di avanzamento selezionato di un progetto, identificato tramite id,
@@ -1264,6 +1272,16 @@ public interface Query extends Serializable {
             "   FROM monitoraggio M " + 
             "   WHERE M.anno = ? " +
             "      AND M.id_dipart = ?";    
+    
+    /**
+     * <p>Estrae identificativo tupla ultimo accesso, se esiste 
+     * per l'utente il cui username viene passato come parametro.</p>
+     */
+    public static final String GET_ACCESSLOG_BY_LOGIN = 
+            "SELECT " +
+            "       A.id                    AS  \"id\"" +
+            "   FROM accesslog A " + 
+            "   WHERE A.login = ? ";    
     
     
     /* ************************************************************************ *
@@ -1473,6 +1491,19 @@ public interface Query extends Serializable {
             "   WHERE  anno = ? " +
             "      AND id_dipart = ?";   
     
+    /**
+     * <p>Query per aggiornamento di ultimo accesso al sistema.</p>
+     */
+    public static final String UPDATE_ACCESSLOG_BY_USER = 
+            "UPDATE accesslog" +
+            "   SET login  = ?" +
+            "   ,   ipv4   = ?" +
+            "   ,   client = ?" +
+            "   ,   server = ?" +
+            "   ,   dataultimoaccesso = ?" + 
+            "   ,   oraultimoaccesso = ?" +
+            "   WHERE id = ? ";
+    
         
     /* ************************************************************************ *
      *                               QUERY DI POL                               *
@@ -1616,7 +1647,7 @@ public interface Query extends Serializable {
             "   ,   id_progetto )" +
             "   VALUES (? " +          // id
             "   ,       ? " +          // descrizione
-            "   ,       ? " +          // probabilita�
+            "   ,       ? " +          // probabilità
             "   ,       ? " +          // impatto
             "   ,       ? " +          // livello
             "   ,       ? " +          // stato
@@ -1650,6 +1681,26 @@ public interface Query extends Serializable {
             "   ,       ? " +       // noteavanzamento
             "   ,       ?)";        // risultati raggiunti
     
+    /**
+     * <p>Query per inserimento di ultimo accesso al sistema.</p>
+     */
+    public static final String INSERT_ACCESSLOG_BY_USER = 
+            "INSERT INTO accesslog" +
+            "   (   id" +
+            "   ,   login" +
+            "   ,   ipv4" +
+            "   ,   client" +
+            "   ,   server" +
+            "   ,   dataultimoaccesso" + 
+            "   ,   oraultimoaccesso )" +
+            "   VALUES (? " +          // id
+            "   ,       ? " +          // login
+            "   ,       ? " +          // IPv4
+            "   ,       ? " +          // client
+            "   ,       ? " +          // server
+            "   ,       ? " +          // dataultimoaccesso
+            "   ,       ?)" ;          // oraultimoaccesso
+    
     
     /* ************************************************************************ *
      *                               QUERY DI POL                               *
@@ -1657,8 +1708,30 @@ public interface Query extends Serializable {
      *                       4.  Query di eliminazione                          *
      * ************************************************************************ */
     /**
+     * <p>Esegue una eliminazione logica di una attivit&agrave;, 
+     * identificata tramite id, passato come parametro, 
+     * attraverso la dereferenziazione della stessa dal progetto e dalla WBS 
+     * a cui appartiene, e collegandola invece ad una WBS e ad un progetto
+     * "fantasma" aventi rispettivamente identificativo uguale 
+     * in valore assoluto a quelli del dipartimento a cui sono collegati,
+     * ma segno opposto (numero opposto o inverso additivo).</p>
+     */
+    public String DELETE_ACTIVITY = 
+            "UPDATE attivita" +
+            "   SET id_progetto = ?" +
+            "   ,   id_wbs   = ?" +
+            "   ,   id_stato = 3" +
+            "   ,   dataultimamodifica = ?" +
+            "   ,   oraultimamodifica = ?" +
+            "   ,   autoreultimamodifica = ?" +
+            "   WHERE id = ?";
+    
+    /**
      * <p>Esegue una eliminazione logica di una WBS, identificata tramite id, 
-     * passato come parametro, dal progetto a cui appartiene.</p>
+     * passato come parametro, attraverso la de-referenziazione della stessa 
+     * dal progetto a cui appartiene, collegandola invece ad un progetto
+     * "fantasma" avente come identificativo l'inverso additivo 
+     * dell'identificativo del dipartimento a cui era collegata.</p>
      */
     public String DELETE_WBS = 
             "UPDATE wbs" +
@@ -1666,9 +1739,10 @@ public interface Query extends Serializable {
             "   WHERE id = ?";
     
     /**
-     * <p>Estrae il primo progetto con id negativo, dato in input l'id del dipartimento.</p>
+     * <p>Estrae il primo progetto con id negativo, 
+     * dato in input l'id del dipartimento.</p>
      */
-    public String GET_PROJECT_FROM_ID_DIPART = 
+    public String GET_PROJECT_BY_DIPART = 
             "SELECT " +
             "   P.id    AS \"id\"" +
             "   FROM progetto P" + 
