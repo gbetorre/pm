@@ -39,15 +39,15 @@ package it.alma.bean;
 import java.io.Serializable;
 import java.util.Vector;
 
-import it.alma.Query;
 import it.alma.exception.AttributoNonValorizzatoException;
 
 /**
  * <p>Classe usata per rappresentare una WBS.</p>
  * 
  * @author <a href="mailto:andrea.tonel@studenti.univr.it">Andrea Tonel</a>
+ * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
  */
-public class WbsBean implements Serializable, Query {
+public class WbsBean implements Serializable {
 
 	/**
      * La serializzazione necessita di dichiarare una costante di tipo long
@@ -79,6 +79,8 @@ public class WbsBean implements Serializable, Query {
     private WbsBean wbsPadre;
     /** Attributo identificativo delle WBS figlie della WBS corrente */
     private Vector<WbsBean> wbsFiglie;
+    /** Attributo identificativo delle attivit&agrave; della WBS corrente */
+    private Vector<ActivityBean> attivita;
     /** Note di avanzamento della WBS */
     private String noteAvanzamento;
     /** Risultati raggiunti da questa WBS */
@@ -95,6 +97,7 @@ public class WbsBean implements Serializable, Query {
 		workPackage = false;
 		wbsPadre = null;
 		wbsFiglie = null;
+		attivita = null;
 		noteAvanzamento = risultatiRaggiunti = null;
 	}
 
@@ -188,7 +191,7 @@ public class WbsBean implements Serializable, Query {
 
 	
     /* ********************************************************* *
-     *         Metodi getter e setter per workPackage            *
+     *   Metodi getter e setter per wbsPadre della WBS corrente  *
      * ********************************************************* */
 	/**
 	 * Restituisce il bean rappresentante la WBS padre.
@@ -208,7 +211,7 @@ public class WbsBean implements Serializable, Query {
     
     
     /* ********************************************************* *
-     *         Metodi getter e setter per workPackage            *
+     *  Metodi getter e setter per wbsFiglie della WBS corrente  *
      * ********************************************************* */
     /**
      * Restituisce il Vector di bean rappresentante l'elenco 
@@ -228,6 +231,30 @@ public class WbsBean implements Serializable, Query {
      */
     public void setWbsFiglie(Vector<WbsBean> wbsFiglie) {
         this.wbsFiglie = wbsFiglie;
+    }
+    
+    
+    /* ********************************************************* *
+     *  Metodi getter e setter per attivita' della WBS corrente  *
+     * ********************************************************* */
+    /**
+     * Restituisce il Vector di bean rappresentante l'elenco 
+     * delle attivit&agrave; eventualmente collegate alla WBS corrente.
+     * 
+     * @return <code>Vector&lt;ActivityBean&gt;</code> -  elenco attivita' di questa WBS da restituire
+     */
+    public Vector<ActivityBean> getAttivita() {
+        return attivita;
+    }
+
+    /**
+     * Imposta il Vector di bean rappresentante l'elenco 
+     * delle attivit&agrave; collegate alla WBS corrente.
+     * 
+     * @param attivita - elenco attivita' collegate da impostare
+     */
+    public void setAttivita(Vector<ActivityBean> attivita) {
+        this.attivita = attivita;
     }
     
 
