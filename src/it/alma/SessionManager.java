@@ -37,6 +37,7 @@
 package it.alma;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.LinkedHashMap;
 import java.util.Vector;
 import java.util.logging.Logger;
@@ -145,6 +146,13 @@ public class SessionManager extends HttpServlet {
         try {
             // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
             HttpSession session = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
+            PersonBean user = (PersonBean) session.getAttribute("usr");
+            String msg = "Ha effettuato il logout l\'utente: " + 
+                         user.getNome() + Utils.BLANK_SPACE + user.getCognome() + 
+                         " in data"  + Utils.BLANK_SPACE + Utils.format(Utils.getCurrentDate()) +
+                         " alle ore" + Utils.BLANK_SPACE + Utils.getCurrentTime() +
+                         ".\n";
+            LOG.info(msg);
             session.invalidate();
             final RequestDispatcher rd = getServletContext().getRequestDispatcher(templateJsp);
             rd.forward(req, res);
@@ -153,7 +161,7 @@ public class SessionManager extends HttpServlet {
         } catch (NullPointerException e) {
             throw new ServletException("Errore nell'estrazione dei dipartimenti che gestiscono il corso.\n" + e.getMessage(), e);
         } catch (Exception ignored) {
-            ;
+            ; // TODO
         }
     }
     
@@ -200,6 +208,28 @@ public class SessionManager extends HttpServlet {
                 req.getRequestDispatcher("/jsp/login.jsp").include(req, res);
             }
             else {
+                // Logga anzitutto l'accesso
+                StringBuffer ip = new StringBuffer(req.getRemoteAddr());
+                StringBuffer remoteHost = new StringBuffer(req.getRemoteHost());
+                String server = req.getServerName();
+                // Recupera il browser
+                if (req.getHeader("user-agent") != null) {
+                    remoteHost = new StringBuffer(req.getHeader("user-agent"));
+                }
+                // Recupera il vero IPv4 dell'utente
+                if (req.getHeader("x-real-ip") != null) {
+                    ip = new StringBuffer(req.getHeader("x-real-ip"));
+                }
+                // Se non riesce a recuperare il vero IP verifica se è quello del NAT
+                else if (String.valueOf(ip).equalsIgnoreCase("0:0:0:0:0:0:0:1")) {
+                    // In tal caso tenta di recuperare l'IP dall'oggetto InetAddress
+                    InetAddress inetAddress = InetAddress.getLocalHost();
+                    remoteHost = new StringBuffer(inetAddress.getHostName());
+                    String ipAddress = inetAddress.getHostAddress();
+                    ip = new StringBuffer(ipAddress);
+                }
+                db.manageAccess(username, ip, remoteHost, server);
+                // Prepara gli altri attributi 
                 Vector<DepartmentBean> userWritableDepts = db.getWritableDeparts(username);
                 Vector<ProjectBean> userWritableProjects = db.getWritableProjects(username);
                 LinkedHashMap<Integer, Vector<ActivityBean>> userWritableActivitiesByProject = new LinkedHashMap<Integer, Vector<ActivityBean>>();
