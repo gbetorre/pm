@@ -39,7 +39,7 @@ a:visited:not(.btn):not(.cc-link):not(.linkFooter):not(.nav-link) {
 	color: #484f51; 
 }
 
-a:hover:not(.btn):not(.logoHeader):not(.cc-link):not(.ui-datepicker-prev):not(.ui-datepicker-next):not(.nav-link):not(.linkFooter):not(.cc-link) {
+a:hover:not(.btn):not(.logoHeader):not(.cc-link):not(.ui-datepicker-prev):not(.ui-datepicker-next):not(.nav-link):not(.linkFooter):not(.cc-link):not(.helpInfo) {
 	text-decoration: underline;
 	color: black;
 	background-color: #d7d9d9;
@@ -215,6 +215,7 @@ body.loginbody {
   color: maroon;
 }
 
+/*---------------------- Righe Orizzontali ------------------------*/
 hr  {
 	clear: both; height: 1px;
   border-top: 1px solid transparent;
@@ -248,6 +249,7 @@ hr.riga       {
   border-top-color: #CCC;
 }
 
+/*---------------------- Blocchetti ------------------------*/
 .subfields {
   background-image: linear-gradient(to top, #ffd380, white);
   border-style: groove;
@@ -350,7 +352,16 @@ hr.riga       {
         
  a.helpInfo {
   background: transparent url("../img/help.png") no-repeat right top; 
-   padding: 3px 30px 3px 0px;
- }   
+  padding: 3px 30px 3px 0px;
+ }      
  
- a.helpInfo:hover {opacity: 0.8; text-decoration: none;}    
+/*---------------------- Tot risultati ------------------------*/
+.avvisiTot {
+  font-weight: bold; 
+  font-style: italic;
+  padding: 3px;
+  margin-bottom: 10px;
+  border-top: 1px dotted #ddd;
+  background: #cccc99;
+  /*text-align: right;*/
+  }
