@@ -148,13 +148,9 @@
             }
           });
         });
-        
-        /*$("form").on("submit", function() {
-          window.location = '${wbs}${p.id}';
-        });*/
       </script>
     <c:choose>
-      <c:when test="${not empty requestScope.attivitaWbs}">
+      <c:when test="${not empty wbsInstance.attivita}">
       <div class="subfields">
       <h4>Attivit&agrave; di questa WBS</h4>
       <table class="table table-bordered table-hover ">
@@ -167,7 +163,7 @@
         </thead>
         <tbody>
         <c:set var="status" value="" scope="page" />
-        <c:forEach var="act" items="${requestScope.attivitaWbs}" varStatus="loop">
+        <c:forEach var="act" items="${wbsInstance.attivita}" varStatus="loop">
           <c:set var="status" value="${loop.index}" scope="page" />
           <tr>
             <td scope="row" id="nameColumn">
