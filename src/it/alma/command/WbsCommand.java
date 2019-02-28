@@ -36,9 +36,9 @@
 
 package it.alma.command;
 
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.Vector;
 import java.util.logging.Logger;
 
@@ -52,7 +52,6 @@ import it.alma.Main;
 import it.alma.Query;
 import it.alma.Utils;
 import it.alma.bean.ActivityBean;
-import it.alma.bean.CodeBean;
 import it.alma.bean.ItemBean;
 import it.alma.bean.PersonBean;
 import it.alma.bean.ProjectBean;
@@ -64,9 +63,9 @@ import it.alma.exception.WebStorageException;
 
 /** 
  * <p><code>WbsCommand.java</code><br />
- * Implementa la logica per la gestione delle WBS� di un progetto on line (POL).</p>
+ * Implementa la logica per la gestione delle WBS di un progetto on line (POL).</p>
  * 
- * <p>Created on marted� 27 novembre 2018 12:56</p>
+ * <p>Created on martedì 27 novembre 2018 12:56</p>
  * 
  * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
  * @author <a href="mailto:andrea.tonel@studenti.univr.it">Andrea Tonel</a>
@@ -91,6 +90,10 @@ public class WbsCommand extends ItemBean implements Command {
      * di una nuova wbs al progetto
      */
     private static final String nomeFileWbs = "/jsp/wbs.jsp";
+    /**
+     * Pagina a cui la command fa riferimento per mostrare il report
+     */
+    private static final String nomeFileReport = "/jsp/wbsReport.jsp";
     /**
      * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutti gli attributi del progetto
      */    
@@ -131,6 +134,7 @@ public class WbsCommand extends ItemBean implements Command {
         nomeFile.put(Query.PART_WBS, nomeFileElenco);
         nomeFile.put(Query.ADD_TO_PROJECT, nomeFileWbs);
         nomeFile.put(Query.MODIFY_PART, nomeFileWbs);
+        nomeFile.put(Query.PART_REPORT, nomeFileReport);
     }  
   
     
@@ -160,21 +164,21 @@ public class WbsCommand extends ItemBean implements Command {
         // Utente loggato
         PersonBean user = null;
         // Dichiara elenco di wbs
-        Vector<WbsBean> vWbs = new Vector<WbsBean>();
+        //Vector<WbsBean> vWbs = new Vector<WbsBean>();
         // Dichiara elenco di wbs in gerarchia
-        Vector<WbsBean> vWbsAncestors  = new Vector<WbsBean>();
-        // Dichiara elenco di wbs non workpackage
-        Vector<WbsBean> wbs = new Vector<WbsBean>();
+        Vector<WbsBean> vWbsAncestors  = null;
+        // Dichiara elenco di wbs non workpackage (padri possibili)
+        Vector<WbsBean> wbsPutativeFather = null;
+        // Dichiara elenco di wbs solo workpackage (wbs che hanno sotto attività)
+        Vector<WbsBean> workPackages = null;
         // Dichiara l'elenco di wbs figlie di una wbs
-        Vector<WbsBean> wbsOfWbs = new Vector<WbsBean>();
+        Vector<WbsBean> wbsOfWbs = null;
         // Dichiara l'elenco delle attivit di una wbs di tipo workpackage
-        Vector<ActivityBean> wbsActivities = new Vector<ActivityBean>();
+        Vector<ActivityBean> wbsActivities = null;
         // Dichiara la wbs richiesta dall'utente nel caso di modifica di una wbs
         WbsBean wbsInstance = null;
-        // Dichiara lista di valori di stati attività
-        LinkedList<CodeBean> states = null;
         // Data di oggi sotto forma di oggetto String
-        String today = null;
+        GregorianCalendar today = Utils.getCurrentDate();
         // Variabile contenente l'indirizzo alla pagina di reindirizzamento
         String redirect = null;
         /* ******************************************************************** *
@@ -241,7 +245,7 @@ public class WbsCommand extends ItemBean implements Command {
                     HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
                     // Recupera i progetti su cui l'utente ha diritti di scrittura
                     Vector<ProjectBean> writablePrj = (Vector<ProjectBean>) ses.getAttribute("writableProjects");
-                    // Se non ci sono progetti scrivibili e il flag "write" � true c'� qualcosa che non va...
+                    // Se non ci sono progetti scrivibili e il flag "write" è true c'è qualcosa che non va...
                     if (writablePrj == null) {
                         String msg = FOR_NAME + "Il flag di scrittura e\' true pero\' non sono stati trovati progetti scrivibili: problema!.\n";
                         LOG.severe(msg);
@@ -289,19 +293,30 @@ public class WbsCommand extends ItemBean implements Command {
                     /* ************************************************ *
                      *                  SELECT Wbs Part                 *
                      * ************************************************ */
-                    // Selezioni per visualizzazione, aggiunta e modifica wbs
                     if (nomeFile.containsKey(part)) { 
-                        // Seleziona tutte le WBS non workpackage per mostrare i possibili padri nella pagina di dettaglio
-                        wbs = db.getWbs(idPrj, Query.WBS_BUT_WP);
-                        if (idWbs != Utils.DEFAULT_ID) {
-                            today = Utils.format(Utils.getCurrentDate());
-                            wbsInstance = db.getWbsInstance(idPrj, idWbs);
-                            wbsActivities = db.getActivitiesByWbs(idWbs, idPrj);
+                        if (part.equalsIgnoreCase(Query.PART_REPORT)) {
+                            java.util.Date todayAsDate = Utils.convert(today);
+                            // Recupera solo i work packages (l'obiettivo finale è mostrare le attività...)
+                            workPackages = db.getWbs(idPrj, Query.WBS_WP_ONLY);
+                            // Per ogni work package ne recupera le attività
+                            for (WbsBean wp : workPackages) {
+                                Vector<ActivityBean> activitiesByWP = db.getActivitiesByWbs(wp.getId(), idPrj);
+                                wp.setAttivita(ActivityCommand.computeActivitiesState(activitiesByWP, todayAsDate));
+                            }
+                        } else {
+                        // Selezioni per visualizzazione, aggiunta e modifica wbs
+                            // Seleziona tutte le WBS non workpackage per mostrare i possibili padri nella pagina di dettaglio
+                            wbsPutativeFather = db.getWbs(idPrj, Query.WBS_BUT_WP);
+                            if (idWbs != Utils.DEFAULT_ID) {
+                                wbsInstance = db.getWbsInstance(idPrj, idWbs);
+                                wbsActivities = db.getActivitiesByWbs(idWbs, idPrj);
+                                wbsInstance.setAttivita(wbsActivities);
+                            }
                         }
                         fileJspT = nomeFile.get(part);
                     } else {
                         // Se il parametro 'p' non è presente, deve solo selezionare tutte le wbs
-                        vWbs = db.getWbs(idPrj, Query.WBS_GET_ALL);
+                        //vWbs = db.getWbs(idPrj, Query.WBS_GET_ALL);
                         vWbsAncestors = db.getWbsHierarchy(idPrj);
                         fileJspT = nomeFileElenco;
                     }
@@ -342,27 +357,16 @@ public class WbsCommand extends ItemBean implements Command {
         /* ******************************************************************** *
          *              Settaggi in request dei valori calcolati                *
          * ******************************************************************** */
+        // Imposta nella request elenco di tutte le wbs del progetto
+        //req.setAttribute("allWbs", vWbs); //sostituito da wbsHierarchy
         // Importa nella request flag di visualizzazione header e footer
         req.setAttribute("header", isHeader);
         // Importa nella request flag di visualizzazione header e footer
         req.setAttribute("footer", isFooter);
         // Imposta nella request dettaglio progetto
         req.setAttribute("progetto", runtimeProject);
-        // Imposta nella request elenco di tutte le wbs del progetto
-        req.setAttribute("allWbs", vWbs);
-        // Imposta nella request elenco di tutte le wbs non workpackage del progetto
-        req.setAttribute("wbs", wbs);
-        req.setAttribute("wbsHierarchy", vWbsAncestors);
-        // Imposta nella request la wbs richiesta dall'utente in fase di modifica di una wbs
-        req.setAttribute("wbsInstance", wbsInstance);
-        // Imposta nella request l'elenco delle wbs che sono figlie di quella selezionata
-        req.setAttribute("wbsFiglie", wbsOfWbs);
-        // Imposta nella request l'elenco delle attivit� che appartengono alla wbs selezionata
-        req.setAttribute("attivitaWbs", wbsActivities);
-        // Imposta nella request elenco wbs associabili
-        req.setAttribute("statiAttivita", states);
         // Imposta nella request data di oggi 
-        req.setAttribute("now", today);
+        req.setAttribute("now", Utils.format(today));
         // Imposta la Pagina JSP di forwarding
         req.setAttribute("fileJsp", fileJspT);
         /* ******************************************************************** *
@@ -372,6 +376,31 @@ public class WbsCommand extends ItemBean implements Command {
         if (redirect != null) {
             req.setAttribute("redirect", redirect);
         }
+        // Imposta nella request elenco di tutte le wbs non workpackage del progetto
+        if (wbsPutativeFather != null) {
+            // Il dato potrebbe essere null in quanto questo elenco serve solo alla funzionalità 'wbs'
+            req.setAttribute("wbs", wbsPutativeFather);
+        }
+        // Importa in request struttura di WBS padri contenenti internamente i propri discendenti 
+        if (vWbsAncestors != null) {
+            req.setAttribute("wbsHierarchy", vWbsAncestors);
+        }
+        // Imposta nella request la wbs richiesta dall'utente in fase di modifica di una wbs
+        if (wbsInstance != null) {
+            req.setAttribute("wbsInstance", wbsInstance);
+        }
+        // Imposta nella request l'elenco delle wbs che sono figlie di quella selezionata
+        if (wbsOfWbs != null) {
+            req.setAttribute("wbsFiglie", wbsOfWbs);
+        }
+        // Imposta nella request l'elenco dei work package corredati ciascuno delle proprie attività
+        if (workPackages != null) {
+            req.setAttribute("wps", workPackages);
+        }
+        // Imposta nella request l'elenco delle attivita che appartengono alla wbs selezionata
+        //if (wbsActivities != null) {
+        //    req.setAttribute("attivitaWbs", wbsActivities);
+        //}
     }
     
     
