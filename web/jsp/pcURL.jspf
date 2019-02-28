@@ -67,6 +67,11 @@
   <c:param name="p" value="mod" />
   <c:param name="id" value="" />
 </c:url>
+<c:url var="rep" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="wbs" />
+  <c:param name="p" value="rep" />
+  <c:param name="id" value="" />
+</c:url>
 <c:url var="act" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="act" />
   <c:param name="id" value="" />
@@ -79,6 +84,11 @@
 <c:url var="modAct" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="act" />
   <c:param name="p" value="mod" />
+  <c:param name="id" value="" />
+</c:url>
+<c:url var="delAct" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="act" />
+  <c:param name="p" value="del" />
   <c:param name="id" value="" />
 </c:url>
 <c:url var="mon" context="${initParam.appName}" value="/" scope="page">
