@@ -80,11 +80,20 @@ function selectionDelete(element) {
   };
 }
 
-function confirmSubmit() {
-  if ($("input[name='wbs-select']:checked").length) {
-    var $radioValue = $("input[name='wbs-select']:checked").val();
-    return confirm("Sei sicuro di voler eliminare la wbs " + $radioValue + "?");
+function confirmSubmit(type) {
+  if (type == 'wbs') {
+    if ($("input[name='wbs-select']:checked").length) {
+      var $radioValue = $("input[name='wbs-select']:checked").val();
+      return confirm("Sei sicuro di voler eliminare la " + type + " " + $radioValue + "?");
+    }
+    alert("Devi selezionare una " + type + " da eliminare");
+    return false;
+  } else {
+    if ($("input[name='act-select']:checked").length) {
+      var $radioValue = $("input[name='act-select']:checked").val();
+      return confirm("Sei sicuro di voler eliminare la " + type + " " + $radioValue + "?");
+    }
+    alert("Devi selezionare una " + type + " da eliminare");
+    return false;
   }
-  alert("Devi selezionare una wbs da eliminare");
-  return false;
 }
