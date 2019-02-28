@@ -38,11 +38,11 @@
     <h2>WBS del progetto <strong><c:out value="${p.titolo}" /></strong></h2>
     <div id="chart_div"></div>
     <hr class="separatore" />
-    <form action="" method="post" onsubmit="return confirmSubmit();">
+    <form action="" method="post" onsubmit="return confirmSubmit('wbs');">
       <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
         <li class="nav-item"><a class="nav-link active tabactive" data-toggle="tab" href="#">WBS</a></li>
-        <li class="nav-item"><a class="nav-link" data-toggle="tab" href="">Attività</a></li>
-        <li class="nav-item"><a class="nav-link" data-toggle="tab" href="">Report</a></li>
+        <li class="nav-item"><a class="nav-link" data-toggle="tab" href="javascript:alert('Occorre selezionare una WBS per visualizzarne le attività')" id="show_act">Attività</a></li>
+        <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${rep}${p.id}">Report</a></li>
       </ul>
       <c:choose>
       <c:when test="${not empty requestScope.wbsHierarchy}">
@@ -136,6 +136,7 @@
                 </a>
                 <c:if test="${not empty wbsFiglio.wbsFiglie}">
                   <div class="moduleThin">
+                  <p class="bg-warning"><strong>Sottoelenco (Livello 3)</strong></p>
                   <ol class="list-unstyled">
                   <c:forEach var="wbsNipote" items="${wbsFiglio.wbsFiglie}">
                   <li>
@@ -144,10 +145,11 @@
                       <c:out value="${wbsNipote.nome}" />
                     </a>
                     <c:if test="${wbsNipote.workPackage}">
-                    <cite>Workpackage</cite>
+                    <cite>(Workpackage)</cite>
                     </c:if>
                     <c:if test="${not empty wbsNipote.wbsFiglie}">
                       <div class="moduleThin2">
+                      <p><strong>Sottoelenco (Livello 4)</strong></p>
                       <ul class="list-unstyled">
                       <c:forEach var="wbsPronipote" items="${wbsNipote.wbsFiglie}">
                         <li>
@@ -156,10 +158,11 @@
                           <c:out value="${wbsPronipote.nome}" />
                         </a>
                         <c:if test="${wbsPronipote.workPackage}">
-                          <cite>Workpackage</cite>
+                          <cite>(Workpackage)</cite>
                         </c:if>
                         <c:if test="${not empty wbsPronipote.wbsFiglie}">
-                        <div class="moduleThin2">
+                        <div class="moduleThin3">
+                        <p><strong>Sottoelenco (Livello 5)</strong></p>
                         <ul class="list-unstyled">
                         <c:forEach var="wbsProPronipote" items="${wbsPronipote.wbsFiglie}">
                           <li>
@@ -168,7 +171,7 @@
                               <c:out value="${wbsProPronipote.nome}" />
                             </a>
                             <c:if test="${wbsProPronipote.workPackage}">
-                              <cite>Workpackage</cite>
+                              <cite>(Workpackage)</cite>
                             </c:if>
                           </li>
                         </c:forEach>
@@ -184,7 +187,6 @@
                   </ol>
                   </div>
                 </c:if>
- 
               </td>
               <td scope="col">
                 <c:choose>
@@ -209,24 +211,34 @@
           </tbody>
         </table>
         <input type="hidden" id="wbs-loop-status" name="wbs-loop-status" value="<c:out value="${status}"/>">
-        <div id="container-fluid">
-          <hr class="separatore" />
-          <div class="row">
-            <div class="col-2">  
-              <span class="float-left">
-                <a class="btn btn-primary" href="${project}">Chiudi</a>
-              </span>
-            </div>
-            <div class="col-8 text-center">
-              <a class="btn btn-primary" href="${addWbs}${p.id}" id="add-wbs">Aggiungi</a>
-              <a class="btn btn-primary" href="" id="mod-wbs" onclick="selectionEdit('WBS')">Modifica</a>
-              <input type="submit" class="btn btn-primary" id="del-wbs" name="" value="Elimina" />
-            </div>
+        </div>
+      </div>
+      </c:when>
+      <c:otherwise>
+      <hr class="separatore" />
+      <div class="alert alert-danger">
+        <strong>Spiacente 
+          <c:out value="${sessionScope.usr.nome}" />
+          <c:out value="${sessionScope.usr.cognome}" />.<br />
+        </strong>
+        <p>Non sono state trovate WBS associate al progetto.</p>
+      </div>
+      </c:otherwise>
+    </c:choose>
+      <div id="container-fluid">
+        <hr class="separatore" />
+        <div class="row">
+          <div class="col-2">  
+            <span class="float-left">
+              <a class="btn btn-primary" href="${project}">Chiudi</a>
+            </span>
+          </div>
+          <div class="col-8 text-center">
+            <%@ include file="subPanel.jspf" %>
           </div>
         </div>
       </div>
-    </div>
-  </form>
+    </form>
 <script type="text/javascript">
   $(document).ready(function() {
     $("#radioColumn, #nameColumn").click(function () {
@@ -240,18 +252,8 @@
       var $delWbsName = "del-wbs" + $radioValue;
       $('#mod-wbs').attr('href', $modWbsUrl);
       $('#del-wbs').attr('name', $delWbsName);
+      var $showActUrl = '<c:out value="${act}${p.id}" escapeXml="false" />' + "&idw=" + $radioValue;
+      $('#show_act').attr('href', $showActUrl);
     });
   });
 </script>
-      </c:when>
-      <c:otherwise>
-      <hr class="separatore" />
-      <div class="alert alert-danger">
-        <strong>Spiacente 
-          <c:out value="${sessionScope.usr.nome}" />
-          <c:out value="${sessionScope.usr.cognome}" />.<br />
-        </strong>
-        <p>Non sono state trovate WBS associate al progetto.</p>
-      </div>
-      </c:otherwise>
-    </c:choose>
