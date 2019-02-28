@@ -1,8 +1,9 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"  %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ include file="pcURL.jspf" %>
     <h4>Attivit&agrave; del progetto <c:out value="${p.titolo}" /></h4>
     <hr class="separatore" />
-    <form id="editAct_form" action="#" method="post">
+    <form id="editAct_form" action="" method="post">
     <c:choose>
       <c:when test="${not empty requestScope.attivita}">
       <table class="table table-bordered table-hover">
@@ -45,7 +46,7 @@
             </c:when>
             <c:when test="${act.stato.id eq 10}">
               <c:set var="stile" value="table-danger" scope="page" />
-              <c:set var="testo" value="Le attivit&agrave; in stato inconsistente tipicamente sono attivit&agrave; in stato CHIUSO ma con la DATA FINE EFFETTIVA vuota." scope="page" />
+              <c:set var="testo" value="Le attivit&agrave; in stato inconsistente possono essere attivit&agrave; in stato CHIUSO ma con la DATA FINE EFFETTIVA vuota o in stato APERTO ma con data FINE EFFETTIVA nel passato." scope="page" />
             </c:when>
           </c:choose>
           </c:catch>
@@ -97,6 +98,7 @@
         </c:forEach>
         </tbody>
       </table>
+      <div class="avvisiTot"><c:out value="${fn:length(requestScope.attivita)} risultati" /></div>
       </c:when>
       <c:otherwise>
       <div class="alert alert-danger">
@@ -136,7 +138,9 @@
           $("input[name='act-select']", tdElement).attr("checked", true);
           var $radioValue = $("input[name='act-select']:checked").val();
           var $modActUrl = '<c:out value="${modAct}${p.id}" escapeXml="false" />' + "&ida=" + $radioValue;
+          var $delActUrl = '<c:out value="${delAct}${p.id}" escapeXml="false" />' + "&ida=" + $radioValue;
           $('#mod-act').attr('href', $modActUrl);
+          $('#del-act').attr('href', $delActUrl);
         });
       });
     </script>
