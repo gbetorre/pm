@@ -66,7 +66,6 @@ import it.alma.bean.ProjectBean;
 import it.alma.bean.RiskBean;
 import it.alma.bean.SkillBean;
 import it.alma.bean.StatusBean;
-import it.alma.bean.WbsBean;
 import it.alma.exception.AttributoNonValorizzatoException;
 import it.alma.exception.CommandException;
 import it.alma.exception.WebStorageException;
@@ -193,7 +192,7 @@ public class ProjectCommand extends ItemBean implements Command {
         StatusBean projectStatus = null;
         // Dichiara l'elenco delle attività presenti in un range di date
         Vector<ActivityBean> activitiesByRange = null;
-        // Dichiara l'elenco delle attivit� con data inizio compresa tra due date
+        // Dichiara l'elenco delle attività con data inizio compresa tra due date
         Vector<ActivityBean> activitiesByDate = null;
         // Dichiara l'avanzamento progetto successivo a quello di partenza
         StatusBean nextStatus = null;
@@ -316,7 +315,7 @@ public class ProjectCommand extends ItemBean implements Command {
                             // Recupera uno specifico status di progetto di dato id
                             projectStatus = db.getStatus(idStatus);
                         } else if (idStatus == Query.NOTHING) { // Valore fittizio (nessuno status può avere id = 0!)
-                            // Recupera l'ultimo Status, cioè quello avente datainizio pi� prossima alla data odierna
+                            // Recupera l'ultimo Status, cioè quello avente datainizio più prossima alla data odierna
                             Date dateProjectStatus = new Date(0);
                             if (!projectStatusList.isEmpty()) {
                                 for (int i = 0; i < projectStatusList.size(); i++) {
@@ -338,10 +337,10 @@ public class ProjectCommand extends ItemBean implements Command {
                             activitiesByRange = db.getActivitiesByRange(idPrj, projectStatus.getDataInizio(), projectStatus.getDataFine());
                             nextStatus = db.getNextStatus(idPrj, projectStatus.getDataFine());
                             if (nextStatus != null) {
-                                // Recupera la lista di attivit� con data inizio compresa tra due date
+                                // Recupera la lista di attività con data inizio compresa tra due date
                                 activitiesByDate = db.getActivitiesByDate(idPrj, nextStatus.getDataInizio(), nextStatus.getDataFine());
                             } else {
-                                // Recupera la lista di attivit� con data inizio nel futuro rispetto alla data di fine dello status attuale
+                                // Recupera la lista di attività con data inizio nel futuro rispetto alla data di fine dello status attuale
                                 activitiesByDate = db.getActivities(idPrj, user, projectStatus.getDataFine(), false, true);
                             }
                         }
@@ -352,7 +351,7 @@ public class ProjectCommand extends ItemBean implements Command {
                     } /*else if(part.equals(Query.PART_WBS)) {
                         vWBS = db.getWbs(idPrj, Query.WBS_GET_ALL);
                     }*/
-                }
+                }                
                 fileJspT = nomeFile.get(part);
             } else {
                 m = db.getProjectsByDepart(user.getId());
@@ -396,7 +395,7 @@ public class ProjectCommand extends ItemBean implements Command {
         req.setAttribute("rischi", vRisks);
         // Imposta nella request elenco degli status di un progetto
         req.setAttribute("listProjectStatus", projectStatusList);
-        // Imposta nella request l'avanzamento progetto pi� recente
+        // Imposta nella request l'avanzamento progetto più recente
         req.setAttribute("projectStatus", projectStatus);
         // Imposta nella request i valori degli stati di un'avanzamento progetto
         req.setAttribute("statiValues", statiValues);
@@ -589,16 +588,24 @@ public class ProjectCommand extends ItemBean implements Command {
     
     
     /**
-     * @param activitiesByProject
-     * @param skillsByProject
-     * @param risksByProject
-     * @return
-     * @throws CommandException
+     * <p>Partendo da una serie di strutture (mappe) passate come argomenti,
+     * travasa le stesse in un'unica mappa avente come chiave un valore
+     * convenzionale (Sting) corrispondente al parametro identificante
+     * la sezione dell'applicazione, e un valore corrispondente alla
+     * mappa ricevuta. In questo modo &quot;compatta&quot; una serie
+     * di liste in una sola lista, che pu&ograve; agevolmente utilizzare
+     * per passarla a sua volta e farla utilizzare da un ricevente.</p>
+     * 
+     * @param activitiesByProject lista di attivita' scrivibili dall'utente, indicizzate per identificativo del progetto
+     * @param skillsByProject   lista di competenze scrivibili dall'utente, indicizzate per identificativo del progetto
+     * @param risksByProject    lista di rischi scrivibili dall'utente, indicizzati per identificativo del progetto
+     * @return <code>LinkedHashMap&lt;String, HashMap&lt;Integer, Vector&gt;&gt; - mappa contenente le mappe passate come argomento, indicizzata per stringa identificante una funzionalita' applicativa
+     * @throws CommandException se si verifica un problema in qualche tipo di puntamento
      */
     private static LinkedHashMap<String, HashMap<Integer, Vector>> decant(LinkedHashMap<Integer, Vector> activitiesByProject,
-                                                                             LinkedHashMap<Integer, Vector> skillsByProject ,
-                                                                             LinkedHashMap<Integer, Vector> risksByProject)
-                                                                      throws CommandException {
+                                                                          LinkedHashMap<Integer, Vector> skillsByProject ,
+                                                                          LinkedHashMap<Integer, Vector> risksByProject)
+                                                                   throws CommandException {
         LinkedHashMap<String, HashMap<Integer, Vector>> map =  new LinkedHashMap<String, HashMap<Integer, Vector>>();
         map.put(Query.PART_PROJECT_CHARTER_MILESTONE, activitiesByProject);
         map.put(Query.PART_PROJECT_CHARTER_RESOURCE, skillsByProject);
