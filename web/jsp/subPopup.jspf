@@ -1,0 +1,9 @@
+<div id="popup1" class="popup">
+  <div id="popup1Under" class="popupundertitle">
+    <div id="titolopopup1" class="popuptitle" ></div>
+    <div id="titolopopup1Under">
+      <a href="Javascript:popupWindow('','popup1',false,'');"><img src="web/img/close-icon.gif" border="0" width="15" height="15" alt="Chiudi" title="Chiudi" /></a>
+    </div>
+  </div>
+  <div class="popupbody" id="popup1Text" ></div>
+</div>
