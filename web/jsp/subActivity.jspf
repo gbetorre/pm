@@ -1,0 +1,31 @@
+<c:set var="stile" value="" scope="page" />
+<c:set var="testo" value="" scope="page" />
+<c:catch var="exception">
+  <c:choose>
+    <c:when test="${act.stato.id eq 1}">
+      <c:set var="stile" value="bg-openOn" scope="page" />
+      <c:set var="testo" value="" scope="page" />
+    </c:when>
+    <c:when test="${act.stato.id eq 4}">
+      <c:set var="stile" value="bg-warningOn" scope="page" />
+      <c:set var="testo" value="Le attivit&agrave; <cite>in realizzazione</cite> sono attivit&agrave;<br> in stato IN PROGRESS,<br> con la DATA FINE nel futuro<br> e la DATA FINE EFFETTIVA vuota." scope="page" />
+    </c:when>
+    <c:when test="${act.stato.id eq 5}">
+      <c:set var="stile" value="bg-workingOn" scope="page" />
+      <c:set var="testo" value="Le attivit&agrave; <cite>in ritardo</cite> sono attivit&agrave;<br> in stato APERTA o IN PROGRESS,<br> con la DATA FINE nel passato<br> e la DATA FINE EFFETTIVA vuota." scope="page" />
+    </c:when>
+    <c:when test="${act.stato.id eq 6}">
+      <c:set var="stile" value="bg-successOn" scope="page" />
+      <c:set var="testo" value="Le attivit&agrave; <cite>chiuse in anticipo</cite> sono attivit&agrave;<br> in stato CHIUSO,<br> con la DATA FINE EFFETTIVA che precede sia la DATA FINE PREVISTA sia la data odierna." scope="page" />
+    </c:when>
+    <c:when test="${act.stato.id eq 7}">
+      <c:set var="stile" value="bg-tableSuccessOn" scope="page" />
+      <c:set var="testo" value="Le attivit&agrave; <cite>chiuse in ritardo</cite> sono attivit&agrave;<br> in stato CHIUSO,<br> con la DATA FINE EFFETTIVA che precede la data odierna ma &egrave; successiva alla DATA FINE PREVISTA." scope="page" />
+    </c:when>
+    <c:when test="${act.stato.id eq 10}">
+      <c:set var="stile" value="bg-dangerOn" scope="page" />
+      <c:set var="testo" value="Le attivit&agrave; in stato inconsistente possono essere attivit&agrave; in stato CHIUSO ma con la DATA FINE EFFETTIVA vuota o in stato APERTO ma con data FINE EFFETTIVA nel passato." scope="page" />
+    </c:when>
+  </c:choose>
+</c:catch>
+<c:out value="${exception}" />
