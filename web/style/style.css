@@ -153,6 +153,18 @@ img.profile {
 	height: 62px;
 }
 
+.1bgcolor {
+	background-color: #99ff66;
+}
+
+.2bgcolor {
+	background-color: #ffff4d;
+}
+
+.3bgcolor {
+	background-color: #ff5232;
+}
+
 tr.selected {
 	background-color: #f2f9fb;	
 }
@@ -195,6 +207,10 @@ textarea {
 
 body.loginbody {
 	background-image: radial-gradient(#ffffff, #ddeeff);
+}
+
+td.statoActRep {
+	
 }
 
 /* Page header and footer styles */
@@ -300,7 +316,27 @@ hr.riga       {
 }
 
 .bg-workingOn {
-  background-color: #ffff33 !important;
+  background-image: linear-gradient(to left, #ffff33, transparent) !important;
+}
+
+.bg-openOn {
+  background-image: linear-gradient(to left, #ffffff, transparent) !important;
+}
+
+.bg-warningOn {
+	background-image: linear-gradient(to left, #ffe8a1, transparent) !important;
+}
+
+.bg-successOn {
+	background-image: linear-gradient(to left, #28a754, transparent) !important;
+}
+
+.bg-tableSuccessOn {
+	background-image: linear-gradient(to left, #c3e6cb, transparent) !important;
+}
+
+.bg-dangerOn {
+	background-image: linear-gradient(to left, #f5c6cb, transparent) !important;
 }
 
 /*---------------------- POP-UP ------------------------*/
