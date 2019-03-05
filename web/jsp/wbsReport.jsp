@@ -3,7 +3,7 @@
     <h4>Report dei Work Packages del progetto: <cite><c:out value="${prj.titolo}" /></cite></h4>
     <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${wbs}${prj.id}">WBS</a></li>
-      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${wbs}${prj.id}" id="show_act">Attività</a></li>
+      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="javascript:showActivities('${wbs}${prj.id}')" id="show_act">Attività</a></li>
       <li class="nav-item"><a class="nav-link active tabactive" data-toggle="tab" href="#">Report</a></li>
     </ul>
     <hr class="separatore" />
@@ -11,39 +11,49 @@
     <c:choose>
       <c:when test="${not empty requestScope.wps}">
       <div class="table-responsive">
-        <table class="table table-striped overviewSummary">
-          <thead class="thead-light">
-          <tr>
-            <th scope="col">Work Package</th>
-            <th scope="col">Attivit&agrave;</th>
-          </tr>
-          </thead>
-          <tbody>
-          <c:set var="status" value="" scope="page" />
-          <c:forEach var="wp" items="${requestScope.wps}" varStatus="loop">
-            <c:set var="status" value="${loop.index}" scope="page" />
-            <tr>
-              <td scope="row" id="nameColumn">
-                <a href="${modAct}${p.id}&ida=${wp.id}">
-                  <c:out value="${wp.nome}"/>
-                </a>
-              </td>
-              <td>
-            <c:forEach var="act" items="${wp.attivita}" varStatus="loop">
-              <dl class="dl-horizontal">
-                <dt>
-                  <a href="${modAct}${p.id}&ida=${act.id}">
-                    <c:out value="${act.nome}" />
+        <c:set var="status" value="" scope="page" />
+        <c:forEach var="wp" items="${requestScope.wps}" varStatus="loop">
+        <c:set var="status" value="${loop.index}" scope="page" />
+          <table class="table table-striped overviewSummary">
+            <thead class="thead-light">
+              <tr>
+                <th scope="col" colspan="2">
+                  WorkPackage: 
+                  <a href="${modAct}${p.id}&ida=${wp.id}">
+                    <c:out value="${wp.nome}"/>
                   </a>
-                </dt>
-                <dd>${act.stato.informativa}</dd>
-              </dl>
-            </c:forEach>
-              </td>
-            </tr>
-          </c:forEach>
-          </tbody>
-        </table>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <c:set var="status" value="" scope="page" />
+              <c:forEach var="act" items="${wp.attivita}" varStatus="loop">
+                <%@ include file="subActivity.jspf" %>
+                <c:set var="status" value="${loop.index}" scope="page" />
+                <tr>
+                  <td style="padding-left: 50px; width: 75%;">
+                    <a href="${modAct}${p.id}&ida=${act.id}">
+                      <c:out value="${act.nome}" />
+                    </a>
+                  </td>
+                  <td class="${pageScope.stile}">
+                    <c:choose>
+                      <c:when test="${not empty pageScope.testo}">
+                      <a href="javascript:popupWindow('Note','popup1',true,'${testo}');" class="helpInfo">
+                        <c:out value="${act.stato.informativa}" escapeXml="false" />
+                      </a>
+                      </c:when>
+                      <c:otherwise>
+                        <c:out value="${act.stato.informativa}" escapeXml="false" />
+                      </c:otherwise>
+                    </c:choose>
+                  </td>
+                </tr>
+              </c:forEach>
+            </tbody>
+          </table>
+          <br />
+        </c:forEach>
       </div>
       </c:when>
       <c:otherwise>
@@ -60,15 +70,24 @@
         <div class="row">
           <div class="col-2">
             <span class="float-left">
-              <a class="btn btn-primary" href="${wbs}${p.id}">Chiudi</a>
+              <a class="btn btn-primary" href="${project}">Chiudi</a>
             </span>
           </div>
           <div class="col-8 text-center">
             <a href="${addAct}${p.id}" class="btn btn-primary" id="add-act">Esporta</a>
           </div>
         </div>
+        <br />
+        <div class="row">
+          <div class="col-2">
+            <span class="float-left">
+              <a class="btn btn-primary" href="${wbs}${p.id}">Torna a elenco WBS</a>
+            </span>
+          </div>
+        </div>
       </div>
     </form>
+    <%@ include file="subPopup.jspf" %>
     <script type="text/javascript">
       $(document).ready(function() {
         $("#radioColumn, #nameColumn").click(function () {
