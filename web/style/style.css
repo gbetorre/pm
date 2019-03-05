@@ -153,15 +153,15 @@ img.profile {
 	height: 62px;
 }
 
-.bgcolor1 {
+select:disabled.bgcolor1, .bgcolor1 {
 	background-color: #99ff66;
 }
 
-.bgcolor2 {
+select:disabled.bgcolor2, .bgcolor2 {
 	background-color: #ffff4d;
 }
 
-.bgcolor3 {
+select:disabled.bgcolor3, .bgcolor3 {
 	background-color: #ff5232;
 }
 
@@ -384,7 +384,7 @@ hr.riga       {
       padding: 5px;
       margin: 5px;
       height:auto;
-        }
+	  }
         
  a.helpInfo {
   background: transparent url("../img/help.png") no-repeat right top; 
