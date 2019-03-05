@@ -1,3 +1,4 @@
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"  %>
 <%@ include file="pcURL.jspf" %>
     <c:set var="prj" value="${requestScope.progetto}" scope="page" />
     <h4>Report dei Work Packages del progetto: <cite><c:out value="${prj.titolo}" /></cite></h4>
@@ -17,7 +18,7 @@
           <table class="table table-striped overviewSummary">
             <thead class="thead-light">
               <tr>
-                <th scope="col" colspan="2">
+                <th scope="col" colspan="4">
                   WorkPackage: 
                   <a href="${modAct}${p.id}&ida=${wp.id}">
                     <c:out value="${wp.nome}"/>
@@ -31,22 +32,42 @@
                 <%@ include file="subActivity.jspf" %>
                 <c:set var="status" value="${loop.index}" scope="page" />
                 <tr>
-                  <td style="padding-left: 50px; width: 75%;">
+                  <td style="padding-left: 50px; width=55%;">
                     <a href="${modAct}${p.id}&ida=${act.id}">
                       <c:out value="${act.nome}" />
                     </a>
                   </td>
-                  <td class="${pageScope.stile}">
+                  <td style="width: 10%;">
+                    <fmt:formatDate value="${act.dataInizio}" pattern='dd/MM/yyyy' />
+                  </td>
+                  <td style="width: 10%;">
+                    <fmt:formatDate value="${act.dataFine}" pattern='dd/MM/yyyy' />
+                  </td>
+                  <td class="${pageScope.stile}" style="width: 25%; text-align: center;">
                     <c:choose>
                       <c:when test="${not empty pageScope.testo}">
                       <a href="javascript:popupWindow('Note','popup1',true,'${testo}');" class="helpInfo">
-                        <c:out value="${act.stato.informativa}" escapeXml="false" />
+                        <c:out value="${act.stato.informativa}" escapeXml="false"/>
                       </a>
                       </c:when>
                       <c:otherwise>
                         <c:out value="${act.stato.informativa}" escapeXml="false" />
                       </c:otherwise>
                     </c:choose>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="2" style="padding-left: 50px;">
+                    <div>
+                      <label><strong>Note di Avanzamento:</strong></label>
+                    </div>
+                    <c:out value="${act.noteAvanzamento}" />
+                  </td>
+                  <td colspan="2">
+                    <div>
+                      <label><strong>Risultati Raggiunti:</strong></label>
+                    </div>
+                    <c:out value="${act.risultatiRaggiunti}" />
                   </td>
                 </tr>
               </c:forEach>
