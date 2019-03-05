@@ -840,6 +840,7 @@ public interface Query extends Serializable {
             "   ,   A.gueffettivi           AS  \"guEffettivi\"" +
             "   ,   A.gurimanenti           AS  \"guRimanenti\"" +
             "   ,   A.noteavanzamento       AS  \"noteAvanzamento\"" +
+            "   ,   A.risultatiraggiunti    AS  \"risultatiRaggiunti\"" +
             "   ,   A.milestone             AS  \"milestone\"" +
             "   FROM attivita A" + 
             "   WHERE id_progetto = ?" +
@@ -864,6 +865,7 @@ public interface Query extends Serializable {
             "   ,   A.gueffettivi           AS  \"guEffettivi\"" +
             "   ,   A.gurimanenti           AS  \"guRimanenti\"" +
             "   ,   A.noteavanzamento       AS  \"noteAvanzamento\"" +
+            "   ,   A.risultatiraggiunti    AS  \"risultatiRaggiunti\"" +
             "   ,   A.milestone             AS  \"milestone\"" +
             "   ,   A.id_stato              AS  \"idStato\"" +
             "   FROM attivita A" + 
@@ -892,6 +894,7 @@ public interface Query extends Serializable {
             "   ,   A.gueffettivi           AS  \"guEffettivi\"" + 
             "   ,   A.gurimanenti           AS  \"guRimanenti\"" + 
             "   ,   A.noteavanzamento       AS  \"noteAvanzamento\"" + 
+            "   ,   A.risultatiraggiunti    AS  \"risultatiRaggiunti\"" +
             "   ,   A.milestone             AS  \"milestone\"" + 
             "   ,   A.id_wbs                AS  \"idWbs\"" + 
             "   ,   A.id_stato              AS  \"idStato\"" + 
@@ -1193,6 +1196,7 @@ public interface Query extends Serializable {
             "   ,   A.gueffettivi           AS  \"guEffettivi\"" +
             "   ,   A.gurimanenti           AS  \"guRimanenti\"" +
             "   ,   A.noteavanzamento       AS  \"noteAvanzamento\"" +
+            "   ,   A.risultatiraggiunti    AS  \"risultatiRaggiunti\"" +
             "   ,   A.milestone             AS  \"milestone\"" +
             "   ,   A.id_wbs                AS  \"idWbs\"" +
             "   ,   A.id_stato              AS  \"idStato\"" +
@@ -1247,6 +1251,7 @@ public interface Query extends Serializable {
             "   ,   A.gueffettivi           AS  \"guEffettivi\"" +
             "   ,   A.gurimanenti           AS  \"guRimanenti\"" +
             "   ,   A.noteavanzamento       AS  \"noteAvanzamento\"" +
+            "   ,   A.risultatiraggiunti    AS  \"risultatiRaggiunti\"" +
             "   ,   A.milestone             AS  \"milestone\"" +
             "   ,   A.id_wbs                AS  \"idWbs\"" +
             "   ,   A.id_stato              AS  \"idStato\"" +
