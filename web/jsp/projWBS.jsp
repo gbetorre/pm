@@ -12,10 +12,10 @@
         // For each orgchart box, provide the name, father, and tooltip to show.
         data.addRows([
         <c:forEach var="wbsAvo" items="${requestScope.wbsHierarchy}">
-          [{v:'${wbsAvo.nome}', f:'${wbsAvo.nome}<div style="color:red; font-style:italic">WBS padre</div>'},
+          [{v:'${wbsAvo.nome}', f:'${wbsAvo.nome}'},
            '', 'WBS capostipite'],
           <c:forEach var="wbsFiglio" items="${wbsAvo.wbsFiglie}">
-          [{v:'${wbsFiglio.nome}', f:'${wbsFiglio.nome}<div style="color:red; font-style:italic">WBS livello 1</div>'},
+          [{v:'${wbsFiglio.nome}', f:'${wbsFiglio.nome}'},
            '${wbsFiglio.wbsPadre.nome}', 'WBS figlia'],
             <c:forEach var="wbsNipote" items="${wbsFiglio.wbsFiglie}">
           ['${wbsNipote.nome}', '${wbsNipote.wbsPadre.nome}', 'Work package = ${wbsNipote.workPackage}'],
