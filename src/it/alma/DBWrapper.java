@@ -3892,4 +3892,212 @@ public class DBWrapper implements Query {
         }
     }
     
+    
+    /**
+     * <p>Dato in input una attivit&agrave; passata come argomento,
+     * ne calcola per lo stato e lo restituisce sotto forma di 
+     * <code>CodeBean</code>.</p>
+     * <p>Implementa un algoritmo che calcola tale stato e lo setta 
+     * nell'argomento, valorizzandolo per riferimento.</p>
+     * 
+     * @param aws activity without state
+     * @param rightNow
+     * @return
+     * @throws CommandException
+     */
+    public CodeBean computeActivityState(ActivityBean aws,
+                                         Date rightNow) 
+                                  throws CommandException {
+        // ID corrispondenti ai veri stati attività impostati dal TL
+        final int APERTA = 1;       // Un'attività APERTA è un'attività avviata ma non ancora iniziata, cioè non vi è stato imputato lavoro
+        final int IN_PROGRESS = 2;  // Un'attività IN PROGRESS è un'attività avviata su cui è stato imputato lavoro (giorni uomo o altro)
+        final int CHIUSA = 3;       // Un'attività CHIUSA è un'attività conclusa, su cui non è più possibile allocare GU o risorse
+        // ID aggiuntivi
+        final int APERTA_IN_RITARDO = 4;
+        final int IN_PROGRESS_IN_ANTICIPO = 5;
+        final int IN_PROGRESS_IN_RITARDO = 6;
+        final int IN_PROGRESS_INIZIO_IN_RITARDO = 7;
+        final int CHIUSA_IN_ANTICIPO = 8;
+        final int CHIUSA_IN_RITARDO = 9;
+        final int STATO_INCONSISTENTE = 10;
+        CodeBean stato = new CodeBean();
+        try {
+            /* ************************************************************ *
+             *        Controlli sulle premesse (che siano consistenti)      *
+             *   data < rightNow -> passato  |  data = rightNow -> presente *
+             *                     data > rightNow -> futuro                *
+             * ************************************************************ */
+            // La data di fine prevista non può mai essere nulla (è un dato obbligatorio)
+            if (aws.getDataFine() == null) {
+                String msg = FOR_NAME + "Incongruenza grave: un dato obbligatorio (la data di fine prevista) non e\' presente!\n";
+                LOG.severe(msg + Utils.BLANK_SPACE + "Tentativo di hackeraggio?");
+                throw new CommandException(msg);
+            }
+            // La data di inizio effettiva, se esiste, deve essere sempre nel passato perché l'utente non è un indovino (e quindi non può prevedere il futuro)
+            if (aws.getDataInizioEffettiva() != null) {
+                if (aws.getDataInizioEffettiva().after(rightNow)) {
+                    String msg = FOR_NAME + "Incongruenza nelle date: la data di inizio effettiva non puo\' essere maggiore della data odierna.\n";
+                    LOG.severe(msg);
+                    throw new CommandException(msg);
+                }
+            }
+            // La data di fine effettiva, se esiste, deve essere sempre nel passato perché l'utente non è un chiromante
+            if (aws.getDataFineEffettiva() != null) {
+                if (aws.getDataFineEffettiva().after(rightNow)) {
+                    String msg = FOR_NAME + "Incongruenza nelle date: la data di fine effettiva non puo\' essere maggiore della data odierna.\n";
+                    LOG.severe(msg);
+                    throw new CommandException(msg);
+                }
+            }
+            // La data di inizio prevista deve essere minore della data di fine prevista 
+            if (aws.getDataInizio() != null) {
+                if (aws.getDataInizio().after(aws.getDataFine())) {
+                    String msg = FOR_NAME + "Incongruenza nelle date: la data di inizio prevista non puo\' essere maggiore della data di fine prevista.\n";
+                    LOG.severe(msg);
+                    throw new CommandException(msg);
+                }
+            }
+            // La data di inizio effettiva deve essere minore della data di fine effettiva
+            if (aws.getDataInizioEffettiva() != null && aws.getDataFineEffettiva() != null) {
+                if (aws.getDataInizioEffettiva().after(aws.getDataFineEffettiva())) {
+                    String msg = FOR_NAME + "Incongruenza nelle date: la data di inizio effettiva non puo\' essere maggiore della data di fine effettiva.\n";
+                    LOG.severe(msg);
+                    throw new CommandException(msg);
+                }
+            }
+            /* ************************************************************ *
+             *                     Controlli sugli stati                    *
+             *  - STATO CHIUSO:                                             *
+             *      criterio + importante: data fine effettiva <> NULL      *
+             *  - STATO APERTO                                              *
+             *      criterio + importante: data inizio effettiva NULL       *
+             *  - STATO IN PROGRESS                                         *
+             *      criterio + importante: data inizio effettiva <> NULL    *
+             * ************************************************************ */
+            // APERTO
+            if (aws.getDataInizioEffettiva() == null && aws.getDataFineEffettiva() == null) {
+                if (aws.getDataInizio() == null) {
+                    if (aws.getDataFine().after(rightNow) || aws.getDataFine().equals(rightNow)) {
+                        stato.setId(APERTA);
+                        stato.setNome("Aperta");
+                        stato.setOrdinale(APERTA);
+                        stato.setInformativa("Aperta regolare");
+                    }
+                    // Intercetta attività in stato "APERTO" ma non finite e in ritardo
+                    else if (aws.getDataFine().after(rightNow)) {
+                        stato.setId(APERTA_IN_RITARDO);
+                        stato.setNome("Aperta in ritardo");
+                        stato.setOrdinale(APERTA);
+                        stato.setInformativa("Attivit&agrave; in ritardo sulla chiusura");
+                    }
+                }
+                else {  // Data inizio prevista <> NULL
+                    if (aws.getDataInizio().after(rightNow) || aws.getDataInizio().equals(rightNow)) {
+                        stato.setId(APERTA);
+                        stato.setNome("Aperta");
+                        stato.setOrdinale(APERTA);
+                        stato.setInformativa("Attivit&agrave; pianificata regolare");
+                    }
+                    else { // aws.getDataInizio().before(rightNow)
+                        stato.setId(APERTA_IN_RITARDO);
+                        stato.setNome("Aperta in ritardo");
+                        stato.setOrdinale(APERTA);
+                        stato.setInformativa("Attivit&agrave; in ritardo sull\'apertura");
+                    }
+                }
+            }
+            // IN PROGRESS
+            else if (aws.getDataInizioEffettiva() != null && aws.getDataFineEffettiva() == null) {
+                if (aws.getDataInizio() == null) {
+                    if (aws.getDataFine().before(rightNow)) {
+                        stato.setId(IN_PROGRESS_IN_RITARDO);
+                        stato.setNome("In progress");
+                        stato.setOrdinale(IN_PROGRESS);
+                        stato.setInformativa("In progress in ritardo sulla chiusura");
+                    }
+                    else {  // Qui data di fine prevista è >= today
+                        stato.setId(IN_PROGRESS);
+                        stato.setNome("In progress");
+                        stato.setOrdinale(IN_PROGRESS);
+                        stato.setInformativa("In progress regolare");
+                    }
+                }
+                else {  // Qui la data di inizio prevista <> NULL quindi possiamo controllare il rapporto tra questa e quella effettiva!
+                    if (aws.getDataInizio().before(aws.getDataInizioEffettiva())) {
+                        if (aws.getDataFine().before(rightNow)) {
+                            stato.setId(IN_PROGRESS_IN_RITARDO);
+                            stato.setNome("In progress in ritardo su tutta la linea");
+                            stato.setOrdinale(IN_PROGRESS);
+                            stato.setInformativa("In progress in ritardo sull\'inizio previsto e sulla fine prevista");
+                        }
+                        else {
+                            stato.setId(IN_PROGRESS_INIZIO_IN_RITARDO);
+                            stato.setNome("In progress in ritardo");
+                            stato.setOrdinale(IN_PROGRESS);
+                            stato.setInformativa("In progress in ritardo sull\'inizio");
+                        }
+                    }
+                    else if (aws.getDataInizio().after(aws.getDataInizioEffettiva())) {
+                        stato.setId(IN_PROGRESS_IN_ANTICIPO);
+                        stato.setNome("In progress");
+                        stato.setOrdinale(IN_PROGRESS);
+                        stato.setInformativa("In progress in anticipo sull\'inizio");
+                    }
+                    else { // la data prevista e effettiva sono uguali
+                        if (aws.getDataFine().after(rightNow) || aws.getDataFine().equals(rightNow)) {
+                            stato.setId(IN_PROGRESS);
+                            stato.setNome("In progress");
+                            stato.setOrdinale(IN_PROGRESS);
+                            stato.setInformativa("In progress in regola");
+                        }
+                        else {  // Caso già gestito in caso di data inizio prevista NULL
+                            stato.setId(IN_PROGRESS_IN_RITARDO);
+                            stato.setNome("In progress");
+                            stato.setOrdinale(IN_PROGRESS);
+                            stato.setInformativa("In progress in ritardo sulla chiusura");
+                        }
+                    }
+                }
+            }
+            // CHIUSO
+            else if (aws.getDataFineEffettiva() != null) {  // Per poter essere considerata chiusa un'attività deve avere data fine effettiva <> null
+                /*
+                if (aws.getDataFineEffettiva() == null) {
+                    stato.setId(STATO_INCONSISTENTE);
+                    stato.setOrdinale(CHIUSO);
+                    stato.setInformativa("Attivit&agrave; in stato inconsistente");
+                } else {
+                    if (aws.getDataFineEffettiva().before(aws.getDataFine()) &&
+                        aws.getDataFineEffettiva().before(rightNow)) {
+                        stato.setId(CHIUSO_PRIMA);
+                        stato.setOrdinale(CHIUSO);
+                        stato.setInformativa("Chiusa in anticipo");
+                    }
+                    // Intercetta attività che sono finite dopo la data prevista
+                    else if (aws.getDataFineEffettiva().after(aws.getDataFine()) &&
+                             aws.getDataFineEffettiva().before(rightNow)) {
+                        stato.setId(CHIUSO_DOPO);
+                        stato.setOrdinale(CHIUSO);
+                        stato.setInformativa("Chiusa in ritardo");
+                    }
+                }*/
+            }    
+            aws.setStato(stato);
+
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio del bean, probabilmente  un id.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + anve.getMessage(), anve);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + npe.getMessage(), npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+        return stato;
+    }
+    
 }
