@@ -872,7 +872,7 @@ public interface Query extends Serializable {
             "   WHERE id_progetto = ?" +
             "       AND A.datainizio >= ?" +
             "       AND (A.milestone = ? OR ?)" +
-            "   ORDER BY A.datainizio, A.datafine, A.id_stato, A.dataultimamodifica ASC";
+            "   ORDER BY A.dataultimamodifica, A.datainizio, A.datafine, A.id_stato  ASC";
     
     /**
      * <p>Estrae le attivit&agrave; di una specifica WBS,
