@@ -55,6 +55,13 @@
     <br />
     <form id="act_form" action="" method="post" class="subfields">
       <input type="hidden" id="act-id" name="act-id" value="${actInstance.id}" />
+      <c:set var="stato" value="" scope="page" />
+      <c:forEach var="status" items="${requestScope.statiAttivita}" varStatus="loop">
+        <c:if test="${status.id eq state}">
+          <c:set var="stato" value="${status.nome}" scope="page" />
+        </c:if> 
+      </c:forEach>
+      <div class="avvisiTot"><c:out value="Stato: ${stato}" /></div>
       <div class="row">
         <div class="col-sm-5 mandatory">
           Identificativo della persona 
@@ -107,25 +114,27 @@
           </select>
         </div>
       </div>
+      <%-- 
       <div class="row">
         <div class="col-sm-5">&nbsp;</div>
         <div class="col-sm-5">
           <input type="button" id="show-extrainfo" class="btn extrainfo" value="Altre informazioni" onclick="modify()">
         </div>
       </div>
+      --%>
       <hr class="separatore" />
-      <div class="additional-fields">
+        <%-- <div class="additional-fields"> --%>
         <div class="row">
           <div class="col-sm-5 mandatory">Nome attivit&agrave; <sup>&#10039;</sup></div>
           <div class="col-sm-5">
-            <input type="text" class="form-control" id="act-name" name="act-name" value="${actName}" readonly="readonly">
+            <input type="text" class="form-control" id="act-name" name="act-name" value="${actName}" readonly="readonly"> <%-- readonly="readonly" --%>
           </div>
         </div>
         <br />
         <div class="row">
           <div class="col-sm-5">Descrizione dell'attivit&agrave;</div>
           <div class="col-sm-5">
-            <textarea class="form-control" name="act-descr" class="form-control" aria-label="With textarea" maxlength="8104" readonly><c:out value="${actDescr}" escapeXml="false" /></textarea>
+            <textarea class="form-control" name="act-descr" class="form-control" aria-label="With textarea" maxlength="8104" readonly> <%--readonly--%><c:out value="${actDescr}" escapeXml="false" /></textarea>
             <div class="charNum"></div>
           </div>
         </div>
@@ -133,26 +142,28 @@
         <div class="row">
           <div class="col-sm-5">Data di inizio dell'attivit&agrave;</div>
           <div class="col-sm-5">
-            <input type="text" class="form-control calendarData" id="act-datainizio" name="act-datainizio" value="<fmt:formatDate value='${actStartDate}' pattern='dd/MM/yyyy' />" readonly></div>
+            <input type="text" class="form-control calendarData" id="act-datainizio" name="act-datainizio" value="<fmt:formatDate value='${actStartDate}' pattern='dd/MM/yyyy' />" readonly> <%--readonly--%>
+          </div>
         </div>
         <br />
         <div class="row">
           <div class="col-sm-5 mandatory">Data di fine dell'attivit&agrave; <sup>&#10039;</sup></div>
           <div class="col-sm-5">
-            <input type="text" class="form-control calendarData" id="act-datafine" name="act-datafine" value="<fmt:formatDate value='${actEndDate}' pattern='dd/MM/yyyy' />" readonly></div>
+            <input type="text" class="form-control calendarData" id="act-datafine" name="act-datafine" value="<fmt:formatDate value='${actEndDate}' pattern='dd/MM/yyyy' />" readonly> <%--readonly--%>
+          </div>
         </div>
         <br />
         <div class="row">
           <div class="col-sm-5">Data di inizio effettiva</div>
           <div class="col-sm-5">
-            <input type="text" class="form-control calendarData" id="act-datainiziovera" name="act-datainiziovera" value="<fmt:formatDate value='${actualStartDate}' pattern='dd/MM/yyyy' />" readonly>
+            <input type="text" class="form-control calendarData" id="act-datainiziovera" name="act-datainiziovera" value="<fmt:formatDate value='${actualStartDate}' pattern='dd/MM/yyyy' />" readonly> <%--readonly--%>
           </div>
         </div>
         <br />
         <div class="row">
           <div class="col-sm-5">Data di fine effettiva</div>
           <div class="col-sm-5">
-            <input type="text" class="form-control calendarData" id="act-datafinevera" name="act-datafinevera" value="<fmt:formatDate value='${actualEndDate}' pattern='dd/MM/yyyy' />" readonly>
+            <input type="text" class="form-control calendarData" id="act-datafinevera" name="act-datafinevera" value="<fmt:formatDate value='${actualEndDate}' pattern='dd/MM/yyyy' />" readonly> <%--readonly--%>
           </div>
         </div>
         <br />
@@ -182,7 +193,7 @@
         <div class="row">
           <div class="col-sm-5">Note di avanzamento</div>
           <div class="col-sm-5">
-            <textarea class="form-control" name="act-progress" class="form-control" aria-label="With textarea" maxlength="8104" readonly><c:out value="${actNotes}" escapeXml="false" /></textarea>
+            <textarea class="form-control" name="act-progress" class="form-control" aria-label="With textarea" maxlength="8104" readonly> <%--readonly--%><c:out value="${actNotes}" escapeXml="false" /></textarea>
             <div class="charNum"></div>
           </div>
         </div>
@@ -190,7 +201,7 @@
         <div class="row">
           <div class="col-sm-5">Risultati raggiunti</div>
           <div class="col-sm-5">
-            <textarea class="form-control" name="act-result" class="form-control" aria-label="With textarea" maxlength="1024" readonly><c:out value="${actResult}" escapeXml="false" /></textarea>
+            <textarea class="form-control" name="act-result" class="form-control" aria-label="With textarea" maxlength="1024" readonly> <%--readonly--%><c:out value="${actResult}" escapeXml="false" /></textarea>
             <div class="charNum"></div>
           </div>
         </div>
@@ -205,7 +216,7 @@
         <div class="row">
           <div class="col-sm-5 mandatory">WBS <sup>&#10039;</sup></div>
           <div class="col-sm-5">
-            <select class="form-control" id="act-wbs" name="act-wbs">
+            <select class="form-control" id="act-wbs" name="act-wbs" disabled><%-- disabled --%>
             <c:forEach var="wp" items="${requestScope.wbs}" varStatus="status">
               <c:set var="selected" value="" scope="page" />
               <c:if test="${wp.id eq wbs}">
@@ -220,7 +231,7 @@
         <div class="row">
           <div class="col-sm-5 mandatory">Complessit&agrave; dell'attivit&agrave; <sup>&#10039;</sup></div>
           <div class="col-sm-5">
-            <select class="form-control" id="act-compl" name="act-compl">
+            <select class="form-control" id="act-compl" name="act-compl" disabled>
             <c:forEach var="status" items="${requestScope.complessita}" varStatus="loop">
               <c:set var="selected" value="" scope="page" />
               <c:if test="${status.id eq complexity}">
@@ -232,10 +243,11 @@
           </div>
         </div>
         <br />
+        <%-- 
         <div class="row">
           <div class="col-sm-5 mandatory">Stato attivit&agrave; <sup>&#10039;</sup></div>
           <div class="col-sm-5">
-            <select class="form-control" id="act-status" name="act-status">
+            <select class="form-control" id="act-status" name="act-status" disabled>
             <c:forEach var="status" items="${requestScope.statiAttivita}" varStatus="loop">
               <c:set var="selected" value="" scope="page" />
               <c:if test="${status.id eq state}">
@@ -247,9 +259,11 @@
           </div>
         </div>
         <br />
+        --%>
         <a href="<c:out value= "${act}${requestScope.progetto.id}" escapeXml="false" />" id='btn-close' class="btn btn-primary">Chiudi</a>
+        <input type="button" class="btn btn-primary" name="modifica" value="Modifica" onclick="modify()">
         <%@ include file="subPanel.jspf" %>
-      </div>
+    <%--</div> --%>
     </form>
 </c:catch>
 <c:out value="${exception}" />
@@ -308,7 +322,7 @@
       });
     });
     
-
+    <%--
     $('.extrainfo').click(function() {
       var $body = $('.additional-fields');
       if ($body.is(':hidden')) {
@@ -317,7 +331,7 @@
         //$body.show();
       }
     });
-    
+    --%>
     
     $("#act-people").change(function () {
       switch($(this).val()) {
