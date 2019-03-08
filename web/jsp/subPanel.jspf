@@ -41,7 +41,7 @@
       <c:otherwise>
         <a href="${addAct}${p.id}" class="btn btn-lightgray" id="add-act">Aggiungi</a>
         <a href="" class="btn btn-lightgray" id="mod-act" onclick="selectionEdit('Attivit&agrave;')">Modifica</a>
-        <a href="" class="btn btn-lightgray" id="del-act" onclick="selectionEdit('Attivit&agrave;')">Elimina</a>
+        <a href="" class="btn btn-lightgray" id="del-act" onclick="selectionEdit('Attivit&agrave;')">Sospendi / Elimina</a>
       </c:otherwise>
     </c:choose>
     </c:when>
