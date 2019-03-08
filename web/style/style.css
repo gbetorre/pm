@@ -153,16 +153,49 @@ img.profile {
 	height: 62px;
 }
 
-select:disabled.bgcolor1, .bgcolor1 {
+.bgcolor1 {
 	background-color: #99ff66;
 }
 
-select:disabled.bgcolor2, .bgcolor2 {
+select:disabled.bgcolor1 {
+	background-color: #00cc44;
+}
+
+.bgcolor2 {
 	background-color: #ffff4d;
 }
 
-select:disabled.bgcolor3, .bgcolor3 {
+select:disabled.bgcolor2 {
+	background-color: #ffd633;
+}
+
+.bgcolor3 {
 	background-color: #ff5232;
+}
+
+select:disabled.bgcolor3 {
+	background-color: #ff1a1a;
+	color: white;
+}
+
+.bgcolorgreen {
+	background-image: linear-gradient(to right, white, #99ff66);
+}
+
+.bgcolorred {
+	background-image: linear-gradient(to right, white, #ff5232);
+}
+
+.btn-lightgray {
+  color: #fff;
+  background-color: #929aa0;
+  border-color: #929aa0;
+}
+
+.btn-lightgray:hover {
+  color: #fff;
+  background-color: #6c757d;
+  border-color: #6c757d;
 }
 
 tr.selected {
