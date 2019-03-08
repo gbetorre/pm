@@ -1152,7 +1152,21 @@ public class DBWrapper implements Query {
     
         
     /**
-     * <p>Restituisce un Vector di ActivityBean rappresentante le attivit&agrave; del progetto attuale</p>
+     * <p>Restituisce un Vector di ActivityBean rappresentante tutte
+     * le attivit&agrave; del progetto attuale.</p>
+     * <p>Pu&ograve; essere usato &quot;a valle&quot; dell'identificazione
+     * di identificativi di progetto su cui l'utente sicuramente pu&ograve; 
+     * scrivere, per recuperare tutte le attivit&agrave; degli stessi,
+     * senza effettuare ulteriori controlli o filtri (se un utente pu&ograve;
+     * scrivere su un progetto, potr&agrave; anche editarne le attivit&agrave;,
+     * dati i ruoli configurati nell'applicazione <code>pol</code>).</p>
+     * <p>Lo stato calcolato potrebbe non essere necessario ai fini dell'uso
+     * di questa lista; in caso contrario bisogna richiamare il metodo che
+     * lo calcola passando l'attivi&agrave; corrente come parametro:
+     * <pre>
+     * BeanUtil.populate(attivita, rs);
+     * computeActivityState(attivita, Utils.convert(Utils.getCurrentDate()));
+     * </pre></p>
      * 
      * @param projId  id del progetto di cui estrarre le attivit&agrave;
      * @return <code>Vector&lt;AttvitaBean&gt;</code> - ActivityBean rappresentante l'attivit&agrave; del progetto.
@@ -1263,7 +1277,7 @@ public class DBWrapper implements Query {
                                               boolean getMilestoneOnly,
                                               boolean getAll) 
                                        throws WebStorageException {
-        ResultSet rs, rs1, rs2 = null;
+        ResultSet rs, rs1 = null;
         Connection con = null;
         PreparedStatement pst = null;
         ActivityBean attivita = null;
@@ -1290,6 +1304,7 @@ public class DBWrapper implements Query {
             while (rs.next()) {
                 attivita = new ActivityBean();
                 BeanUtil.populate(attivita, rs);
+                computeActivityState(attivita, Utils.convert(Utils.getCurrentDate()));
                 pst = null;
                 pst = con.prepareStatement(GET_PEOPLE_ON_ACTIVITY);
                 pst.clearParameters();
@@ -1356,6 +1371,7 @@ public class DBWrapper implements Query {
             while (rs.next()) {
                 activity = new ActivityBean();
                 BeanUtil.populate(activity, rs);
+                computeActivityState(activity, Utils.convert(Utils.getCurrentDate()));
                 activities.add(activity);
             }
             return activities;
@@ -1411,6 +1427,7 @@ public class DBWrapper implements Query {
             while (rs.next()) {
                 activity = new ActivityBean();
                 BeanUtil.populate(activity, rs);
+                computeActivityState(activity, Utils.convert(Utils.getCurrentDate()));
                 vectorActivity.add(activity);
             }
             return vectorActivity;
@@ -1433,8 +1450,8 @@ public class DBWrapper implements Query {
     
     
     /**
-     * <p>Restituisce un Vector di ActivityBean rappresentante le attivit&agrave; che 
-     * hanno data di inizio compresa tra due date, passate come argomento.</p>
+     * <p>Restituisce un Vector di ActivityBean rappresentante le attivit&agrave; 
+     * che hanno data di inizio compresa tra due date, passate come argomento.</p>
      * 
      * @param idProj                id del progetto a cui appartiene lo status
      * @param dataInizio            data di inizio dello status progetto
@@ -1464,6 +1481,7 @@ public class DBWrapper implements Query {
             while (rs.next()) {
                 activity = new ActivityBean();
                 BeanUtil.populate(activity, rs);
+                computeActivityState(activity, Utils.convert(Utils.getCurrentDate()));
                 vectorActivity.add(activity);
             }
             return vectorActivity;
@@ -1491,10 +1509,10 @@ public class DBWrapper implements Query {
      * essere leggibile dall'utente - e avente identificativo 
      * passato come argomento.</p>
      * 
-     * @param projId id del progetto di cui estrarre le attivit&agrave;
+     * @param projId     id del progetto di cui estrarre le attivit&agrave;
      * @param activityId id dell'attivit&agrave; che si vuol recuperare
-     * @param user 
-     * @return <code>Vector&lt;AttvitaBean&gt;</code> - ActivityBean rappresentante l'attivit&agrave; del progetto.
+     * @param user       utente loggato
+     * @return <code>Vector&lt;AttvitaBean&gt;</code> - ActivityBean rappresentante l'attivit&agrave; del progetto di identificativo passato come argomento.
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
      */
     @SuppressWarnings({ "null", "static-method" })
@@ -1519,6 +1537,7 @@ public class DBWrapper implements Query {
             if (rs.next()) {
                 activity = new ActivityBean();
                 BeanUtil.populate(activity, rs);
+                computeActivityState(activity, Utils.convert(Utils.getCurrentDate()));
                 pst = null;
                 pst = con.prepareStatement(GET_PEOPLE_ON_ACTIVITY);
                 pst.clearParameters();
@@ -1569,7 +1588,8 @@ public class DBWrapper implements Query {
     
     
     /**
-     * <p>Restituisce un Vector di SkillBean rappresentante le competenze del progetto attuale</p>
+     * <p>Restituisce un Vector di SkillBean 
+     * rappresentante le competenze del progetto corrente.</p>
      * 
      * @param projId id del progetto di cui estrarre le competenze
      * @return <code>Vector&lt;SkillBean&gt;</code> - SkillBean rappresentante le competenze del progetto.
@@ -1614,7 +1634,8 @@ public class DBWrapper implements Query {
     
     
     /**
-     * <p>Restituisce un Vector di RiskBean rappresentante i rischi del progetto attuale</p>
+     * <p>Restituisce un Vector di RiskBean 
+     * rappresentante i rischi del progetto corrente.</p>
      * 
      * @param projId id del progetto di cui estrarre i rischi
      * @return <code>Vector&lt;RiskBean&gt;</code> - RiskBean rappresentante i rischi del progetto.
@@ -2593,7 +2614,7 @@ public class DBWrapper implements Query {
     }
     
     
-    /** <p>Aggiorna una attivit&agrave; di un dato progetto.</p>
+    /** <p>Aggiorna una attivit&agrave; di dato id, di un dato progetto.</p>
      * 
      * @param idProj    id del progetto da aggiornare 
      * @param user      utente che ha eseguito il login
@@ -2614,7 +2635,8 @@ public class DBWrapper implements Query {
         int calculatedId = -1;
         try {
             con = pol_manager.getConnection();
-            // Controlla anzitutto che l'id progetto sulla querystring corrisponda a un id dei progetti scrivibili dall'utente    
+            /* ===  Controlla anzitutto che l'id progetto sulla querystring === *
+             * ===  corrisponda a un id dei progetti scrivibili dall'utente === */
             try {
                 if (!userCanWrite(idProj, projectsWritableByUser)) {
                     String msg = FOR_NAME + "Attenzione: l'utente ha tentato di modificare un\'attivita\' legata ad un progetto su cui non ha i diritti di scrittura!\n";
@@ -2628,7 +2650,8 @@ public class DBWrapper implements Query {
             }
             // Ottiene l'id da aggiornare
             calculatedId = Integer.parseInt(params.get("act-id"));
-            /* Controlla che l'id attivita' passato dalla form corrisponda a un id di attività scrivibili dall'utente  **/
+            /* ===   Controlla che l'id attivita' passato dalla form        === * 
+             * ===   corrisponda a un id di attività scrivibili dall'utente === */
             // Ottiene la lista di attività scrivibili per il progetto in esame
             Vector<ActivityBean> writableActivities = userWritableActivitiesByProjectId.get(new Integer(idProj));
             // Ottiene la cardinalità della lista delle atività precaricate 
@@ -2650,22 +2673,25 @@ public class DBWrapper implements Query {
                 LOG.severe(msg + "Problema durante il tentativo di inserire una nuova attivita\'.\n");
                 throw new WebStorageException(msg);
             }            
-            // Se siamo qui vuol dire che l'id dell'attività su cui si deve aggiungere un'attività è scrivibile dall'utente
+            /* === Se siamo qui vuol dire che l'id dell'attivita' su cui    === * 
+             * === si deve aggiungere/modificare informazioni e' una        === * 
+             * === attivita' scrivibile dall'utente                         === */
             // Begin: ==>
             con.setAutoCommit(false);
             pst = con.prepareStatement(UPDATE_ACTIVITY);
             pst.clearParameters();
              // Prepara i parametri per l'inserimento
             try {
+                /* === Variabili locali === */
                 // Definisce un contatore per l'indice del parametro
                 int nextParam = 0;
                 // Definisce un valore boolean in funzione del checkbox
                 boolean milestone = params.get("act-milestone").equals("on") ? true : false;
-                // Nome
+                /* === Nome === */
                 pst.setString(++nextParam, params.get("act-name"));
-                // Descrizione
+                /* === Descrizione === */
                 pst.setString(++nextParam, params.get("act-descr"));
-                // Controllo lato server sull'input delle date
+                /* === Controllo lato server sull'input delle date previste === */
                 java.util.Date dataInizio = Utils.format(params.get("act-datainizio"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
                 java.util.Date dataFine = Utils.format(params.get("act-datafine"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
                 // Data fine non deve essere minore di Data inizio
@@ -2680,7 +2706,7 @@ public class DBWrapper implements Query {
                 pst.setDate(++nextParam, null);
                 // Campo residuale (Data fine attesa)
                 pst.setDate(++nextParam, null);   
-                // Gestione delle date facoltative
+                /* === Gestione delle date effettive, facoltative === */
                 java.util.Date dataInizioEffettiva = null;
                 java.util.Date dataFineEffettiva = null;
                 java.sql.Date date = null;
@@ -2704,6 +2730,7 @@ public class DBWrapper implements Query {
                         throw new WebStorageException("La data di fine effettiva attivita\' e\' minore di quella di inizio effettiva attivita\'.\n");
                     }
                 }
+                /* === Gestione GU === */
                 // Gestione giorni uomo previsti
                 Integer gu = null;
                 if (!params.get("act-guprevisti").equals(Utils.VOID_STRING)) {
@@ -2734,20 +2761,29 @@ public class DBWrapper implements Query {
                     // Dato facoltativo non inserito
                     pst.setNull(++nextParam, Types.NULL);
                 }
+                /* === Note di avanzamento === */
                 pst.setString(++nextParam, params.get("act-progress"));
+                /* === Risultati raggiunti === */
                 pst.setString(++nextParam, params.get("act-result"));
+                /* === Milestone === */
                 pst.setBoolean(++nextParam, milestone);
-                //pst.setInt(++nextParam, idProj);
+                // E' vietato modificare l'id progetto:
+                // pst.setInt(++nextParam, idProj);
+                /* === WBS aggregante === */
                 pst.setInt(++nextParam, Integer.parseInt(params.get("act-wbs")));
+                /* === Identificativo complessita' === */
                 pst.setInt(++nextParam, Integer.parseInt(params.get("act-compl")));
-                // Gestione congruenza tra stato e date
+                /* === Gestione stato automatico === */
                 Date today = Utils.convert(Utils.getCurrentDate());
+                /* // Gestione congruenza tra stato e date
                 int idStato = Integer.parseInt(params.get("act-status"));
                 if (dataFineEffettiva != null && dataFineEffettiva.before(today)) {
                     // Se ha messo la data di fine effettiva, forza lo stato a "chiuso", qualunque sia stata la scelta dell'utente
                     idStato = 3;
                 }
-                pst.setInt(++nextParam, idStato);
+                pst.setInt(++nextParam, idStato);*/
+                CodeBean stato = computeActivityState(dataInizio, dataFine, dataInizioEffettiva, dataFineEffettiva, today);
+                pst.setInt(++nextParam, stato.getId());
                 // Campi automatici: id utente, ora ultima modifica, data ultima modifica
                 pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
                 pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringe, ma un oggetto java.sql.Time
@@ -3156,7 +3192,8 @@ public class DBWrapper implements Query {
         try {
             // Effettua la connessione
             con = pol_manager.getConnection();
-            // Controlla anzitutto che l'id progetto sulla querystring corrisponda a un id dei progetti scrivibili dall'utente    
+            /* ===  Controlla anzitutto che l'id progetto sulla querystring === *
+             * ===  corrisponda a un id dei progetti scrivibili dall'utente === */
             try {
                 if (!userCanWrite(idProj, projectsWritableByUser)) {
                     String msg = FOR_NAME + "Attenzione: l'utente ha tentato di modificare un\'attivita\' legata ad un progetto su cui non ha i diritti di scrittura!\n";
@@ -3168,7 +3205,8 @@ public class DBWrapper implements Query {
                 LOG.severe(msg + "Problema durante il tentativo di inserire una nuova attivita\'.\n");
                 throw new WebStorageException(msg);
             }
-            // Se siamo qui vuol dire che l'id del progetto su cui si deve aggiungere un'attività è scrivibile dall'utente
+            /* === Se siamo qui vuol dire che l'id del progetto su cui si   === * 
+             * === deve aggiungere un'attivita' e' scrivibile dall'utente   === */
             // Deve fare un inserimento
             // Begin: ==>
             con.setAutoCommit(false);
@@ -3182,13 +3220,13 @@ public class DBWrapper implements Query {
                 int maxActId = getMax("attivita") + 1;
                 // Definisce un valore boolean in funzione del checkbox
                 boolean milestone = params.get("act-milestone").equals("on") ? true : false;
-                // Id
+                /* === Id === */
                 pst.setInt(++nextParam, maxActId);
-                // Nome
+                /* === Nome === */
                 pst.setString(++nextParam, params.get("act-name"));
-                // Descrizione
+                /* === Descrizione === */
                 pst.setString(++nextParam, params.get("act-descr"));
-                // Controllo lato server sull'input delle date
+                /* === Controllo lato server sull'input delle date === */
                 java.util.Date dataInizio = Utils.format(params.get("act-datainizio"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
                 java.util.Date dataFine = Utils.format(params.get("act-datafine"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
                 // Data fine non deve essere minore di Data inizio
@@ -3202,26 +3240,29 @@ public class DBWrapper implements Query {
                 // Campo residuale
                 pst.setDate(++nextParam, null);
                 // Campo residuale
-                pst.setDate(++nextParam, null);   
-                // Gestione delle date facoltative
+                pst.setDate(++nextParam, null);
+                /* === Gestione delle date facoltative === */
+                java.util.Date dataInizioEffettiva = null;
+                java.util.Date dataFineEffettiva = null;
                 java.sql.Date date = null;
                 if (params.get("act-datainiziovera") != null) {
-                    dataInizio = Utils.format(params.get("act-datainiziovera"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
-                    date = Utils.convert(dataInizio);
+                    dataInizioEffettiva = Utils.format(params.get("act-datainiziovera"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
+                    date = Utils.convert(dataInizioEffettiva);
                 }
                 // Data inizio effettiva
                 pst.setDate(++nextParam, date); // non accetta una data italiana, ma java.sql.Date
                 date = null;
                 if (params.get("act-datafinevera") != null) {
-                    dataFine = Utils.format(params.get("act-datafinevera"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
+                    dataFineEffettiva = Utils.format(params.get("act-datafinevera"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
                     date = Utils.convert(dataFine);
                 }
-                // data fine effettiva
+                // Data fine effettiva
                 pst.setDate(++nextParam, date); // non accetta una data italiana, ma java.sql.Date
                 // Data fine non deve essere minore di Data inizio
-                if (dataInizio.compareTo(dataFine) > NOTHING) {
+                if (dataInizioEffettiva.compareTo(dataFineEffettiva) > NOTHING) {
                     throw new WebStorageException("La data di fine effettiva attivita\' e\' minore di quella di inizio effettiva attivita\'.\n");
                 }
+                /* === Gestione GU === */
                 // Gestione giorni uomo previsti
                 Integer gu = null;
                 if (!params.get("act-guprevisti").equals(Utils.VOID_STRING)) {
@@ -3252,18 +3293,26 @@ public class DBWrapper implements Query {
                     // dato facoltativo non inserito
                     pst.setNull(++nextParam, Types.NULL);
                 }
+                /* === Note di avanzamento === */
                 pst.setString(++nextParam, params.get("act-progress"));
+                /* === Risultati raggiunti === */
                 pst.setString(++nextParam, params.get("act-result"));
+                /* === Milestone === */
                 pst.setBoolean(++nextParam, milestone);
+                /* === Riferimento a progetto === */
                 pst.setInt(++nextParam, idProj);
+                /* === Riferimento a WBS === */
                 pst.setInt(++nextParam, Integer.parseInt(params.get("act-wbs")));
+                /* === Riferimento a complessita' === */
                 pst.setInt(++nextParam, Integer.parseInt(params.get("act-compl")));
-                pst.setInt(++nextParam, Integer.parseInt(params.get("act-status")));
-                // Campi automatici: id utente, ora ultima modifica, data ultima modifica
+                /* === Stato attività calcolato dall'applicazione === */
+                CodeBean stato = computeActivityState(dataInizio, dataFine, dataInizioEffettiva, dataFineEffettiva, Utils.convert(Utils.getCurrentDate()));
+                pst.setInt(++nextParam, stato.getId());
+                /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
                 pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
                 pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringe, ma un oggetto java.sql.Time
                 pst.setString(++nextParam, user.getCognome() + String.valueOf(Utils.BLANK_SPACE) + user.getNome());
-                // Query contestuale di inserimento in attivitagestione 
+                /* === Query contestuale di inserimento in attivitagestione === */ 
                 int maxActGestId = getMax("attivitagestione") + 1;
                 pst1 = con.prepareStatement(INSERT_PERSON_ON_ACTIVITY);
                 pst1.clearParameters();
@@ -3779,17 +3828,17 @@ public class DBWrapper implements Query {
      * 
      * @param idProj identificativo del progetto di cui si vuol verificare la presenza tra quelli scrivibili dall'utente
      * @param projectsWritableByUser lista dei progetti scrivibili dall'utente
-     * @return <code>boolean</code> - valore true se la persona e' presente, in qualsivoglia ruolo, false altrimenti
-     * @throws WebStorageException se si verifica un problema nel recupero dell'id di un progetto o in qualche puntamento
+     * @return <code>boolean</code> - valore true se l'identificativo del progetto e' presente tra quelli scrivibili dall'utente, false altrimenti
+     * @throws WebStorageException se si verifica un problema nel recupero di attributi o in qualche puntamento
      */
     @SuppressWarnings({ "static-method" })
     private boolean userCanWrite(int idProj,
                                  Vector<ProjectBean> projectsWritableByUser) 
                           throws WebStorageException {
         try {
-            /* **         Controllo lato server sui diritti dell'utente.       ** 
-             * ** Controlla per prima cosa che l'id progetto sulla querystring ** 
-             * ** corrisponda a un id dei progetti scrivibili dall'utente      **/
+            /* ==       Controllo lato server sui diritti dell'utente.       == * 
+             * == Controlla per prima cosa che l'id progetto sulla querystring== * 
+             * == corrisponda a un id dei progetti scrivibili dall'utente    == */
             // Ottiene la cardinalità della lista dei progetti precaricati 
             // quando l'utente si &egrave; loggato, uno dei quali deve 
             // corrispondere al progetto sul quale aggiungere un'attività
@@ -3833,27 +3882,24 @@ public class DBWrapper implements Query {
     
     
     /**
-     * <p>Dato in input un identificativo di progetto e un Vector
+     * <p>Dato in input un identificativo di dipartimento e un Vector
      * di dipartimenti scrivibili dall'utente, restituisce <code>true</code> 
      * se il progetto avente tale id &egrave; presente in lista progetti, 
      * <code>false</code> altrimenti.</p>
      * 
-     * @param idProj identificativo del progetto di cui si vuol verificare la presenza tra quelli scrivibili dall'utente
-     * @param projectsWritableByUser lista dei progetti scrivibili dall'utente
-     * @return <code>boolean</code> - valore true se la persona e' presente, in qualsivoglia ruolo, false altrimenti
-     * @throws WebStorageException se si verifica un problema nel recupero dell'id di un progetto o in qualche puntamento
+     * @param idDip identificativo del dipartimento di cui si vuol verificare la presenza tra quelli scrivibili dall'utente
+     * @param departmentWritableByUser lista dei dipartimenti su cui l'utente ha i diritti di scrittura (cioe' su cui e' almeno PMODip)
+     * @return <code>boolean</code> - valore true se l'identificativo del dipartimento e' presente nella lista dei dipartimenti scrivibili (quelli su cui l'utente e' PMO), false altrimenti
+     * @throws WebStorageException se si verifica un problema nello scorrimento di liste o in qualche altro tipo di puntamento
      */
     @SuppressWarnings({ "static-method" })
     public boolean userCanMonitor(int idDip,
                                   Vector<DepartmentBean> departmentWritableByUser) 
                            throws WebStorageException {
         try {
-            /* **         Controllo lato server sui diritti dell'utente.       ** 
-             * ** Controlla per prima cosa che l'id progetto sulla querystring ** 
-             * ** corrisponda a un id dei progetti scrivibili dall'utente      **/
-            // Ottiene la cardinalità della lista dei progetti precaricati 
+            // Ottiene la cardinalità della lista dei dipartimenti precaricati 
             // quando l'utente si &egrave; loggato, uno dei quali deve 
-            // corrispondere al progetto sul quale aggiungere un'attività
+            // corrispondere al dipartimento sul quale aggiungere un monitoraggio
             int lastIndexOf = departmentWritableByUser.size();
             int index = 0;
             // Controllo sull'input
@@ -3900,26 +3946,15 @@ public class DBWrapper implements Query {
      * <p>Implementa un algoritmo che calcola tale stato e lo setta 
      * nell'argomento, valorizzandolo per riferimento.</p>
      * 
-     * @param aws activity without state
-     * @param rightNow
-     * @return
-     * @throws CommandException
+     * @param aws       activity without state
+     * @param rightNow  today
+     * @return <code>CodeBean</code> - oggetto rappresentante lo stato calcolato per l'attivita' passata come argomento
+     * @throws WebStorageException se si verfica un problema nel recupero di qualche attributo obbligatorio o in qualche altro tipo di puntamento
      */
-    public CodeBean computeActivityState(ActivityBean aws,
-                                         Date rightNow) 
-                                  throws CommandException {
-        // ID corrispondenti ai veri stati attività impostati dal TL
-        final int APERTA = 1;       // Un'attività APERTA è un'attività avviata ma non ancora iniziata, cioè non vi è stato imputato lavoro
-        final int IN_PROGRESS = 2;  // Un'attività IN PROGRESS è un'attività avviata su cui è stato imputato lavoro (giorni uomo o altro)
-        final int CHIUSA = 3;       // Un'attività CHIUSA è un'attività conclusa, su cui non è più possibile allocare GU o risorse
-        // ID aggiuntivi
-        final int APERTA_IN_RITARDO = 4;
-        final int IN_PROGRESS_IN_ANTICIPO = 5;
-        final int IN_PROGRESS_IN_RITARDO = 6;
-        final int IN_PROGRESS_INIZIO_IN_RITARDO = 7;
-        final int CHIUSA_IN_ANTICIPO = 8;
-        final int CHIUSA_IN_RITARDO = 9;
-        final int STATO_INCONSISTENTE = 10;
+    public static CodeBean computeActivityState(ActivityBean aws,
+                                                Date rightNow) 
+                                         throws WebStorageException {
+        // Oggetto per memorizzare lo stato dell'attività passata come argomento
         CodeBean stato = new CodeBean();
         try {
             /* ************************************************************ *
@@ -3931,14 +3966,14 @@ public class DBWrapper implements Query {
             if (aws.getDataFine() == null) {
                 String msg = FOR_NAME + "Incongruenza grave: un dato obbligatorio (la data di fine prevista) non e\' presente!\n";
                 LOG.severe(msg + Utils.BLANK_SPACE + "Tentativo di hackeraggio?");
-                throw new CommandException(msg);
+                throw new WebStorageException(msg);
             }
             // La data di inizio effettiva, se esiste, deve essere sempre nel passato perché l'utente non è un indovino (e quindi non può prevedere il futuro)
             if (aws.getDataInizioEffettiva() != null) {
                 if (aws.getDataInizioEffettiva().after(rightNow)) {
                     String msg = FOR_NAME + "Incongruenza nelle date: la data di inizio effettiva non puo\' essere maggiore della data odierna.\n";
                     LOG.severe(msg);
-                    throw new CommandException(msg);
+                    throw new WebStorageException(msg);
                 }
             }
             // La data di fine effettiva, se esiste, deve essere sempre nel passato perché l'utente non è un chiromante
@@ -3946,7 +3981,7 @@ public class DBWrapper implements Query {
                 if (aws.getDataFineEffettiva().after(rightNow)) {
                     String msg = FOR_NAME + "Incongruenza nelle date: la data di fine effettiva non puo\' essere maggiore della data odierna.\n";
                     LOG.severe(msg);
-                    throw new CommandException(msg);
+                    throw new WebStorageException(msg);
                 }
             }
             // La data di inizio prevista deve essere minore della data di fine prevista 
@@ -3954,7 +3989,7 @@ public class DBWrapper implements Query {
                 if (aws.getDataInizio().after(aws.getDataFine())) {
                     String msg = FOR_NAME + "Incongruenza nelle date: la data di inizio prevista non puo\' essere maggiore della data di fine prevista.\n";
                     LOG.severe(msg);
-                    throw new CommandException(msg);
+                    throw new WebStorageException(msg);
                 }
             }
             // La data di inizio effettiva deve essere minore della data di fine effettiva
@@ -3984,9 +4019,9 @@ public class DBWrapper implements Query {
                         stato.setInformativa("Aperta regolare");
                     }
                     // Intercetta attività in stato "APERTO" ma non finite e in ritardo
-                    else if (aws.getDataFine().after(rightNow)) {
+                    else if (aws.getDataFine().before(rightNow)) {
                         stato.setId(APERTA_IN_RITARDO);
-                        stato.setNome("Aperta in ritardo");
+                        stato.setNome("Aperta e in ritardo");
                         stato.setOrdinale(APERTA);
                         stato.setInformativa("Attivit&agrave; in ritardo sulla chiusura");
                     }
@@ -4061,41 +4096,265 @@ public class DBWrapper implements Query {
             }
             // CHIUSO
             else if (aws.getDataFineEffettiva() != null) {  // Per poter essere considerata chiusa un'attività deve avere data fine effettiva <> null
-                /*
-                if (aws.getDataFineEffettiva() == null) {
-                    stato.setId(STATO_INCONSISTENTE);
-                    stato.setOrdinale(CHIUSO);
-                    stato.setInformativa("Attivit&agrave; in stato inconsistente");
-                } else {
-                    if (aws.getDataFineEffettiva().before(aws.getDataFine()) &&
-                        aws.getDataFineEffettiva().before(rightNow)) {
-                        stato.setId(CHIUSO_PRIMA);
-                        stato.setOrdinale(CHIUSO);
-                        stato.setInformativa("Chiusa in anticipo");
-                    }
-                    // Intercetta attività che sono finite dopo la data prevista
-                    else if (aws.getDataFineEffettiva().after(aws.getDataFine()) &&
-                             aws.getDataFineEffettiva().before(rightNow)) {
-                        stato.setId(CHIUSO_DOPO);
-                        stato.setOrdinale(CHIUSO);
-                        stato.setInformativa("Chiusa in ritardo");
-                    }
-                }*/
-            }    
+                // In questo punto la data fine effettiva sarà sempre > today, per i controlli sulle premesse
+                if (aws.getDataFineEffettiva().before(aws.getDataFine())) {
+                    stato.setId(CHIUSA_IN_ANTICIPO);
+                    stato.setNome("Chiusa in anticipo");
+                    stato.setOrdinale(CHIUSA);
+                    stato.setInformativa("Chiusa in anticipo rispetto al previsto");
+                } else if (aws.getDataFineEffettiva().after(aws.getDataFine())) {
+                        stato.setId(CHIUSA_IN_RITARDO);
+                        stato.setNome("Chiusa in ritardo");
+                        stato.setOrdinale(CHIUSA);
+                        stato.setInformativa("Chiusa in ritardo rispetto al previsto");
+                } else {    // Se non è in anticipo e non è in ritardo, è in orario
+                        stato.setId(CHIUSA);
+                        stato.setNome("Chiusa");
+                        stato.setOrdinale(CHIUSA);
+                        stato.setInformativa("Chiusa regolarmente");
+                }
+            }
+            // STATO INCONSISTENTE
+            else {
+                stato.setId(STATO_INCONSISTENTE);
+                stato.setNome("Stato inconsistente");
+                stato.setOrdinale(STATO_INCONSISTENTE);
+                stato.setInformativa("Attivit&agrave; in stato inconsistente");
+                LOG.severe(stato.getInformativa() + Utils.BLANK_SPACE + "Reason: " + 
+                           "Data inizio prevista  = " + aws.getDataInizio() +
+                           "Data fine prevista    = " + aws.getDataFine() +
+                           "Data inizio effettiva = " + aws.getDataInizioEffettiva() +
+                           "Data fine effettiva   = " + aws.getDataFineEffettiva()
+                          );
+            }
+            aws.setIdStato(stato.getId());
             aws.setStato(stato);
-
         } catch (AttributoNonValorizzatoException anve) {
             String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio del bean, probabilmente  un id.\n";
             LOG.severe(msg);
-            throw new CommandException(msg + anve.getMessage(), anve);
+            throw new WebStorageException(msg + anve.getMessage(), anve);
         } catch (NullPointerException npe) {
             String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n";
             LOG.severe(msg);
-            throw new CommandException(msg + npe.getMessage(), npe);
+            throw new WebStorageException(msg + npe.getMessage(), npe);
         } catch (Exception e) {
             String msg = FOR_NAME + "Si e\' verificato un problema.\n";
             LOG.severe(msg);
-            throw new CommandException(msg + e.getMessage(), e);
+            throw new WebStorageException(msg + e.getMessage(), e);
+        }
+        return stato;
+    }
+    
+    
+    /**
+     * <p>Dato in input una serie di date (relative ad una attivit&agrave;), 
+     * passate come argomento, calcola uno stato esatto relativo ad una
+     * ipotetica attivit&atrave; a cui le date passate facciano riferimento
+     * e lo restituisce sotto forma di <code>CodeBean</code>.</p>
+     * <p>Implementa un algoritmo che calcola tale stato e lo setta 
+     * nell'oggetto, restituito al chiamante.</p>
+     * 
+     * @param dataInizioPrevista    data in cui era previsto che iniziasse la lavorazione dell'attivita'
+     * @param dataFinePrevista      data entro cui era previsto che terminasse la lavorazione dell'attivita'
+     * @param dataInizioEffettiva   data in cui e' effettivamente iniziata la lavorazione dell'attivita'
+     * @param dataFineEffettiva     data in cui e' effettivamente finita la lavorazione dell'attivita'
+     * @param rightNow  today       data odierna, per il calcolo dello stato in cui l'attivita' si trova ad oggi
+     * @return <code>CodeBean</code> - oggetto rappresentante lo stato calcolato per l'attivita' a cui le date ipoteticamente fanno riferimento
+     * @throws WebStorageException se si verfica un problema nel recupero di qualche attributo obbligatorio o in qualche altro tipo di puntamento
+     */
+    public static CodeBean computeActivityState(Date dataInizioPrevista,
+                                                Date dataFinePrevista,
+                                                Date dataInizioEffettiva,
+                                                Date dataFineEffettiva,
+                                                Date rightNow) 
+                                         throws WebStorageException {
+        // Oggetto per memorizzare lo stato dell'attività passata come argomento
+        CodeBean stato = new CodeBean();
+        try {
+            /* ************************************************************ *
+             *        Controlli sulle premesse (che siano consistenti)      *
+             *   data < rightNow -> passato  |  data = rightNow -> presente *
+             *                     data > rightNow -> futuro                *
+             * ************************************************************ */
+            // La data di fine prevista non può mai essere nulla (è un dato obbligatorio)
+            if (dataFinePrevista == null) {
+                String msg = FOR_NAME + "Incongruenza grave: un dato obbligatorio (la data di fine prevista) non e\' presente!\n";
+                LOG.severe(msg + Utils.BLANK_SPACE + "Tentativo di hackeraggio?");
+                throw new WebStorageException(msg);
+            }
+            // La data di inizio effettiva, se esiste, deve essere sempre nel passato perché l'utente non è un indovino (e quindi non può prevedere il futuro)
+            if (dataInizioEffettiva != null) {
+                if (dataInizioEffettiva.after(rightNow)) {
+                    String msg = FOR_NAME + "Incongruenza nelle date: la data di inizio effettiva non puo\' essere maggiore della data odierna.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg);
+                }
+            }
+            // La data di fine effettiva, se esiste, deve essere sempre nel passato perché l'utente non è un chiromante
+            if (dataFineEffettiva != null) {
+                if (dataFineEffettiva.after(rightNow)) {
+                    String msg = FOR_NAME + "Incongruenza nelle date: la data di fine effettiva non puo\' essere maggiore della data odierna.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg);
+                }
+            }
+            // La data di inizio prevista deve essere minore della data di fine prevista 
+            if (dataInizioPrevista != null) {
+                if (dataInizioPrevista.after(dataFinePrevista)) {
+                    String msg = FOR_NAME + "Incongruenza nelle date: la data di inizio prevista non puo\' essere maggiore della data di fine prevista.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg);
+                }
+            }
+            // La data di inizio effettiva deve essere minore della data di fine effettiva
+            if (dataInizioEffettiva != null && dataFineEffettiva != null) {
+                if (dataInizioEffettiva.after(dataFineEffettiva)) {
+                    String msg = FOR_NAME + "Incongruenza nelle date: la data di inizio effettiva non puo\' essere maggiore della data di fine effettiva.\n";
+                    LOG.severe(msg);
+                    throw new WebStorageException(msg);
+                }
+            }
+            /* ************************************************************ *
+             *                     Controlli sugli stati                    *
+             *  - STATO CHIUSO:                                             *
+             *      criterio + importante: data fine effettiva <> NULL      *
+             *  - STATO APERTO                                              *
+             *      criterio + importante: data inizio effettiva NULL       *
+             *  - STATO IN PROGRESS                                         *
+             *      criterio + importante: data inizio effettiva <> NULL    *
+             * ************************************************************ */
+            // APERTO
+            if (dataInizioEffettiva == null && dataFineEffettiva == null) {
+                if (dataInizioPrevista == null) {
+                    if (dataFinePrevista.after(rightNow) || dataFinePrevista.equals(rightNow)) {
+                        stato.setId(APERTA);
+                        stato.setNome("Aperta");
+                        stato.setOrdinale(APERTA);
+                        stato.setInformativa("Aperta regolare");
+                    }
+                    // Intercetta attività in stato "APERTO" ma non finite e in ritardo
+                    else if (dataFinePrevista.before(rightNow)) {
+                        stato.setId(APERTA_IN_RITARDO);
+                        stato.setNome("Aperta e in ritardo");
+                        stato.setOrdinale(APERTA);
+                        stato.setInformativa("Attivit&agrave; in ritardo sulla chiusura");
+                    }
+                }
+                else {  // Data inizio prevista <> NULL
+                    if (dataInizioPrevista.after(rightNow) || dataInizioPrevista.equals(rightNow)) {
+                        stato.setId(APERTA);
+                        stato.setNome("Aperta");
+                        stato.setOrdinale(APERTA);
+                        stato.setInformativa("Attivit&agrave; pianificata regolare");
+                    }
+                    else { // dataInizioPrevista.before(rightNow)
+                        stato.setId(APERTA_IN_RITARDO);
+                        stato.setNome("Aperta in ritardo");
+                        stato.setOrdinale(APERTA);
+                        stato.setInformativa("Attivit&agrave; in ritardo sull\'apertura");
+                    }
+                }
+            }
+            // IN PROGRESS
+            else if (dataInizioEffettiva != null && dataFineEffettiva == null) {
+                // Caso: data inizio prevista NULL
+                if (dataInizioPrevista == null) {
+                    // Sottocaso: data fine prevista nel passato
+                    if (dataFinePrevista.before(rightNow)) {
+                        stato.setId(IN_PROGRESS_IN_RITARDO);
+                        stato.setNome("In progress");
+                        stato.setOrdinale(IN_PROGRESS);
+                        stato.setInformativa("In progress in ritardo sulla chiusura");
+                    }
+                    else {  // Qui data di fine prevista è >= today
+                        stato.setId(IN_PROGRESS);
+                        stato.setNome("In progress");
+                        stato.setOrdinale(IN_PROGRESS);
+                        stato.setInformativa("In progress regolare");
+                    }
+                }
+                else {  // Qui la data di inizio prevista <> NULL quindi possiamo controllare il rapporto tra questa e quella effettiva!
+                    if (dataInizioPrevista.before(dataInizioEffettiva)) {
+                        if (dataFinePrevista.before(rightNow)) {
+                            stato.setId(IN_PROGRESS_IN_RITARDO);
+                            stato.setNome("In progress in ritardo su tutta la linea");
+                            stato.setOrdinale(IN_PROGRESS);
+                            stato.setInformativa("In progress in ritardo sull\'inizio previsto e sulla fine prevista");
+                        }
+                        else {  // Qui data di fine prevista è >= today
+                            stato.setId(IN_PROGRESS_INIZIO_IN_RITARDO);
+                            stato.setNome("In progress in ritardo");
+                            stato.setOrdinale(IN_PROGRESS);
+                            stato.setInformativa("In progress in ritardo sull\'inizio");
+                        }
+                    }
+                    else if (dataInizioPrevista.after(dataInizioEffettiva)) {
+                        stato.setId(IN_PROGRESS_IN_ANTICIPO);
+                        stato.setNome("In progress");
+                        stato.setOrdinale(IN_PROGRESS);
+                        stato.setInformativa("In progress in anticipo sull\'inizio");
+                    }
+                    else { // la data prevista e effettiva sono uguali
+                        if (dataFinePrevista.after(rightNow) || dataFinePrevista.equals(rightNow)) {
+                            stato.setId(IN_PROGRESS);
+                            stato.setNome("In progress");
+                            stato.setOrdinale(IN_PROGRESS);
+                            stato.setInformativa("In progress in regola");
+                        }
+                        else {  // Caso già gestito in caso di data inizio prevista NULL
+                            stato.setId(IN_PROGRESS_IN_RITARDO);
+                            stato.setNome("In progress");
+                            stato.setOrdinale(IN_PROGRESS);
+                            stato.setInformativa("In progress in ritardo sulla chiusura");
+                        }
+                    }
+                }
+            }
+            // CHIUSO
+            else if (dataFineEffettiva != null) {  // Per poter essere considerata chiusa un'attività deve avere data fine effettiva <> null
+                // In questo punto la data fine effettiva sarà sempre > today, per i controlli sulle premesse
+                if (dataFineEffettiva.before(dataFinePrevista)) {
+                    stato.setId(CHIUSA_IN_ANTICIPO);
+                    stato.setNome("Chiusa in anticipo");
+                    stato.setOrdinale(CHIUSA);
+                    stato.setInformativa("Chiusa in anticipo rispetto al previsto");
+                } else if (dataFineEffettiva.after(dataFinePrevista)) {
+                        stato.setId(CHIUSA_IN_RITARDO);
+                        stato.setNome("Chiusa in ritardo");
+                        stato.setOrdinale(CHIUSA);
+                        stato.setInformativa("Chiusa in ritardo rispetto al previsto");
+                } else {    // Se non è in anticipo e non è in ritardo, è in orario
+                        stato.setId(CHIUSA);
+                        stato.setNome("Chiusa");
+                        stato.setOrdinale(CHIUSA);
+                        stato.setInformativa("Chiusa regolarmente");
+                }
+            }
+            // STATO INCONSISTENTE
+            else {
+                stato.setId(STATO_INCONSISTENTE);
+                stato.setNome("Stato inconsistente");
+                stato.setOrdinale(STATO_INCONSISTENTE);
+                stato.setInformativa("Attivit&agrave; in stato inconsistente");
+                LOG.severe(stato.getInformativa() + Utils.BLANK_SPACE + "Reason: " + 
+                           "Data inizio prevista  = " + dataInizioPrevista +
+                           "Data fine prevista    = " + dataFinePrevista +
+                           "Data inizio effettiva = " + dataInizioEffettiva +
+                           "Data fine effettiva   = " + dataFineEffettiva
+                          );
+            }
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio del bean, probabilmente  un id.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + npe.getMessage(), npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + e.getMessage(), e);
         }
         return stato;
     }
