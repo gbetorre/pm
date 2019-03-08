@@ -134,6 +134,10 @@ public interface Query extends Serializable {
      */
     public static final String PART_ACTIVITY                    = "act";
     /**
+     * <p>Costante per il parametro identificante la pagina dei rischi associati ad un progetto.</p>
+     */
+    public static final String PART_RISK                        = "ris";
+    /**
      * <p>Costante per il parametro identificante la pagina del Report di un progetto.</p>
      */
     public static final String PART_REPORT                      = "rep";
