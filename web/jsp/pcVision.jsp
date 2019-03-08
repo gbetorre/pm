@@ -7,6 +7,9 @@
     <c:set var="distinguishingSubmitName" value="${fn:substring(fn:substringAfter(paramAsToken, '='), 0, 3)}" scope="page" />
   </c:if>
 </c:forTokens>
+    <span class="float-right">
+      <a class="btn btn-primary" href="${project}">Torna<br />all'elenco progetti</a>
+    </span>
     <form id="pcvision_form" name="pcv" action="#" method="post">
   	<ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
    		<li class="nav-item"><a class="nav-link active tabactive" data-toggle="tab" href="#">Vision</a></li>
@@ -42,9 +45,6 @@
           <div id="container-fluid">
             <div class="row">
               <div class="col-2">
-                <span class="float-left">
-                  <a class="btn btn-primary" href="${project}">Torna all'elenco progetti</a>
-                </span>
               </div>
               <div class="col-8 text-center">
                 <%@ include file="subPanel.jspf" %>
