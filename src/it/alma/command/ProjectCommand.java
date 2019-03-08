@@ -135,7 +135,7 @@ public class ProjectCommand extends ItemBean implements Command {
         nomeFile.put(Query.PART_PROJECT_CHARTER_STAKEHOLDER, "/jsp/pcStakeholder.jsp");
         nomeFile.put(Query.PART_PROJECT_CHARTER_DELIVERABLE, "/jsp/pcDeliverable.jsp");
         nomeFile.put(Query.PART_PROJECT_CHARTER_RESOURCE, "/jsp/pcRisorse.jsp");
-        nomeFile.put(Query.PART_PROJECT_CHARTER_RISK, "/jsp/pcRischi.jsp");
+        //nomeFile.put(Query.PART_PROJECT_CHARTER_RISK, "/jsp/pcRischi.jsp");
         nomeFile.put(Query.PART_PROJECT_CHARTER_CONSTRAINT, "/jsp/pcVincoli.jsp");
         nomeFile.put(Query.PART_PROJECT_CHARTER_MILESTONE, "/jsp/pcMilestone.jsp");
         //nomeFile.put(Query.PART_WBS, "/jsp/projWBS.jsp");
@@ -346,9 +346,9 @@ public class ProjectCommand extends ItemBean implements Command {
                         }
                     } else if (part.equals(Query.PART_PROJECT_CHARTER_RESOURCE)) {
                         vSkills = db.getSkills(idPrj);
-                    } else if (part.contains(Query.PART_PROJECT_CHARTER_RISK)) {
+                    } /*else if (part.contains(Query.PART_PROJECT_CHARTER_RISK)) {
                         vRisks = db.getRisks(idPrj);
-                    } /*else if(part.equals(Query.PART_WBS)) {
+                    } else if(part.equals(Query.PART_WBS)) {
                         vWBS = db.getWbs(idPrj, Query.WBS_GET_ALL);
                     }*/
                 }                
@@ -392,7 +392,7 @@ public class ProjectCommand extends ItemBean implements Command {
         // Imposta nella request elenco competenze del progetto
         req.setAttribute("competenze", vSkills);
         // Imposta nella request elenco rischi del progetto
-        req.setAttribute("rischi", vRisks);
+        //req.setAttribute("rischi", vRisks);
         // Imposta nella request elenco degli status di un progetto
         req.setAttribute("listProjectStatus", projectStatusList);
         // Imposta nella request l'avanzamento progetto più recente
@@ -473,7 +473,7 @@ public class ProjectCommand extends ItemBean implements Command {
         /* **************************************************** *
          *              Ramo di Project Charter - Rischi        *
          * **************************************************** */
-        else if (part.equalsIgnoreCase(Query.PART_PROJECT_CHARTER_RISK)) {
+        /*else if (part.equalsIgnoreCase(Query.PART_PROJECT_CHARTER_RISK)) {
             // Recupero e caricamento parametri di project charter/rischi
             int totRisks = Integer.parseInt(parser.getStringParameter("pck-loop-status", Utils.VOID_STRING));
             HashMap<String, String> pck = new HashMap<String, String>();
@@ -486,7 +486,7 @@ public class ProjectCommand extends ItemBean implements Command {
                 pck.put("pck-stato" + String.valueOf(i), parser.getStringParameter("pck-stato" + String.valueOf(i), Utils.VOID_STRING));
             }
             params.put(Query.PART_PROJECT_CHARTER_RISK, pck);
-        }
+        }*/
         /* **************************************************** *
          *            Ramo di Project Charter - Vincoli         *
          * **************************************************** */
