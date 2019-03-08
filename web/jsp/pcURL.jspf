@@ -28,8 +28,17 @@
   <c:param name="id" value="" />
 </c:url>
 <c:url var="rischi" context="${initParam.appName}" value="/" scope="page">
-  <c:param name="q" value="pol" />
-  <c:param name="p" value="pck" />
+  <c:param name="q" value="ris" />
+  <c:param name="id" value="" />
+</c:url>
+<c:url var="addRis" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="ris" />
+  <c:param name="p" value="add" />
+  <c:param name="id" value="" />
+</c:url>
+<c:url var="modRis" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="ris" />
+  <c:param name="p" value="mod" />
   <c:param name="id" value="" />
 </c:url>
 <c:url var="vincoli" context="${initParam.appName}" value="/" scope="page">
