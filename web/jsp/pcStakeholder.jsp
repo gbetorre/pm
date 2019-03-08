@@ -1,4 +1,7 @@
 <%@ include file="pcURL.jspf" %>
+    <span class="float-right">
+      <a class="btn btn-primary" href="${project}">Torna<br />all'elenco progetti</a>
+    </span>
     <form id="pcstakeholder_form" action="#" method="post">
       <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
         <li class="nav-item">
@@ -63,14 +66,7 @@
                 </div>
               </div>
             </div>
-            <hr class="separatore" /> 
-            <div class="row">
-              <div class="col-2">
-                <span class="float-left">
-                  <a class="btn btn-primary" href="${project}">Torna all'elenco progetti</a>
-                </span>
-              </div>
-            </div>
+            <hr class="separatore" />
     	  </div>
       </div>
     </form>
