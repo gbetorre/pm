@@ -164,11 +164,14 @@ public interface Query extends Serializable {
     /**
      * <p>Costante per il parametro identificante la pagina dei monitoraggio.</p>
      */
-    public static final String PART_MONITOR      = "";
+    public static final String PART_MONITOR                     = "";
     /**
      * <p>Costante per il parametro identificante la pagina dei credits dell'applicazione.</p>
      */
-    public static final String CREDITS      = "credits";
+    public static final String CREDITS                          = "credits";
+    /* ************************************************************************ *
+     *           Costanti utilizzate per i metodi di estrazione wbs             *
+     * ************************************************************************ */
     /**
      * <p>Costante identificante la query che estrae tutte le WBS compresi i Workpackage</p>
      */
@@ -201,6 +204,65 @@ public interface Query extends Serializable {
      * <p>Costante identificante la query che estrae le attivit&agrave; future rispetto al periodo corrente di avanzamento progetto.</p>
      */
     public static final int ACT_GET_FUTURE_ACTIVITIES = 8;
+    /* ************************************************************************ *
+     *              Costanti parlanti per identificativi di stato               *
+     * ************************************************************************ */
+    /**
+     * Un'attivit&agrave; APERTA &egrave; un'attivit&agrave; avviata 
+     * ma non ancora iniziata, cio&egrave; non vi &egrave; stato imputato lavoro
+     */
+    public static final int APERTA = 1;
+    /**
+     * Un'attività IN PROGRESS &egrave; un'attivit&agrave; avviata 
+     * su cui &egrave; stato imputato lavoro (giorni uomo o data inizio effettiva)
+     */
+    public static final int IN_PROGRESS = 2;
+    /**
+     * Un'attivit&agrave; CHIUSA è un'attivit&agrave; conclusa, 
+     * su cui non &egrave; più possibile allocare GU o risorse
+     */
+    public static final int CHIUSA = 3;
+    /**
+     * Identificativo di stato attivit&agrave; non ancora lavorata ma 
+     * gi&agrave; in ritardo (quindi in ritardo rispetto al previsto,
+     * non all'effettivo)
+     */
+    public static final int APERTA_IN_RITARDO = 4;
+    /**
+     * Identificativo di stato attivit&agrave; gi&agrave; in lavorazione
+     * (data inizio effettiva <> NULL) ma con data inizio effettiva
+     * precedente rispetto a quanto previsto (data inizio prevista)
+     */
+    public static final int IN_PROGRESS_IN_ANTICIPO = 5;
+    /**
+     * Identificativo di stato attivit&agrave; gi&agrave; in lavorazione
+     * (data inizio effettiva <> NULL) ma che in base al raffronto con 
+     * la data fine effettiva avrebbe dovuto essere chiusa 
+     */
+    public static final int IN_PROGRESS_IN_RITARDO = 6;
+    /**
+     * Identificativo di stato attivit&agrave; gi&agrave; in lavorazione
+     * (data inizio effettiva <> NULL) ma con data inizio effettiva
+     * precedente rispetto a quanto previsto
+     */
+    public static final int IN_PROGRESS_INIZIO_IN_RITARDO = 7;
+    /**
+     * Identificativo di stato attivit&agrave; gi&agrave; chiusa
+     * (data fine effettiva <> NULL) ma con data fine effettiva
+     * precedente rispetto a quanto previsto (data fine prevista)
+     */
+    public static final int CHIUSA_IN_ANTICIPO = 8;
+    /**
+     * Identificativo di stato attivit&agrave; gi&agrave; chiusa
+     * (data inizio effettiva <> NULL) ma con data fine effettiva
+     * successiva rispetto a quanto previsto (data fine prevista)
+     */
+    public static final int CHIUSA_IN_RITARDO = 9;
+    /**
+     * Identificativo di stato attivit&agrave; inconsistente, che 
+     * pu&ograve; dipendere da varie incongruenze
+     */
+    public static final int STATO_INCONSISTENTE = 10;
     /* ************************************************************************ *
      *   Enumerativi statici per incapsulare i valori di enumerativi dinamici   *
      * ************************************************************************ */
@@ -876,7 +938,7 @@ public interface Query extends Serializable {
             "   WHERE id_progetto = ?" +
             "       AND A.datainizio >= ?" +
             "       AND (A.milestone = ? OR ?)" +
-            "   ORDER BY A.dataultimamodifica, A.datainizio, A.datafine, A.id_stato  ASC";
+            "   ORDER BY A.dataultimamodifica DESC, A.oraultimamodifica DESC, A.datainizio, A.datafine, A.id_stato";
     
     /**
      * <p>Estrae le attivit&agrave; di una specifica WBS,
