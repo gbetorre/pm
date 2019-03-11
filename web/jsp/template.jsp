@@ -57,7 +57,6 @@
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />bootstrap/bootstrap.css" type="text/css" />
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />jquery/jquery-ui.css" type="text/css" />
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />bootstrap/plugin/grayscale.css" type="text/css" />
-    <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />pol.css" type="text/css" />
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />style.css" type="text/css" />
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />cookie/cookieconsent.min.css" type="text/css" />
   </head>
