@@ -1,6 +1,6 @@
 <%@ include file="pcURL.jspf" %>
     <span class="float-right">
-      <a class="btn btn-primary" href="${project}">Torna<br />all'elenco progetti</a>
+      <a class="btn btn-primary" href="${project}">Torna a elenco progetti</a>
     </span>
     <form id="pcdeliverable_form" action="#" method="post">
       <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
