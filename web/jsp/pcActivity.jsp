@@ -158,7 +158,7 @@
           </div>
         </div>
         <br />
-        <a href="${act}${requestScope.progetto.id}" id='btn-close' class="btn btn-primary">Chiudi</a>
+        <a href="${act}${requestScope.progetto.id}" id='btn-close' class="btn btnNav">Chiudi</a>
         <input type="button" class="btn btn-primary" name="elimina" value="Elimina" onclick="alert('funzionalit&agrave; in corso di sviluppo')"> <!-- onclick="selectionDelete()" -->
     </form>
 </c:catch>

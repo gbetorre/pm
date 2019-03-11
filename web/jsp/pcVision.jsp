@@ -8,7 +8,7 @@
   </c:if>
 </c:forTokens>
     <span class="float-right">
-      <a class="btn btn-primary" href="${project}">Torna a elenco progetti</a>
+      <a class="btn btnNav" href="${project}">Torna a elenco progetti</a>
     </span>
     <form id="pcvision_form" name="pcv" action="#" method="post">
   	<ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
@@ -51,7 +51,7 @@
               </div>
               <div class="col-2">
                 <span class="float-right">
-            		  <a class="btn btn-primary" href="${stakeholder}${p.id}">Avanti &gt;</a>
+            		  <a class="btn btnNav" href="${stakeholder}${p.id}">Avanti &gt;</a>
                 </span>
               </div>
             </div>

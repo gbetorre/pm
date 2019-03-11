@@ -1,6 +1,6 @@
 <%@ include file="pcURL.jspf" %>
     <span class="float-right">
-      <a class="btn btn-primary" href="${project}">Torna a elenco progetti</a>
+      <a class="btn btnNav" href="${project}">Torna a elenco progetti</a>
     </span>
     <form action="#" method="post">
       <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
@@ -62,7 +62,7 @@
             <div class="row">
               <div class="col-2">  
                 <span class="float-left">
-                  <a class="btn btn-primary" href="${risorse}${p.id}">&lt; Indietro</a>
+                  <a class="btn btnNav" href="${risorse}${p.id}">&lt; Indietro</a>
                 </span>
               </div>
               <div class="col-8 text-center">
@@ -70,7 +70,7 @@
               </div>
               <div class="col-2">
                 <span class="float-right">
-                  <a class="btn btn-primary" href="${vincoli}${p.id}">Avanti &gt;</a>
+                  <a class="btn btnNav" href="${vincoli}${p.id}">Avanti &gt;</a>
                 </span>
               </div>
             </div>

@@ -96,7 +96,7 @@
         </div>
       </div>
       <hr class="separatore" />
-      <a href="${wbs}${p.id}" class="btn btn-primary">Chiudi</a>
+      <a href="${wbs}${p.id}" class="btn btnNav">Chiudi</a>
       <%@ include file="subPanel.jspf" %>
       </form>
       </c:catch>
