@@ -1,6 +1,6 @@
 <%@ include file="pcURL.jspf" %>
     <span class="float-right">
-      <a class="btn btn-primary" href="${project}">Torna a elenco progetti</a>
+      <a class="btn btnNav" href="${project}">Torna a elenco progetti</a>
     </span>
     <form id="pcrisorse_form" action="#" method="post">
       <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
@@ -53,22 +53,22 @@
           <c:set var="status" value="${loop.index}" scope="page" />
           <input type="hidden" id="pcr-id${status}" name="pcr-id${status}" value="<c:out value="${skill.id}"/>">
           <tr>
-            <th scope="row"><c:out value="${skill.nome}" /></th>
-            <th scope="row"><c:out value="${skill.informativa}" /></th>
+            <td scope="row"><c:out value="${skill.nome}" /></td>
+            <td scope="row"><c:out value="${skill.informativa}" /></td>
             <c:choose>
               <c:when test="${skill.presenza}">
-                <th scope="row" class="bgcolorgreen">
+                <td scope="row" class="bgcolorgreen">
                   <div class="form-check text-center">
                     <span>SI</span>
                   </div>
-                </th>
+                </td>
               </c:when>
               <c:otherwise>
-                <th scope="row" class="bgcolorred">
+                <td scope="row" class="bgcolorred">
                   <div class="form-check text-center">
                     <span>NO</span>
                   </div>
-                </th>
+                </td>
               </c:otherwise>
             </c:choose>
           </tr>
@@ -81,13 +81,13 @@
       <div class="row">
         <div class="col-2">  
           <span class="float-left">
-            <a class="btn btn-primary" href="${deliverable}${p.id}">&lt; Indietro</a>
+            <a class="btn btnNav" href="${deliverable}${p.id}">&lt; Indietro</a>
           </span>
         </div>
         <div class="col-8"></div>
         <div class="col-2">
           <span class="float-right">
-            <a class="btn btn-primary" href="${rischi}${p.id}">Avanti &gt;</a>
+            <a class="btn btnNav" href="${rischi}${p.id}">Avanti &gt;</a>
           </span>
         </div>
       </div>

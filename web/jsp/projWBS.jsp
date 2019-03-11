@@ -230,7 +230,7 @@
         <div class="row">
           <div class="col-2">  
             <span class="float-left">
-              <a class="btn btn-primary" href="${project}">Chiudi</a>
+              <a class="btn btnNav" href="${project}">Chiudi</a>
             </span>
           </div>
           <div class="col-8 text-center">

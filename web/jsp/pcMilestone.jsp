@@ -1,6 +1,6 @@
 <%@ include file="pcURL.jspf" %>
     <span class="float-right">
-      <a class="btn btn-primary" href="${project}">Torna a elenco progetti</a>
+      <a class="btn btnNav" href="${project}">Torna a elenco progetti</a>
     </span>
     <form action="#" method="post">
       <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
@@ -55,15 +55,12 @@
             </tbody>
           </table>
           <input type="hidden" id="pcm-loop-status" name="pcm-loop-status" value="<c:out value="${status}"/>">
-          <div class="text-center">
-            <a href="javascript:window.open('${initParam.appName}/jsp/pcAttivita.jsp', 'newAttivita', true)" class="btn btn-lightgray">Aggiungi</a>
-          </div>
           <hr class="separatore" />
           <div id="container-fluid">
             <div class="row">
               <div class="col-2">  
                 <span class="float-left">
-                  <a class="btn btn-primary" href="${vincoli}${p.id}">&lt; Indietro</a>
+                  <a class="btn btnNav" href="${vincoli}${p.id}">&lt; Indietro</a>
                 </span>
               </div>
               <div class="col-8 text-center">

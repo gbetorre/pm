@@ -260,7 +260,7 @@
         </div>
         <br />
         --%>
-        <a href="<c:out value= "${act}${requestScope.progetto.id}" escapeXml="false" />" id='btn-close' class="btn btn-primary">Chiudi</a>
+        <a href="<c:out value= "${act}${requestScope.progetto.id}" escapeXml="false" />" id='btn-close' class="btn btnNav">Chiudi</a>
         <input type="button" class="btn btn-primary" name="modifica" value="Modifica" onclick="modify()">
         <%@ include file="subPanel.jspf" %>
     <%--</div> --%>
