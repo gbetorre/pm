@@ -370,27 +370,43 @@ hr.riga       {
   margin-top: 10px;
 }
 
-.bg-workingOn {
-  background-image: linear-gradient(to left, #ffff33, transparent) !important;
+.bgAct1 {
+  background-image: linear-gradient(to left, #b3e6ff, transparent) !important;
 }
 
-.bg-openOn {
-  background-image: linear-gradient(to left, #ffffff, transparent) !important;
+.bgAct2 {
+  background-image: linear-gradient(to left, #ffffb3, transparent) !important;
 }
 
-.bg-warningOn {
-	background-image: linear-gradient(to left, #ffe8a1, transparent) !important;
-}
-
-.bg-successOn {
-	background-image: linear-gradient(to left, #28a754, transparent) !important;
-}
-
-.bg-tableSuccessOn {
+.bgAct3 {
 	background-image: linear-gradient(to left, #c3e6cb, transparent) !important;
 }
 
-.bg-dangerOn {
+.bgAct4 {
+	background-image: linear-gradient(to left, #ffe8a1, transparent) !important;
+}
+
+.bgAct5 {
+	background-image: linear-gradient(to left, #ffff33, transparent) !important;
+}
+
+.bgAct6 {
+	background-image: linear-gradient(to left, #ffb380, transparent) !important;#28a754
+}
+
+.bgAct7 {
+	background-image: linear-gradient(to left, #ff6600, transparent) !important;#c3e6cb
+}
+
+.bgAct8 {
+	background-image: linear-gradient(to left, #28a754, transparent) !important;
+}
+
+.bgAct9 {
+	background-image: linear-gradient(to left, #bfff00, transparent) !important;
+}
+
+.bgAct10 {
 	background-image: linear-gradient(to left, #f5c6cb, transparent) !important;
 }
 
