@@ -18,30 +18,30 @@
 <c:if test="${pageScope.superuser}">
   <c:choose>
     <c:when test="${param['q'] eq 'pol'}">
-      <input type="button" class="btn btn-lightgray" name="modifica" value="Modifica" onclick="modify()">
-      <input type="submit" class="btn btn-lightgray" name="${distinguishingSubmitName}" id="${distinguishingSubmitId}" value="Salva">
+      <input type="button" class="btn btn-primary" name="modifica" value="Modifica" onclick="modify()">
+      <input type="submit" class="btn btn-primary" name="${distinguishingSubmitName}" id="${distinguishingSubmitId}" value="Salva">
     </c:when>
     <c:when test="${param['q'] eq 'wbs'}">
     <c:choose>
       <c:when test="${not empty param['p']}">
-        <input type="submit" class="btn btn-lightgray" name="${distinguishingSubmitName}" id="${distinguishingSubmitId}" value="Salva">
+        <input type="submit" class="btn btn-primary" name="${distinguishingSubmitName}" id="${distinguishingSubmitId}" value="Salva">
       </c:when>
       <c:otherwise>
-        <a class="btn btn-lightgray" href="${addWbs}${p.id}" id="add-wbs">Aggiungi</a>
-        <a class="btn btn-lightgray" href="" id="mod-wbs" onclick="selectionEdit('WBS')">Modifica</a>
-        <input type="submit" class="btn btn-lightgray" id="del-wbs" name="" value="Elimina" />
+        <a class="btn btn-primary" href="${addWbs}${p.id}" id="add-wbs">Aggiungi</a>
+        <a class="btn btn-primary" href="" id="mod-wbs" onclick="selectionEdit('WBS')">Modifica</a>
+        <input type="submit" class="btn btn-primary" id="del-wbs" name="" value="Elimina" />
       </c:otherwise>
     </c:choose>
     </c:when>
     <c:when test="${param['q'] eq 'act'}">
     <c:choose>
       <c:when test="${not empty param['p']}">
-        <input type="submit" class="btn btn-lightgray" name="${distinguishingSubmitName}" id="${distinguishingSubmitId}" value="Salva">
+        <input type="submit" class="btn btn-primary" name="${distinguishingSubmitName}" id="${distinguishingSubmitId}" value="Salva">
       </c:when>
       <c:otherwise>
-        <a href="${addAct}${p.id}" class="btn btn-lightgray" id="add-act">Aggiungi</a>
-        <a href="" class="btn btn-lightgray" id="mod-act" onclick="selectionEdit('Attivit&agrave;')">Modifica</a>
-        <a href="" class="btn btn-lightgray" id="del-act" onclick="selectionEdit('Attivit&agrave;')">Sospendi / Elimina</a>
+        <a href="${addAct}${p.id}" class="btn btn-primary" id="add-act">Aggiungi</a>
+        <a href="" class="btn btn-primary" id="mod-act" onclick="selectionEdit('Attivit&agrave;')">Modifica</a>
+        <a href="" class="btn btn-primary" id="del-act" onclick="selectionEdit('Attivit&agrave;')">Sospendi / Elimina</a>
       </c:otherwise>
     </c:choose>
     </c:when>
