@@ -26,6 +26,7 @@ function modify() {
   $('select').prop('disabled', false);
   $('button').prop('disabled', false);
   $('input[type=\'text\'].calendarData').datepicker();
+  $('input[type=\'submit\']').prop('disabled', false);
 }
   
 $('textarea').textareaAutoSize();

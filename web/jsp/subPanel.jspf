@@ -19,12 +19,12 @@
   <c:choose>
     <c:when test="${param['q'] eq 'pol'}">
       <input type="button" class="btn btn-primary" name="modifica" value="Modifica" onclick="modify()">
-      <input type="submit" class="btn btn-primary" name="${distinguishingSubmitName}" id="${distinguishingSubmitId}" value="Salva">
+      <input type="submit" class="btn btn-primary" name="${distinguishingSubmitName}" id="${distinguishingSubmitId}" value="Salva" disabled>
     </c:when>
     <c:when test="${param['q'] eq 'wbs'}">
     <c:choose>
       <c:when test="${not empty param['p']}">
-        <input type="submit" class="btn btn-primary" name="${distinguishingSubmitName}" id="${distinguishingSubmitId}" value="Salva">
+        <input type="submit" class="btn btn-primary" name="${distinguishingSubmitName}" id="${distinguishingSubmitId}" value="Salva" disabled>
       </c:when>
       <c:otherwise>
         <a class="btn btn-primary" href="${addWbs}${p.id}" id="add-wbs">Aggiungi</a>
@@ -36,7 +36,7 @@
     <c:when test="${param['q'] eq 'act'}">
     <c:choose>
       <c:when test="${not empty param['p']}">
-        <input type="submit" class="btn btn-primary" name="${distinguishingSubmitName}" id="${distinguishingSubmitId}" value="Salva">
+        <input type="submit" class="btn btn-primary" name="${distinguishingSubmitName}" id="${distinguishingSubmitId}" value="Salva" disabled>
       </c:when>
       <c:otherwise>
         <a href="${addAct}${p.id}" class="btn btn-primary" id="add-act">Aggiungi</a>
