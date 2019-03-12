@@ -51,13 +51,13 @@
             <div class="row">
               <div class="col-2">
                 <span class="float-left">
-                  <a class="btn btn-primary" href="${project}">Torna all'elenco progetti</a>
+                  <a class="btn btnNav" href="${project}">Torna a elenco progetti</a>
                 </span>
               </div>
               <div class="col-8 text-center">
               <c:if test="${requestScope.privileges}">
                 <input type="button" class="btn btn-primary" name="modifica" value="Modifica" onclick="modify()">
-                <input type="submit" class="btn btn-primary" name="${distinguishingSubmitName}" id="${distinguishingSubmitId}" value="Salva">
+                <input type="submit" class="btn btn-primary" name="${distinguishingSubmitName}" id="${distinguishingSubmitId}" value="Salva" disabled>
               </c:if>
               </div>
               <div class="col-2">
