@@ -260,7 +260,7 @@ public class SessionManager extends HttpServlet {
             //session.setAttribute("error", true);
             //session.setAttribute("msg", msg);
             //Log dell'evento
-            LOG.severe("Oggetto Vector<elencoDipartCs> non valorizzato; L'username passato come parametro non ha associato alcun progetto"); 
+            LOG.severe("Oggetto PersonBean non valorizzato; l\'username passato come parametro non ha associato alcun progetto.\n");
         }
         //final RequestDispatcher rd = getServletContext().getRequestDispatcher(fileJsp + "?" + req.getQueryString());
         //rd.forward(req, res);
@@ -316,6 +316,10 @@ public class SessionManager extends HttpServlet {
                 String msg = FOR_NAME + "Attributo della persona non valorizzato.\n";
                 LOG.severe(msg);
                 throw new CommandException(msg + anve.getMessage(), anve);
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Oggetto persona non valorizzato.\n";
+                LOG.severe(msg);
+                throw new CommandException(msg + npe.getMessage(), npe);
             }
         }
         return authenticated;
