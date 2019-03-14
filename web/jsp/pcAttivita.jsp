@@ -68,7 +68,7 @@
           <sup>&#10039;</sup>
         </div>
         <div class="col-sm-5">
-          <select class="form-control" id="act-people" name="act-people">
+          <select class="form-control" id="act-people" name="act-people" disabled>
           <c:forEach var="person" items="${requestScope.people}" varStatus="status">
             <c:set var="selected" value="" scope="page" />
             <c:if test="${person.id eq personInCharge.id}">
@@ -101,7 +101,7 @@
           </c:if>
         </div>
         <div class="col-sm-5">
-          <select class="form-control" id="act-role" name="act-role" multiple>
+          <select class="form-control" id="act-role" name="act-role" multiple disabled>
           <c:forEach var="skill" items="${pageScope.skills}">
             <c:set var="selected" value="" scope="page" />
             <c:if test="${skill.id eq personInCharge.idQualificaPrincipaleDip}">
