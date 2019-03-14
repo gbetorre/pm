@@ -202,11 +202,11 @@ public class HomePageCommand extends ItemBean implements Command {
          *                          Recupera i parametri                        *
          * ******************************************************************** */
         // Recupera o inizializza 'id progetto'
-        int idPrj = parser.getIntParameter("id", -1);       
+        //int idPrj = parser.getIntParameter("id", -1);       
         // Imposta il testo del Titolo da visualizzare prima dell'elenco
-        req.setAttribute("titoloE", "Project Charter");
+        req.setAttribute("titoloE", "Progetti di eccellenza: login");
         // Salva nella request: Titolo pagina (da mostrare nell'HTML)
-        req.setAttribute("tP", req.getAttribute("titoloE"));         
+        //req.setAttribute("tP", req.getAttribute("titoloE"));
         // Imposta la Pagina JSP di forwarding
         req.setAttribute("fileJsp", nomeFileElenco);
         // Salva nella request: utente
