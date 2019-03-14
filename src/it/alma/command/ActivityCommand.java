@@ -387,7 +387,7 @@ public class ActivityCommand extends ItemBean implements Command {
                         fileJspT = nomeFileActivityByWbs;
                     } else {
                         // Se il parametro 'p' non è presente, e il parametro 'idw' nemmeno, deve solo mostrare l'elenco delle attività per quel progetto
-                        vActivities = computeActivitiesState(db.getActivities(idPrj, user, Utils.convert(Utils.getUnixEpoch()), !Query.GET_MILESTONES_ONLY, Query.GET_ALL), today);
+                        vActivities = db.getActivities(idPrj, user, Utils.convert(Utils.getUnixEpoch()), !Query.GET_MILESTONES_ONLY, Query.GET_ALL);
                         fileJspT = nomeFileElenco;
                     }
                 }
@@ -549,7 +549,7 @@ public class ActivityCommand extends ItemBean implements Command {
      * @return
      * @throws CommandException
      */
-    public static Vector<ActivityBean> computeActivitiesState(Vector<ActivityBean> activitiesWithoutState,
+    private static Vector<ActivityBean> computeActivitiesState(Vector<ActivityBean> activitiesWithoutState,
                                                               Date rightNow) 
                                                        throws CommandException {
         // ID corrispondenti ai veri stati attività impostati dal TL
