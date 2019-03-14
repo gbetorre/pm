@@ -264,6 +264,75 @@ public interface Query extends Serializable {
      */
     public static final int STATO_INCONSISTENTE = 10;
     /* ************************************************************************ *
+     *              Costanti per incapsulare informative di stato               *
+     * ************************************************************************ */
+    /**
+     * Un'attivit&agrave; APERTA &egrave; un'attivit&agrave; avviata 
+     * ma non ancora iniziata, cio&egrave; non vi &egrave; stato imputato lavoro
+     */
+    public static final String APERTA_REGOLARE_HELP = "Le Attivit&agrave; <cite>APERTE REGOLARMENTE</cite> sono quelle che hanno <dl><dt>DATA FINE PREVISTA</dt><dd>futura o presente</dd></dl>";
+    /**
+     * Un'attività IN PROGRESS &egrave; un'attivit&agrave; avviata 
+     * su cui &egrave; stato imputato lavoro (giorni uomo o data inizio effettiva)
+     */
+    public static final String IN_PROGRESS_HELP = "Le <cite>Attivit&agrave; </cite>";
+    /**
+     * Un'attivit&agrave; CHIUSA è un'attivit&agrave; conclusa, 
+     * su cui non &egrave; più possibile allocare GU o risorse
+     */
+    public static final String CHIUSA_HELP = "Le <cite>Attivit&agrave; </cite>";
+
+    public static final String APERTA_REGOLARE_PIANIFICATA_HELP = "Le Attivit&agrave; <cite>PIANIFICATE REGOLARMENTE</cite> sono quelle che hanno <dl><dt>DATA INIZIO PREVISTA</dt><dd>futura o presente";
+    /**
+     * Identificativo di stato attivit&agrave; non ancora lavorata ma 
+     * gi&agrave; in ritardo (quindi in ritardo rispetto al previsto,
+     * non all'effettivo)
+     */
+    public static final String APERTA_IN_RITARDO_APERTURA_HELP = "Le <cite>Attivit&agrave; </cite>";
+    /**
+     * Identificativo di stato attivit&agrave; non ancora lavorata ma 
+     * gi&agrave; in ritardo (quindi in ritardo rispetto al previsto,
+     * non all'effettivo)
+     */
+    public static final String APERTA_IN_RITARDO_CHIUSURA_HELP = "Le <cite>Attivit&agrave; </cite>";
+    /**
+     * Identificativo di stato attivit&agrave; gi&agrave; in lavorazione
+     * (data inizio effettiva <> NULL) ma con data inizio effettiva
+     * precedente rispetto a quanto previsto (data inizio prevista)
+     */
+    public static final String IN_PROGRESS_IN_ANTICIPO_HELP = "Le In progress in anticipo sull\'inizio<cite>Attivit&agrave; </cite>";
+    /**
+     * Identificativo di stato attivit&agrave; gi&agrave; in lavorazione
+     * (data inizio effettiva <> NULL) ma che in base al raffronto con 
+     * la data fine effettiva avrebbe dovuto essere chiusa 
+     */
+    public static final String IN_PROGRESS_IN_RITARDO_HELP = "Le In progress in ritardo su tutta la linea inizio e fine <cite>Attivit&agrave; in progress in ritardo su tutta la linea</cite>";
+    
+    public static final String IN_PROGRESS_CHIUSURA_IN_RITARDO_HELP = "Le <cite>Attivit&agrave; </cite>";
+    /**
+     * Identificativo di stato attivit&agrave; gi&agrave; in lavorazione
+     * (data inizio effettiva <> NULL) ma con data inizio effettiva
+     * precedente rispetto a quanto previsto
+     */
+    public static final String IN_PROGRESS_INIZIO_IN_RITARDO_HELP = "Le <cite>Attivit&agrave; </cite>";
+    /**
+     * Identificativo di stato attivit&agrave; gi&agrave; chiusa
+     * (data fine effettiva <> NULL) ma con data fine effettiva
+     * precedente rispetto a quanto previsto (data fine prevista)
+     */
+    public static final String CHIUSA_IN_ANTICIPO_HELP = "Le <cite>Attivit&agrave; </cite>";
+    /**
+     * Identificativo di stato attivit&agrave; gi&agrave; chiusa
+     * (data inizio effettiva <> NULL) ma con data fine effettiva
+     * successiva rispetto a quanto previsto (data fine prevista)
+     */
+    public static final String CHIUSA_IN_RITARDO_HELP = "Le <cite>Attivit&agrave; </cite>";
+    /**
+     * Identificativo di stato attivit&agrave; inconsistente, che 
+     * pu&ograve; dipendere da varie incongruenze
+     */
+    public static final String STATO_INCONSISTENTE_HELP = "Le <cite>Attivit&agrave; </cite>";
+    /* ************************************************************************ *
      *   Enumerativi statici per incapsulare i valori di enumerativi dinamici   *
      * ************************************************************************ */
     /**
