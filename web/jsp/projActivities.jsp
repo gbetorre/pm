@@ -20,10 +20,9 @@
         <tbody>
         <c:set var="status" value="" scope="page" />
         <c:forEach var="act" items="${requestScope.attivita}" varStatus="loop">
-          <%@ include file="subActivity.jspf" %>
           <c:set var="status" value="${loop.index}" scope="page" />
           <input type="hidden" id="act-id${status}" name="act-id${status}" value="<c:out value="${act.id}"/>">
-          <tr class="${pageScope.stile}">
+          <tr class="bgAct${act.stato.id}">
             <td scope="row" id="radioColumn" class="success">
               <input type="radio" id="act-${act.id}" name="act-select" value="${act.id}">
             </td>
@@ -40,13 +39,13 @@
             </td>
             <td scope="row">
             <c:choose>
-              <c:when test="${not empty pageScope.testo}">
-              <a href="javascript:popupWindow('Note','popup1',true,'${testo}');" class="helpInfo">
-                <c:out value="${act.stato.informativa}" escapeXml="false" />
+              <c:when test="${act.stato.id ne 1}">
+              <a href="javascript:popupWindow('Note','popup1',true,'${act.stato.informativa}');" class="helpInfo">
+                <c:out value="${act.stato.nome}" escapeXml="false" />
               </a>
               </c:when>
               <c:otherwise>
-                <c:out value="${act.stato.informativa}" escapeXml="false" />
+                <c:out value="${act.stato.nome}" escapeXml="false" />
               </c:otherwise>
             </c:choose>
             </td>
