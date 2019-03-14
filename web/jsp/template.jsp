@@ -2,6 +2,10 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <c:set var="head" value="${requestScope.header}" scope="page" />
 <c:set var="foot" value="${requestScope.footer}" scope="page" />
+<c:set var="bgbody" value="" scope="page" />
+<c:if test="${empty sessionScope.usr}">
+  <c:set var="bgbody" value="masthead" scope="page" />
+</c:if>
 <!DOCTYPE html>
 <html>
   <head>
@@ -42,7 +46,7 @@
         "theme": "classic",
         "position": "bottom-right",
         "content": {
-          "message": "Questo sito o gli strumenti terzi da questo utilizzati si avvalgono di cookie necessari al funzionamento ed utili alle finalità illustrate nella <a class=\"cc-link\" href=\"https://www.univr.it/it/privacy\" target=\"_blank\">cookie policy</a>. Se vuoi saperne di più o negare il consenso a tutti o ad alcuni cookie, consulta la <a class=\"cc-link\" href=\"https://www.univr.it/it/privacy\" target=\"_blank\">cookie policy</a>. Cliccando su \'Acconsento\' dai l\'autorizzazione all\'utilizzo dei cookie.",
+          "message": "Questo sito o gli strumenti terzi da questo utilizzati si avvalgono di cookie necessari al funzionamento ed utili alle finalit&agrave; illustrate nella <a class=\"cc-link\" href=\"https://www.univr.it/it/privacy\" target=\"_blank\">cookie policy</a>. Inoltre nel contesto di alcune funzionalit&agrave; vengono memorizzati gli autori e le date di alcune modifiche. Se vuoi saperne di pi&uacute; o negare il consenso a tutti o ad alcuni cookie, consulta la <a class=\"cc-link\" href=\"https://www.univr.it/it/privacy\" target=\"_blank\">cookie policy</a>. Cliccando su \'Acconsento\' dai l\'autorizzazione all\'utilizzo dei cookie e delle profilazioni.",
           "dismiss": "Acconsento",
           "link": "Informazioni",
           "href": "https://www.univr.it/it/privacy"
@@ -60,7 +64,7 @@
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />style.css" type="text/css" />
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />cookie/cookieconsent.min.css" type="text/css" />
   </head>
-  <body>
+  <body class="${pageScope.bgbody}">
   <c:catch var="exception">
     <c:if test="${not empty head and head}">
     <!-- Header -->
