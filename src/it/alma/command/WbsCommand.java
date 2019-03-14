@@ -295,14 +295,7 @@ public class WbsCommand extends ItemBean implements Command {
                      * ************************************************ */
                     if (nomeFile.containsKey(part)) { 
                         if (part.equalsIgnoreCase(Query.PART_REPORT)) {
-                            java.util.Date todayAsDate = Utils.convert(today);
-                            // Recupera solo i work packages (l'obiettivo finale è mostrare le attività...)
-                            workPackages = db.getWbs(idPrj, Query.WBS_WP_ONLY);
-                            // Per ogni work package ne recupera le attività
-                            for (WbsBean wp : workPackages) {
-                                Vector<ActivityBean> activitiesByWP = db.getActivitiesByWbs(wp.getId(), idPrj);
-                                wp.setAttivita(ActivityCommand.computeActivitiesState(activitiesByWP, todayAsDate));
-                            }
+                            workPackages = retrieveWorkPackages(idPrj, db);
                         } else {
                         // Selezioni per visualizzazione, aggiunta e modifica wbs
                             // Seleziona tutte le WBS non workpackage per mostrare i possibili padri nella pagina di dettaglio
@@ -445,6 +438,46 @@ public class WbsCommand extends ItemBean implements Command {
             wbs.put("wbs-result",       parser.getStringParameter("wbs-result", Utils.VOID_STRING));
             formParams.put(Query.ADD_TO_PROJECT, wbs);
         }
+    }
+    
+    
+    /**
+     * <p>Restituisce un Vector di work packages appartenenti al progetto
+     * il cui identificativo viene passato come argomento; ciascuno dei
+     * work package contiene al proprio interno la lista di attivit&agrave; 
+     * valorizzate, ciascuna a sua volta contenente lo stato calcolato.</p>
+     * 
+     * @param idPrj identificativo del progetto corrente
+     * @param db    WebStorage per l'accesso ai dati
+     * @return <code>Vector&lt;WbsBean&gt;</code> - lista di work packages recuperati 
+     * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
+     */
+    public static Vector<WbsBean> retrieveWorkPackages(int idPrj,
+                                                       DBWrapper db)
+                                                throws CommandException {
+        Vector<WbsBean> workPackages = null;
+        try {
+            // Recupera solo i work packages (l'obiettivo finale è mostrare le attività...)
+            workPackages = db.getWbs(idPrj, Query.WBS_WP_ONLY);
+            // Per ogni work package ne recupera le attività
+            for (WbsBean wp : workPackages) {
+                Vector<ActivityBean> activitiesByWP = db.getActivitiesByWbs(wp.getId(), idPrj);
+                wp.setAttivita(activitiesByWP);
+            }
+        } catch (WebStorageException wse) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di work packages.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + wse.getMessage(), wse);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n Attenzione: controllare di essere autenticati nell\'applicazione!\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + npe.getMessage(), npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+        return workPackages;
     }
     
 }
