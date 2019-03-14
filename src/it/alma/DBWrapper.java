@@ -3244,23 +3244,25 @@ public class DBWrapper implements Query {
                 /* === Gestione delle date facoltative === */
                 java.util.Date dataInizioEffettiva = null;
                 java.util.Date dataFineEffettiva = null;
-                java.sql.Date date = null;
+                java.sql.Date  dateAsSqlDate = null;
                 if (params.get("act-datainiziovera") != null) {
                     dataInizioEffettiva = Utils.format(params.get("act-datainiziovera"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
-                    date = Utils.convert(dataInizioEffettiva);
+                    dateAsSqlDate = Utils.convert(dataInizioEffettiva);
                 }
                 // Data inizio effettiva
-                pst.setDate(++nextParam, date); // non accetta una data italiana, ma java.sql.Date
-                date = null;
+                pst.setDate(++nextParam, dateAsSqlDate); // non accetta una data italiana, ma java.sql.Date
+                dateAsSqlDate = null;
                 if (params.get("act-datafinevera") != null) {
                     dataFineEffettiva = Utils.format(params.get("act-datafinevera"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
-                    date = Utils.convert(dataFine);
+                    dateAsSqlDate = Utils.convert(dataFine);
                 }
                 // Data fine effettiva
-                pst.setDate(++nextParam, date); // non accetta una data italiana, ma java.sql.Date
+                pst.setDate(++nextParam, dateAsSqlDate); // non accetta una data italiana, ma java.sql.Date
                 // Data fine non deve essere minore di Data inizio
-                if (dataInizioEffettiva.compareTo(dataFineEffettiva) > NOTHING) {
-                    throw new WebStorageException("La data di fine effettiva attivita\' e\' minore di quella di inizio effettiva attivita\'.\n");
+                if (dataInizioEffettiva != null && dataFineEffettiva != null) {
+                    if (dataInizioEffettiva.compareTo(dataFineEffettiva) > NOTHING) {
+                        throw new WebStorageException("La data di fine effettiva attivita\' e\' minore di quella di inizio effettiva attivita\'.\n");
+                    }
                 }
                 /* === Gestione GU === */
                 // Gestione giorni uomo previsti
@@ -4014,30 +4016,30 @@ public class DBWrapper implements Query {
                 if (aws.getDataInizio() == null) {
                     if (aws.getDataFine().after(rightNow) || aws.getDataFine().equals(rightNow)) {
                         stato.setId(APERTA);
-                        stato.setNome("Aperta");
+                        stato.setNome("Aperta regolare");
                         stato.setOrdinale(APERTA);
-                        stato.setInformativa("Aperta regolare");
+                        stato.setInformativa(APERTA_REGOLARE_HELP);
                     }
                     // Intercetta attività in stato "APERTO" ma non finite e in ritardo
                     else if (aws.getDataFine().before(rightNow)) {
                         stato.setId(APERTA_IN_RITARDO);
-                        stato.setNome("Aperta e in ritardo");
+                        stato.setNome("In ritardo sulla chiusura");
                         stato.setOrdinale(APERTA);
-                        stato.setInformativa("Attivit&agrave; in ritardo sulla chiusura");
+                        stato.setInformativa(APERTA_IN_RITARDO_CHIUSURA_HELP);
                     }
                 }
                 else {  // Data inizio prevista <> NULL
                     if (aws.getDataInizio().after(rightNow) || aws.getDataInizio().equals(rightNow)) {
                         stato.setId(APERTA);
-                        stato.setNome("Aperta");
+                        stato.setNome("Attivit&agrave; pianificata regolare");
                         stato.setOrdinale(APERTA);
-                        stato.setInformativa("Attivit&agrave; pianificata regolare");
+                        stato.setInformativa(APERTA_REGOLARE_PIANIFICATA_HELP);
                     }
                     else { // aws.getDataInizio().before(rightNow)
                         stato.setId(APERTA_IN_RITARDO);
-                        stato.setNome("Aperta in ritardo");
+                        stato.setNome("In ritardo sull\'apertura");
                         stato.setOrdinale(APERTA);
-                        stato.setInformativa("Attivit&agrave; in ritardo sull\'apertura");
+                        stato.setInformativa(APERTA_IN_RITARDO_APERTURA_HELP);
                     }
                 }
             }
@@ -4046,50 +4048,50 @@ public class DBWrapper implements Query {
                 if (aws.getDataInizio() == null) {
                     if (aws.getDataFine().before(rightNow)) {
                         stato.setId(IN_PROGRESS_IN_RITARDO);
-                        stato.setNome("In progress");
+                        stato.setNome("In progress in ritardo sulla chiusura");
                         stato.setOrdinale(IN_PROGRESS);
-                        stato.setInformativa("In progress in ritardo sulla chiusura");
+                        stato.setInformativa(IN_PROGRESS_CHIUSURA_IN_RITARDO_HELP);
                     }
                     else {  // Qui data di fine prevista è >= today
                         stato.setId(IN_PROGRESS);
-                        stato.setNome("In progress");
+                        stato.setNome("In progress regolare");
                         stato.setOrdinale(IN_PROGRESS);
-                        stato.setInformativa("In progress regolare");
+                        stato.setInformativa(IN_PROGRESS_HELP);
                     }
                 }
                 else {  // Qui la data di inizio prevista <> NULL quindi possiamo controllare il rapporto tra questa e quella effettiva!
                     if (aws.getDataInizio().before(aws.getDataInizioEffettiva())) {
                         if (aws.getDataFine().before(rightNow)) {
                             stato.setId(IN_PROGRESS_IN_RITARDO);
-                            stato.setNome("In progress in ritardo su tutta la linea");
+                            stato.setNome("In progress in ritardo sull\'inizio previsto e sulla fine prevista");
                             stato.setOrdinale(IN_PROGRESS);
-                            stato.setInformativa("In progress in ritardo sull\'inizio previsto e sulla fine prevista");
+                            stato.setInformativa(IN_PROGRESS_IN_RITARDO_HELP);
                         }
                         else {
                             stato.setId(IN_PROGRESS_INIZIO_IN_RITARDO);
-                            stato.setNome("In progress in ritardo");
+                            stato.setNome("In progress in ritardo sull\'inizio");
                             stato.setOrdinale(IN_PROGRESS);
-                            stato.setInformativa("In progress in ritardo sull\'inizio");
+                            stato.setInformativa(IN_PROGRESS_INIZIO_IN_RITARDO_HELP);
                         }
                     }
                     else if (aws.getDataInizio().after(aws.getDataInizioEffettiva())) {
                         stato.setId(IN_PROGRESS_IN_ANTICIPO);
                         stato.setNome("In progress");
                         stato.setOrdinale(IN_PROGRESS);
-                        stato.setInformativa("In progress in anticipo sull\'inizio");
+                        stato.setInformativa(IN_PROGRESS_IN_ANTICIPO_HELP);
                     }
                     else { // la data prevista e effettiva sono uguali
                         if (aws.getDataFine().after(rightNow) || aws.getDataFine().equals(rightNow)) {
                             stato.setId(IN_PROGRESS);
-                            stato.setNome("In progress");
+                            stato.setNome("In progress in regola");
                             stato.setOrdinale(IN_PROGRESS);
-                            stato.setInformativa("In progress in regola");
+                            stato.setInformativa(IN_PROGRESS_HELP);
                         }
                         else {  // Caso già gestito in caso di data inizio prevista NULL
                             stato.setId(IN_PROGRESS_IN_RITARDO);
-                            stato.setNome("In progress");
+                            stato.setNome("In progress in ritardo sulla chiusura");
                             stato.setOrdinale(IN_PROGRESS);
-                            stato.setInformativa("In progress in ritardo sulla chiusura");
+                            stato.setInformativa(IN_PROGRESS_CHIUSURA_IN_RITARDO_HELP);
                         }
                     }
                 }
@@ -4099,27 +4101,27 @@ public class DBWrapper implements Query {
                 // In questo punto la data fine effettiva sarà sempre > today, per i controlli sulle premesse
                 if (aws.getDataFineEffettiva().before(aws.getDataFine())) {
                     stato.setId(CHIUSA_IN_ANTICIPO);
-                    stato.setNome("Chiusa in anticipo");
+                    stato.setNome("Chiusa in anticipo rispetto al previsto");
                     stato.setOrdinale(CHIUSA);
-                    stato.setInformativa("Chiusa in anticipo rispetto al previsto");
+                    stato.setInformativa(CHIUSA_IN_ANTICIPO_HELP);
                 } else if (aws.getDataFineEffettiva().after(aws.getDataFine())) {
                         stato.setId(CHIUSA_IN_RITARDO);
-                        stato.setNome("Chiusa in ritardo");
+                        stato.setNome("Chiusa in ritardo rispetto al previsto");
                         stato.setOrdinale(CHIUSA);
-                        stato.setInformativa("Chiusa in ritardo rispetto al previsto");
+                        stato.setInformativa(CHIUSA_IN_RITARDO_HELP);
                 } else {    // Se non è in anticipo e non è in ritardo, è in orario
                         stato.setId(CHIUSA);
-                        stato.setNome("Chiusa");
+                        stato.setNome("Chiusa regolarmente");
                         stato.setOrdinale(CHIUSA);
-                        stato.setInformativa("Chiusa regolarmente");
+                        stato.setInformativa(CHIUSA_HELP);
                 }
             }
             // STATO INCONSISTENTE
             else {
                 stato.setId(STATO_INCONSISTENTE);
-                stato.setNome("Stato inconsistente");
+                stato.setNome("Attivit&agrave; in stato inconsistente");
                 stato.setOrdinale(STATO_INCONSISTENTE);
-                stato.setInformativa("Attivit&agrave; in stato inconsistente");
+                stato.setInformativa(STATO_INCONSISTENTE_HELP);
                 LOG.severe(stato.getInformativa() + Utils.BLANK_SPACE + "Reason: " + 
                            "Data inizio prevista  = " + aws.getDataInizio() +
                            "Data fine prevista    = " + aws.getDataFine() +
