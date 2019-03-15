@@ -24,7 +24,7 @@
     <c:when test="${param['q'] eq 'wbs'}">
     <c:choose>
       <c:when test="${not empty param['p']}">
-        <input type="submit" class="btn btn-primary" name="${distinguishingSubmitName}" id="${distinguishingSubmitId}" value="Salva" disabled>
+        <input type="submit" class="btn btn-primary" name="${distinguishingSubmitName}" id="${distinguishingSubmitId}" value="Salva">
       </c:when>
       <c:otherwise>
         <a class="btn btn-primary" href="${addWbs}${p.id}" id="add-wbs">Aggiungi</a>
