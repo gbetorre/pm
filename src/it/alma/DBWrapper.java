@@ -3254,7 +3254,7 @@ public class DBWrapper implements Query {
                 dateAsSqlDate = null;
                 if (params.get("act-datafinevera") != null) {
                     dataFineEffettiva = Utils.format(params.get("act-datafinevera"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
-                    dateAsSqlDate = Utils.convert(dataFine);
+                    dateAsSqlDate = Utils.convert(dataFineEffettiva);
                 }
                 // Data fine effettiva
                 pst.setDate(++nextParam, dateAsSqlDate); // non accetta una data italiana, ma java.sql.Date
