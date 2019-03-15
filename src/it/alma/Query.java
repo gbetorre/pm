@@ -263,6 +263,35 @@ public interface Query extends Serializable {
      * pu&ograve; dipendere da varie incongruenze
      */
     public static final int STATO_INCONSISTENTE = 10;
+    /**
+     * Identificativo di stato attivit&agrave; chiusa nei periodi
+     * di avanzamento progetto antecedenti all'ultimo terminato
+     */
+    public static final int CHIUSA_DA_TEMPO = 11;
+    /**
+     * Identificativo di stato attivit&agrave; chiusa nel periodo 
+     * di avanzamento progetto immediatamente antecedente al corrente
+     */
+    public static final int CHIUSA_DA_POCO = 12;
+    /**
+     * Identificativo di stato attivit&agrave; in ritardo ma in 
+     * progress
+     */
+    public static final int IN_RITARDO = 13;
+    /**
+     * Identificativo di stato attivit&agrave; in corso di sviluppo
+     */
+    public static final int IN_CORSO = 14;
+    /**
+     * Identificativo di stato attivit&agrave; che saranno svolte
+     * nel periodo immediatamente successivo
+     */
+    public static final int PERIODO_FUTURO_PROSSIMO = 15;
+    /**
+     * Identificativo di stato attivit&agrave; che saranno svolte nei
+     * periodi successivi al prossimo
+     */
+    public static final int PERIODO_FUTURO_VENTURO = 16;
     /* ************************************************************************ *
      *              Costanti per incapsulare informative di stato               *
      * ************************************************************************ */
