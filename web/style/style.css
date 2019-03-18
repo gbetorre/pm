@@ -232,48 +232,6 @@ select:disabled.bgcolor3 {
 	border-top: 2px solid #8c8c8c;
 }
 
-.bgSts11, .bgSts12 {
-	background-color: #ccff99;
-}
-
-.bgAct11 {
-	background-color: #4d9900;
-	border: 1px solid #336600;
-}
-
-.bgAct12 {
-	background-color: #73e600;
-	border: 1px solid #4d9900;
-}
-
-.bgSts13, .bgSts14 {
-	background-color: #ffff80;
-}
-
-.bgAct13 {
-	background-color: #ff9933;
-	border: 1px solid #e67300;
-}
-
-.bgAct14 {
-	background-color: #ffd633;
-	border: 1px solid #cca300;
-}
-
-.bgSts15, .bgSts16 {
-	background-color: #cceeff;
-}
-
-.bgAct15 {
-	background-color: #99ccff;
-	border: 1px solid #3399ff;
-}
-
-.bgAct16 {
-	background-color: #80aaff;
-	border: 1px solid #004de6;
-}
-
 .btn-lightgray {
   color: #fff;
   background-color: #929aa0;
@@ -288,7 +246,7 @@ select:disabled.bgcolor3 {
 
 .btnNav {
   color: white;
-  background-color: #80bfff;
+  background-color: #4da6ff;
 }
 
 .btnNav:hover {
@@ -305,7 +263,7 @@ tr.selected {
 }
 
 td.statoActRep {
-	
+	margin-left: 
 }
 
 textarea {
@@ -446,6 +404,7 @@ hr.riga       {
   margin-top: 10px;
 }
 
+/*---------------------- STATI ------------------------*/
 .bgAct1 {
   background-image: linear-gradient(to left, #b3e6ff, transparent) !important;
 }
@@ -459,7 +418,7 @@ hr.riga       {
 }
 
 .bgAct4 {
-	background-image: linear-gradient(to left, #ffe8a1, transparent) !important;
+	background-image: linear-gradient(to left, #d9d9d9, transparent) !important;
 }
 
 .bgAct5 {
@@ -467,23 +426,65 @@ hr.riga       {
 }
 
 .bgAct6 {
-	background-image: linear-gradient(to left, #ffb380, transparent) !important;#28a754
+	background-image: linear-gradient(to left, #ffb380, transparent) !important;
 }
 
 .bgAct7 {
-	background-image: linear-gradient(to left, #ff6600, transparent) !important;#c3e6cb
+	background-image: linear-gradient(to left, #ff6600, transparent) !important;
 }
 
 .bgAct8 {
-	background-image: linear-gradient(to left, #28a754, transparent) !important;
+	background-image: linear-gradient(to left, #bfff00, transparent) !important;
 }
 
 .bgAct9 {
-	background-image: linear-gradient(to left, #bfff00, transparent) !important;
+	background-image: linear-gradient(to left, #28a754, transparent) !important;
 }
 
 .bgAct10 {
 	background-image: linear-gradient(to left, #f5c6cb, transparent) !important;
+}
+
+.bgAct11 {
+  background-color: #4d9900;
+  border: 1px solid #336600;
+}
+
+.bgAct12 {
+  background-color: #73e600;
+  border: 1px solid #4d9900;
+}
+
+.bgSts13, .bgSts14 {
+  background-color: #ffff80;
+}
+
+.bgAct13 {
+  background-color: #ff9933;
+  border: 1px solid #e67300;
+}
+
+.bgAct14 {
+  background-color: #ffd633;
+  border: 1px solid #cca300;
+}
+
+.bgSts15, .bgSts16 {
+  background-color: #cceeff;
+}
+
+.bgAct15 {
+  background-color: #99ccff;
+  border: 1px solid #3399ff;
+}
+
+.bgAct16 {
+  background-color: #80aaff;
+  border: 1px solid #004de6;
+}
+
+.bgSts11, .bgSts12 {
+  background-color: #ccff99;
 }
 
 /*---------------------- POP-UP ------------------------*/
@@ -536,7 +537,16 @@ hr.riga       {
  a.helpInfo {
   background: transparent url("../img/help.png") no-repeat right top; 
   padding: 3px 30px 3px 0px;
- }      
+ }
+ 
+/* .popup dt {
+  margin-left: 9px;
+ }*/ 
+ 
+ .popup dd {
+  margin-left: 18px;
+  margin-bottom: 0px;
+ } 
  
 /*---------------------- Tot risultati ------------------------*/
 .avvisiTot {
