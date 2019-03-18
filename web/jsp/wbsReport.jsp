@@ -15,24 +15,26 @@
         <c:set var="status" value="" scope="page" />
         <c:forEach var="wp" items="${requestScope.wps}" varStatus="loop">
         <c:set var="status" value="${loop.index}" scope="page" />
+          <h5 class="moduleThin">WorkPackage: 
+            <a href="${modAct}${p.id}&ida=${wp.id}">
+              <c:out value="${wp.nome}"/>
+            </a>
+          </h5>
           <table class="table table-striped overviewSummary">
             <thead class="thead-light">
               <tr>
-                <th scope="col" colspan="4">
-                  WorkPackage: 
-                  <a href="${modAct}${p.id}&ida=${wp.id}">
-                    <c:out value="${wp.nome}"/>
-                  </a>
-                </th>
+                <th scope="col">Attivit&agrave; del Work Package</th>
+                <th scope="col">Data inizio</th>
+                <th scope="col">Data fine</th>
+                <th scope="col">Stato effettivo</th>
               </tr>
             </thead>
             <tbody>
               <c:set var="status" value="" scope="page" />
               <c:forEach var="act" items="${wp.attivita}" varStatus="loop">
-                <%@ include file="subActivity.jspf" %>
                 <c:set var="status" value="${loop.index}" scope="page" />
-                <tr>
-                  <td style="padding-left: 50px; width=55%;">
+                <tr class="bgAct${act.stato.id}">
+                  <td class="page">
                     <a href="${modAct}${p.id}&ida=${act.id}">
                       <c:out value="${act.nome}" />
                     </a>
@@ -45,19 +47,19 @@
                   </td>
                   <td class="${pageScope.stile}" style="width: 25%; text-align: center;">
                     <c:choose>
-                      <c:when test="${not empty pageScope.testo}">
-                      <a href="javascript:popupWindow('Note','popup1',true,'${testo}');" class="helpInfo">
-                        <c:out value="${act.stato.informativa}" escapeXml="false"/>
+                      <c:when test="${act.stato.id ne 1}">
+                      <a href="javascript:popupWindow('Note','popup1',true,'${act.stato.informativa}');" class="helpInfo">
+                        <c:out value="${act.stato.nome}" escapeXml="false" />
                       </a>
                       </c:when>
                       <c:otherwise>
-                        <c:out value="${act.stato.informativa}" escapeXml="false" />
+                        <c:out value="${act.stato.nome}" escapeXml="false" />
                       </c:otherwise>
                     </c:choose>
                   </td>
                 </tr>
                 <tr>
-                  <td colspan="2" style="padding-left: 50px;">
+                  <td colspan="2">
                     <div>
                       <label><strong>Note di Avanzamento:</strong></label>
                     </div>
