@@ -30,6 +30,7 @@
                 <a href="<c:out value= "${wbs}${prj.id}" />"  class="btn btn-primary">WBS</a>
                 <a href="<c:out value= "${act}${prj.id}" />" class="btn btn-primary">Attivit&agrave;</a>
                 <a href="<c:out value= "${lastStatus}${prj.id}" />"  class="btn btn-primary">Status</a>
+                <a href="<c:out value= "${report}${prj.id}" />"  class="btn btn-primary">Report</a>
               </td>
               <td><cite><c:out value="${prj.tag}" /></cite></td>
             </tr>
