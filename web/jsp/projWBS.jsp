@@ -35,7 +35,7 @@
         chart.draw(data, {allowHtml:true});
       }
     </script>
-    <h2>WBS del progetto <strong><c:out value="${p.titolo}" /></strong></h2>
+    <h2>WBS del sotto progetto <strong><c:out value="${p.titolo}" /></strong></h2>
     <div id="chart_div"></div>
     <hr class="separatore" />
     <form action="" method="post" onsubmit="return confirmSubmit('wbs');">
