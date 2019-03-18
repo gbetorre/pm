@@ -198,6 +198,82 @@ select:disabled.bgcolor3 {
 	background-image: linear-gradient(to right, white, #ff5232);
 }
 
+.reportHead {
+	background-color: #bfbfbf;
+	font-weight: bold;
+	border-top-style: groove;
+	border-bottom-style: groove;
+}
+
+.reportStateAct {
+	background-color: #bfbfbf;
+	font-size: 9pt;
+	font-weight: bold;
+	border-top-style: groove;
+	border-bottom-style: groove;
+}
+
+.reportWpHead {
+	background-color: #bfbfbf;
+	font-weight: bold;
+	border-top-style: groove;
+}
+
+.reportWpRow {
+	background-color: #bfbfbf;
+	font-weight: bold;
+}
+
+.reportWp {
+	background-image: linear-gradient(to right, #cccccc, #ffffff);
+}
+
+.reportAct {
+	border-top: 2px solid #8c8c8c;
+}
+
+.bgSts11, .bgSts12 {
+	background-color: #ccff99;
+}
+
+.bgAct11 {
+	background-color: #4d9900;
+	border: 1px solid #336600;
+}
+
+.bgAct12 {
+	background-color: #73e600;
+	border: 1px solid #4d9900;
+}
+
+.bgSts13, .bgSts14 {
+	background-color: #ffff80;
+}
+
+.bgAct13 {
+	background-color: #ff9933;
+	border: 1px solid #e67300;
+}
+
+.bgAct14 {
+	background-color: #ffd633;
+	border: 1px solid #cca300;
+}
+
+.bgSts15, .bgSts16 {
+	background-color: #cceeff;
+}
+
+.bgAct15 {
+	background-color: #99ccff;
+	border: 1px solid #3399ff;
+}
+
+.bgAct16 {
+	background-color: #80aaff;
+	border: 1px solid #004de6;
+}
+
 .btn-lightgray {
   color: #fff;
   background-color: #929aa0;
@@ -221,7 +297,7 @@ select:disabled.bgcolor3 {
 }
 
 input[type="submit"]:disabled {
-  background: #d9d9d9;
+  background: #999999;
 }
 
 tr.selected {
