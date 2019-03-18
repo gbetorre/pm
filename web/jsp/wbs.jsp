@@ -71,7 +71,7 @@
       </div>
       <br />
       <div class="row">
-        <div class="col-sm-5">Risultati raggiunti</div>
+        <div class="col-sm-5">Risultati raggiunti da questa WBS</div>
         <div class="col-sm-5">
           <textarea class="form-control" name="wbs-result">${wbsRisultati}</textarea>
           <div class="charNum"></div>
@@ -156,8 +156,9 @@
       <table class="table table-bordered table-hover ">
         <thead class="thead-light">
         <tr>
-          <th scope="col">Nome</th>
-          <th scope="col">Descrizione</th>
+          <th scope="col">Nome attivit&agrave;</th>
+          <th scope="col">Note di avanzamento</th>
+          <th scope="col">Risultati raggiunti</th>
           <th scope="col"><div class="text-center">Milestone</div></th>
         </tr>
         </thead>
@@ -172,7 +173,10 @@
               </a>
             </td>
             <td scope="row">
-              <c:out value="${act.descrizione}"/>
+              <c:out value="${act.noteAvanzamento}"/>
+            </td>
+            <td scope="row">
+              <c:out value="${act.risultatiRaggiunti}"/>
             </td>
             <td scope="row">
               <c:choose>
