@@ -1,7 +1,7 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"  %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ include file="pcURL.jspf" %>
-    <h4>Attivit&agrave; del progetto <c:out value="${p.titolo}" /></h4>
+    <h2>Attivit&agrave; del sotto progetto <c:out value="${p.titolo}" /></h2>
     <hr class="separatore" />
     <form id="editAct_form" action="" method="post">
     <c:choose>
@@ -11,6 +11,7 @@
         <tr>
           <th scope="col" width="2%"></th>
           <th scope="col" width="*">Nome</th>
+          <th scope="col" width="20%">WBS</th>
           <th scope="col" width="10%">Data inizio</th>
           <th scope="col" width="10%">Data fine</th>
           <th scope="col" width="20%">Stato effettivo</th>
@@ -29,6 +30,11 @@
             <td scope="row" id="nameColumn" class="success">
               <a href="${modAct}${p.id}&ida=${act.id}">
                 <c:out value="${act.nome}"/>
+              </a>
+            </td>
+            <td scope="row">
+              <a href="${modWbs}${p.id}&idw=${act.wbs.id}">
+                <c:out value="${act.wbs.nome}"/>
               </a>
             </td>
             <td scope="row">
