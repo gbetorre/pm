@@ -115,6 +115,8 @@ public class ActivityBean extends CodeBean implements Serializable {
     private int idComplessita;
     /** Riferimento allo stato in cui si trova l'attivit&agrave; */
     private int idStato;
+    /** Work package che aggrega l'attivit&agrave; */
+    private WbsBean wbs;
     /** Stato esatto in cui si trova l'attivit&agrave; */
     private CodeBean stato;
     
@@ -131,6 +133,7 @@ public class ActivityBean extends CodeBean implements Serializable {
     	milestone = false;
     	persone = null;
     	idWbs = idComplessita = idStato = -2;
+    	wbs = null;
     	stato = null;
     }
     
@@ -619,5 +622,29 @@ public class ActivityBean extends CodeBean implements Serializable {
      */
     public void setStato(CodeBean stato) {
         this.stato = stato;
+    }   
+    
+    
+    /* ********************************************************* *
+     *   Metodi getter e setter per il work package aggregante   *
+     * ********************************************************* */
+    /**
+     * <p>Restituisce la wbs (di tipo work package) che aggrega l'attivit&agrave;
+     * corrente.</p>
+     * 
+     * @return <code>WbsBean</code> - oggetto rappresentante il work package dell'attivit&agrave;
+     */
+    public WbsBean getWbs() {
+        return wbs;
+    }
+
+    /**
+     * <p>Imposta la wbs (di tipo work package) relativo all'attivit&agrave;
+     * corrente</p>
+     * 
+     * @param wbs - work package da impostare
+     */
+    public void setWbs(WbsBean wbs) {
+        this.wbs = wbs;
     }
 }
