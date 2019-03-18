@@ -296,22 +296,31 @@ public interface Query extends Serializable {
      *              Costanti per incapsulare informative di stato               *
      * ************************************************************************ */
     /**
-     * Un'attivit&agrave; APERTA &egrave; un'attivit&agrave; avviata 
-     * ma non ancora iniziata, cio&egrave; non vi &egrave; stato imputato lavoro
+     * <p>Un'attivit&agrave; APERTA &egrave; un'attivit&agrave; avviata 
+     * ma non ancora iniziata, cio&egrave; non vi &egrave; stato imputato lavoro.</p>
+     * <p>Inoltre, un'attivit&agrave; regolare &egrave; un'attivit&agrave; 
+     * che vive nel presente, cio&egrave; la data di fine, sia pure prevista, 
+     * &egrave; nel futuro e la data di inizio prevista &egrave; nel passato.</p>
      */
     public static final String APERTA_REGOLARE_HELP = "Le Attivit&agrave; <cite>APERTE REGOLARMENTE</cite> sono quelle che hanno <dl><dt>DATA FINE PREVISTA</dt><dd>futura o presente</dd></dl>";
     /**
-     * Un'attività IN PROGRESS &egrave; un'attivit&agrave; avviata 
-     * su cui &egrave; stato imputato lavoro (giorni uomo o data inizio effettiva)
+     * <p>Un'attività IN PROGRESS regolare &egrave; un'attivit&agrave; 
+     * avviata ed iniziata, ovvero su cui &egrave; stato imputato lavoro 
+     * (data di inizio effettiva diversa da NULL), quindi:
+     * <ul>
+     * <li>Data di inizio effettiva <> NULL</li>
+     * <li>Data di fine effettiva = NULL</li>
+     * <li>Data di fine prevista >= today</li>
+     * </ul></p>
      */
-    public static final String IN_PROGRESS_HELP = "Le <cite>Attivit&agrave; </cite>";
+    public static final String IN_PROGRESS_HELP = "Le Attivit&agrave; <cite>in progress</cite> sono quelle che hanno <dl><dt>&ndash; DATA INIZIO EFFETTIVA</dt> <dd>non vuota</dd><dt>&ndash; DATA FINE PREVISTA</dt><dd>futura o presente</dd></dl>";
     /**
      * Un'attivit&agrave; CHIUSA è un'attivit&agrave; conclusa, 
      * su cui non &egrave; più possibile allocare GU o risorse
      */
     public static final String CHIUSA_HELP = "Le <cite>Attivit&agrave; </cite>";
 
-    public static final String APERTA_REGOLARE_PIANIFICATA_HELP = "Le Attivit&agrave; <cite>PIANIFICATE REGOLARMENTE</cite> sono quelle che hanno <dl><dt>DATA INIZIO PREVISTA</dt><dd>futura o presente";
+    public static final String APERTA_REGOLARE_PIANIFICATA_HELP = "Le Attivit&agrave; <cite>PIANIFICATE REGOLARMENTE</cite> sono quelle che hanno <dl><dt>&ndash; DATA INIZIO PREVISTA</dt><dd>futura o presente";
     /**
      * Identificativo di stato attivit&agrave; non ancora lavorata ma 
      * gi&agrave; in ritardo (quindi in ritardo rispetto al previsto,
@@ -329,7 +338,7 @@ public interface Query extends Serializable {
      * (data inizio effettiva <> NULL) ma con data inizio effettiva
      * precedente rispetto a quanto previsto (data inizio prevista)
      */
-    public static final String IN_PROGRESS_IN_ANTICIPO_HELP = "Le In progress in anticipo sull\'inizio<cite>Attivit&agrave; </cite>";
+    public static final String IN_PROGRESS_IN_ANTICIPO_HELP = "Le In progress in anticipo sull&amp;inizio<cite>Attivit&agrave; </cite>";
     /**
      * Identificativo di stato attivit&agrave; gi&agrave; in lavorazione
      * (data inizio effettiva <> NULL) ma che in base al raffronto con 
@@ -1031,6 +1040,7 @@ public interface Query extends Serializable {
             "   ,   A.noteavanzamento       AS  \"noteAvanzamento\"" +
             "   ,   A.risultatiraggiunti    AS  \"risultatiRaggiunti\"" +
             "   ,   A.milestone             AS  \"milestone\"" +
+            "   ,   A.id_wbs                AS  \"idWbs\"" +
             "   ,   A.id_stato              AS  \"idStato\"" +
             "   FROM attivita A" + 
             "   WHERE id_progetto = ?" +
