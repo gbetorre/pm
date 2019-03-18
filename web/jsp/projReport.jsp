@@ -57,7 +57,9 @@
         <c:forEach var="wp" items="${requestScope.workPackagesOfProj}" varStatus="loop">
           <div class="row reportWpRow">
             <div class="col-6 reportWpHead">
-              <strong>${wp.nome}</strong>
+              <a href="${modWbs}${p.id}&idw=${wp.id}">
+                <strong>${wp.nome}</strong>
+              </a>
             </div>
             <div class="col-2 bgSts11"></div>
             <div class="col-2 bgSts13"></div>
@@ -66,7 +68,11 @@
           <c:forEach var="act" items="${wp.attivita}" varStatus="loop">
             <div class="row">
               <div class="col-1 reportWpRow"></div>
-              <div class="col-5 reportAct">${act.nome}</div>
+              <div class="col-5 reportAct">
+                <a href="${modAct}${p.id}&ida=${act.id}">
+                  <c:out value="${act.nome}" />
+                </a>
+              </div>
               <c:forTokens var="divSts" items="${divs}" delims=",">
                 <c:set var="bgAct" value="" scope="page" />
                 <c:if test="${act.stato.ordinale eq divSts}">
