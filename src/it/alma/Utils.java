@@ -473,6 +473,75 @@ public class Utils {
     
     
     /**
+     * <p>Restituisce la data passata come argomento,
+     * addizionata o sottratta di:
+     * <em><ul>
+     * <li>tot giorni</li>
+     * <li>tot mesi</li>
+     * <li>tot anni</li>
+     * </ul></em>
+     * con giorni, mesi e anni passati come argomenti.</p>
+     * <p><ol>
+     * <li>Se si vuol <em>sottrarre</em> anzich&eacute; <em>aggiungere</em> 
+     * basta passare valori negativi dei parametri.</li>
+     * <li>Se si vuol sottrarre o aggiungere solo uno o solo un paio di 
+     * parametri, ma non tutti e tre, basta passare zero <code>(0)</code> 
+     * come valore dei parametri non interessanti.</li>
+     * </ol></p>
+     * <p>
+     * Notare che per ottenere qualsiasi data sarebbe sufficiente
+     * aggiungere o sottrarre il numero giusto di soli giorni.
+     * Tuttavia in alcuni casi pu&ograve; essere pi&uacute;
+     * comodo passare lo shift giusto di mesi e anni piuttosto che 
+     * ricavare la data voluta attraverso il numero di giorni in pi&uacute;
+     * o in meno, e per questo motivo il metodo ha 3 possibili parametri
+     * (anche se nulla vieta di utilizzare solo il primo per ottenere
+     * tutte le date volute).</p>
+     * 
+     * @param date   data sulla quale applicare la somma o sottrazione dei giorni/mesi/anni passati
+     * @param days   numero di giorni da aggiungere o togliere alla data corrente per ottenere una data desiderata
+     * @param months numero di mesi   da aggiungere o togliere alla data corrente per ottenere una data desiderata
+     * @param years  numero di anni   da aggiungere o togliere alla data corrente per ottenere una data desiderata
+     * @return <code>GregorianCalendar</code> - la data desiderata, pari alla data corrente aggiunta o sottratta di giorni e/o mesi e/o anni specificati dai parametri
+     * @throws NotFoundException se si generano eccezioni sul controllo della data in input
+     */
+    public static GregorianCalendar getDate(GregorianCalendar date, 
+                                            int days, 
+                                            int months, 
+                                            int years)
+                                     throws NotFoundException {
+        // Controlli sulla data in input
+        if (date == null) {
+            String msg = FOR_NAME + "Si e\' tentato di invocare il metodo di controllo su un oggetto non pronto. Controllare il valore dell\'argomento.\n";
+            throw new NotFoundException(msg);
+        }
+        try {
+            if (days != 0) {
+                // Aggiunge, o toglie, 'days'
+                date.add(Calendar.DATE, days);
+            }
+            if (months != 0) {
+                // Aggiunge, o toglie, 'months'
+                date.add(Calendar.MONTH, months);
+            }
+            if (years != 0) {
+                // Aggiunge, o toglie, 'years'
+                date.add(Calendar.YEAR, years);
+            }
+            return date;
+        }  catch (NullPointerException npe) {
+            StackTraceElement[] stackTrace = npe.getStackTrace();
+            StringBuffer trace = new StringBuffer("\n");
+            for (StackTraceElement stack : stackTrace) 
+                trace.append(stack.toString()).append("\n");
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a: " + npe.getMessage() + trace.toString();            
+            log.warning(msg + "Problema probabilmente legato al costruttore di SimpleDateFormat, che restituisce una NullPointerException se la maschera in base a cui l\'oggetto viene generato e\' null.\n");
+            throw new NotFoundException(msg, npe);
+        }
+    }
+    
+    
+    /**
      * Formatta una data di tipo <code>java.util.GregorianCalendar</code> 
      * secondo il formato standard italiano, ovvero in base alla maschera:
      * <pre>"gg/mm/aaaa"</pre>
