@@ -36,6 +36,7 @@
 
 package it.alma.command;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -66,8 +67,10 @@ import it.alma.bean.ProjectBean;
 import it.alma.bean.RiskBean;
 import it.alma.bean.SkillBean;
 import it.alma.bean.StatusBean;
+import it.alma.bean.WbsBean;
 import it.alma.exception.AttributoNonValorizzatoException;
 import it.alma.exception.CommandException;
+import it.alma.exception.NotFoundException;
 import it.alma.exception.WebStorageException;
 
 
@@ -94,6 +97,10 @@ public class ProjectCommand extends ItemBean implements Command {
      * Pagina a cui la command reindirizza per mostrare la lista dei progetti che l'utente ha i diritti di visualizzare
      */
     private static final String nomeFileElenco = "/jsp/elencoProgetti.jsp";
+    /**
+     * Pagina a cui la command fa riferimento per mostrare il report
+     */
+    private static final String nomeFileReport = "/jsp/projReport.jsp";
     /**
      * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutti gli attributi del progetto
      */    
@@ -142,6 +149,7 @@ public class ProjectCommand extends ItemBean implements Command {
         //nomeFile.put(Query.PART_ACTIVITY, "/jsp/projActivities.jsp");
         nomeFile.put(Query.PART_STATUS, "/jsp/projStatus.jsp");
         nomeFile.put(Query.CREDITS, "/jsp/credits.jsp");
+        nomeFile.put(Query.PART_REPORT, nomeFileReport);
         nomeFile.put(Query.PART_PROJECT, this.getPaginaJsp());
     }  
   
@@ -172,6 +180,8 @@ public class ProjectCommand extends ItemBean implements Command {
         int idStatus = parser.getIntParameter("ids", -1);
         // Recupera o inizializza 'tipo pagina'   
         String part = parser.getStringParameter("p", "-");
+        // Recupera o inizializza 'data visualizzazione report'
+        String selectionDate = parser.getStringParameter("d", Utils.format(Utils.getCurrentDate()));
         // Flag di scrittura
         boolean write = (boolean) req.getAttribute("w");
         // Dichiara la pagina a cui reindirizzare
@@ -196,6 +206,10 @@ public class ProjectCommand extends ItemBean implements Command {
         Vector<ActivityBean> activitiesByDate = null;
         // Dichiara l'avanzamento progetto successivo a quello di partenza
         StatusBean nextStatus = null;
+        // Dichiara l'elenco di work packages del progetto 
+        Vector<WbsBean> workPackagesOfProj = null;
+        // Dichiara la data del report da visualizzare
+        Date convertDate = null;
         // Dichiara l'id massimo della tabella avanzamentoprogetto
         int newStatusId = -1;
         // Flag specificante se l'utente vede almeno un progetto
@@ -310,6 +324,12 @@ public class ProjectCommand extends ItemBean implements Command {
                     if (part.equals(Query.PART_PROJECT)) {
                         ; // Codice per mostrare dati aggregati sul progetto, o relazioni o altro
                     } else if (part.equals(Query.PART_STATUS)) {
+                        /* ************************************************************ *
+                         *      Implementazione logica per recupero degli status        *
+                         *      sia nel caso l'id sia uguale a '0' sia nel caso         * 
+                         *      mi venga specificato uno status tramite id              *        
+                         * ************************************************************ */
+                        Date rightNow = Utils.convert(Utils.getCurrentDate());
                         // Testa se l'id dello status è significativo
                         if (idStatus > Query.NOTHING) {
                             // Recupera uno specifico status di progetto di dato id
@@ -319,8 +339,8 @@ public class ProjectCommand extends ItemBean implements Command {
                             Date dateProjectStatus = new Date(0);
                             if (!projectStatusList.isEmpty()) {
                                 for (int i = 0; i < projectStatusList.size(); i++) {
-                                    if (projectStatusList.get(i).getDataInizio().equals(Utils.convert(Utils.getCurrentDate())) ||
-                                        projectStatusList.get(i).getDataInizio().before(Utils.convert(Utils.getCurrentDate())) ) {
+                                    if (projectStatusList.get(i).getDataInizio().equals(rightNow) ||
+                                        projectStatusList.get(i).getDataInizio().before(rightNow) ) {
                                         if (dateProjectStatus.before(projectStatusList.get(i).getDataInizio())) {
                                             dateProjectStatus = projectStatusList.get(i).getDataInizio();
                                         }
@@ -344,13 +364,24 @@ public class ProjectCommand extends ItemBean implements Command {
                                 activitiesByDate = db.getActivities(idPrj, user, projectStatus.getDataFine(), false, true);
                             }
                         }
-                    } else if (part.equals(Query.PART_PROJECT_CHARTER_RESOURCE)) {
+                    } 
+                    /* ******************************************************************************************** *
+                     *      Implementazione della parte specifica per la visualizzazione del report di progetto     *
+                     * ******************************************************************************************** */
+                    else if (part.equals(Query.PART_REPORT)) {
+                        workPackagesOfProj = WbsCommand.retrieveWorkPackages(idPrj, db);
+                        // Chiamata al metodo per la valorizzazione dello stato dell'attività da visualizzare
+                        if (selectionDate.equals(Utils.format(Utils.getCurrentDate()))) {
+                            convertDate = Utils.format(Utils.format(Utils.getCurrentDate()), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
+                        } else {
+                            convertDate = Utils.format(selectionDate, "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
+                        }
+                        computeActivityState(convertDate, workPackagesOfProj);
+                    } 
+                    // Parte specifica di risorse
+                    else if (part.equals(Query.PART_PROJECT_CHARTER_RESOURCE)) {
                         vSkills = db.getSkills(idPrj);
-                    } /*else if (part.contains(Query.PART_PROJECT_CHARTER_RISK)) {
-                        vRisks = db.getRisks(idPrj);
-                    } else if(part.equals(Query.PART_WBS)) {
-                        vWBS = db.getWbs(idPrj, Query.WBS_GET_ALL);
-                    }*/
+                    }
                 }                
                 fileJspT = nomeFile.get(part);
             } else {
@@ -382,6 +413,14 @@ public class ProjectCommand extends ItemBean implements Command {
         // Imposta nella request elenco dipartimenti, se presente
         if (d != null) {
             req.setAttribute("dipart", d);
+        }
+        // Imposta nella request il Vector di workPackages nel caso in cui si voglia visualizzare il report di status
+        if (workPackagesOfProj != null) {
+            req.setAttribute("workPackagesOfProj", workPackagesOfProj);
+        }
+        // Imposta nella request la data sulla quale visualizzare il report
+        if (convertDate != new Date(0)) {
+            req.setAttribute("selectionDate", convertDate);
         }
         // Imposta flag 'true' se l'utente loggato vede almeno un progetto
         req.setAttribute("checkThisOut", checkThisOut);
@@ -666,4 +705,118 @@ public class ProjectCommand extends ItemBean implements Command {
         }
     }
     
+    
+    /**
+     * <p>Metodo che valorizza per riferimento lo stato dell'attivit&agrave; in relazione 
+     * allo status di progetto che si vuole visualizzare. In particolare, se è presente
+     * uno solo status di progetto, l'attivit&agrave; potr&agrave; riportare solo i valori:<br /> 
+     *      - CHIUSA<br />
+     *      - IN RITARDO<br />
+     *      - IN PROGRESS<br />
+     *      - APERTA<br />
+     * Se invece sono presenti pi&ugrave; status, allora l'attivit&agrave; potr&agrave; riportare 
+     * i seguenti valori, calcolati basandosi sulle date dell'attivit&agrave; stessa e dello status: <br />
+     *      - CHIUSA<br />
+     *      - APPENA CHIUSA<br />
+     *      - IN RITARDO<br />
+     *      - IN PROGRESS<br />
+     *      - PROSSIMO PERIODO<br />
+     *      - PERIODI SUCCESSIVI.</p>
+     * 
+     * @param referenceDate Rappresenta la data alla quale l'utente ha richiesto il report.
+     * @param workPackages Vector contenente tutti i work-packages relativi al progetto corrente.
+     * @throws CommandException se si verfica un problema nel recupero di qualche attributo obbligatorio o in qualche altro tipo di puntamento
+     */
+    private static void computeActivityState(Date referenceDate, 
+                                             Vector<WbsBean> workPackages)
+                                      throws CommandException {
+        try {
+            // Ciclo tutti i workPackages del progetto attuale, per estrarmi tutte le attività
+            for (WbsBean wp: workPackages) {
+                // Ciclo interno per selezionare e valutare tutte le attività
+                for (ActivityBean activity: wp.getAttivita()) {
+                    // Variabili identificanti le date effettive dell'attività
+                    GregorianCalendar date = new GregorianCalendar();
+                    date.setTime(referenceDate);
+                    // Data di inizio da prendere
+                    Date dataInizio = null;
+                    // Eseguo tutti i controlli
+                    /* ***************************************************************** *
+                     *              Prendo la data di inizio più significativa           * 
+                     * ***************************************************************** */
+                    // Confronto con new Date(0) perchè nel bean inizializzo i valori in questo modo
+                    if (activity.getDataInizioEffettiva() != null) {
+                        dataInizio = activity.getDataInizioEffettiva();
+                    } else if (activity.getDataInizio() != null){
+                        dataInizio = activity.getDataInizio();
+                    }
+                    /* ***************************************************************** *
+                     *  Per prima cosa controllo se l'attività ha data inizio effettiva  *
+                     *  e data fine effettiva.
+                     * ***************************************************************** */
+                    // CASI CON DATA FINE EFFETTIVA
+                    if (activity.getDataFineEffettiva() != null && 
+                        activity.getDataFineEffettiva().before(referenceDate)) {
+                        // caso in cui la data di fine effettiva sia precedente di oltre 30 giorni
+                        if (activity.getDataFineEffettiva().before(Utils.convert(Utils.getDate(date, -30, 0, 0)))) {
+                                activity.getStato().setOrdinale(Query.CHIUSA_DA_TEMPO);
+                        } 
+                        // caso in cui la data di fine effettiva sia precedente di massimo 30 giorni
+                        else {
+                            activity.getStato().setOrdinale(Query.CHIUSA_DA_POCO);
+                        }
+                    }
+                    // CASI IN CUI LA DATA DI FINE EFFETTIVA NON SIA SIGNIFICATIVA
+                    else {
+                        // IN RITARDO: ho la data di fine prevista passata
+                        if (activity.getDataFine().before(referenceDate)) {
+                            activity.getStato().setOrdinale(Query.IN_RITARDO);
+                        }
+                        // data fine prevista > o = a data di riferimento
+                        else {
+                            if (dataInizio == null) {
+                                // data di fine prevista successiva di oltre 30 giorni
+                                if (activity.getDataFine().after(Utils.convert(Utils.getDate(date, 30, 0, 0)))) {
+                                    activity.getStato().setOrdinale(Query.PERIODO_FUTURO_VENTURO);
+                                } 
+                                // data di fine prevista successiva di massimo 30 giorni 
+                                else {
+                                    activity.getStato().setOrdinale(Query.PERIODO_FUTURO_PROSSIMO);
+                                }
+                            } else {
+                                if (dataInizio.before(referenceDate) || dataInizio.equals(referenceDate)) {
+                                    activity.getStato().setOrdinale(Query.IN_CORSO);
+                                } else {
+                                    // data di inizio prevista successiva di oltre 30 giorni
+                                    if (activity.getDataInizio().after(Utils.convert(Utils.getDate(date, 30, 0, 0)))) {
+                                        activity.getStato().setOrdinale(Query.PERIODO_FUTURO_VENTURO);
+                                    } 
+                                    // data di inizio prevista successiva di massimo 30 giorni 
+                                    else {
+                                        activity.getStato().setOrdinale(Query.PERIODO_FUTURO_PROSSIMO);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Oggetto ActivityBean non valorizzato; problema nel settaggio dell\'ordinale nello stato dell\'attivi&agrave;.\n";
+            LOG.severe(msg); 
+            throw new CommandException(msg + anve.getMessage(), anve);
+        } catch (NotFoundException nfe) {
+            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella conversione sulla somma algebrica della data di riferimento.\n";
+            LOG.severe(msg); 
+            throw new CommandException(msg + nfe.getMessage(), nfe);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + npe.getMessage(), npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+    }
 }
