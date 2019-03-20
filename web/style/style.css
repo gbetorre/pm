@@ -1,4 +1,4 @@
-body {
+pm.body {
     background-color:#fffaf0;
     color:#353833;
     font-family: "Trebuchet MS", sans-serif;
@@ -445,46 +445,46 @@ hr.riga       {
 	background-image: linear-gradient(to left, #f5c6cb, transparent) !important;
 }
 
-.bgAct11 {
+.bgSts21, .bgSts22 {
+  background-color: #ccff99;
+}
+
+.bgAct21 {
   background-color: #4d9900;
   border: 1px solid #336600;
 }
 
-.bgAct12 {
+.bgAct22 {
   background-color: #73e600;
   border: 1px solid #4d9900;
 }
 
-.bgSts13, .bgSts14 {
+.bgSts23, .bgSts24 {
   background-color: #ffff80;
 }
 
-.bgAct13 {
+.bgAct23 {
   background-color: #ff9933;
   border: 1px solid #e67300;
 }
 
-.bgAct14 {
+.bgAct24 {
   background-color: #ffd633;
   border: 1px solid #cca300;
 }
 
-.bgSts15, .bgSts16 {
+.bgSts25, .bgSts26 {
   background-color: #cceeff;
 }
 
-.bgAct15 {
+.bgAct25 {
   background-color: #99ccff;
   border: 1px solid #3399ff;
 }
 
-.bgAct16 {
+.bgAct26 {
   background-color: #80aaff;
   border: 1px solid #004de6;
-}
-
-.bgSts11, .bgSts12 {
-  background-color: #ccff99;
 }
 
 /*---------------------- POP-UP ------------------------*/
