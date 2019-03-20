@@ -140,14 +140,14 @@
         </div>
         <br />
         <div class="row">
-          <div class="col-sm-5">Data di inizio dell'attivit&agrave;</div>
+          <div class="col-sm-5">Data prevista di inizio dell'attivit&agrave;</div>
           <div class="col-sm-5">
             <input type="text" class="form-control calendarData" id="act-datainizio" name="act-datainizio" value="<fmt:formatDate value='${actStartDate}' pattern='dd/MM/yyyy' />" readonly> <%--readonly--%>
           </div>
         </div>
         <br />
         <div class="row">
-          <div class="col-sm-5 mandatory">Data di fine dell'attivit&agrave; <sup>&#10039;</sup></div>
+          <div class="col-sm-5 mandatory">Data prevista di fine dell'attivit&agrave; <sup>&#10039;</sup></div>
           <div class="col-sm-5">
             <input type="text" class="form-control calendarData" id="act-datafine" name="act-datafine" value="<fmt:formatDate value='${actEndDate}' pattern='dd/MM/yyyy' />" readonly> <%--readonly--%>
           </div>
@@ -216,7 +216,7 @@
         <div class="row">
           <div class="col-sm-5 mandatory">WBS <sup>&#10039;</sup></div>
           <div class="col-sm-5">
-            <select class="form-control" id="act-wbs" name="act-wbs" disabled><%-- disabled --%>
+            <select class="form-control" id="act-wbs" name="act-wbs" disabled>
             <c:forEach var="wp" items="${requestScope.wbs}" varStatus="status">
               <c:set var="selected" value="" scope="page" />
               <c:if test="${wp.id eq wbs}">
@@ -261,7 +261,7 @@
         <br />
         --%>
         <a href="<c:out value= "${act}${requestScope.progetto.id}" escapeXml="false" />" id='btn-close' class="btn btnNav">Chiudi</a>
-        <input type="button" class="btn btn-primary" name="modifica" value="Modifica" onclick="modify()">
+        <input type="button" class="btn btn-primary" name="modifica" value="Modifica" onclick="modify();">
         <%@ include file="subPanel.jspf" %>
     <%--</div> --%>
     </form>
@@ -269,6 +269,31 @@
 <c:out value="${exception}" />
     <script type="text/javascript">
     var offsetcharacter = 5;
+    // Adesso
+    var rightNow = new Date();
+    // Millisecondi trascorsi da UNIX_EPOCH
+    var elapsedTimeFromUnixEpochAsMillisec = Date.now();
+    // Secondi trascorsi da UNIX_EPOCH
+    var elapsedSeconds = elapsedTimeFromUnixEpochAsMillisec/1000;
+    // Minuti trascorsi da UNIX_EPOCH
+    var elapsedMinutes = elapsedSeconds/60;
+    // Ore trascorse da UNIX_EPOCH
+    var elapsedHours = Math.round(elapsedMinutes/60);
+    // Giorni trascorsi da UNIX_EPOCH
+    var elapsedDays = Math.round(elapsedHours/24);
+    // Mesi trascorsi da UNIX_EPOCH
+    var elapsedMonths = Math.round(elapsedDays/30);
+    // Data a partire dalla quale sono iniziati i progetti di eccellenza
+    //var start = new Date('2018-01-01');
+    // Millisecondi trascorsi da UNIX_EPOCH fino a start progetti
+    //var startAsMillis = start.getTime();
+    // Giorni trascorsi da UNIX_EPOCH fino a start
+    //var elapsedDaysToStart = Math.round(startAsMillis/(1000*60*60*24));
+    // Giorni trascorsi da start progetti fino ad oggi
+    //var elapsedDaysFromStartToNow = elapsedDays - elapsedDaysToStart;
+    // Rappresentazione a stringa della data di oggi, in formato italiano
+    var todayAsString = rightNow.getDate() + "/" + (1 + rightNow.getMonth()) + "/" + rightNow.getFullYear();
+    // Corpo del programma
     $(document).ready(function () {
       $('#act_form').validate ({
       rules: {
@@ -280,27 +305,35 @@
           minlength: offsetcharacter
         },
         'act-datainizio': {
-          required: true
+          dateITA: true
         },
         'act-datafine': {
+          dateITA: true,
           required: true
         },
-        'act-guprevisti': {
-          number: true
-        },
-        'act-gueffettivi': {
-          number: true
-        },
-        'act-gurimanenti': {
-          number: true
+        //'act-guprevisti': {
+        //  number: true
+        //},
+        //'act-gueffettivi': {
+        //  number: true
+        //},
+        //'act-gurimanenti': {
+        //  number: true
+        //}
+        'act-datainiziovera': {
+          dateITA: true,
+          //maxDate: elapsedDays
         }
+
       }, 
       messages: {
         'act-role': "Scegliere una competenza (ruolo) per la persona selezionata",
-        'act-name': "Inserire il nome dell\'attivita\'",
+        'act-name': "Inserire il nome dell\'attivita\'" + elapsedDays + $("#act-datainiziovera").val(),
         'act-datainizio': "Inserire una data di inizio valida",
         'act-datafine': "Inserire una data di fine valida",
-        'act-guprevisti': "Inserire un valore numerico",
+        'act-datainiziovera': "La data inserita deve essere in formato italiano e non pu&ograve; essere maggiore della data odierna (" + todayAsString + ")",
+      //'act-datainiziovera': "La data inserita non ha il formato corretto",
+        'act-datafinevera': "La data inserita non puo essere maggiore della data odierna (" + new Date() + ")",
         'act-gueffettivi': "Inserire un valore numerico",
         'act-gurimanenti': "Inserire un valore numerico"
       },
