@@ -1,6 +1,6 @@
 <%@ include file="pcURL.jspf" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"  %>
-<c:set var="divs" value="11,12,13,14,15,16" scope="page" />
+<c:set var="divs" value="21,22,23,24,25,26" scope="page" />
 <div class="row">
   <div class="col-12">
     <form id="status_form" action="#" method="post">
@@ -35,22 +35,22 @@
         <div class="row reportStateAct">
           <div class="col-6">
           </div>
-          <div class="col-1 bgSts11">
+          <div class="col-1 bgSts21">
             Chiusa da pi&ugrave; tempo
           </div>
-          <div class="col-1 bgSts12">
+          <div class="col-1 bgSts22">
             Chiusa il mese scorso
           </div>
-          <div class="col-1 bgSts13">
+          <div class="col-1 bgSts23">
             In ritardo
           </div>
-          <div class="col-1 bgSts14">
+          <div class="col-1 bgSts24">
             In realizzazione
           </div>
-          <div class="col-1 bgSts15">
+          <div class="col-1 bgSts25">
             Prossimo mese
           </div>
-          <div class="col-1 bgSts16">
+          <div class="col-1 bgSts26">
             Mesi successivi
           </div>
         </div>
@@ -61,9 +61,9 @@
                 <strong>${wp.nome}</strong>
               </a>
             </div>
-            <div class="col-2 bgSts11"></div>
-            <div class="col-2 bgSts13"></div>
-            <div class="col-2 bgSts15"></div>
+            <div class="col-2 bgSts21"></div>
+            <div class="col-2 bgSts23"></div>
+            <div class="col-2 bgSts25"></div>
           </div>
           <c:forEach var="act" items="${wp.attivita}" varStatus="loop">
             <div class="row">
