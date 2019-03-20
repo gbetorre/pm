@@ -1153,6 +1153,7 @@ $.extend( $.validator, {
 		url: { url: true },
 		date: { date: true },
 		dateISO: { dateISO: true },
+		dateITA: { dateITA: true },
 		number: { number: true },
 		digits: { digits: true },
 		creditcard: { creditcard: true }
@@ -1404,6 +1405,11 @@ $.extend( $.validator, {
 			return this.optional( element ) || /^\d{4}[\/\-](0?[1-9]|1[012])[\/\-](0?[1-9]|[12][0-9]|3[01])$/.test( value );
 		},
 
+    // ATTENZIONE: Personalizzazione; validazione data in formato: gg/mm/aaaa o gg-mm-aaaa
+    dateITA: function( value, element ) {
+      return this.optional( element ) || /^(0?[1-9]|[12][0-9]|3[01])[\/\-](0?[1-9]|1[012])[\/\-]\d{4}$/.test( value );
+    },
+
 		// https://jqueryvalidation.org/number-method/
 		number: function( value, element ) {
 			return this.optional( element ) || /^(?:-?\d+|-?\d{1,3}(?:,\d{3})+)?(?:\.\d+)?$/.test( value );
@@ -1441,6 +1447,21 @@ $.extend( $.validator, {
 		max: function( value, element, param ) {
 			return this.optional( element ) || value <= param;
 		},
+		
+		/* ATTENZIONE: Personalizzazione; validazione data in funzione di altra data
+		// Fare attenzione a usare questo metodo solo su valori che si è certi siano date, 
+		// altrimenti va in errore e non funziona più alcuno script della pagina
+    maxDate: function( value, element, param ) {
+      // param è il valore immesso (quindi, in questo caso, una data)
+      // value è il criterio
+      // Millisecondi trascorsi da UNIX_EPOCH fino alla data immessa
+      var paramAsMillis = param.getTime();
+      // Giorni trascorsi da UNIX_EPOCH fino alla data immessa
+      var elapsedDaysToParam = Math.round(paramAsMillis/(1000*60*60*24));
+      console.log(elapsedDaysToParam);
+      // Criterio
+      return this.optional( element ) || value <= elapsedDaysToParam;
+    },*/
 
 		// https://jqueryvalidation.org/range-method/
 		range: function( value, element, param ) {
