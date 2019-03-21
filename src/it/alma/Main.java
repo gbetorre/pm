@@ -75,7 +75,7 @@ public class Main extends HttpServlet {
      * <p>All logging goes through this logger.</p>
      * <p>To avoid the 'Read access to enclosing field Main.log 
      * is emulated by a synthetic accessor method' warning, 
-     * visibility is changed to 'friendly' (id est 'default', 
+     * the visibility is changed to 'friendly' (id est 'default', 
      * id est 'visible from the same package').</p>
      * <p>Spiegazione, per chi non "mastica" l'inglese (o Java, o
      * <ul><li>non ha il cervello</li><li>&egrave; uno zombie</li>
@@ -311,7 +311,7 @@ public class Main extends HttpServlet {
             cmd.execute(req);
         } catch (CommandException ce) { // Potrebbe già uscire qui
             String msg = FOR_NAME + 
-                         "L'errore è stato generato dalla seguente chiamata: " + 
+                         "L\'errore e\' stato generato dalla seguente chiamata: " + 
                          req.getQueryString() +
                          ", presente nella pagina: " + 
                          req.getHeader("Referer");
@@ -321,7 +321,7 @@ public class Main extends HttpServlet {
             flush(req, res, errorJsp);
         } catch (Exception e) {
             String msg = FOR_NAME +  
-                         "L'errore è stato generato dalla seguente chiamata: " + 
+                         "L\'errore e\' stato generato dalla seguente chiamata: " + 
                          req.getQueryString() + 
                          ", presente nella pagina: " + 
                          req.getHeader("Referer");
@@ -404,16 +404,19 @@ public class Main extends HttpServlet {
             req.setAttribute("message", npe.getMessage());
             log(FOR_NAME + "Problema di puntamento: applicazione terminata!" + npe);
             flush(req, res, errorJsp);
+            return;
         } catch (NumberFormatException nfe) { // Controllo sull'input
             req.setAttribute("javax.servlet.jsp.jspException", nfe);
             req.setAttribute("message", nfe.getMessage());
             log(FOR_NAME + "Parametro in formato non valido: applicazione terminata!" + nfe);
             flush(req, res, errorJsp);
+            return;
         } catch (Exception e) { // Just in case
             req.setAttribute("javax.servlet.jsp.jspException", e);
             req.setAttribute("message", e.getMessage());
             log(FOR_NAME + "Eccezione generica: " + e);
             flush(req, res, errorJsp);
+            return;
         }
         try {
             /*
@@ -423,14 +426,19 @@ public class Main extends HttpServlet {
             req.setAttribute("w", true);
             Command cmd = lookupCommand(q);
             cmd.execute(req);
-        } catch (CommandException e) { // Potrebbe già uscire qui
+        } catch (CommandException ce) { // Potrebbe già uscire qui
+            req.setAttribute("javax.servlet.jsp.jspException", ce);
+            req.setAttribute("message", ce.getMessage());
+            log("Problema: " + ce);
+            flush(req, res, errorJsp);
+            return;
+        } catch (Exception e) {
             req.setAttribute("javax.servlet.jsp.jspException", e);
             req.setAttribute("message", e.getMessage());
             log("Problema: " + e);
-            flush(req, res, errorJsp);
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
+            flush(req, res, errorJsp);
+            return;
         }
         retrieveFixedInfo(req);
         flush(req, res, templateJsp);
