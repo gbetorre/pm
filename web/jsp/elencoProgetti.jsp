@@ -37,7 +37,7 @@
             </c:forEach>
             <c:if test="${not empty sessionScope.writableDeparments}">
             <tr>
-              <td colspan="3" align="left"><a href="${mon}${d.id}"  class="btn btn-primary">Monitoraggio MIUR</a></td>
+              <td colspan="4" align="left"><a href="${mon}${d.id}"  class="btn btn-primary">Monitoraggio MIUR</a></td>
             </tr>
             </c:if>
           </tbody>
@@ -52,7 +52,7 @@
           <span aria-hidden="true" >&times;</ span>
         </button>
         <strong> <fmt:message key="Attenzione" /></ strong><br />
-        <em> <fmt:message key="ErroreDol" /></ em><hr />
+        <em> <fmt:message key="ErroreDol" /></em><hr />
         Dettagli: <br />
         <c:out value=" ${exception}" />
       </div >
