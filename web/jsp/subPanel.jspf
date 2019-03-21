@@ -22,7 +22,7 @@
       <input type="submit" class="btn btn-primary" name="${distinguishingSubmitName}" id="${distinguishingSubmitId}" value="Salva" disabled>
     </c:when>
     <c:when test="${param['q'] eq 'wbs'}">
-    <c:choose>
+      <c:choose>
       <c:when test="${not empty param['p']}">
         <input type="submit" class="btn btn-primary" name="${distinguishingSubmitName}" id="${distinguishingSubmitId}" value="Salva">
       </c:when>
@@ -31,7 +31,7 @@
         <a class="btn btn-primary" href="" id="mod-wbs" onclick="selectionEdit('WBS')">Modifica</a>
         <input type="submit" class="btn btn-primary" id="del-wbs" name="" value="Elimina" />
       </c:otherwise>
-    </c:choose>
+      </c:choose>
     </c:when>
     <c:when test="${param['q'] eq 'act'}">
     <c:choose>
@@ -41,7 +41,8 @@
       <c:otherwise>
         <a href="${addAct}${p.id}" class="btn btn-primary" id="add-act">Aggiungi</a>
         <a href="" class="btn btn-primary" id="mod-act" onclick="selectionEdit('Attivit&agrave;')">Modifica</a>
-        <a href="" class="btn btn-primary" id="del-act" onclick="selectionEdit('Attivit&agrave;')">Sospendi / Elimina</a>
+        <a href="" class="btn btn-primary" id="sus-act" onclick="selectionDelete('&Egrave; necessario selezionare una attivit&agrave; da sospendere!')">Sospendi</a>
+        <a href="" class="btn btn-primary" id="del-act" onclick="selectionDelete('&Egrave; necessario selezionare una attivit&agrave; da eliminare!')">Elimina</a>
       </c:otherwise>
     </c:choose>
     </c:when>
