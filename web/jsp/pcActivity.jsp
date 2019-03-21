@@ -8,17 +8,17 @@
     <c:set var="checked" value="checked" scope="page" />
   </c:if>
   <c:set var="wbs" value="${actInstance.idWbs}" scope="page" />
-  <c:set var="complexity" value="${actInstance.idComplessita}" scope="page" />
-  <c:set var="state" value="${actInstance.idStato}" scope="page" />    
+  <c:set var="complexityIdAsIndex" value="${actInstance.idComplessita - 1}" scope="page" />
+  <c:set var="complexityValues" value="ALTA,MEDIA,BASSA" scope="page" /> 
 </c:if>
-
     <h3>Riepilogo attivit&agrave; &quot;${actInstance.nome}&quot;:</h3>
     <br />
     <form id="delAct_form" action="" method="post" class="subfields">
       <input type="hidden" id="act-id" name="act-id" value="${actInstance.id}" />
+      
       <div class="row">
         <div class="col-sm-5">
-          <strong>Persona incaricata </strong>
+          <strong>Persona responsabile </strong>
         </div>
         <div class="col-sm-5">
         <c:set var="skills" value="" scope="page" />
@@ -31,7 +31,7 @@
       <br />
       <div class="row">
         <div class="col-sm-5">
-          <strong>Identificativo del ruolo ricoperto nell'attivit&agrave;</strong>
+          <strong>Identificativo della competenza</strong>
         </div>
         <div class="col-sm-5">
           <c:forEach var="skill" items="${skills}" begin="0" end="0">
@@ -76,6 +76,7 @@
           </div>
         </div>
         <br />
+      <c:if test="${not empty actInstance.dataInizioEffettiva}">
         <div class="row">
           <div class="col-sm-5">
             <strong>Data di inizio effettiva</strong>
@@ -85,6 +86,8 @@
           </div>
         </div>
         <br />
+      </c:if>
+      <c:if test="${not empty actInstance.dataFineEffettiva}">
         <div class="row">
           <div class="col-sm-5">
             <strong>Data di fine effettiva</strong>
@@ -94,6 +97,8 @@
           </div>
         </div>
         <br />
+      </c:if>
+      <c:if test="${not empty actInstance.noteAvanzamento}">
         <div class="row">
           <div class="col-sm-5"><strong>Note di avanzamento</strong></div>
           <div class="col-sm-5">
@@ -101,6 +106,8 @@
           </div>
         </div>
         <br />
+      </c:if>
+      <c:if test="${not empty actInstance.risultatiRaggiunti}">
         <div class="row">
           <div class="col-sm-5"><strong>Risultati raggiunti</strong></div>
           <div class="col-sm-5">
@@ -109,6 +116,7 @@
           </div>
         </div>
         <br />
+      </c:if>
         <div class="row">
           <div class="col-sm-5"><strong>Milestone</strong></div>
           <div class="col-sm-5" style="margin-left:25px;">
@@ -116,36 +124,65 @@
           </div>
         </div>
         <br />
-        <%--
         <div class="row">
-          <div class="col-sm-5">WBS</div>
+          <div class="col-sm-5"><strong>WBS</strong></div>
           <div class="col-sm-5">
-
-            <c:out value="${requestScope.w.nome}" />
-            <c:if test="${not empty requestScope.w.wbsFiglie}">
-              <c:forEach var="wbs1" items="${requestScope.w.wbsFiglie}" begin="0" end="0">
-                <c:out value="${wbs1.nome}" />
-                <c:if test="${not empty wbs1.wbsFiglie}">
+          <ol>
+            <li>
+              <a href="${modWbs}${p.id}&idw=${requestScope.w.id}">
+                <c:out value="${requestScope.w.nome}" />
+              </a>
+            </li>
+          <c:if test="${not empty requestScope.w.wbsFiglie}">
+            <ol start="2">
+            <c:forEach var="wbs1" items="${requestScope.w.wbsFiglie}" begin="0" end="0">
+              <li>
+                <a href="${modWbs}${p.id}&idw=${wbs1.id}">
+                  <c:out value="${wbs1.nome}" />
+                </a>
+              </li>
+              <c:if test="${not empty wbs1.wbsFiglie}">
+                <ol start="3">
                   <c:forEach var="wbs2" items="${wbs1.wbsFiglie}" begin="0" end="0">
+                  <li>
                     <c:out value="${wbs2.nome}" />
+                  </li>
                     <c:if test="${not empty wbs2.wbsFiglie}">
+                    <ol start="4">
                       <c:forEach var="wbs3" items="${wbs2.wbsFiglie}" begin="0" end="0">
+                      <li>
                         <c:out value="${wbs3.nome}" />
+                      </li>
+                      <c:if test="${not empty wbs3.wbsFiglie}">
+                      <ol start="5">
+                        <c:forEach var="wbs4" items="${wbs3.wbsFiglie}" begin="0" end="0">
+                        <li>
+                          <c:out value="${wbs4.nome}" />
+                        </li>
+                        </c:forEach>
+                      </ol>
+                      </c:if>
                       </c:forEach>
+                    </ol>
                     </c:if>
                   </c:forEach>
-                </c:if>
-              </c:forEach>
-            </c:if>
+                </ol>
+              </c:if>
+            </c:forEach>
+            </ol>
+          </c:if>
+          </ol>
           </div>
         </div>
         <br />
-        --%>
         <div class="row">
           <div class="col-sm-5">
-            <strong>Livello di complessit&agrave;</strong></div>
+            <strong>Livello di complessit&agrave;</strong>
+          </div>
           <div class="col-sm-5">
-            <c:out value="${actInstance.stato.informativa}" />
+          <c:forTokens var="complessita" items="${complexityValues}" delims="," begin="${complexityIdAsIndex}" end="${complexityIdAsIndex}">
+            <c:out value="${complessita}" />
+          </c:forTokens>
           </div>
         </div>
         <br />
@@ -159,7 +196,7 @@
         </div>
         <br />
         <a href="${act}${requestScope.progetto.id}" id='btn-close' class="btn btnNav">Chiudi</a>
-        <input type="button" class="btn btn-primary" name="elimina" value="Elimina" onclick="alert('funzionalit&agrave; in corso di sviluppo')"> <!-- onclick="selectionDelete()" -->
+        <input type="submit" class="btn btn-primary" id="del-act" name="" value="Elimina" />
     </form>
 </c:catch>
 <c:out value="${exception}" />
