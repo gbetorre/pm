@@ -200,7 +200,7 @@
       </c:when>
       <c:otherwise>
       <div class="alert alert-danger">
-        <p>Non &egrave; stata trovata alcuna attivit&agrave; associata alla WBS &quot;${wbsNome}&quot;.</p>
+        <p>Non &egrave; stata trovata alcuna attivit&agrave; associata <em>direttamente</em> alla WBS &quot;${wbsNome}&quot;.</p>
       </div>
       </c:otherwise>
     </c:choose>
