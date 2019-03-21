@@ -114,16 +114,7 @@
           </select>
         </div>
       </div>
-      <%-- 
-      <div class="row">
-        <div class="col-sm-5">&nbsp;</div>
-        <div class="col-sm-5">
-          <input type="button" id="show-extrainfo" class="btn extrainfo" value="Altre informazioni" onclick="modify()">
-        </div>
-      </div>
-      --%>
       <hr class="separatore" />
-        <%-- <div class="additional-fields"> --%>
         <div class="row">
           <div class="col-sm-5 mandatory">Nome attivit&agrave; <sup>&#10039;</sup></div>
           <div class="col-sm-5">
@@ -167,33 +158,10 @@
           </div>
         </div>
         <br />
-        <%-- 
-        <div class="row">
-          <div class="col-sm-5">Giorni/Uomo previsti</div>
-          <div class="col-sm-5">
-            <input type="text" class="form-control" id="act-guprevisti" name="act-guprevisti" value="${actDays}" readonly>
-          </div>
-        </div>
-        <br />
-        <div class="row">
-          <div class="col-sm-5">Giorni/Uomo effettivi</div>
-          <div class="col-sm-5">
-            <input type="text" class="form-control" id="act-gueffettivi" name="act-gueffettivi" value="${elapsedDays}" readonly>
-          </div>
-        </div>
-        <br />
-        <div class="row">
-          <div class="col-sm-5">Giorni/Uomo rimanenti</div>
-          <div class="col-sm-5">
-            <input type="text" class="form-control" id="act-gurimanenti" name="act-gurimanenti" value="${remainingDays}" readonly>
-          </div>
-        </div>
-        <br />
-        --%>
         <div class="row">
           <div class="col-sm-5">Note di avanzamento</div>
           <div class="col-sm-5">
-            <textarea class="form-control" name="act-progress" class="form-control" aria-label="With textarea" maxlength="8104" readonly> <%--readonly--%><c:out value="${actNotes}" escapeXml="false" /></textarea>
+            <textarea class="form-control" name="act-progress" class="form-control" aria-label="With textarea" maxlength="8104" readonly><c:out value="${actNotes}" escapeXml="false" /></textarea>
             <div class="charNum"></div>
           </div>
         </div>
@@ -201,7 +169,7 @@
         <div class="row">
           <div class="col-sm-5">Risultati raggiunti</div>
           <div class="col-sm-5">
-            <textarea class="form-control" name="act-result" class="form-control" aria-label="With textarea" maxlength="1024" readonly> <%--readonly--%><c:out value="${actResult}" escapeXml="false" /></textarea>
+            <textarea class="form-control" name="act-result" class="form-control" aria-label="With textarea" maxlength="1024" readonly><c:out value="${actResult}" escapeXml="false" /></textarea>
             <div class="charNum"></div>
           </div>
         </div>
@@ -243,27 +211,9 @@
           </div>
         </div>
         <br />
-        <%-- 
-        <div class="row">
-          <div class="col-sm-5 mandatory">Stato attivit&agrave; <sup>&#10039;</sup></div>
-          <div class="col-sm-5">
-            <select class="form-control" id="act-status" name="act-status" disabled>
-            <c:forEach var="status" items="${requestScope.statiAttivita}" varStatus="loop">
-              <c:set var="selected" value="" scope="page" />
-              <c:if test="${status.id eq state}">
-                <c:set var="selected" value="selected" scope="page" />
-              </c:if> 
-              <option value="${status.id}" ${selected}>${status.nome}</option>
-            </c:forEach>
-            </select>
-          </div>
-        </div>
-        <br />
-        --%>
         <a href="<c:out value= "${act}${requestScope.progetto.id}" escapeXml="false" />" id='btn-close' class="btn btnNav">Chiudi</a>
         <input type="button" class="btn btn-primary" name="modifica" value="Modifica" onclick="modify();">
         <%@ include file="subPanel.jspf" %>
-    <%--</div> --%>
     </form>
 </c:catch>
 <c:out value="${exception}" />
@@ -271,6 +221,7 @@
     var offsetcharacter = 5;
     // Adesso
     var rightNow = new Date();
+    var dayOfMonth = rightNow.getUTCDate();
     // Millisecondi trascorsi da UNIX_EPOCH
     var elapsedTimeFromUnixEpochAsMillisec = Date.now();
     // Secondi trascorsi da UNIX_EPOCH
@@ -282,7 +233,7 @@
     // Giorni trascorsi da UNIX_EPOCH
     var elapsedDays = Math.round(elapsedHours/24);
     // Mesi trascorsi da UNIX_EPOCH
-    var elapsedMonths = Math.round(elapsedDays/30);
+    //var elapsedMonths = Math.round(elapsedDays/30);
     // Data a partire dalla quale sono iniziati i progetti di eccellenza
     //var start = new Date('2018-01-01');
     // Millisecondi trascorsi da UNIX_EPOCH fino a start progetti
@@ -321,14 +272,14 @@
         //  number: true
         //}
         'act-datainiziovera': {
-          dateITA: true,
+          dateITA: true
           //maxDate: elapsedDays
         }
 
       }, 
       messages: {
         'act-role': "Scegliere una competenza (ruolo) per la persona selezionata",
-        'act-name': "Inserire il nome dell\'attivita\'" + elapsedDays + $("#act-datainiziovera").val(),
+        'act-name': "Inserire il nome dell\'attivita\'" + "--" + dayOfMonth + "--" + elapsedDays + $("#act-datainiziovera").val(),
         'act-datainizio': "Inserire una data di inizio valida",
         'act-datafine': "Inserire una data di fine valida",
         'act-datainiziovera': "La data inserita deve essere in formato italiano e non pu&ograve; essere maggiore della data odierna (" + todayAsString + ")",
@@ -354,17 +305,6 @@
         }
       });
     });
-    
-    <%--
-    $('.extrainfo').click(function() {
-      var $body = $('.additional-fields');
-      if ($body.is(':hidden')) {
-        $body.show();
-      } else {
-        //$body.show();
-      }
-    });
-    --%>
     
     $("#act-people").change(function () {
       switch($(this).val()) {
