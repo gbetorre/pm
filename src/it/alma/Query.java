@@ -162,6 +162,10 @@ public interface Query extends Serializable {
      */
     public static final String DELETE_PART                      = "del";
     /**
+     * <p>Costante per il parametro identificante la parte di sospensione di una attivit&agrave;.</p>
+     */
+    public static final String SUSPEND_PART                     = "sus";
+    /**
      * <p>Costante per il parametro identificante la pagina dei monitoraggio.</p>
      */
     public static final String PART_MONITOR                     = "";
@@ -263,6 +267,22 @@ public interface Query extends Serializable {
      * pu&ograve; dipendere da varie incongruenze
      */
     public static final int STATO_INCONSISTENTE = 10;
+    /**
+     * Identificativo di stato attivit&agrave; messa esplicitamente in
+     * stato 'sospeso' dall'utente che ha diritti di scrittura sul progetto.
+     * A differenza delle attivit&agrave; eliminate, un' attivit&agrave;
+     * in stato di sospensione viene visualizzata negli elenchi di  
+     * attivit&agrave; ma non nei report.
+     */
+    public static final int SOSPESA = 11;
+    /**
+     * Identificativo di stato attivit&agrave; messa esplicitamente in
+     * stato 'eliminato' dall'utente che ha diritti di scrittura sul progetto.
+     * Mentre le attivit&agrave; sospese si vedono negli elenchi ma non
+     * nei report, le  attivit&agrave; cancellate non escono in nessuna
+     * selezione.
+     */
+    public static final int ELIMINATA = 12;
     /**
      * Identificativo di stato attivit&agrave; chiusa nei periodi
      * di avanzamento progetto antecedenti all'ultimo terminato
@@ -1512,6 +1532,23 @@ public interface Query extends Serializable {
             "   ,       autoreultimamodifica = ?" +
             "   WHERE id = ?";
 
+    /**
+     * <p>Aggiorna lo stato di una attivit&agrave;, 
+     * identificata tramite id, passato come parametro.</p> 
+     * <p>Utile per effettuare aggiornamenti <em>a posteriori</em> rispetto
+     * allo stato calcolato all'atto dell'inserimento, tipicamente per 
+     * impostare l'attivit&agrave; come sospesa o eliminata, perch&eacute;
+     * questi non sono stati calcolabili ma dipendono dall'input dell'utente,
+     * dato in una fase successiva a quella dell'inserimento.</p> 
+     */
+    public String UPDATE_ACTIVITY_STATE = 
+            "UPDATE attivita" +
+            "   SET id_stato = ?" +
+            "   ,   dataultimamodifica = ?" +
+            "   ,   oraultimamodifica = ?" +
+            "   ,   autoreultimamodifica = ?" +
+            "   WHERE id = ?";
+    
     /**
      * <p>Query per aggiornamento di persona su una attivit&agrave;.</p>
      */
