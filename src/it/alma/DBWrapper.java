@@ -55,6 +55,8 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+import org.apache.commons.logging.Log;
+
 import it.alma.bean.ActivityBean;
 import it.alma.bean.BeanUtil;
 import it.alma.bean.CodeBean;
@@ -174,14 +176,16 @@ public class DBWrapper implements Query {
             }
             return commands;
         } catch (SQLException sqle) {
-            throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            throw new WebStorageException(FOR_NAME + sqle.getMessage(), sqle);
         } finally {
             try {
                 con.close();
             } catch (NullPointerException npe) {
-                throw new WebStorageException(FOR_NAME + npe.getMessage());
+                String msg = "Connessione al database in stato inconsistente!\nAttenzione: la connessione vale " + con + "\n";
+                LOG.severe(msg);
+                throw new WebStorageException(FOR_NAME + msg + npe.getMessage(), npe);
             } catch (SQLException sqle) {
-                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+                throw new WebStorageException(FOR_NAME + sqle.getMessage(), sqle);
             }
         }
     }
@@ -1962,6 +1966,7 @@ public class DBWrapper implements Query {
                     rs2 = pst.executeQuery();
                     // Valorizza bisnonno di L0
                     if (rs2.next()) {
+                    // Sono stati trovati padre, nonno, bisnonno
                         wbsF = new WbsBean();
                         BeanUtil.populate(wbsF, rs2);
                         pst = null;
@@ -1971,42 +1976,68 @@ public class DBWrapper implements Query {
                         rs3 = pst.executeQuery();
                         // Valorizza trisavolo di L0
                         if (rs3.next()) {
+                        // Sono stati trovati padre, nonno, bisnonno e trisavolo
                             wbsP = new WbsBean();
                             BeanUtil.populate(wbsP, rs3);
-                            // Sono stati trovati padre, nonno e trisavolo
+                            // PPN va su PN
                             wbsFiglie = new Vector<WbsBean>();
                             wbsFiglie.add(wbsPPN);
                             wbsPN.setWbsFiglie(wbsFiglie);
+                            // PN va su N
+                            wbsFiglie = null;
                             wbsFiglie = new Vector<WbsBean>();
                             wbsFiglie.add(wbsPN);
                             wbsN.setWbsFiglie(wbsFiglie);
+                            // N va su F
+                            wbsFiglie = null;
                             wbsFiglie = new Vector<WbsBean>();
                             wbsFiglie.add(wbsN);
+                            wbsF.setWbsFiglie(wbsFiglie);
+                            // F va su P
+                            wbsFiglie = null;
+                            wbsFiglie = new Vector<WbsBean>();
+                            wbsFiglie.add(wbsF);
                             wbsP.setWbsFiglie(wbsFiglie);
-                            wbs = wbsP;
-                        }   
-                    } else {
-                        // Sono stati trovati padre e nonno
+                            // P diventa WBS
+                            return wbsP;
+                        }
+                        // PPN va su PN
                         wbsFiglie = new Vector<WbsBean>();
                         wbsFiglie.add(wbsPPN);
                         wbsPN.setWbsFiglie(wbsFiglie);
+                        // PN va su N
+                        wbsFiglie = null;
                         wbsFiglie = new Vector<WbsBean>();
                         wbsFiglie.add(wbsPN);
                         wbsN.setWbsFiglie(wbsFiglie);
-                        wbs = wbsN;
+                        // N va su F
+                        wbsFiglie = null;
+                        wbsFiglie = new Vector<WbsBean>();
+                        wbsFiglie.add(wbsN);
+                        wbsF.setWbsFiglie(wbsFiglie);
+                        // F diventa WBS
+                        return wbsF;
                     }
-                } else {
-                    // E' stato trovato solo un padre
-                    wbs = wbsPN;
+                    // PPN va su PN
                     wbsFiglie = new Vector<WbsBean>();
                     wbsFiglie.add(wbsPPN);
-                    wbs.setWbsFiglie(wbsFiglie);
+                    wbsPN.setWbsFiglie(wbsFiglie);
+                    // PN va su N
+                    wbsFiglie = null;
+                    wbsFiglie = new Vector<WbsBean>();
+                    wbsFiglie.add(wbsPN);
+                    wbsN.setWbsFiglie(wbsFiglie);
+                    // N diventa WBS
+                    return wbsN;
                 }
-            } else {
-                // Non è stato trovato nemmeno un padre
-                wbs = wbsPPN;
+                // PPN va su PN
+                wbsFiglie = new Vector<WbsBean>();
+                wbsFiglie.add(wbsPPN);
+                wbsPN.setWbsFiglie(wbsFiglie);
+                // PN diventa WBS
+                return wbsPN;
             }
-           return wbs;
+            return wbsPPN;           
         } catch (AttributoNonValorizzatoException anve) {
             String msg = FOR_NAME + "id WBS padre non valorizzato; problema nella query delle WBS figlie.\n";
             LOG.severe(msg); 
@@ -2802,10 +2833,10 @@ public class DBWrapper implements Query {
                 pst1.executeUpdate();
                 // End: <==
                 con.commit();
-            } catch (CommandException ce) {
-                String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di date.\n" + ce.getMessage();
+            } catch (WebStorageException wse) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di date.\n" + wse.getMessage();
                 LOG.severe(msg);
-                throw new WebStorageException(msg, ce);
+                throw new WebStorageException(msg, wse);
             } catch (NumberFormatException nfe) {
                 String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di interi.\n" + nfe.getMessage();
                 LOG.severe(msg);
@@ -2839,6 +2870,116 @@ public class DBWrapper implements Query {
             String msg = FOR_NAME + "Oggetto ActivityBean non valorizzato; problema nel codice SQL.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Imposta un'attivit&agrave; in uno stato il cui identificativo 
+     * viene desunto dal valore di un parametro di navigazione 
+     * passato come argomento.</p>
+     * 
+     * @param idProj    identificativo del progetto nell'ambito del quale operare 
+     * @param idAct     identificativo dell'attivita' da aggiornare
+     * @param part      parametro di navigazione in base a cui si identifica se bisogna aggiornare l'attivita' in uno stato sospeso o eliminato
+     * @param user      persona corrispondente all'utente loggato
+     * @param projectsWritableByUser lista di progetti su cui l'utente corrente ha il diritto di scrivere
+     * @param userWritableActivitiesByProjectId    lista di attivita' su cui l'utente corrente ha il diritto di scrivere
+     * @throws WebStorageException se si verifica un problema in sql, nel recupero di valori, nella conversione di tipi o in qualche puntamento
+     */
+    @SuppressWarnings("null")
+    public void updateActivityState(int idProj,
+                                    int idAct,
+                                    String part,
+                                    PersonBean user,
+                                    Vector<ProjectBean> projectsWritableByUser, 
+                                    HashMap<Integer, Vector<ActivityBean>> userWritableActivitiesByProjectId) 
+                             throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        try {
+            // Ottiene la connessione
+            con = pol_manager.getConnection();
+            /* ===  Controlla anzitutto che l'id progetto sulla querystring === *
+             * ===  corrisponda a un id dei progetti scrivibili dall'utente === */
+            try {
+                if (!userCanWrite(idProj, projectsWritableByUser)) {
+                    String msg = FOR_NAME + "Attenzione: l'utente ha tentato di modificare un\'attivita\' legata ad un progetto su cui non ha i diritti di scrittura!\n";
+                    LOG.severe(msg + "Problema durante il tentativo di inserire una nuova attivita\'.\n");
+                    throw new WebStorageException(msg);
+                }
+            } catch (WebStorageException wse) {
+                String msg = FOR_NAME + "Problema nel tentativo di capire se l\'utente ha o non ha i diritti di scrittura!\n";
+                LOG.severe(msg + "Problema durante il tentativo di inserire una nuova attivita\'.\n");
+                throw new WebStorageException(msg);
+            }
+            /* ===   Controlla che l'id attivita' passato dalla form        === * 
+             * ===   corrisponda a un id di attività scrivibili dall'utente === */
+            // Ottiene la lista di attività scrivibili per il progetto in esame
+            Vector<ActivityBean> writableActivities = userWritableActivitiesByProjectId.get(new Integer(idProj));
+            // Ottiene la cardinalità della lista delle atività precaricate 
+            // quando l'utente si &egrave; loggato, una delle quali deve 
+            // corrispondere all'attività da modificare
+            int lastIndexOf = writableActivities.size();
+            int index = 0;
+            do {
+                ActivityBean aw = writableActivities.elementAt(index);
+                // Se un id di attività scrivibili è uguale all'id sulla querystring è tutto ok 
+                if (aw.getId() == idAct) {
+                    break;
+                }
+                index++;
+            } while (index < lastIndexOf);
+            // In caso contrario, ovvero se abbiamo raggiunto la fine del Vector senza trovare l'id sulla querystring, sono guai...
+            if (index == lastIndexOf) {
+                String msg = FOR_NAME + "Attenzione: l'utente ha tentato di modificare un\'attivita\' su cui non ha i diritti di scrittura!\n";
+                LOG.severe(msg + "Problema durante il tentativo di inserire una nuova attivita\'.\n");
+                throw new WebStorageException(msg);
+            }            
+            /* === Se siamo qui vuol dire che l'id dell'attivita'   === * 
+             * === su cui si deve modificare informazioni e' una    === * 
+             * === attivita' scrivibile dall'utente                 === */
+            int idState = part.equals(DELETE_PART) ? ELIMINATA : SOSPESA; 
+            // Begin: ==>
+            con = pol_manager.getConnection();
+            con.setAutoCommit(false);
+            pst = con.prepareStatement(UPDATE_ACTIVITY_STATE);
+            pst.clearParameters();
+            pst.setInt(1, idState);
+            // Campi automatici: id utente, ora ultima modifica, data ultima modifica
+            pst.setDate(2, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+            pst.setTime(3, Utils.getCurrentTime());   // non accetta una Stringe, ma un oggetto java.sql.Time
+            pst.setString(4, user.getCognome() + String.valueOf(Utils.BLANK_SPACE) + user.getNome());
+            // Identificativo attività da aggiornare
+            pst.setInt(5, idAct);
+            pst.executeUpdate();
+            con.commit();
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Probabile problema nel recupero dei dati dell\'autore ultima modifica.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna lo stato dell\'attivita\'.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } catch (NumberFormatException nfe) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna lo stato dell\'attivita\'.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + nfe.getMessage(), nfe);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna lo stato dell\'attivita\'.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + npe.getMessage(), npe);
         } finally {
             try {
                 con.close();
@@ -3562,6 +3703,7 @@ public class DBWrapper implements Query {
      * @param idDipart  identificativo del dipartimento al quale appartiene la WBS da eliminare
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
+    @SuppressWarnings({ "static-method", "null" })
     public void deleteWbs(int idDipart, 
                           int idWbs)
                    throws WebStorageException {
@@ -3624,6 +3766,7 @@ public class DBWrapper implements Query {
      * @param idDipart  identificativo del dipartimento al quale appartiene l'attivita' da eliminare
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
+    @SuppressWarnings({ "static-method", "null" })
     public void deleteActivity(PersonBean user,
                                int idDipart, 
                                int idActivity)
