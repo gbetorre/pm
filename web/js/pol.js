@@ -65,19 +65,10 @@ function selectionEdit(element) {
   };
 }
 
-function selectionDelete(element) {
+function selectionDelete(msg) {
   if(!$("input[type='radio']").is(":checked")) {
-    alert("E' necessario selezionare una " + element + " da eliminare!");
+    alert(msg);
     return false;
-    //$('<div></div>').html("E' necessario selezionare una " + element + " da modificare!").dialog({
-    //  title: "Attenzione!!!",
-    //  resizable: false,
-    //  buttons: {
-    //    'Ok': function()  {
-    //        $( this ).dialog( 'close' );
-    //    }
-    //  }
-    //});
   };
 }
 
