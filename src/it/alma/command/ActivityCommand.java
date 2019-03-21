@@ -304,13 +304,12 @@ public class ActivityCommand extends ItemBean implements Command {
                             loadParams(part, parser, params);
                             db.updateActivity(idPrj, user, writablePrj, userWritableActivitiesByProjectId, params.get(Query.MODIFY_PART));
                             redirect = "q=" + Query.PART_ACTIVITY + "&id=" + idPrj;
-                        } else if (part.equalsIgnoreCase(Query.DELETE_PART)) {
-                            // Deve eseguire una eliminazione
+                        } else if (part.equalsIgnoreCase(Query.DELETE_PART) || part.equalsIgnoreCase(Query.SUSPEND_PART)) {
+                            // Deve eseguire una eliminazione o una sospensione
                             /* ************************************************ *
-                             *              DELETE Single Activity              *
+                             *        SUSPEND or DELETE Single Activity         *
                              * ************************************************ */
-                            Integer idActToDel = Integer.parseInt(parser.getStringParameter("act-select",  Utils.VOID_STRING));
-                            db.deleteActivity(user, runtimeProject.getIdDipart(), idActToDel);
+                            db.updateActivityState(idPrj, idAct, part, user, writablePrj, userWritableActivitiesByProjectId);
                             redirect = "q=" + Query.PART_ACTIVITY + "&id=" + idPrj;
                         }
                         // Aggiorna le attività dell'utente in sessione
@@ -325,17 +324,25 @@ public class ActivityCommand extends ItemBean implements Command {
                          *                 SELECT Activity Part                 *
                          * **************************************************** */
                         if (part.equals(Query.PART_PROJECT_CHARTER_MILESTONE)) {
-                            // Recupera le sole Milestones
+                            /* ************************************************ *
+                             *            Recupera le sole Milestones           *
+                             * ************************************************ */
                             vActivities = db.getActivities(idPrj, user, Utils.convert(Utils.getUnixEpoch()), Query.GET_MILESTONES_ONLY, !Query.GET_ALL);
-                        // Effettua le selezioni che servono all'inserimento di una nuova attività
                         } else if (part.equals(Query.ADD_ACTIVITY_TO_PROJECT)) {
+                            /* ************************************************ *
+                             *        Effettua le selezioni che servono         * 
+                             *      all'inserimento di una nuova attivita'      *
+                             * ************************************************ */
                             isHeader = isFooter = false;
                             candidates = db.getPeople(runtimeProject.getId());
                             workPackage = db.getWbs(runtimeProject.getId(), Query.WBS_WP_ONLY); 
                             complexity = HomePageCommand.getComplessita();
                             states = HomePageCommand.getStatiAttivita();
-                        // Effettua le selezioni che servono all'aggiornamento di una data attività    
                         } else if (part.equals(Query.MODIFY_PART)) {
+                            /* ************************************************ *
+                             *        Effettua le selezioni che servono         * 
+                             *      all'aggiornamento di una data attivita'     *
+                             * ************************************************ */
                             // Se siamo qui (p=mod) e l'id dell'attività non è significativo c'è qualcosa che non va...
                             if (idAct == Utils.DEFAULT_ID) {
                                 HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
@@ -352,7 +359,12 @@ public class ActivityCommand extends ItemBean implements Command {
                             states = HomePageCommand.getStatiAttivita();
                         // Effettua le selezioni che servono all'eliminazione di una data attività    
                         } else if (part.equals(Query.DELETE_PART)) {
-                            // Se siamo qui (p=del) e l'id dell'attività non è significativo c'è qualcosa che non va...
+                            /* ************************************************ *
+                             *        Effettua le selezioni che servono         * 
+                             *  all'aggiornamento in stato eliminato o sospeso  *
+                             *          di una attivita' esistente              *
+                             * ************************************************ */
+                            // Se siamo qui (p=del o p=sus) e l'id dell'attività non è significativo c'è qualcosa che non va...
                             if (idAct == Utils.DEFAULT_ID) {
                                 HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
                                 ses.invalidate();
@@ -360,9 +372,10 @@ public class ActivityCommand extends ItemBean implements Command {
                                 LOG.severe(msg + "E\' presente il parametro \'p=del\' ma non un valore \'ida\' - cioe\' id attivita\' - significativo!\n");
                                 throw new CommandException("Attenzione: indirizzo richiesto non valido!\n");
                             }
-                            // Effettua le selezioni che servono all'aggiornamento di una data attività
+                            // Effettua le selezioni che servono all'eliminazione di una data attività
                             isHeader = isFooter = false;
                             activity = db.getActivity(idPrj, idAct, user);
+                            /*
                             CodeBean stato = new CodeBean();
                             int index = activity.getIdStato();
                             if (index == 1 || index == 2) {
@@ -370,7 +383,7 @@ public class ActivityCommand extends ItemBean implements Command {
                             }
                             stato.setNome(Query.STATI_PROGETTO[index]);
                             stato.setInformativa(Query.LIVELLI_RISCHIO[activity.getIdComplessita() - 1]);
-                            activity.setStato(stato);
+                            activity.setStato(stato);*/
                             wbs = db.getWbsHierarchyByOffspring(idPrj, activity.getIdWbs());
                         } 
                         fileJspT = nomeFile.get(part);
@@ -404,7 +417,7 @@ public class ActivityCommand extends ItemBean implements Command {
             LOG.severe(msg);
             throw new CommandException(msg + anve.getMessage(), anve);
         } catch (WebStorageException wse) {
-            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di valori dal db.\n";
+            String msg = FOR_NAME + "Si e\' verificato un problema nel codice che effettua il recupero di valori dal db, a livello di SQL o nel calcolo di valori.\n";
             LOG.severe(msg);
             throw new CommandException(msg + wse.getMessage(), wse);
         } catch (IllegalStateException ise) {
@@ -533,121 +546,6 @@ public class ActivityCommand extends ItemBean implements Command {
             formParams.put(Query.ADD_ACTIVITY_TO_PROJECT, act);
             formParams.put(Query.MODIFY_PART, act);
         }
-    }
-    
-    
-    /**
-     * <p>Dato in input un Vector di attivit&agrave; passato come argomento,
-     * ne calcola per ciascuna lo stato e restituisce un Vector analogo
-     * a quello ricevuto, con le attivit&agrave; corredate ciascuna del
-     * proprio stato.</p>
-     * <p>Implementa un algoritmo che calcola tale stato e lo setta in
-     * ciascuna attivit&agrave;.</p>
-     * 
-     * @param activitiesWithoutState
-     * @param rightNow
-     * @return
-     * @throws CommandException
-     */
-    private static Vector<ActivityBean> computeActivitiesState(Vector<ActivityBean> activitiesWithoutState,
-                                                              Date rightNow) 
-                                                       throws CommandException {
-        // ID corrispondenti ai veri stati attività impostati dal TL
-        final int APERTO = 1;       // Un'attività APERTA è un'attività avviata ma non ancora iniziata, cioè non vi è stato imputato lavoro
-        final int IN_PROGRESS = 2;  // Un'attività IN PROGRESS è un'attività avviata su cui è stato imputato lavoro (giorni uomo o altro)
-        final int CHIUSO = 3;       // Un'attività CHIUSA è un'attività conclusa, su cui non è più possibile allocare GU o risorse
-        // ID aggiuntivi
-        final int IN_REALIZZAZIONE = 4;
-        final int IN_RITARDO = 5;
-        final int CHIUSO_PRIMA = 6;
-        final int CHIUSO_DOPO = 7;
-        final int STATO_INCONSISTENTE = 10;
-        Vector<ActivityBean> vc = null;
-        try {
-            int cardinality = activitiesWithoutState.size();
-            vc = new Vector<ActivityBean>(cardinality);
-            for (int i = 0; i < cardinality; i++) {
-                ActivityBean act = activitiesWithoutState.elementAt(i);
-                CodeBean stato = new CodeBean();
-                // APERTO
-                if (act.getIdStato() == APERTO) {
-                    if ((act.getDataFine().after(rightNow) || act.getDataFine().equals(rightNow)) &&
-                        act.getDataFineEffettiva() == null) {
-                        stato.setId(APERTO);
-                        stato.setOrdinale(APERTO);
-                        stato.setInformativa("Aperta");
-                    }
-                    // Intercetta attività che avrebbero dovuto essere finite ma che sono ancora in stato "APERTO"
-                    else if (act.getDataFine().before(rightNow) &&
-                             act.getDataFineEffettiva() == null) {
-                        stato.setId(IN_RITARDO);
-                        stato.setOrdinale(APERTO);
-                        stato.setInformativa("In ritardo");
-                    }
-                    // Intercetta attività con data di fine effettiva nel passato e quindi avrebbero dovuto avere stato "CHIUSO" ma che sono ancora in stato "APERTO"
-                    else if (act.getDataFineEffettiva() != null && 
-                             act.getDataFineEffettiva().before(rightNow)) {
-                        stato.setId(STATO_INCONSISTENTE);
-                        stato.setOrdinale(APERTO);
-                        stato.setInformativa("Attivit&agrave; in stato inconsistente");
-                    }
-                }
-                // IN PROGRESS
-                else if (act.getIdStato() == IN_PROGRESS) {
-                    if ((act.getDataFine().after(rightNow) || act.getDataFine().equals(rightNow)) &&
-                        act.getDataFineEffettiva() == null) {
-                        stato.setId(IN_REALIZZAZIONE);
-                        stato.setOrdinale(IN_PROGRESS);
-                        stato.setInformativa("In realizzazione");
-                    }
-                    // Intercetta attività che avrebbero dovuto essere finite ma che sono ancora in stato "IN PROGRESS"
-                    else if (act.getDataFine().before(rightNow) &&
-                             act.getDataFineEffettiva() == null ) {
-                        stato.setId(IN_RITARDO);
-                        stato.setOrdinale(IN_PROGRESS);
-                        stato.setInformativa("In ritardo");
-                    }
-                }
-                // CHIUSO
-                else if (act.getIdStato() == CHIUSO) {
-                    // Per poter essere considerata chiusa un'attività deve avere data fine effettiva <> null
-                    if (act.getDataFineEffettiva() == null) {
-                        stato.setId(STATO_INCONSISTENTE);
-                        stato.setOrdinale(CHIUSO);
-                        stato.setInformativa("Attivit&agrave; in stato inconsistente");
-                    } else {
-                        if (act.getDataFineEffettiva().before(act.getDataFine()) &&
-                            act.getDataFineEffettiva().before(rightNow)) {
-                            stato.setId(CHIUSO_PRIMA);
-                            stato.setOrdinale(CHIUSO);
-                            stato.setInformativa("Chiusa in anticipo");
-                        }
-                        // Intercetta attività che sono finite dopo la data prevista
-                        else if (act.getDataFineEffettiva().after(act.getDataFine()) &&
-                                 act.getDataFineEffettiva().before(rightNow)) {
-                            stato.setId(CHIUSO_DOPO);
-                            stato.setOrdinale(CHIUSO);
-                            stato.setInformativa("Chiusa in ritardo");
-                        }
-                    }
-                }    
-                act.setStato(stato);
-                vc.add(act);
-            }
-        } catch (AttributoNonValorizzatoException anve) {
-            String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio del bean, probabilmente  un id.\n";
-            LOG.severe(msg);
-            throw new CommandException(msg + anve.getMessage(), anve);
-        } catch (NullPointerException npe) {
-            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n";
-            LOG.severe(msg);
-            throw new CommandException(msg + npe.getMessage(), npe);
-        } catch (Exception e) {
-            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
-            LOG.severe(msg);
-            throw new CommandException(msg + e.getMessage(), e);
-        }
-        return vc;
     }
     
 }
