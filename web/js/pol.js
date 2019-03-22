@@ -42,12 +42,42 @@ jQuery.validator.addMethod("greaterThan",
     var monthFirstDate = firstDate[1];
     var yearFirstDate = firstDate[2];
     if (!/Invalid|NaN/.test(new Date(yearFinalDate, monthFinalDate, dayFinalDate))) {
-      return new Date(yearFinalDate, monthFinalDate, dayFinalDate) > new Date(yearFirstDate, monthFirstDate, dayFirstDate);
+      return new Date(yearFinalDate, monthFinalDate - 1, dayFinalDate) > new Date(yearFirstDate, monthFirstDate - 1, dayFirstDate);
     }
     return isNaN(value) && isNaN($(params).val()) 
         || (Number(value) > Number($(params).val()));
   }, 'Must be greater than {0}.'
 );
+
+jQuery.validator.addMethod("lessThan", 
+    function (value, element, params) {
+      var finalDate = value.split('/');
+      var dayFinalDate = finalDate[0];
+      var monthFinalDate = finalDate[1];
+      var yearFinalDate = finalDate[2];
+      var runtimeDate = new Date(yearFinalDate, monthFinalDate - 1, dayFinalDate);
+      var rightNow = new Date();
+      var dayRuntimeDate = runtimeDate.getUTCDate() + 1;
+      var monthRuntimeDate = runtimeDate.getUTCMonth();
+      var yearRuntimeDate = runtimeDate.getUTCFullYear();
+      var dayCurrentDate = rightNow.getUTCDate();
+      var monthCurrentDate = rightNow.getUTCMonth();
+      var yearCurrentDate = rightNow.getUTCFullYear();
+      if (!/Invalid|NaN/.test(runtimeDate)) {
+        if (yearRuntimeDate <= yearCurrentDate) {
+          if (monthRuntimeDate <= monthCurrentDate) {
+            if (dayRuntimeDate <= dayCurrentDate) {
+              return true;
+            }
+            return false;
+          }
+          return false;
+        }
+        return false;
+      }
+      return true;
+    }, 'Must be less than {0}.'
+  );
 
 function selectionEdit(element) {
   if(!$("input[type='radio']").is(":checked")) {
