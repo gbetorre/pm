@@ -153,7 +153,7 @@
       <c:when test="${not empty wbsInstance.attivita}">
       <div class="subfields">
       <h4>Attivit&agrave; di questa WBS</h4>
-      <table class="table table-bordered table-hover ">
+      <table class="table table-bordered table-hover" id="listAct">
         <thead class="thead-light">
         <tr>
           <th scope="col">Nome attivit&agrave;</th>
@@ -179,6 +179,7 @@
               <c:out value="${act.risultatiRaggiunti}"/>
             </td>
             <td scope="row">
+              <input type="hidden" value="${act.milestone}" />
               <c:choose>
                 <c:when test="${act.milestone}">
                   <div class="form-check text-center">
@@ -204,3 +205,8 @@
       </div>
       </c:otherwise>
     </c:choose>
+    <script type="text/javascript">
+      $(document).ready(function() {
+        $('#listAct').DataTable();
+      });
+    </script>

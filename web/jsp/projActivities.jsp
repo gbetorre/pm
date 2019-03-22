@@ -6,7 +6,7 @@
     <form id="editAct_form" action="" method="post">
     <c:choose>
       <c:when test="${not empty requestScope.attivita}">
-      <table class="table table-bordered table-hover">
+      <table class="table table-bordered table-hover" id="listAct">
         <thead class="thead-light">
         <tr>
           <th scope="col" width="2%"></th>
@@ -43,7 +43,7 @@
             <td scope="row">
               <fmt:formatDate value='${act.dataFine}' pattern='dd/MM/yyyy' />
             </td>
-            <td scope="row">
+            <td class="${pageScope.stileSafari}" scope="row">
             <c:choose>
               <c:when test="${act.stato.id ne 1}">
               <a href="javascript:popupWindow('Note','popup1',true,'${act.stato.informativa}');" class="helpInfo">
@@ -56,6 +56,7 @@
             </c:choose>
             </td>
             <td scope="row">
+              <input type="hidden" value="${act.milestone}" />
               <c:choose>
                 <c:when test="${act.milestone}">
                   <div class="form-check text-center">
@@ -109,5 +110,6 @@
           $('#mod-act').attr('href', $modActUrl);
           $('#del-act').attr('href', $delActUrl);
         });
+        $('#listAct').DataTable();
       });
     </script>
