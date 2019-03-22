@@ -125,7 +125,7 @@
         <div class="row">
           <div class="col-sm-5">Descrizione dell'attivit&agrave;</div>
           <div class="col-sm-5">
-            <textarea class="form-control" name="act-descr" class="form-control" aria-label="With textarea" maxlength="8104" readonly> <%--readonly--%><c:out value="${actDescr}" escapeXml="false" /></textarea>
+            <textarea class="form-control" name="act-descr" class="form-control" aria-label="With textarea" maxlength="8104" readonly><c:out value="${actDescr}" escapeXml="false" /></textarea>
             <div class="charNum"></div>
           </div>
         </div>
@@ -229,11 +229,11 @@
     // Minuti trascorsi da UNIX_EPOCH
     var elapsedMinutes = elapsedSeconds/60;
     // Ore trascorse da UNIX_EPOCH
-    var elapsedHours = Math.round(elapsedMinutes/60);
+    var elapsedHours = elapsedMinutes/60;
     // Giorni trascorsi da UNIX_EPOCH
-    var elapsedDays = Math.round(elapsedHours/24);
+    var elapsedDays = elapsedHours/24;
     // Mesi trascorsi da UNIX_EPOCH
-    //var elapsedMonths = Math.round(elapsedDays/30);
+    var elapsedMonths = elapsedDays/30;
     // Data a partire dalla quale sono iniziati i progetti di eccellenza
     //var start = new Date('2018-01-01');
     // Millisecondi trascorsi da UNIX_EPOCH fino a start progetti
@@ -272,10 +272,13 @@
         //  number: true
         //}
         'act-datainiziovera': {
-          dateITA: true
-          //maxDate: elapsedDays
+          dateITA: true,
+          lessThan: true
+        },
+        'act-datafinevera': {
+          dateITA: true,
+          lessThan: true
         }
-
       }, 
       messages: {
         'act-role': "Scegliere una competenza (ruolo) per la persona selezionata",
@@ -283,8 +286,7 @@
         'act-datainizio': "Inserire una data di inizio valida",
         'act-datafine': "Inserire una data di fine valida",
         'act-datainiziovera': "La data inserita deve essere in formato italiano e non pu&ograve; essere maggiore della data odierna (" + todayAsString + ")",
-      //'act-datainiziovera': "La data inserita non ha il formato corretto",
-        'act-datafinevera': "La data inserita non puo essere maggiore della data odierna (" + new Date() + ")",
+        'act-datafinevera': "La data inserita deve essere in formato italiano e non pu&ograve; essere maggiore della data odierna (" + todayAsString + ")",
         'act-gueffettivi': "Inserire un valore numerico",
         'act-gurimanenti': "Inserire un valore numerico"
       },
