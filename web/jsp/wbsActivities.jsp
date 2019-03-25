@@ -5,7 +5,8 @@
     </c:forEach>
     <h4>Attivit&agrave; della WBS <c:out value="${wp.nome}" /></h4>
     <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
-      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#">WBS</a></li>
+      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${wbs}${p.id}">WBS</a></li>
+      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${grafico}${p.id}">Grafico</a></li>
       <li class="nav-item"><a class="nav-link active tabactive" data-toggle="tab" href="javascript:alert('Occorre selezionare una WBS per indicarne le attività')" id="show_act">Attività</a></li>
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${rep}${p.id}">Report</a></li>
     </ul>
@@ -13,7 +14,7 @@
     <form id="editWbsAct_form" action="#" method="post">
     <c:choose>
       <c:when test="${not empty requestScope.attivita}">
-      <table class="table table-bordered table-hover">
+      <table class="table table-bordered table-hover" id="actOnWbs">
         <thead class="thead-light">
         <tr>
           <th scope="col"></th>
@@ -40,6 +41,7 @@
               <c:out value="${act.descrizione}"/>
             </td>
             <td scope="row">
+              <input type="hidden" value="${act.milestone}" />
               <c:choose>
                 <c:when test="${act.milestone}">
                   <div class="form-check text-center">
