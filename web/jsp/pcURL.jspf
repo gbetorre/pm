@@ -83,9 +83,19 @@
   <c:param name="p" value="mod" />
   <c:param name="id" value="" />
 </c:url>
+<c:url var="delWbs" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="wbs" />
+  <c:param name="p" value="del" />
+  <c:param name="id" value="" />
+</c:url>
 <c:url var="rep" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="wbs" />
   <c:param name="p" value="rep" />
+  <c:param name="id" value="" />
+</c:url>
+<c:url var="grafico" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="wbs" />
+  <c:param name="p" value="gra" />
   <c:param name="id" value="" />
 </c:url>
 <c:url var="act" context="${initParam.appName}" value="/" scope="page">
