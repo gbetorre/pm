@@ -28,8 +28,8 @@
       </c:when>
       <c:otherwise>
         <a class="btn btn-primary" href="${addWbs}${p.id}" id="add-wbs">Aggiungi</a>
-        <a class="btn btn-primary" href="" id="mod-wbs" onclick="selectionEdit('WBS')">Modifica</a>
-        <input type="submit" class="btn btn-primary" id="del-wbs" name="" value="Elimina" />
+        <!-- <a class="btn btn-primary" href="" id="mod-wbs" onclick="selectionEdit('WBS')">Modifica</a>
+        <input type="submit" class="btn btn-primary" id="del-wbs" name="" value="Elimina" /> -->
       </c:otherwise>
       </c:choose>
     </c:when>
