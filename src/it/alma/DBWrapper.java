@@ -55,8 +55,6 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
-import org.apache.commons.logging.Log;
-
 import it.alma.bean.ActivityBean;
 import it.alma.bean.BeanUtil;
 import it.alma.bean.CodeBean;
@@ -1753,9 +1751,9 @@ public class DBWrapper implements Query {
     /**
      * <p>Restituisce un vector contenente tutte le Wbs di un dato progetto.</p>
      * 
-     * @param idProj - id del progetto di cui caricare le wbs
-     * @param getPartOfWbs - flag specificante se bisogna recuperare solo i WorkPackage, solo le WBS oppure le WBS e i Workpackage
-     * @return vectorWbs - vettore contenente tutte le Wbs di un progetto
+     * @param idProj    id del progetto di cui caricare le wbs
+     * @param getPartOfWbs flag specificante se bisogna recuperare solo i WorkPackage, solo le WBS oppure le WBS e i Workpackage
+     * @return <code>Vector&lt;WbsBean&gt;</code> - vettore contenente tutte le Wbs di un progetto
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
     @SuppressWarnings({ "null", "static-method" })
@@ -1929,9 +1927,126 @@ public class DBWrapper implements Query {
     }
     
     
+    /**
+     * <p>Restituisce un WbsBean contenente tutte le proprie wbs figlie
+     * in gerarchia.</p>
+     * 
+     * @param idProj id del progetto di cui caricare le wbs
+     * @param idWbs  id della wbs di cui si vuol caricare tutta la gerarchia
+     * @return <code>WbsBean</code> - oggetto contenente tutte la gerarchia di Wbs di un progetto
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public WbsBean getWbsHierarchyByWbs(int idProj,
+                                        int idWbs)
+                                 throws WebStorageException {
+        ResultSet rs, rs1, rs2, rs3, rs4 = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        WbsBean wbsPPN, wbsPN, wbsN, wbsF, wbsP = null;
+        Vector<WbsBean> vWbsF = new Vector<WbsBean>();
+        Vector<WbsBean> vWbsN = null;
+        Vector<WbsBean> vWbsPN = null;
+        Vector<WbsBean> vWbsPPN = null;
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_WBS);
+            pst.clearParameters();
+            pst.setInt(1, idProj);
+            pst.setInt(2, idWbs);
+            rs = pst.executeQuery();
+            // Valorizza lista padri
+            if (rs.next()) {
+                wbsP = new WbsBean();
+                BeanUtil.populate(wbsP, rs);
+                vWbsF = new Vector<WbsBean>();
+                pst = null;
+                pst = con.prepareStatement(GET_WBS_FIGLIE);
+                pst.clearParameters();
+                pst.setInt(1, idProj);
+                pst.setInt(2, wbsP.getId());
+                rs1 = pst.executeQuery();
+                // Valorizza lista figli
+                while (rs1.next()) {
+                    wbsF = new WbsBean();
+                    BeanUtil.populate(wbsF, rs1);
+                    wbsF.setWbsPadre(wbsP);
+                    vWbsN = new Vector<WbsBean>();
+                    pst = null;
+                    pst = con.prepareStatement(GET_WBS_FIGLIE);
+                    pst.clearParameters();
+                    pst.setInt(1, idProj);
+                    pst.setInt(2, wbsF.getId());
+                    rs2 = pst.executeQuery();
+                    // Valorizza lista nipoti
+                    while (rs2.next()) {
+                        wbsN = new WbsBean();
+                        BeanUtil.populate(wbsN, rs2);
+                        wbsN.setWbsPadre(wbsF);
+                        vWbsPN = new Vector<WbsBean>();
+                        pst = null;
+                        pst = con.prepareStatement(GET_WBS_FIGLIE);
+                        pst.clearParameters();
+                        pst.setInt(1, idProj);
+                        pst.setInt(2, wbsN.getId());
+                        rs3 = pst.executeQuery();
+                        // Valorizza lista pronipoti
+                        while (rs3.next()) {
+                            wbsPN = new WbsBean();
+                            BeanUtil.populate(wbsPN, rs3);
+                            wbsPN.setWbsPadre(wbsN);
+                            vWbsPPN = new Vector<WbsBean>();
+                            pst = null;
+                            pst = con.prepareStatement(GET_WBS_FIGLIE);
+                            pst.clearParameters();
+                            pst.setInt(1, idProj);
+                            pst.setInt(2, wbsPN.getId());
+                            rs4 = pst.executeQuery();
+                            // Valorizza lista pronipoti
+                            while (rs4.next()) {
+                                wbsPPN = new WbsBean();
+                                BeanUtil.populate(wbsPPN, rs4);
+                                wbsPPN.setWbsPadre(wbsPN);
+                                vWbsPPN.add(wbsPPN);
+                            }
+                            wbsPN.setWbsFiglie(vWbsPPN);
+                            vWbsPN.add(wbsPN);
+                        }
+                        wbsN.setWbsFiglie(vWbsPN);
+                        vWbsN.add(wbsN);
+                    }
+                    wbsF.setWbsFiglie(vWbsN);
+                    vWbsF.add(wbsF);
+                }
+                wbsP.setWbsFiglie(vWbsF);
+            }
+            return wbsP;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "id WBS padre non valorizzato; problema nella query delle WBS figlie.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        }  catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    // TODO: commento
+    @SuppressWarnings("null")
     public WbsBean getWbsHierarchyByOffspring(int idProj,
-                                                      int idWbs) 
-                                               throws WebStorageException {
+                                              int idWbs) 
+                                       throws WebStorageException {
         Connection con = null;
         PreparedStatement pst = null;
         ResultSet rs, rs1, rs2, rs3 = null;
@@ -2111,11 +2226,15 @@ public class DBWrapper implements Query {
        
     
     /**
+     * <p>Restituisce una lista formata dai possibili valori di 
+     * enumerativi dinamici, interrogati in funzione di una query SQL
+     * passata come argomento.</p> 
      * 
-     * @param query 
-     * @return 
-     * @throws WebStorageException 
+     * @param query stringa SQL contenente le indicazioni per estrarre le informazioni relative ai valori 
+     * @return <code>LinkedList&lt;CodeBean&gt;</code> - lista di bean contenente i valori estratti dall'enumerativo selezionato
+     * @throws WebStorageException se si verifica un problema SQL o in qualche tipo di puntamento
      */
+    @SuppressWarnings({ "static-method", "null" })
     public LinkedList<CodeBean> getStati(String query)
                                   throws WebStorageException {
         ResultSet rs = null;
