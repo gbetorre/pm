@@ -29,6 +29,7 @@
     <script src="<c:out value="${initParam.urlDirectoryScript}" />jquery/plugin/jquery.textarea_autosize.js"></script>
     <!-- <script src="<c:out value="${initParam.urlDirectoryScript}" />bootstrap/bootstrap.js"></script> 
     <script src="<c:out value="${initParam.urlDirectoryScript}" />bootstrap/plugin/bootstrap.bundle.js"></script> -->
+    <script src="<c:out value="${initParam.urlDirectoryScript}" />jquery/plugin/jquery-modal.js"></script>
     <script src="<c:out value="${initParam.urlDirectoryScript}" />bootstrap/plugin/grayscale.js"></script>
     <script src="<c:out value="${initParam.urlDirectoryScript}" />cookie/cookieconsent.min.js"></script>
     <script src="<c:out value="${initParam.urlDirectoryScript}" />jquery/plugin/jquery-datatables.js"></script>
@@ -63,6 +64,7 @@
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />bootstrap/bootstrap.css" type="text/css" />
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />jquery/jquery-ui.css" type="text/css" />
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />bootstrap/plugin/grayscale.css" type="text/css" />
+    <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />jquery/jquery-modal.css" type="text/css" />
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />style.css" type="text/css" />
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />cookie/cookieconsent.min.css" type="text/css" />
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />jquery/jquery-datatables.css" type="text/css" />
