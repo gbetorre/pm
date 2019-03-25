@@ -35,6 +35,12 @@ h6 {
 	font-size:1.1em;
 }
 
+h3.heading {
+	border-color: #d9d6d6;
+	border-style: groove;
+	border-width: 2px;
+}
+
 body {
 	background-color: white;
 	font-size: medium;
@@ -46,14 +52,15 @@ body.loginbody {
 	background-image: radial-gradient(#ffffff, #ddeeff);
 }
 
-a:link:not(.btn):not(.cc-link):not(.linkFooter):not(.nav-link), 
-a:visited:not(.btn):not(.cc-link):not(.linkFooter):not(.nav-link):not(.btnNav) {
-	color: #484f51; 
+a:link:not(.btn):not(.cc-link):not(.linkFooter):not(.nav-link):not(.helpInfo):not(.page-link), 
+a:visited:not(.btn):not(.cc-link):not(.linkFooter):not(.nav-link):not(.btnNav):not(.helpInfo):not(.page-link) {
+	color: #007acc; 
+	text-decoration: underline;
 }
 
-a:hover:not(.btn):not(.logoHeader):not(.cc-link):not(.ui-datepicker-prev):not(.ui-datepicker-next):not(.nav-link):not(.linkFooter):not(.cc-link):not(.helpInfo) {
+a:hover:not(.btn):not(.logoHeader):not(.cc-link):not(.ui-datepicker-prev):not(.ui-datepicker-next):not(.nav-link):not(.linkFooter):not(.cc-link):not(.helpInfo):not(.page-link) {
 	text-decoration: underline;
-	color: black;
+	color: #004d99;
 	background-color: #d7d9d9;
 }
 
@@ -537,6 +544,7 @@ hr.riga       {
  a.helpInfo {
   background: transparent url("../img/help.png") no-repeat right top; 
   padding: 3px 30px 3px 0px;
+  color: #484f51;
  }
  
 /* .popup dt {
