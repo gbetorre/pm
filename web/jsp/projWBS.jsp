@@ -1,5 +1,11 @@
 <%@ include file="pcURL.jspf" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+    <c:url var="delWbs" context="${initParam.appName}" value="/" scope="page">
+      <c:param name="q" value="wbs" />
+      <c:param name="p" value="del" />
+      <c:param name="id" value="${p.id}" />
+      <c:param name="idw" value="" />
+    </c:url>
     <h2>WBS del sotto progetto <strong><c:out value="${p.titolo}" /></strong></h2>
     <hr class="separatore" />
     <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
@@ -26,7 +32,7 @@
               <tbody>
                 <c:set var="duplicateHeaders" value="${false}" scope="page" />
                 <c:set var="status" value="" scope="page" />
-                <c:forEach var="wbs" items="${requestScope.wbsHierarchy}" varStatus="loop">
+                <c:forEach var="wbsInstance" items="${requestScope.wbsHierarchy}" varStatus="loop">
                   <c:set var="status" value="${loop.index}" scope="page" />
                   <c:if test="${duplicateHeaders}">
                     <tr class="active">
@@ -39,20 +45,20 @@
                   </c:if>
                   <tr>
                     <td scope="col" id="nameColumn">
-                      <input type="hidden" id="wbs-id${status}" name="wbs-id${status}" value="<c:out value="${wbs.id}"/>">
-                      <a href="${modWbs}${p.id}&idw=${wbs.id}">
-                        <c:out value="${wbs.nome}" />
+                      <input type="hidden" id="wbs-id${status}" name="wbs-id${status}" value="<c:out value="${wbsInstance.id}"/>">
+                      <a href="${modWbs}${p.id}&idw=${wbsInstance.id}">
+                        <c:out value="${wbsInstance.nome}" />
                       </a>
                     </td>
                     <td scope="col">
-                      <c:out value="${wbs.noteAvanzamento}" />
+                      <c:out value="${wbsInstance.noteAvanzamento}" />
                     </td>
                     <td scope="col">
-                      <c:out value="${wbs.risultatiRaggiunti}" />
+                      <c:out value="${wbsInstance.risultatiRaggiunti}" />
                     </td>
                     <td scope="col">
                       <c:choose>
-                        <c:when test="${wbs.workPackage}">
+                        <c:when test="${wbsInstance.workPackage}">
                           <div class="form-check text-center">
                             <input type="checkbox" class="form-check-input" id="wbs-workpackage${status}" name="wbs-workpackage${status}" checked disabled>
                           </div>
@@ -65,14 +71,14 @@
                       </c:choose>
                     </td>
                     <td scope="col">
-                      <a href="${act}${p.id}&idw=${wbs.id}" class="" id="del-wbs">
+                      <a href="${act}${p.id}&idw=${wbsInstance.id}" class="" id="del-wbs">
                         <img src="${initParam.urlDirectoryImmagini}/ico-act.png" class="btn-del" alt="Link a lista attivita" title="Mostra Attivit&agrave;" />
                       </a>
-                      <a href="#del-form${wbs.id}" class="" id="del-wbs" rel="modal:open">
+                      <a href="#del-form${wbsInstance.id}" class="" id="del-wbs" rel="modal:open">
                         <img src="${initParam.urlDirectoryImmagini}/ico-del.png" class="btn-del" alt="Elimina" title="Elimina" />
                       </a>
-                      <form id="del-form${wbs.id}" method="post" action="${wbs}${p.id}" class="modal">
-                        <input type="hidden" id="wbs-id" name="wbs-id" value="${wbs.id}" />
+                      <form id="del-form${wbsInstance.id}" method="post" action="${delWbs}${wbsInstance.id}" class="modal">
+                        <input type="hidden" id="wbs-id" name="wbs-id" value="${wbsInstance.id}" />
                         <h3 class="heading">Riepilogo della WBS selezionata</h3>
                         <br />
                         <div class="row">
@@ -84,8 +90,8 @@
                           </div>
                           <div class="col-sm-5">
                             <c:choose>
-                              <c:when test="${wbs.wbsPadre.id ne -3}">
-                                <c:out value="${wbs.wbsPadre.nome}" />
+                              <c:when test="${wbsInstance.wbsPadre.id ne -3}">
+                                <c:out value="${wbsInstance.wbsPadre.nome}" />
                               </c:when>
                               <c:otherwise>
                                 <c:out value="Nessuna wbs padre" />
@@ -97,28 +103,28 @@
                         <div class="row">
                           <div class="col-sm-5"><strong>Nome WBS:</strong></div>
                           <div class="col-sm-5">
-                            <c:out value="${wbs.nome}" />
+                            <c:out value="${wbsInstance.nome}" />
                           </div>
                         </div>
                         <br />
                         <div class="row">
                           <div class="col-sm-5"><strong>Descrizione della WBS:</strong></div>
                           <div class="col-sm-5">
-                            <c:out value="${wbs.descrizione}" />
+                            <c:out value="${wbsInstance.descrizione}" />
                           </div>
                         </div>
                         <br />
                         <div class="row">
                           <div class="col-sm-5"><strong>Note di avanzamento della WBS:</strong></div>
                           <div class="col-sm-5">
-                            <c:out value="${wbs.noteAvanzamento}" />
+                            <c:out value="${wbsInstance.noteAvanzamento}" />
                           </div>
                         </div>
                         <br />
                         <div class="row">
                           <div class="col-sm-5"><strong>Risultati raggiunti della WBS:</strong></div>
                           <div class="col-sm-5">
-                            <c:out value="${wbs.risultatiRaggiunti}" />
+                            <c:out value="${wbsInstance.risultatiRaggiunti}" />
                           </div>
                         </div>
                         <br />
@@ -126,7 +132,7 @@
                           <div class="col-sm-5"><strong>Workpackage:</strong></div>
                           <div class="col-sm-5">
                             <c:choose>
-                              <c:when test="${wbs.workPackage}">
+                              <c:when test="${wbsInstance.workPackage}">
                                 <span class="ui-icon ui-icon-check"></span>
                               </c:when>
                               <c:otherwise>
@@ -136,21 +142,21 @@
                           </div>
                         </div>
                         <br />
-                        <c:if test="${fn:length(wbs.attivita) gt zero}">
+                        <c:if test="${wbsInstance.attivita.capacity() gt 0}">
                           <div class="row">
-                            <div class="col-sm-5"><strong>Attivit&agrave; collegate:</strong></div>
+                            <div class="col-sm-5"><strong>Attivit&agrave; collegate: ${wbsInstance.attivita.capacity()}</strong></div>
                             <div class="col-sm-5">
-                              <a href="${act}${p.id}&idw=${wbs.id}">Vedi Attivit&agrave;</a>
+                              <a href="${act}${p.id}&idw=${wbsInstance.id}">Vedi Attivit&agrave;</a>
                             </div>
                           </div>
                         </c:if>
                         <br />
-                        <c:if test="${fn:length(wbs.wbsFiglie) gt zero}">
+                        <c:if test="${fn:length(wbsInstance.wbsFiglie) gt zero}">
                           <div class="row">
                             <div class="col-sm-5"><strong>WBS direttamente collegate:</strong></div>
                             <div class="col-sm-5">
                               <select class="form-control" id="act-role" name="act-role" multiple>
-                                <c:forEach var="wbsChild" items="${wbs.wbsFiglie}" varStatus="loop">
+                                <c:forEach var="wbsChild" items="${wbsInstance.wbsFiglie}" varStatus="loop">
                                   <option value="${wbsChild.id}">
                                     <c:out value="${wbsChild.nome}" />
                                   </option>
@@ -161,7 +167,7 @@
                         </c:if>
                         <br />
                         <c:choose>
-                          <c:when test="${fn:length(wbs.attivita) eq zero and fn:length(wbs.wbsFiglie) eq zero}">
+                          <c:when test="${wbsInstance.attivita.capacity() eq 0 && fn:length(wbsInstance.wbsFiglie) eq 0}">
                             <span class="right"><input type="submit" class="btn btn-danger" id="del-wbs" value="Elimina" /></span>
                           </c:when>
                           <c:otherwise>
@@ -176,7 +182,7 @@
                       </form>
                     </td>
                   </tr>
-                  <c:if test="${not empty wbs.wbsFiglie}">
+                  <c:if test="${not empty wbsInstance.wbsFiglie}">
                     <c:set var="duplicateHeaders" value="${true}" scope="page" />
                     <tr>
                       <td colspan="5">
@@ -191,7 +197,7 @@
                             </tr>
                           </thead>
                      	    <tbody>
-                            <c:forEach var="wbsFiglio" items="${wbs.wbsFiglie}" varStatus="loop">
+                            <c:forEach var="wbsFiglio" items="${wbsInstance.wbsFiglie}" varStatus="loop">
                             <c:set var="status" value="${loop.index}" scope="page" />
                             <tr>
                               <td scope="col" id="nameColumn">
@@ -215,7 +221,7 @@
                                             <a href="#del-form${wbsNipote.id}" class="btn" id="del-wbs" rel="modal:open">
                                               <img src="${initParam.urlDirectoryImmagini}/ico-del.png" class="btn-del" alt="Elimina" title="Elimina" />
                                             </a>
-                                            <form id="del-form${wbsNipote.id}" method="post" action="${wbs}${p.id}" class="modal">
+                                            <form id="del-form${wbsNipote.id}" method="post" action="${delWbs}${wbsNipote.id}" class="modal">
                                               <input type="hidden" id="wbs-id" name="wbs-id" value="${wbsNipote.id}" />
                                               <h3 class="heading">Riepilogo della WBS selezionata</h3>
                                               <br />
@@ -280,9 +286,9 @@
                                                 </div>
                                               </div>
                                               <br />
-                                              <c:if test="${fn:length(wbsNipote.attivita) gt 0}">
+                                              <c:if test="${wbsNipote.attivita.capacity() gt 0}">
                                                 <div class="row">
-                                                  <div class="col-sm-5"><strong>Attivit&agrave; collegate:</strong></div>
+                                                  <div class="col-sm-5"><strong>Attivit&agrave; collegate: ${wbsNipote.attivita.capacity()}</strong></div>
                                                   <div class="col-sm-5">
                                                     <a href="${act}${p.id}&idw=${wbsNipote.id}">Vedi Attivit&agrave;</a>
                                                   </div>
@@ -305,7 +311,7 @@
                                               </c:if>
                                               <br />
                                               <c:choose>
-                                                <c:when test="${fn:length(wbsNipote.attivita) eq zero and fn:length(wbsNipote.wbsFiglie) eq zero}">
+                                                <c:when test="${wbsNipote.attivita.capacity() eq zero and fn:length(wbsNipote.wbsFiglie) eq zero}">
                                                   <span class="right"><input type="submit" class="btn btn-danger" id="del-wbs" value="Elimina" /></span>
                                                 </c:when>
                                                 <c:otherwise>
@@ -336,7 +342,7 @@
                                                     <a href="#del-form${wbsPronipote.id}" class="btn" id="del-wbs" rel="modal:open">
                                                       <img src="${initParam.urlDirectoryImmagini}/ico-del.png" class="btn-del" alt="Elimina" title="Elimina" />
                                                     </a>
-                                                    <form id="del-form${wbsPronipote.id}" method="post" action="${wbs}${p.id}" class="modal">
+                                                    <form id="del-form${wbsPronipote.id}" method="post" action="${delWbs}${wbsPronipote.id}" class="modal">
                                                       <input type="hidden" id="wbs-id" name="wbs-id" value="${wbsPronipote.id}" />
                                                       <h3 class="heading">Riepilogo della WBS selezionata</h3>
                                                       <br />
@@ -401,9 +407,9 @@
                                                         </div>
                                                       </div>
                                                       <br />
-                                                      <c:if test="${fn:length(wbsPronipote.attivita) gt 0}">
+                                                      <c:if test="${wbsPronipote.attivita.capacity() gt 0}">
                                                         <div class="row">
-                                                          <div class="col-sm-5"><strong>Attivit&agrave; collegate:</strong></div>
+                                                          <div class="col-sm-5"><strong>Attivit&agrave; collegate: ${wbsPronipote.attivita.capacity()}</strong></div>
                                                           <div class="col-sm-5">
                                                             <a href="${act}${p.id}&idw=${wbsPronipote.id}">Vedi Attivit&agrave;</a>
                                                           </div>
@@ -426,7 +432,7 @@
                                                       </c:if>
                                                       <br />
                                                       <c:choose>
-                                                        <c:when test="${fn:length(wbsPronipote.attivita) eq zero and fn:length(wbsPronipote.wbsFiglie) eq zero}">
+                                                        <c:when test="${wbsPronipote.attivita.capacity() eq zero and fn:length(wbsPronipote.wbsFiglie) eq zero}">
                                                           <span class="right"><input type="submit" class="btn btn-danger" id="del-wbs" value="Elimina" /></span>
                                                         </c:when>
                                                         <c:otherwise>
@@ -457,7 +463,7 @@
                                                               <a href="#del-form${wbsProPronipote.id}" class="btn" id="del-wbs" rel="modal:open">
                                                                 <img src="${initParam.urlDirectoryImmagini}/ico-del.png" class="btn-del" alt="Elimina" title="Elimina" />
                                                               </a>
-                                                              <form id="del-form${wbsProPronipote.id}" method="post" action="${wbs}${p.id}" class="modal">
+                                                              <form id="del-form${wbsProPronipote.id}" method="post" action="${delWbs}${wbsProPronipote.id}" class="modal">
                                                                 <input type="hidden" id="wbs-id" name="wbs-id" value="${wbsProPronipote.id}" />
                                                                 <h3 class="heading">Riepilogo della WBS selezionata</h3>
                                                                 <br />
@@ -522,9 +528,9 @@
                                                                   </div>
                                                                 </div>
                                                                 <br />
-                                                                <c:if test="${fn:length(wbsProPronipote.attivita) gt 0}">
+                                                                <c:if test="${wbsProPronipote.attivita.capacity() gt 0}">
                                                                   <div class="row">
-                                                                    <div class="col-sm-5"><strong>Attivit&agrave; collegate:</strong></div>
+                                                                    <div class="col-sm-5"><strong>Attivit&agrave; collegate:${wbsProPronipote.attivita.capacity()}</strong></div>
                                                                     <div class="col-sm-5">
                                                                       <a href="${act}${p.id}&idw=${wbsProPronipote.id}">Vedi Attivit&agrave;</a>
                                                                     </div>
@@ -547,7 +553,7 @@
                                                                 </c:if>
                                                                 <br />
                                                                 <c:choose>
-                                                                  <c:when test="${fn:length(wbsProPronipote.attivita) eq zero and fn:length(wbsProPronipote.wbsFiglie) eq zero}">
+                                                                  <c:when test="${wbsProPronipote.attivita.capacity() eq zero and fn:length(wbsProPronipote.wbsFiglie) eq zero}">
                                                                     <span class="right"><input type="submit" class="btn btn-danger" id="del-wbs" value="Elimina" /></span>
                                                                   </c:when>
                                                                   <c:otherwise>
@@ -601,7 +607,7 @@
                                 <a href="#del-form${wbsFiglio.id}" class="" id="del-wbs" rel="modal:open">
                                   <img src="${initParam.urlDirectoryImmagini}/ico-del.png" class="btn-del" alt="Elimina" title="Elimina" />
                                 </a>
-                                <form id="del-form${wbsFiglio.id}" method="post" action="${wbs}${p.id}" class="modal">
+                                <form id="del-form${wbsFiglio.id}" method="post" action="${delWbs}${wbsFiglio.id}" class="modal">
                                   <input type="hidden" id="wbs-id" name="wbs-id" value="${wbsFiglio.id}" />
                                   <h3 class="heading">Riepilogo della WBS selezionata</h3>
                                   <br />
@@ -666,9 +672,9 @@
                                     </div>
                                   </div>
                                   <br />
-                                  <c:if test="${fn:length(wbsFiglio.attivita) gt zero}">
+                                  <c:if test="${wbsFiglio.attivita.capacity() gt zero}">
                                     <div class="row">
-                                      <div class="col-sm-5"><strong>Attivit&agrave; collegate:</strong></div>
+                                      <div class="col-sm-5"><strong>Attivit&agrave; collegate: ${wbsFiglio.attivita.capacity()}</strong></div>
                                       <div class="col-sm-5">
                                         <a href="${act}${p.id}&idw=${wbsFiglio.id}">Vedi Attivit&agrave;</a>
                                       </div>
@@ -691,7 +697,7 @@
                                   </c:if>
                                   <br />
                                   <c:choose>
-                                    <c:when test="${fn:length(wbsFiglio.attivita) eq zero and fn:length(wbsFiglio.wbsFiglie) eq zero}">
+                                    <c:when test="${wbsFiglio.attivita.capacity() eq zero and fn:length(wbsFiglio.wbsFiglie) eq zero}">
                                       <span class="right"><input type="submit" class="btn btn-danger" id="del-wbs" value="Elimina" /></span>
                                     </c:when>
                                     <c:otherwise>
