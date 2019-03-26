@@ -1398,6 +1398,51 @@ public class DBWrapper implements Query {
     
     
     /**
+     * <p>Restituisce il numero di attivit$agrave; presenti all'interno di una data wbs, 
+     * identificata tramite id, passato come parametro.</p>
+     * 
+     * @param idProj               id del progetto a cui appartengono la wbs e le attivit&agrave;
+     * @param idWbs                id della wbs a cui appartengono le attivit&agrave;
+     * @return <code>int</code> - intero che rappresenta il numero di istanze di attivit&agrave; sottostanti alla wbs data
+     * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    public int getActivitiesAmountByWbs (int idProj, 
+                                         int idWbs) 
+                                  throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+        int amountActivities = 0;
+        int nextParam = 0;
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_ACTIVITIES_COUNT_BY_WBS);
+            pst.setInt(++nextParam, idProj);
+            pst.setInt(++nextParam, idWbs);
+            rs = pst.executeQuery();
+            if (rs.next()) {
+                amountActivities = rs.getInt(1);
+            }
+            return amountActivities;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Errore nella query che estrae il numero di attivit&agrave; presenti in una data wbs.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
      * <p>Restituisce un Vector di ActivityBean rappresentante le attivit&agrave; che 
      * a qualunque titolo intersecano un range di date passate come argomento.</p>
      * 
@@ -1890,18 +1935,28 @@ public class DBWrapper implements Query {
                                 wbsPPN = new WbsBean();
                                 BeanUtil.populate(wbsPPN, rs4);
                                 wbsPPN.setWbsPadre(wbsPN);
+                                Vector<ActivityBean> wbsAct = new Vector<ActivityBean>(getActivitiesAmountByWbs(idProj, wbsPPN.getId()));
+                                wbsPPN.setAttivita(wbsAct);
                                 vWbsPPN.add(wbsPPN);
                             }
                             wbsPN.setWbsFiglie(vWbsPPN);
+                            Vector<ActivityBean> wbsAct = new Vector<ActivityBean>(getActivitiesAmountByWbs(idProj, wbsPN.getId()));
+                            wbsPN.setAttivita(wbsAct);
                             vWbsPN.add(wbsPN);
                         }
                         wbsN.setWbsFiglie(vWbsPN);
+                        Vector<ActivityBean> wbsAct = new Vector<ActivityBean>(getActivitiesAmountByWbs(idProj, wbsN.getId()));
+                        wbsN.setAttivita(wbsAct);
                         vWbsN.add(wbsN);
                     }
                     wbsF.setWbsFiglie(vWbsN);
+                    Vector<ActivityBean> wbsAct = new Vector<ActivityBean>(getActivitiesAmountByWbs(idProj, wbsF.getId()));
+                    wbsF.setAttivita(wbsAct);
                     vWbsF.add(wbsF);
                 }
                 wbsP.setWbsFiglie(vWbsF);
+                Vector<ActivityBean> wbsAct = new Vector<ActivityBean>(getActivitiesAmountByWbs(idProj, wbsP.getId()));
+                wbsP.setAttivita(wbsAct);
                 vWbsP.add(wbsP);
             }
             return vWbsP;
