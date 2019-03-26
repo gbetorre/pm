@@ -95,6 +95,10 @@ public class WbsCommand extends ItemBean implements Command {
      */
     private static final String nomeFileReport = "/jsp/wbsReport.jsp";
     /**
+     * Pagina a cui la command fa riferimento per mostrare il grafico
+     */
+    private static final String nomeFileGrafico = "/jsp/wbsGrafico.jsp";
+    /**
      * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutti gli attributi del progetto
      */    
     private static final HashMap<String, String> nomeFile = new HashMap<String, String>();
@@ -134,7 +138,9 @@ public class WbsCommand extends ItemBean implements Command {
         nomeFile.put(Query.PART_WBS, nomeFileElenco);
         nomeFile.put(Query.ADD_TO_PROJECT, nomeFileWbs);
         nomeFile.put(Query.MODIFY_PART, nomeFileWbs);
+        nomeFile.put(Query.DELETE_PART, nomeFileWbs);
         nomeFile.put(Query.PART_REPORT, nomeFileReport);
+        nomeFile.put(Query.PART_GRAPHIC, nomeFileGrafico);
     }  
   
     
@@ -186,7 +192,7 @@ public class WbsCommand extends ItemBean implements Command {
          * ******************************************************************** */
         // Recupera o inizializza 'id progetto'
         int idPrj = parser.getIntParameter("id", Utils.DEFAULT_ID);
-        // Recupera o inizializza 'id wbs' (per modifica=
+        // Recupera o inizializza 'id wbs' (per modifica)
         int idWbs = parser.getIntParameter("idw", Utils.DEFAULT_ID);
         // Recupera o inizializza 'tipo pagina'   
         String part = parser.getStringParameter("p", "-");
@@ -275,18 +281,17 @@ public class WbsCommand extends ItemBean implements Command {
                             loadParams(part, parser, params);
                             db.insertWbs(idPrj, user, params.get(Query.ADD_TO_PROJECT));
                             redirect = "q=" + Query.PART_WBS + "&id=" + idPrj;
-                        }
-                    } else {
-                        // Deve eseguire una eliminazione
-                        /* ************************************************ *
-                         *                  DELETE Wbs Part                 *
-                         * ************************************************ */
-                        Integer idWbsToDel = Integer.parseInt(parser.getStringParameter("wbs-select",  Utils.VOID_STRING));
-                        wbsOfWbs = db.getWbsFiglie(idPrj, idWbsToDel);
-                        wbsActivities = db.getActivitiesByWbs(idWbsToDel, idPrj);
-                        if (wbsActivities.isEmpty() && wbsOfWbs.isEmpty()) {
-                            db.deleteWbs(runtimeProject.getIdDipart(), idWbsToDel);
-                            redirect = "q=" + Query.PART_WBS + "&id=" + idPrj;
+                        } else if (part.equalsIgnoreCase(Query.DELETE_PART)) {
+                            /* ************************************************ *
+                             *                  DELETE Wbs Part                 *
+                             * ************************************************ */
+                            Integer idWbsToDel = idWbs;
+                            wbsOfWbs = db.getWbsFiglie(idPrj, idWbsToDel);
+                            wbsActivities = db.getActivitiesByWbs(idWbsToDel, idPrj);
+                            if (wbsActivities.isEmpty() && wbsOfWbs.isEmpty()) {
+                                db.deleteWbs(runtimeProject.getIdDipart(), idWbsToDel);
+                                redirect = "q=" + Query.PART_WBS + "&id=" + idPrj;
+                            }
                         }
                     }
                 } else {
@@ -297,7 +302,7 @@ public class WbsCommand extends ItemBean implements Command {
                         if (part.equalsIgnoreCase(Query.PART_REPORT)) {
                             workPackages = retrieveWorkPackages(idPrj, db);
                         } else {
-                        // Selezioni per visualizzazione, aggiunta e modifica wbs
+                            // Selezioni per visualizzazione, aggiunta e modifica wbs
                             // Seleziona tutte le WBS non workpackage per mostrare i possibili padri nella pagina di dettaglio
                             wbsPutativeFather = db.getWbs(idPrj, Query.WBS_BUT_WP);
                             if (idWbs != Utils.DEFAULT_ID) {
@@ -309,7 +314,7 @@ public class WbsCommand extends ItemBean implements Command {
                         fileJspT = nomeFile.get(part);
                     } else {
                         // Se il parametro 'p' non è presente, deve solo selezionare tutte le wbs
-                        //vWbs = db.getWbs(idPrj, Query.WBS_GET_ALL);
+                        // vWbs = db.getWbs(idPrj, Query.WBS_GET_ALL);
                         vWbsAncestors = db.getWbsHierarchy(idPrj);
                         fileJspT = nomeFileElenco;
                     }
@@ -391,7 +396,7 @@ public class WbsCommand extends ItemBean implements Command {
             req.setAttribute("wps", workPackages);
         }
         // Imposta nella request l'elenco delle attivita che appartengono alla wbs selezionata
-        //if (wbsActivities != null) {
+        //if (!wbsActivities.isEmpty()) {
         //    req.setAttribute("attivitaWbs", wbsActivities);
         //}
     }
