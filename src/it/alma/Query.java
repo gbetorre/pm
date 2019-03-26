@@ -142,6 +142,10 @@ public interface Query extends Serializable {
      */
     public static final String PART_REPORT                      = "rep";
     /**
+     * <p>Costante per il parametro identificante la pagina del grafico di WBS di un progetto.</p>
+     */
+    public static final String PART_GRAPHIC                      = "gra";
+    /**
      * <p>Costante per il parametro identificante la pagina di inserimento di uno status di un progetto.</p>
      */
     public static final String ADD_STATUS_TO_PROJECT            = "addSts";
@@ -1096,7 +1100,19 @@ public interface Query extends Serializable {
             "   FROM attivita A" + 
             "   WHERE id_progetto = ?" + 
             "     AND id_wbs = ?" +
+            "     AND id_stato NOT IN (12)" + 
             "   ORDER BY A.dataultimamodifica ASC";
+    
+    
+    /**
+     * <p>Estrae il numero di tuple presenti nella tabella attivit&agrave;
+     * con l'id della wbs selezionata dall'utente, identificata tramite id.</p>
+     */
+    public static final String GET_ACTIVITIES_COUNT_BY_WBS =
+            "SELECT count(*)" +
+            "   FROM attivita" +
+            "   WHERE id_progetto = ?" +
+            "     AND id_wbs = ?";
     
     /**
      * <p>Estrae l'attivit&agrave; specificata tramite id 
