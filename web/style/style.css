@@ -327,6 +327,16 @@ textarea {
   color: maroon;
 }
 
+/*.btn-del {
+    background: url(../img/ico-del.png) no-repeat left top;
+    background-size: 22px 22px;
+}*/
+
+.btn-del {
+    width:40px;
+}
+
+
 /*---------------------- Righe Orizzontali ------------------------*/
 hr  {
 	clear: both; height: 1px;
