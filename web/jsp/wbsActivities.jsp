@@ -101,6 +101,7 @@
           var $modActUrl = '<c:out value="${modAct}${p.id}" escapeXml="false" />' + "&ida=" + $radioValue;
           $('#mod-act').attr('href', $modActUrl);
         });
+        $("#actOnWbs").DataTable();
       });
     </script>
     <script>
