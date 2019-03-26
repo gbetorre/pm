@@ -170,6 +170,10 @@ public interface Query extends Serializable {
      */
     public static final String SUSPEND_PART                     = "sus";
     /**
+     * <p>Costante per il parametro identificante la parte di ripresa di una attivit&agrave; precedentemente sospesa.</p>
+     */
+    public static final String RESUME_PART                      = "res";
+    /**
      * <p>Costante per il parametro identificante la pagina dei monitoraggio.</p>
      */
     public static final String PART_MONITOR                     = "";
@@ -394,6 +398,16 @@ public interface Query extends Serializable {
      * pu&ograve; dipendere da varie incongruenze
      */
     public static final String STATO_INCONSISTENTE_HELP = "Le <cite>Attivit&agrave; </cite>";
+    /**
+     * Identificativo di stato attivit&agrave; inconsistente, che 
+     * pu&ograve; dipendere da varie incongruenze
+     */
+    public static final String SOSPESA_HELP = "Le <cite>Attivit&agrave; </cite>";
+    /**
+     * Identificativo di stato attivit&agrave; inconsistente, che 
+     * pu&ograve; dipendere da varie incongruenze
+     */
+    public static final String ELIMINATA_HELP = "Le <cite>Attivit&agrave; </cite>";
     /* ************************************************************************ *
      *   Enumerativi statici per incapsulare i valori di enumerativi dinamici   *
      * ************************************************************************ */
@@ -787,7 +801,7 @@ public interface Query extends Serializable {
             "   FROM wbs W" + 
             "   WHERE W.id_progetto = ?" +
             "       AND W.id_wbs = ?" + 
-            "   ORDER BY W.dataultimamodifica ASC"; 
+            "   ORDER BY W.dataultimamodifica DESC"; 
     
     /**
      * <p>Estrae le wbs che non sono workpackage di un progetto,
@@ -1025,23 +1039,24 @@ public interface Query extends Serializable {
     public static final String  GET_ACTIVITIES = 
             "SELECT " +
             "       A.id                    AS  \"id\"" +
-            "   ,   A.nome                  AS  \"nome\"" +
-            "   ,   A.descrizione           AS  \"descrizione\"" +
-            "   ,   A.datainizio            AS  \"dataInizio\"" +
-            "   ,   A.datafine              AS  \"dataFine\"" +
-            "   ,   A.datainizioattesa      AS  \"dataInizioAttesa\"" +
-            "   ,   A.datafineattesa        AS  \"dataFineAttesa\"" +
-            "   ,   A.datainizioeffettiva   AS  \"dataInizioEffettiva\"" +
-            "   ,   A.datafineeffettiva     AS  \"dataFineEffettiva\"" +
-            "   ,   A.guprevisti            AS  \"guPrevisti\"" +
-            "   ,   A.gueffettivi           AS  \"guEffettivi\"" +
-            "   ,   A.gurimanenti           AS  \"guRimanenti\"" +
-            "   ,   A.noteavanzamento       AS  \"noteAvanzamento\"" +
-            "   ,   A.risultatiraggiunti    AS  \"risultatiRaggiunti\"" +
-            "   ,   A.milestone             AS  \"milestone\"" +
+          //"   ,   A.nome                  AS  \"nome\"" +
+          //"   ,   A.descrizione           AS  \"descrizione\"" +
+          //"   ,   A.datainizio            AS  \"dataInizio\"" +
+          //"   ,   A.datafine              AS  \"dataFine\"" +
+          //"   ,   A.datainizioattesa      AS  \"dataInizioAttesa\"" +
+          //"   ,   A.datafineattesa        AS  \"dataFineAttesa\"" +
+          //"   ,   A.datainizioeffettiva   AS  \"dataInizioEffettiva\"" +
+          //"   ,   A.datafineeffettiva     AS  \"dataFineEffettiva\"" +
+          //"   ,   A.guprevisti            AS  \"guPrevisti\"" +
+          //"   ,   A.gueffettivi           AS  \"guEffettivi\"" +
+          //"   ,   A.gurimanenti           AS  \"guRimanenti\"" +
+          //"   ,   A.noteavanzamento       AS  \"noteAvanzamento\"" +
+          //"   ,   A.risultatiraggiunti    AS  \"risultatiRaggiunti\"" +
+          //"   ,   A.milestone             AS  \"milestone\"" +
+            "   ,   A.id_stato              AS  \"idStato\"" +
             "   FROM attivita A" + 
-            "   WHERE id_progetto = ?" +
-            "   ORDER BY A.dataultimamodifica ASC";
+            "   WHERE A.id_progetto = ?" +
+            "   ORDER BY A.id";
     
     /**
      * <p>Estrae le attivit&agrave; relative ad un progetto, identificato 
@@ -1067,7 +1082,8 @@ public interface Query extends Serializable {
             "   ,   A.id_wbs                AS  \"idWbs\"" +
             "   ,   A.id_stato              AS  \"idStato\"" +
             "   FROM attivita A" + 
-            "   WHERE id_progetto = ?" +
+            "   WHERE A.id_progetto = ?" +
+            "       AND A.id_stato <> 12" +
             "       AND A.datainizio >= ?" +
             "       AND (A.milestone = ? OR ?)" +
             "   ORDER BY A.dataultimamodifica DESC, A.oraultimamodifica DESC, A.datainizio, A.datafine, A.id_stato";
@@ -1098,11 +1114,10 @@ public interface Query extends Serializable {
             "   ,   A.id_stato              AS  \"idStato\"" + 
             "   ,   A.id_complessita        AS  \"idComplessita\"" + 
             "   FROM attivita A" + 
-            "   WHERE id_progetto = ?" + 
-            "     AND id_wbs = ?" +
-            "     AND id_stato NOT IN (12)" + 
+            "   WHERE A.id_progetto = ?" + 
+            "     AND A.id_wbs = ?" +
+            "     AND A.id_stato <> 12" +
             "   ORDER BY A.dataultimamodifica ASC";
-    
     
     /**
      * <p>Estrae il numero di tuple presenti nella tabella attivit&agrave;
@@ -1141,8 +1156,8 @@ public interface Query extends Serializable {
             "   ,   A.id_stato              AS  \"idStato\"" +
             "   ,   A.id_complessita        AS  \"idComplessita\"" +
             "   FROM attivita A" + 
-            "   WHERE id_progetto = ?" +
-            "     AND id = ?";
+            "   WHERE A.id_progetto = ?" +
+            "     AND A.id = ?";
     
     /**
      * <p>Estrae le persone che sono collegate ad una attivit&agrave;</p>
@@ -1417,7 +1432,8 @@ public interface Query extends Serializable {
             "       AND ( " +
             "                   (A.datainizio <= ? AND A.datafine >= ?) " +
             "                OR ((A.datainizio BETWEEN ? AND ?))" +
-            "           )";
+            "           )" +
+            "       AND A.id_stato <> 12";
     
     /**
      * <p>Estrae lo status di avanzamento di un progetto successivo, in ordine di datainizio, 
@@ -1469,7 +1485,8 @@ public interface Query extends Serializable {
             "   FROM attivita A " + 
             "      INNER JOIN progetto P ON P.id = A.id_progetto " +
             "   WHERE P.id = ? " +
-            "      AND (A.datainizio BETWEEN ? AND ?)";
+            "      AND (A.datainizio BETWEEN ? AND ?)" +
+            "       AND A.id_stato <> 12";
     
     /**
      * <p>Estrae tutti i monitoraggi di dato anno e dato dipartimento
