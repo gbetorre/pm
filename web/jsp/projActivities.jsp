@@ -16,6 +16,7 @@
           <th scope="col" width="10%">Data fine</th>
           <th scope="col" width="20%">Stato effettivo</th>
           <th scope="col" width="4%"><div class="text-center">Milestone</div></th>
+          <th scope="col" width="4%"><div class="text-center">Funzioni</div></th>
         </tr>
         </thead>
         <tbody>
@@ -70,7 +71,25 @@
                 </c:otherwise>
               </c:choose>
             </td>
+            <td scope="row">
+            <c:set var="pauseico" value="/ico-pause.png" scope="page" />
+            <c:set var="pausetxt" value="Sospendi" scope="page" />
+            <c:set var="pauseurl" value="${susAct}${p.id}&ida=${act.id}" scope="page" />
+            <c:if test="${act.idStato eq 11}">
+              <c:set var="pauseico" value="/ico-start.png" scope="page" />
+              <c:set var="pausetxt" value="Riprendi" scope="page" />
+              <c:set var="pauseurl" value="javascript:DoPost()" scope="page" />
+            </c:if>
+              <a href="${pauseurl}" class="btn" id="del-wbs">
+                <img src="${initParam.urlDirectoryImmagini}${pauseico}" class="btn-del" alt="Gestione sospensione attivita" title="${pausetxt} Attivit&agrave;" />
+              </a>
+            </td>
           </tr>
+          <script> 
+          function DoPost(){
+            $.post("${resAct}${p.id}&ida=${act.id}", { id: "${p.id}", ida: "${act.id}" } );  // Values in JSON format
+          }
+          </script>
         </c:forEach>
         </tbody>
       </table>
@@ -106,8 +125,10 @@
           $("input[name='act-select']", tdElement).attr("checked", true);
           var $radioValue = $("input[name='act-select']:checked").val();
           var $modActUrl = '<c:out value="${modAct}${p.id}" escapeXml="false" />' + "&ida=" + $radioValue;
+          var $susActUrl = '<c:out value="${susAct}${p.id}" escapeXml="false" />' + "&ida=" + $radioValue;
           var $delActUrl = '<c:out value="${delAct}${p.id}" escapeXml="false" />' + "&ida=" + $radioValue;
           $('#mod-act').attr('href', $modActUrl);
+          $('#sus-act').attr('href', $susActUrl);
           $('#del-act').attr('href', $delActUrl);
         });
         $('#listAct').DataTable();
