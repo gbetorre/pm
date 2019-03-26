@@ -54,13 +54,12 @@ body.loginbody {
 
 a:link:not(.btn):not(.cc-link):not(.linkFooter):not(.nav-link):not(.helpInfo):not(.page-link), 
 a:visited:not(.btn):not(.cc-link):not(.linkFooter):not(.nav-link):not(.btnNav):not(.helpInfo):not(.page-link) {
-	color: #007acc; 
-	text-decoration: underline;
+	color: #005c99; 
 }
 
 a:hover:not(.btn):not(.logoHeader):not(.cc-link):not(.ui-datepicker-prev):not(.ui-datepicker-next):not(.nav-link):not(.linkFooter):not(.cc-link):not(.helpInfo):not(.page-link) {
 	text-decoration: underline;
-	color: #004d99;
+	color: #002e4d;
 	background-color: #d7d9d9;
 }
 
