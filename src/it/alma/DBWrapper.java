@@ -10,7 +10,7 @@
  *   Alma on Line (aol), Projects on Line (pol), Questionnaire on Line (qol);
  *   web applications to publish, and manage, students evaluation,
  *   projects, students and degrees information.
- *   Copyright (C) renewed 2018 Universita' degli Studi di Verona, 
+ *   Copyright (C) renewed 2019 Universita' degli Studi di Verona, 
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify 
@@ -2839,6 +2839,7 @@ public class DBWrapper implements Query {
                         throws WebStorageException {
         Connection con = null;
         PreparedStatement pst, pst1 = null;
+        ActivityBean aw = null;
         int calculatedId = -1;
         try {
             con = pol_manager.getConnection();
@@ -2867,7 +2868,7 @@ public class DBWrapper implements Query {
             int lastIndexOf = writableActivities.size();
             int index = 0;
             do {
-                ActivityBean aw = writableActivities.elementAt(index);
+                aw = writableActivities.elementAt(index);
                 // Se un id di attività scrivibili è uguale all'id sulla querystring è tutto ok 
                 if (aw.getId() == calculatedId) {
                     break;
@@ -2982,15 +2983,16 @@ public class DBWrapper implements Query {
                 pst.setInt(++nextParam, Integer.parseInt(params.get("act-compl")));
                 /* === Gestione stato automatico === */
                 Date today = Utils.convert(Utils.getCurrentDate());
-                /* // Gestione congruenza tra stato e date
-                int idStato = Integer.parseInt(params.get("act-status"));
-                if (dataFineEffettiva != null && dataFineEffettiva.before(today)) {
-                    // Se ha messo la data di fine effettiva, forza lo stato a "chiuso", qualunque sia stata la scelta dell'utente
-                    idStato = 3;
+                // Gestione congruenza tra stato e stato
+                int idStato = aw.getIdStato();
+                if (idStato == SOSPESA || idStato == ELIMINATA) {
+                    // Se l'attività da aggiornare è sospesa o eliminata, lascia lo stato inalterato per rispettare la scelta dell'utente
+                    pst.setInt(++nextParam, idStato);
+                } else {
+                    // In tutti gli altri casi lo stato è da ricalcolare
+                    CodeBean stato = computeActivityState(dataInizio, dataFine, dataInizioEffettiva, dataFineEffettiva, today);
+                    pst.setInt(++nextParam, stato.getId());
                 }
-                pst.setInt(++nextParam, idStato);*/
-                CodeBean stato = computeActivityState(dataInizio, dataFine, dataInizioEffettiva, dataFineEffettiva, today);
-                pst.setInt(++nextParam, stato.getId());
                 // Campi automatici: id utente, ora ultima modifica, data ultima modifica
                 pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
                 pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringe, ma un oggetto java.sql.Time
@@ -3059,13 +3061,16 @@ public class DBWrapper implements Query {
     
     
     /**
-     * <p>Imposta un'attivit&agrave; in uno stato il cui identificativo 
+     * <p>Imposta un'attivit&agrave; in uno stato di sospensione logica 
+     * (attivit&agrave; sospesa o eliminata) il cui identificativo 
      * viene desunto dal valore di un parametro di navigazione 
      * passato come argomento.</p>
+     * <p>Gestisce anche la riattivazione di un'attivit&agrave; precedentemente
+     * sospesa, ricalcolandone lo stato aggiornato e reimpostandolo.</p>
      * 
      * @param idProj    identificativo del progetto nell'ambito del quale operare 
      * @param idAct     identificativo dell'attivita' da aggiornare
-     * @param part      parametro di navigazione in base a cui si identifica se bisogna aggiornare l'attivita' in uno stato sospeso o eliminato
+     * @param part      parametro di navigazione in base a cui si identifica se bisogna aggiornare l'attivita' in uno stato sospeso o eliminato, o ricalcolarlo
      * @param user      persona corrispondente all'utente loggato
      * @param projectsWritableByUser lista di progetti su cui l'utente corrente ha il diritto di scrivere
      * @param userWritableActivitiesByProjectId    lista di attivita' su cui l'utente corrente ha il diritto di scrivere
@@ -3081,6 +3086,7 @@ public class DBWrapper implements Query {
                              throws WebStorageException {
         Connection con = null;
         PreparedStatement pst = null;
+        int idState = NOTHING;
         try {
             // Ottiene la connessione
             con = pol_manager.getConnection();
@@ -3123,7 +3129,16 @@ public class DBWrapper implements Query {
             /* === Se siamo qui vuol dire che l'id dell'attivita'   === * 
              * === su cui si deve modificare informazioni e' una    === * 
              * === attivita' scrivibile dall'utente                 === */
-            int idState = part.equals(DELETE_PART) ? ELIMINATA : SOSPESA; 
+            if (part.equals(DELETE_PART)) {
+                idState = ELIMINATA;
+            } else if (part.equals(SUSPEND_PART)) {
+                idState = SOSPESA;
+            } else if (part.equals(RESUME_PART)) {
+                CodeBean stateToCompute = null;
+                ActivityBean actToResume = getActivity(idProj, idAct, user);
+                stateToCompute = computeActivityState(actToResume.getDataInizio(), actToResume.getDataFine(), actToResume.getDataInizioEffettiva(), actToResume.getDataFineEffettiva(), Utils.convert(Utils.getCurrentDate()));
+                idState = stateToCompute.getId();
+            }
             // Begin: ==>
             con = pol_manager.getConnection();
             con.setAutoCommit(false);
@@ -4278,8 +4293,27 @@ public class DBWrapper implements Query {
         // Oggetto per memorizzare lo stato dell'attività passata come argomento
         CodeBean stato = new CodeBean();
         try {
+            /* **************************************************************** *
+             *                Controlli sugli stati a monte                     *
+             *                Se un'attivita' e' in:                            *
+             *      - STATO SOSPESO                                             *
+             *      - STATO ELIMINATO                                           *
+             *  (stati impostati dall'utente che non devono essere modificati)  *
+             *  tali stati non vanno alterati in base al calcolo delle date     *
+             *  perche' sono di esplicita volonta' da parte dell'utente!        *
+             * **************************************************************** */
+            if (aws.getIdStato() == SOSPESA || aws.getIdStato() == ELIMINATA) {
+                stato.setId(aws.getIdStato());
+                String nome = (aws.getIdStato() == SOSPESA) ? "Attivit&agrave; sospesa" : "Attivit&agrave; eliminata";
+                stato.setNome(nome);
+                String informativa = (aws.getIdStato() == SOSPESA) ? SOSPESA_HELP : ELIMINATA_HELP;
+                stato.setInformativa(informativa);
+                aws.setStato(stato);
+                return stato;
+            }
             /* ************************************************************ *
-             *        Controlli sulle premesse (che siano consistenti)      *
+             *    Posto che l'attivita' non e' ne' SOSPESA ne' ELIMINATA    *
+             *    Effettua controlli sulle premesse (che siano consistenti) *
              *   data < rightNow -> passato  |  data = rightNow -> presente *
              *                     data > rightNow -> futuro                *
              * ************************************************************ */
@@ -4453,9 +4487,9 @@ public class DBWrapper implements Query {
     
     
     /**
-     * <p>Dato in input una serie di date (relative ad una attivit&agrave;), 
+     * <p>Date in input una serie di date (relative ad una attivit&agrave;), 
      * passate come argomento, calcola uno stato esatto relativo ad una
-     * ipotetica attivit&atrave; a cui le date passate facciano riferimento
+     * ipotetica attivit&agrave; a cui le date passate facciano riferimento
      * e lo restituisce sotto forma di <code>CodeBean</code>.</p>
      * <p>Implementa un algoritmo che calcola tale stato e lo setta 
      * nell'oggetto, restituito al chiamante.</p>
