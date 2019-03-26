@@ -112,6 +112,11 @@
   <c:param name="p" value="mod" />
   <c:param name="id" value="" />
 </c:url>
+<c:url var="susAct" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="act" />
+  <c:param name="p" value="sus" />
+  <c:param name="id" value="" />
+</c:url>
 <c:url var="delAct" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="act" />
   <c:param name="p" value="del" />
