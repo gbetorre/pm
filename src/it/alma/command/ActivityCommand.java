@@ -10,7 +10,7 @@
  *   Alma on Line (aol), Projects on Line (pol), Questionnaire on Line (qol);
  *   web applications to publish, and manage, students evaluation,
  *   projects, students and degrees information.
- *   Copyright (C) renewed 2018 Universita' degli Studi di Verona, 
+ *   Copyright (C) renewed 2019 Universita' degli Studi di Verona, 
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify 
@@ -36,7 +36,6 @@
 
 package it.alma.command;
 
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -150,6 +149,8 @@ public class ActivityCommand extends ItemBean implements Command {
         nomeFile.put(Query.ADD_ACTIVITY_TO_PROJECT, nomeFileActivity);
         nomeFile.put(Query.MODIFY_PART, nomeFileActivity);
         nomeFile.put(Query.DELETE_PART, nomeFileRecapToDel);
+        nomeFile.put(Query.SUSPEND_PART, nomeFileRecapToDel);
+        nomeFile.put(Query.RESUME_PART, nomeFileElenco);
         nomeFile.put(Query.PART_PROJECT, this.getPaginaJsp());
     }  
   
@@ -260,7 +261,7 @@ public class ActivityCommand extends ItemBean implements Command {
                 // Verifica se è presente il parametro 'p'
                 if (nomeFile.containsKey(part)) {
                     // Verifica se deve eseguire un'operazione di scrittura
-                    if (write) {
+                    if (write) {    // Ramo delle operazioni (ramo di scrittura)
                         /* **************************************************** *
                          *          UPDATE, INSERT, DELETE an Activity          *
                          * **************************************************** */
@@ -304,10 +305,12 @@ public class ActivityCommand extends ItemBean implements Command {
                             loadParams(part, parser, params);
                             db.updateActivity(idPrj, user, writablePrj, userWritableActivitiesByProjectId, params.get(Query.MODIFY_PART));
                             redirect = "q=" + Query.PART_ACTIVITY + "&id=" + idPrj;
-                        } else if (part.equalsIgnoreCase(Query.DELETE_PART) || part.equalsIgnoreCase(Query.SUSPEND_PART)) {
-                            // Deve eseguire una eliminazione o una sospensione
+                        } else if (part.equalsIgnoreCase(Query.DELETE_PART)  || 
+                                   part.equalsIgnoreCase(Query.SUSPEND_PART) ||
+                                   part.equalsIgnoreCase(Query.RESUME_PART))    {
+                            // Deve eseguire una eliminazione o una sospensione o una riattivazione
                             /* ************************************************ *
-                             *        SUSPEND or DELETE Single Activity         *
+                             *    SUSPEND or DELETE or RESUME Single Activity   *
                              * ************************************************ */
                             db.updateActivityState(idPrj, idAct, part, user, writablePrj, userWritableActivitiesByProjectId);
                             redirect = "q=" + Query.PART_ACTIVITY + "&id=" + idPrj;
@@ -319,9 +322,9 @@ public class ActivityCommand extends ItemBean implements Command {
                         Vector<ActivityBean> userWritableActivities = db.getActivities(idPrj);
                         userWritableActivitiesByProject.put(key, userWritableActivities);
                         ses.setAttribute("writableActivity", userWritableActivitiesByProject);
-                    } else {
+                    } else {    // Ramo delle selezioni (ramo di lettura)
                         /* **************************************************** *
-                         *                 SELECT Activity Part                 *
+                         *                 SELECT Activity/ies                  *
                          * **************************************************** */
                         if (part.equals(Query.PART_PROJECT_CHARTER_MILESTONE)) {
                             /* ************************************************ *
@@ -357,8 +360,8 @@ public class ActivityCommand extends ItemBean implements Command {
                             workPackage = db.getWbs(runtimeProject.getId(), Query.WBS_WP_ONLY);
                             complexity = HomePageCommand.getComplessita();
                             states = HomePageCommand.getStatiAttivita();
-                        // Effettua le selezioni che servono all'eliminazione di una data attività    
-                        } else if (part.equals(Query.DELETE_PART)) {
+                        // Effettua le selezioni che servono all'eliminazione di una data attività
+                        } else if (part.equalsIgnoreCase(Query.DELETE_PART) || part.equalsIgnoreCase(Query.SUSPEND_PART)) {
                             /* ************************************************ *
                              *        Effettua le selezioni che servono         * 
                              *  all'aggiornamento in stato eliminato o sospeso  *
@@ -385,7 +388,7 @@ public class ActivityCommand extends ItemBean implements Command {
                             stato.setInformativa(Query.LIVELLI_RISCHIO[activity.getIdComplessita() - 1]);
                             activity.setStato(stato);*/
                             wbs = db.getWbsHierarchyByOffspring(idPrj, activity.getIdWbs());
-                        } 
+                        }
                         fileJspT = nomeFile.get(part);
                     }
                 } else {
