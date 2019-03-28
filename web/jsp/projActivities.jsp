@@ -45,16 +45,9 @@
               <fmt:formatDate value='${act.dataFine}' pattern='dd/MM/yyyy' />
             </td>
             <td class="${pageScope.stileSafari}" scope="row">
-            <c:choose>
-              <c:when test="${act.stato.id ne 1}">
-              <a href="javascript:popupWindow('Note','popup1',true,'${act.stato.informativa}');" class="helpInfo">
+              <a href="javascript:popupWindow('Note','popup1',true,'${act.stato.informativa}');" class="helpInfo" id="helpAct${act.id}">
                 <c:out value="${act.stato.nome}" escapeXml="false" />
               </a>
-              </c:when>
-              <c:otherwise>
-                <c:out value="${act.stato.nome}" escapeXml="false" />
-              </c:otherwise>
-            </c:choose>
             </td>
             <td scope="row">
               <input type="hidden" value="${act.milestone}" />
@@ -78,18 +71,13 @@
             <c:if test="${act.idStato eq 11}">
               <c:set var="pauseico" value="/ico-start.png" scope="page" />
               <c:set var="pausetxt" value="Riprendi" scope="page" />
-              <c:set var="pauseurl" value="javascript:DoPost()" scope="page" />
+              <c:set var="pauseurl" value="javascript:DoPost(${act.id})" scope="page" />
             </c:if>
-              <a href="${pauseurl}" class="btn" id="del-wbs">
-                <img src="${initParam.urlDirectoryImmagini}${pauseico}" class="btn-del" alt="Gestione sospensione attivita" title="${pausetxt} Attivit&agrave;" />
+              <a href="${pauseurl}" id="del-wbs">
+                <img id="aboutSus${act.id}" src="${initParam.urlDirectoryImmagini}${pauseico}" class="btn-del" alt="Gestione sospensione attivita" title="${pausetxt} Attivit&agrave;" />
               </a>
             </td>
           </tr>
-          <script> 
-          function DoPost(){
-            $.post("${resAct}${p.id}&ida=${act.id}", { id: "${p.id}", ida: "${act.id}" } );  // Values in JSON format
-          }
-          </script>
         </c:forEach>
         </tbody>
       </table>
@@ -115,6 +103,15 @@
       </div>
     </form>
     <%@ include file="subPopup.jspf" %>
+    <script type="text/javascript"> 
+      function DoPost(idAct){
+        $("a#helpAct"+idAct).removeClass("helpInfo");
+        $("a#helpAct"+idAct).removeAttr("href");
+        $("a#helpAct"+idAct).html("Attivit&agrave; riattivata");
+        $("#aboutSus"+idAct).attr("src","${initParam.urlDirectoryImmagini}/spacer.gif");
+        $.post("${resAct}${p.id}&ida="+idAct, { id: "${p.id}", ida: idAct } );  // Values must be in JSON format
+      }
+    </script>
     <script type="text/javascript">
       $(document).ready(function() {
         $("#radioColumn, #nameColumn").click(function () {
