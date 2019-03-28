@@ -146,7 +146,7 @@ public class ActivityCommand extends ItemBean implements Command {
         // Carica la hashmap contenente le pagine da includere in funzione dei parametri sulla querystring
         nomeFile.put(Query.PART_ACTIVITY, nomeFileElenco);
         nomeFile.put(Query.PART_PROJECT_CHARTER_MILESTONE, nomeFileMilestone);
-        nomeFile.put(Query.ADD_ACTIVITY_TO_PROJECT, nomeFileActivity);
+        nomeFile.put(Query.ADD_TO_PROJECT, nomeFileActivity);
         nomeFile.put(Query.MODIFY_PART, nomeFileActivity);
         nomeFile.put(Query.DELETE_PART, nomeFileRecapToDel);
         nomeFile.put(Query.SUSPEND_PART, nomeFileRecapToDel);
@@ -290,13 +290,13 @@ public class ActivityCommand extends ItemBean implements Command {
                             loadParams(part, parser, params);
                             //Vector<ProjectBean> userWritableProjects = db.getProjects(user.getId(), Query.GET_WRITABLE_PROJECTS_ONLY);
                             db.updateActivityPart(idPrj, user.getId(), writableProjects, userWritableActivitiesByProjectId, params);
-                        } else if (part.equalsIgnoreCase(Query.ADD_ACTIVITY_TO_PROJECT)) {
+                        } else if (part.equalsIgnoreCase(Query.ADD_TO_PROJECT)) {
                             /* ************************************************ *
                              *                 INSERT New Activity              *
                              * ************************************************ */
                             loadParams(part, parser, params);
                             isHeader = isFooter = false;
-                            db.insertActivity(idPrj, user, writablePrj, params.get(Query.ADD_ACTIVITY_TO_PROJECT));
+                            db.insertActivity(idPrj, user, writablePrj, params.get(Query.ADD_TO_PROJECT));
                             redirect = "q=" + Query.PART_ACTIVITY + "&id=" + idPrj;
                         } else if (part.equalsIgnoreCase(Query.MODIFY_PART)) {
                             /* ************************************************ *
@@ -331,7 +331,7 @@ public class ActivityCommand extends ItemBean implements Command {
                              *            Recupera le sole Milestones           *
                              * ************************************************ */
                             vActivities = db.getActivities(idPrj, user, Utils.convert(Utils.getUnixEpoch()), Query.GET_MILESTONES_ONLY, !Query.GET_ALL);
-                        } else if (part.equals(Query.ADD_ACTIVITY_TO_PROJECT)) {
+                        } else if (part.equals(Query.ADD_TO_PROJECT)) {
                             /* ************************************************ *
                              *        Effettua le selezioni che servono         * 
                              *      all'inserimento di una nuova attivita'      *
@@ -524,7 +524,7 @@ public class ActivityCommand extends ItemBean implements Command {
         /* **************************************************** *
          *       Ramo di INSERT / UPDATE di una Attivita'       *
          * **************************************************** */
-        else if (part.equalsIgnoreCase(Query.ADD_ACTIVITY_TO_PROJECT) || part.equalsIgnoreCase(Query.MODIFY_PART)) {
+        else if (part.equalsIgnoreCase(Query.ADD_TO_PROJECT) || part.equalsIgnoreCase(Query.MODIFY_PART)) {
             GregorianCalendar date = Utils.getUnixEpoch();
             String dateAsString = Utils.format(date, Query.DATA_SQL_PATTERN);
             HashMap<String, String> act = new HashMap<String, String>();
@@ -546,7 +546,7 @@ public class ActivityCommand extends ItemBean implements Command {
             act.put("act-wbs",          parser.getStringParameter("act-wbs", Utils.VOID_STRING));
             act.put("act-compl",        parser.getStringParameter("act-compl", Utils.VOID_STRING));
             act.put("act-status",       parser.getStringParameter("act-status", Utils.VOID_STRING));
-            formParams.put(Query.ADD_ACTIVITY_TO_PROJECT, act);
+            formParams.put(Query.ADD_TO_PROJECT, act);
             formParams.put(Query.MODIFY_PART, act);
         }
     }
