@@ -75,7 +75,7 @@
                         <img src="${initParam.urlDirectoryImmagini}/ico-act.png" class="btn-del" alt="Link a lista attivita" title="Mostra Attivit&agrave;" />
                       </a>
                       <a href="#del-form${wbsInstance.id}" class="" id="del-wbs" rel="modal:open">
-                        <img src="${initParam.urlDirectoryImmagini}/ico-del.png" class="btn-del" alt="Elimina" title="Elimina" />
+                        <img src="${initParam.urlDirectoryImmagini}/ico-del-outline.png" class="btn-del" alt="Elimina" title="Elimina" />
                       </a>
                       <form id="del-form${wbsInstance.id}" method="post" action="${delWbs}${wbsInstance.id}" class="modal">
                         <input type="hidden" id="wbs-id" name="wbs-id" value="${wbsInstance.id}" />
@@ -219,7 +219,7 @@
                                           </c:if>
                       	                  <div class="text-right">
                                             <a href="#del-form${wbsNipote.id}" class="btn" id="del-wbs" rel="modal:open">
-                                              <img src="${initParam.urlDirectoryImmagini}/ico-del.png" class="btn-del" alt="Elimina" title="Elimina" />
+                                              <img src="${initParam.urlDirectoryImmagini}/ico-del-outline.png" class="btn-del" alt="Elimina" title="Elimina" />
                                             </a>
                                             <form id="del-form${wbsNipote.id}" method="post" action="${delWbs}${wbsNipote.id}" class="modal">
                                               <input type="hidden" id="wbs-id" name="wbs-id" value="${wbsNipote.id}" />
@@ -340,7 +340,7 @@
                                                   </c:if>
                                                   <div class="text-right">
                                                     <a href="#del-form${wbsPronipote.id}" class="btn" id="del-wbs" rel="modal:open">
-                                                      <img src="${initParam.urlDirectoryImmagini}/ico-del.png" class="btn-del" alt="Elimina" title="Elimina" />
+                                                      <img src="${initParam.urlDirectoryImmagini}/ico-del-outline.png" class="btn-del" alt="Elimina" title="Elimina" />
                                                     </a>
                                                     <form id="del-form${wbsPronipote.id}" method="post" action="${delWbs}${wbsPronipote.id}" class="modal">
                                                       <input type="hidden" id="wbs-id" name="wbs-id" value="${wbsPronipote.id}" />
@@ -461,7 +461,7 @@
                                                             </c:if>
                                                             <div class="text-right">
                                                               <a href="#del-form${wbsProPronipote.id}" class="btn" id="del-wbs" rel="modal:open">
-                                                                <img src="${initParam.urlDirectoryImmagini}/ico-del.png" class="btn-del" alt="Elimina" title="Elimina" />
+                                                                <img src="${initParam.urlDirectoryImmagini}/ico-del-outline.png" class="btn-del" alt="Elimina" title="Elimina" />
                                                               </a>
                                                               <form id="del-form${wbsProPronipote.id}" method="post" action="${delWbs}${wbsProPronipote.id}" class="modal">
                                                                 <input type="hidden" id="wbs-id" name="wbs-id" value="${wbsProPronipote.id}" />
@@ -605,7 +605,7 @@
                               </td>
                               <td scope="col" align="center">
                                 <a href="#del-form${wbsFiglio.id}" class="" id="del-wbs" rel="modal:open">
-                                  <img src="${initParam.urlDirectoryImmagini}/ico-del.png" class="btn-del" alt="Elimina" title="Elimina" />
+                                  <img src="${initParam.urlDirectoryImmagini}/ico-del-outline.png" class="btn-del" alt="Elimina" title="Elimina" />
                                 </a>
                                 <form id="del-form${wbsFiglio.id}" method="post" action="${delWbs}${wbsFiglio.id}" class="modal">
                                   <input type="hidden" id="wbs-id" name="wbs-id" value="${wbsFiglio.id}" />
