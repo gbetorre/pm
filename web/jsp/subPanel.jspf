@@ -15,36 +15,63 @@
 <c:if test="${(ruolo eq 'PMOATE') or (ruolo eq 'PMODIP') or (ruolo eq 'PM') or (ruolo eq 'TL')}">
   <c:set var="superuser" value="${true}" scope="page" />
 </c:if>
-<c:if test="${pageScope.superuser}">
-  <c:choose>
-    <c:when test="${param['q'] eq 'pol'}">
-      <input type="button" class="btn btn-primary" name="modifica" value="Modifica" onclick="modify()">
-      <input type="submit" class="btn btn-primary" name="${distinguishingSubmitName}" id="${distinguishingSubmitId}" value="Salva" disabled>
-    </c:when>
-    <c:when test="${param['q'] eq 'wbs'}">
-      <c:choose>
-      <c:when test="${not empty param['p']}">
-        <input type="submit" class="btn btn-primary" name="${distinguishingSubmitName}" id="${distinguishingSubmitId}" value="Salva">
-      </c:when>
-      <c:otherwise>
-        <a class="btn btn-primary" href="${addWbs}${p.id}" id="add-wbs">Aggiungi</a>
-        <!-- <a class="btn btn-primary" href="" id="mod-wbs" onclick="selectionEdit('WBS')">Modifica</a>
-        <input type="submit" class="btn btn-primary" id="del-wbs" name="" value="Elimina" /> -->
-      </c:otherwise>
-      </c:choose>
-    </c:when>
-    <c:when test="${param['q'] eq 'act'}">
+<c:choose>
+  <c:when test="${pageScope.superuser}">
     <c:choose>
-      <c:when test="${not empty param['p']}">
+      <c:when test="${param['q'] eq 'pol'}">
+        <input type="button" class="btn btn-primary" name="modifica" value="Modifica" onclick="modify()">
         <input type="submit" class="btn btn-primary" name="${distinguishingSubmitName}" id="${distinguishingSubmitId}" value="Salva" disabled>
       </c:when>
-      <c:otherwise>
-        <a href="${addAct}${p.id}" class="btn btn-primary" id="add-act">Aggiungi</a>
-        <a href="" class="btn btn-primary" id="mod-act" onclick="selectionEdit('Attivit&agrave;')">Modifica</a>
-        <a href="" class="btn btn-primary" id="sus-act" onclick="selectionDelete('&Egrave; necessario selezionare una attivit&agrave; da sospendere!')">Sospendi</a>
-        <a href="" class="btn btn-primary" id="del-act" onclick="selectionDelete('&Egrave; necessario selezionare una attivit&agrave; da eliminare!')">Elimina</a>
-      </c:otherwise>
+      <c:when test="${param['q'] eq 'wbs'}">
+        <c:choose>
+        <c:when test="${not empty param['p']}">
+          <input type="submit" class="btn btn-primary" name="${distinguishingSubmitName}" id="${distinguishingSubmitId}" value="Salva">
+        </c:when>
+        <c:otherwise>
+          <input type="submit" class="btn btn-danger" id="del-wbs" value="Elimina" />
+        </c:otherwise>
+        </c:choose>
+      </c:when>
+      <c:when test="${param['q'] eq 'act'}">
+      <c:choose>
+        <c:when test="${param['p'] eq 'mod' or param['p'] eq 'add'}">
+          <input type="submit" class="btn btn-primary" name="${distinguishingSubmitName}" id="${distinguishingSubmitId}" value="Salva" disabled>
+        </c:when>
+        <c:when test="${param['p'] eq 'sus'}">
+          <input type="submit" class="btn btn-primary" id="btn-susAct" value="Sospendi" />
+        </c:when>
+        <c:when test="${param['p'] eq 'del'}">
+          <input type="submit" class="btn btn-primary" id="btn-delAct" value="Elimina" />
+        </c:when>
+        <c:otherwise>
+          <a href="${addAct}${p.id}" class="btn btn-primary" id="add-act">Aggiungi</a>
+        </c:otherwise>
+      </c:choose>
+      </c:when>
+    </c:choose>    
+  </c:when>
+  <c:otherwise>
+    <c:choose>
+      <c:when test="${param['q'] eq 'wbs'}">
+        <c:if test="${empty param['p']}">
+          <div class="alert alert-warning">
+            <p>
+              <span class="ui-icon ui-icon-alert"></span>
+              &nbsp;Il tuo ruolo nel progetto non permette di modificare o eliminare parti dello stesso.
+            </p>
+          </div>
+        </c:if>
+      </c:when>
+      <c:when test="${param['q'] eq 'act'}">
+        <c:if test="${not empty param['p']}">
+          <div class="alert alert-warning">
+            <p>
+              <span class="ui-icon ui-icon-alert"></span>
+              &nbsp;Il tuo ruolo nel progetto non permette di modificare o eliminare parti dello stesso.
+            </p>
+          </div>
+        </c:if>
+      </c:when>
     </c:choose>
-    </c:when>
-  </c:choose>    
-</c:if>
+  </c:otherwise>
+</c:choose>
