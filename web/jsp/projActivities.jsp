@@ -3,13 +3,11 @@
 <%@ include file="pcURL.jspf" %>
     <h2>Attivit&agrave; del sotto progetto <c:out value="${p.titolo}" /></h2>
     <hr class="separatore" />
-    <form id="editAct_form" action="" method="post">
     <c:choose>
       <c:when test="${not empty requestScope.attivita}">
       <table class="table table-bordered table-hover" id="listAct">
         <thead class="thead-light">
         <tr>
-          <th scope="col" width="2%"></th>
           <th scope="col" width="*">Nome</th>
           <th scope="col" width="20%">WBS</th>
           <th scope="col" width="10%">Data inizio</th>
@@ -25,9 +23,6 @@
           <c:set var="status" value="${loop.index}" scope="page" />
           <input type="hidden" id="act-id${status}" name="act-id${status}" value="<c:out value="${act.id}"/>">
           <tr class="bgAct${act.stato.id}">
-            <td scope="row" id="radioColumn" class="success">
-              <input type="radio" id="act-${act.id}" name="act-select" value="${act.id}">
-            </td>
             <td scope="row" id="nameColumn" class="success">
               <a href="${modAct}${p.id}&ida=${act.id}">
                 <c:out value="${act.nome}"/>
@@ -73,8 +68,11 @@
               <c:set var="pausetxt" value="Riprendi" scope="page" />
               <c:set var="pauseurl" value="javascript:DoPost(${act.id})" scope="page" />
             </c:if>
-              <a href="${pauseurl}" id="del-wbs">
+              <a href="${pauseurl}" id="sus-act" class="ico">
                 <img id="aboutSus${act.id}" src="${initParam.urlDirectoryImmagini}${pauseico}" class="btn-del" alt="Gestione sospensione attivita" title="${pausetxt} Attivit&agrave;" />
+              </a>
+              <a href="${delAct}${p.id}&ida=${act.id}" id="del-act" class="ico">
+                <img id="aboutDel${act.id}" src="${initParam.urlDirectoryImmagini}/ico-del-outline.png" class="btn-del" alt="Gestione eliminazione attivita" title="Elimina Attivit&agrave;" />
               </a>
             </td>
           </tr>
@@ -101,7 +99,6 @@
           </div>
         </div>
       </div>
-    </form>
     <%@ include file="subPopup.jspf" %>
     <script type="text/javascript"> 
       function DoPost(idAct){
@@ -114,20 +111,6 @@
     </script>
     <script type="text/javascript">
       $(document).ready(function() {
-        $("#radioColumn, #nameColumn").click(function () {
-          $('.selected').removeClass('selected');
-          var trElement = $(this).parent();
-          $(this).parent().addClass('selected');
-          var tdElement = $("td", $(this).parent());
-          $("input[name='act-select']", tdElement).attr("checked", true);
-          var $radioValue = $("input[name='act-select']:checked").val();
-          var $modActUrl = '<c:out value="${modAct}${p.id}" escapeXml="false" />' + "&ida=" + $radioValue;
-          var $susActUrl = '<c:out value="${susAct}${p.id}" escapeXml="false" />' + "&ida=" + $radioValue;
-          var $delActUrl = '<c:out value="${delAct}${p.id}" escapeXml="false" />' + "&ida=" + $radioValue;
-          $('#mod-act').attr('href', $modActUrl);
-          $('#sus-act').attr('href', $susActUrl);
-          $('#del-act').attr('href', $delActUrl);
-        });
         $('#listAct').DataTable();
       });
     </script>
