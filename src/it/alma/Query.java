@@ -154,10 +154,6 @@ public interface Query extends Serializable {
      */
     public static final String ADD_TO_PROJECT                   = "add";
     /**
-     * <p>Costante per il parametro identificante la pagina di inserimento di un'attivit&agrave; di un progetto.</p>
-     */
-    public static final String ADD_ACTIVITY_TO_PROJECT          = "add";
-    /**
      * <p>Costante per il parametro identificante la pagina di modifica di una entit&agrave;.</p>
      */
     public static final String MODIFY_PART                      = "mod";
@@ -425,7 +421,7 @@ public interface Query extends Serializable {
      * Identificativo di stato attivit&agrave; inconsistente, che 
      * pu&ograve; dipendere da varie incongruenze
      */
-    public static final String SOSPESA_HELP = "Le Attivit&agrave; <cite>SOSPESE</cite> sono quelle sulle quali si &egrave; deciso di <cite>NON</cite> proseguire temporaneamente la lavorazione.";
+    public static final String SOSPESA_HELP = "Le Attivit&agrave; <cite>SOSPESE</cite> sono quelle sulle quali si &egrave; deciso di <cite>NON</cite> proseguire temporaneamente la lavorazione.<br />Le Attivit&agrave; <cite>SOSPESE</cite> non vengono visualizzate nei report.";
     /**
      * Identificativo di stato attivit&agrave; inconsistente, che 
      * pu&ograve; dipendere da varie incongruenze
