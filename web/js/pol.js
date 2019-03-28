@@ -176,7 +176,7 @@ function showActivities(indirizzo) {
     AssignPosition(dd, tipo);
     dd.style.display = "block";
     dd.style.width= "230px";
-    dd.style.height = "170px";
+    dd.style.height = "200px";
   }
   
   function ReverseContentDisplay(d) {
