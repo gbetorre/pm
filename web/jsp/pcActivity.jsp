@@ -196,15 +196,7 @@
         </div>
         <br />
         <a href="${act}${requestScope.progetto.id}" id='btn-close' class="btn btnNav">Chiudi</a>
-        <c:choose>
-          <c:when test="${param['p'] eq 'sus'}">
-            <c:set var="action" value="Sospendi" scope="page" />
-          </c:when>
-          <c:when test="${param['p'] eq 'del'}">
-            <c:set var="action" value="Elimina" scope="page" />
-          </c:when>
-        </c:choose>
-        <input type="submit" class="btn btn-primary" id="del-act" name="" value="${action}" />
+        <%@ include file="subPanel.jspf" %>
     </form>
 </c:catch>
 <c:out value="${exception}" />
