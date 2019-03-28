@@ -64,6 +64,7 @@
       </c:when>
       <c:when test="${param['q'] eq 'act'}">
         <c:if test="${not empty param['p']}">
+          <hr class="separatore" />
           <div class="alert alert-warning">
             <p>
               <span class="ui-icon ui-icon-alert"></span>
