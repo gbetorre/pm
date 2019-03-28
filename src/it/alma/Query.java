@@ -326,11 +326,26 @@ public interface Query extends Serializable {
     /**
      * <p>Un'attivit&agrave; APERTA &egrave; un'attivit&agrave; avviata 
      * ma non ancora iniziata, cio&egrave; non vi &egrave; stato imputato lavoro.</p>
+     */
+    public static final String APERTA_HELP = "Le Attivit&agrave; <cite>APERTE</cite> hanno <cite>SOLO DATE PREVISTE</cite>.<br />";
+    /**
+     * <p>Un'attivit&agrave; IN PROGRESS &egrave; un'attivit&agrave; 
+     * gi&agrave; iniziata,ma non ancora terminata.</p>
+     */
+    public static final String IN_PROGRESS_HELP = "Le Attivit&agrave; <cite>IN PROGRESS</cite> hanno <cite>DATA INIZIO EFFETTIVA</cite> non vuota.<br />";
+    /**
+     * <p>Un'attivit&agrave; IN PROGRESS &egrave; un'attivit&agrave; 
+     * gi&agrave; terminata.</p>
+     */
+    public static final String CHIUSA_HELP = "Le Attivit&agrave; <cite>CHIUSE</cite> hanno <cite>DATA FINE EFFETTIVA</cite> non vuota.<br />";
+    /**
+     * <p>Un'attivit&agrave; APERTA &egrave; un'attivit&agrave; avviata 
+     * ma non ancora iniziata, cio&egrave; non vi &egrave; stato imputato lavoro.</p>
      * <p>Inoltre, un'attivit&agrave; regolare &egrave; un'attivit&agrave; 
      * che vive nel presente, cio&egrave; la data di fine, sia pure prevista, 
      * &egrave; nel futuro e la data di inizio prevista &egrave; nel passato.</p>
      */
-    public static final String APERTA_REGOLARE_HELP = "Le Attivit&agrave; <cite>APERTE REGOLARMENTE</cite> sono quelle che hanno <dl><dt>DATA FINE PREVISTA</dt><dd>futura o presente</dd></dl>";
+    public static final String APERTA_REGOLARE_HELP = APERTA_HELP + "Quelle <cite>APERTE REGOLARMENTE</cite> hanno: <dl><dt>DATA FINE PREVISTA</dt><dd> futura o presente</dd></dl>";
     /**
      * <p>Un'attività IN PROGRESS regolare &egrave; un'attivit&agrave; 
      * avviata ed iniziata, ovvero su cui &egrave; stato imputato lavoro 
@@ -341,73 +356,81 @@ public interface Query extends Serializable {
      * <li>Data di fine prevista >= today</li>
      * </ul></p>
      */
-    public static final String IN_PROGRESS_HELP = "Le Attivit&agrave; <cite>in progress</cite> sono quelle che hanno <dl><dt>&ndash; DATA INIZIO EFFETTIVA</dt> <dd>non vuota</dd><dt>&ndash; DATA FINE PREVISTA</dt><dd>futura o presente</dd></dl>";
+    public static final String IN_PROGRESS_REGOLARE_HELP = IN_PROGRESS_HELP + "Quelle<cite>IN PROGRESS REGOLARE</cite> hanno: <dl><dt>&ndash; DATA FINE PREVISTA</dt><dd> futura o presente</dd></dl>";
     /**
      * Un'attivit&agrave; CHIUSA è un'attivit&agrave; conclusa, 
      * su cui non &egrave; più possibile allocare GU o risorse
      */
-    public static final String CHIUSA_HELP = "Le <cite>Attivit&agrave; </cite>";
-
-    public static final String APERTA_REGOLARE_PIANIFICATA_HELP = "Le Attivit&agrave; <cite>PIANIFICATE REGOLARMENTE</cite> sono quelle che hanno <dl><dt>&ndash; DATA INIZIO PREVISTA</dt><dd>futura o presente";
+    public static final String CHIUSA_REGOLARE_HELP = CHIUSA_HELP + "Su quelle <cite>CHIUSE REGOLARMENTE</cite> non &egrave; pi&ugrave; possibile allocare risorse.";
+    /**
+     * Un'attivit&agrave; APERTA REGOLARE PIANIFICATA &egrave; 
+     * un'attivit&agrave; che deve ancora iniziare effettivamente,
+     * ma attualmente &egrave; pianificata nel futuro
+     */
+    public static final String APERTA_REGOLARE_PIANIFICATA_HELP = APERTA_HELP + "Quelle <cite>PIANIFICATE REGOLARMENTE</cite> hanno: <dl><dt>&ndash; DATA INIZIO PREVISTA</dt><dd>futura o presente";
     /**
      * Identificativo di stato attivit&agrave; non ancora lavorata ma 
      * gi&agrave; in ritardo (quindi in ritardo rispetto al previsto,
      * non all'effettivo)
      */
-    public static final String APERTA_IN_RITARDO_APERTURA_HELP = "Le <cite>Attivit&agrave; </cite>";
+    public static final String APERTA_IN_RITARDO_APERTURA_HELP = APERTA_HELP + "Quelle <cite>IN RITARDO RISPETTO L\\'APERTURA</cite> hanno:<dl><dt>&ndash; DATA INIZIO PREVISTA</dt> <dd> nel passato</dd></dl>";
     /**
      * Identificativo di stato attivit&agrave; non ancora lavorata ma 
      * gi&agrave; in ritardo (quindi in ritardo rispetto al previsto,
      * non all'effettivo)
      */
-    public static final String APERTA_IN_RITARDO_CHIUSURA_HELP = "Le <cite>Attivit&agrave; </cite>";
+    public static final String APERTA_IN_RITARDO_CHIUSURA_HELP = APERTA_HELP + "Quelle <cite>IN RITARDO RISPETTO ALLA CHIUSURA</cite> hanno:<dl><dt>&ndash; DATA FINE PREVISTA</dt> <dd> nel passato</dd></dl>";
     /**
      * Identificativo di stato attivit&agrave; gi&agrave; in lavorazione
      * (data inizio effettiva <> NULL) ma con data inizio effettiva
      * precedente rispetto a quanto previsto (data inizio prevista)
      */
-    public static final String IN_PROGRESS_IN_ANTICIPO_HELP = "Le In progress in anticipo sull&amp;inizio<cite>Attivit&agrave; </cite>";
+    public static final String IN_PROGRESS_IN_ANTICIPO_HELP = IN_PROGRESS_HELP + "Quelle <cite>IN PROGRESS IN ANTICIPO SULL\\'INIZIO</cite> hanno:<dl><dt>&ndash; DATA INIZIO PREVISTA</dt> <dd> successiva alla DATA INIZIO EFFETTIVA</dd></dl>";
     /**
      * Identificativo di stato attivit&agrave; gi&agrave; in lavorazione
      * (data inizio effettiva <> NULL) ma che in base al raffronto con 
      * la data fine effettiva avrebbe dovuto essere chiusa 
      */
-    public static final String IN_PROGRESS_IN_RITARDO_HELP = "Le In progress in ritardo su tutta la linea inizio e fine <cite>Attivit&agrave; in progress in ritardo su tutta la linea</cite>";
-    
-    public static final String IN_PROGRESS_CHIUSURA_IN_RITARDO_HELP = "Le <cite>Attivit&agrave; </cite>";
+    public static final String IN_PROGRESS_IN_RITARDO_HELP = IN_PROGRESS_HELP + "Quelle <cite>IN PROGRESS IN RITARDO</cite> sono in ritardo su tutta la linea (sia sull\\'inizio che sulla fine)";
+    /**
+     * Identificativo di stato attivit&agrave; ancora in progress
+     * (data inizio effettiva <> NULL) ma con data fine effettiva 
+     * ancora null e data fine prevista precedente a today
+     */
+    public static final String IN_PROGRESS_CHIUSURA_IN_RITARDO_HELP = IN_PROGRESS_HELP + "Quelle <cite>IN PROGRESS CON CHIUSURA IN RITARDO</cite> hanno:<dl><dt>&ndash; DATA FINE PREVISTA</dt> <dd> precedente alla data odierna</dd><dt>&ndash; DATA FINE EFFETTIVA</dt><dd> vuota</dd></dl>";
     /**
      * Identificativo di stato attivit&agrave; gi&agrave; in lavorazione
      * (data inizio effettiva <> NULL) ma con data inizio effettiva
-     * precedente rispetto a quanto previsto
+     * successiva rispetto a quanto previsto
      */
-    public static final String IN_PROGRESS_INIZIO_IN_RITARDO_HELP = "Le <cite>Attivit&agrave; </cite>";
+    public static final String IN_PROGRESS_INIZIO_IN_RITARDO_HELP = IN_PROGRESS_HELP + "Quelle <cite>IN PROGRESS CON INIZIO IN RITARDO</cite> hanno:<dl><dt>&ndash; DATA INIZIO PREVISTA</dt> <dd> precedente alla data di inizio effettiva</dd></dl>";
     /**
      * Identificativo di stato attivit&agrave; gi&agrave; chiusa
      * (data fine effettiva <> NULL) ma con data fine effettiva
      * precedente rispetto a quanto previsto (data fine prevista)
      */
-    public static final String CHIUSA_IN_ANTICIPO_HELP = "Le <cite>Attivit&agrave; </cite>";
+    public static final String CHIUSA_IN_ANTICIPO_HELP = CHIUSA_HELP + "Quelle <cite>CHIUSA IN ANTICIPO</cite> hanno:<dl><dt>&ndash; DATA FINE EFFETTIVA</dt> <dd> precedente alla data di fine prevista</dd></dl>";
     /**
      * Identificativo di stato attivit&agrave; gi&agrave; chiusa
      * (data inizio effettiva <> NULL) ma con data fine effettiva
      * successiva rispetto a quanto previsto (data fine prevista)
      */
-    public static final String CHIUSA_IN_RITARDO_HELP = "Le <cite>Attivit&agrave; </cite>";
+    public static final String CHIUSA_IN_RITARDO_HELP = CHIUSA_HELP + "Quelle <cite>CHIUSA IN RITARDO</cite> hanno:<dl><dt>&ndash; DATA FINE EFFETTIVA</dt> <dd> successiva alla data di fine prevista</dd></dl>"; 
     /**
      * Identificativo di stato attivit&agrave; inconsistente, che 
      * pu&ograve; dipendere da varie incongruenze
      */
-    public static final String STATO_INCONSISTENTE_HELP = "Le <cite>Attivit&agrave; </cite>";
+    public static final String STATO_INCONSISTENTE_HELP = "Le Attivit&agrave; <cite>IN STATO INCONSISTENTE</cite> sono quelle che possono avere varie incongruenze";
     /**
      * Identificativo di stato attivit&agrave; inconsistente, che 
      * pu&ograve; dipendere da varie incongruenze
      */
-    public static final String SOSPESA_HELP = "Le <cite>Attivit&agrave; </cite>";
+    public static final String SOSPESA_HELP = "Le Attivit&agrave; <cite>SOSPESE</cite> sono quelle sulle quali si &egrave; deciso di <cite>NON</cite> proseguire temporaneamente la lavorazione.";
     /**
      * Identificativo di stato attivit&agrave; inconsistente, che 
      * pu&ograve; dipendere da varie incongruenze
      */
-    public static final String ELIMINATA_HELP = "Le <cite>Attivit&agrave; </cite>";
+    public static final String ELIMINATA_HELP = "Le Attivit&agrave; <cite>ELIMINATE</cite> sono quelle che non vengono pi&uacute; sviluppate.";
     /* ************************************************************************ *
      *   Enumerativi statici per incapsulare i valori di enumerativi dinamici   *
      * ************************************************************************ */
