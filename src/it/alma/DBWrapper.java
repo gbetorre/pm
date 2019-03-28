@@ -4403,7 +4403,7 @@ public class DBWrapper implements Query {
                     else {  // Qui data di fine prevista è >= today
                         stato.setId(IN_PROGRESS);
                         stato.setNome("In progress regolare");
-                        stato.setInformativa(IN_PROGRESS_HELP);
+                        stato.setInformativa(IN_PROGRESS_REGOLARE_HELP);
                     }
                 }
                 else {  // Qui la data di inizio prevista <> NULL quindi possiamo controllare il rapporto tra questa e quella effettiva!
@@ -4428,7 +4428,7 @@ public class DBWrapper implements Query {
                         if (aws.getDataFine().after(rightNow) || aws.getDataFine().equals(rightNow)) {
                             stato.setId(IN_PROGRESS);
                             stato.setNome("In progress in regola");
-                            stato.setInformativa(IN_PROGRESS_HELP);
+                            stato.setInformativa(IN_PROGRESS_REGOLARE_HELP);
                         }
                         else {  // Caso già gestito in caso di data inizio prevista NULL
                             stato.setId(IN_PROGRESS_IN_RITARDO);
@@ -4452,7 +4452,7 @@ public class DBWrapper implements Query {
                 } else {    // Se non è in anticipo e non è in ritardo, è in orario
                         stato.setId(CHIUSA);
                         stato.setNome("Chiusa regolarmente");
-                        stato.setInformativa(CHIUSA_HELP);
+                        stato.setInformativa(CHIUSA_REGOLARE_HELP);
                 }
             }
             // STATO INCONSISTENTE
