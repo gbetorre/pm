@@ -71,10 +71,10 @@
                       </c:choose>
                     </td>
                     <td scope="col">
-                      <a href="${act}${p.id}&idw=${wbsInstance.id}" class="" id="del-wbs">
-                        <img src="${initParam.urlDirectoryImmagini}/ico-act.png" class="btn-del" alt="Link a lista attivita" title="Mostra Attivit&agrave;" />
+                      <a href="${act}${p.id}&idw=${wbsInstance.id}" class="ico" id="actOfwbs">
+                        <img src="${initParam.urlDirectoryImmagini}/ico-act-outline.png" class="btn-del" alt="Link a lista attivita" title="Mostra Attivit&agrave;" />
                       </a>
-                      <a href="#del-form${wbsInstance.id}" class="" id="del-wbs" rel="modal:open">
+                      <a href="#del-form${wbsInstance.id}" class="ico" id="del-wbs" rel="modal:open">
                         <img src="${initParam.urlDirectoryImmagini}/ico-del-outline.png" class="btn-del" alt="Elimina" title="Elimina" />
                       </a>
                       <form id="del-form${wbsInstance.id}" method="post" action="${delWbs}${wbsInstance.id}" class="modal">
@@ -168,7 +168,7 @@
                         <br />
                         <c:choose>
                           <c:when test="${wbsInstance.attivita.capacity() eq 0 && fn:length(wbsInstance.wbsFiglie) eq 0}">
-                            <span class="right"><input type="submit" class="btn btn-danger" id="del-wbs" value="Elimina" /></span>
+                            <%@ include file="subPanel.jspf" %>
                           </c:when>
                           <c:otherwise>
                             <div class="alert alert-warning">
@@ -218,7 +218,10 @@
                                             <cite>(Workpackage)</cite>
                                           </c:if>
                       	                  <div class="text-right">
-                                            <a href="#del-form${wbsNipote.id}" class="btn" id="del-wbs" rel="modal:open">
+                                            <a href="${act}${p.id}&idw=${wbsNipote.id}" class="ico" id="del-wbs">
+                                              <img src="${initParam.urlDirectoryImmagini}/ico-act-outline.png" class="btn-del" alt="Link a lista attivita" title="Mostra Attivit&agrave;" />
+                                            </a>
+                                            <a href="#del-form${wbsNipote.id}" class="ico" id="del-wbs" rel="modal:open">
                                               <img src="${initParam.urlDirectoryImmagini}/ico-del-outline.png" class="btn-del" alt="Elimina" title="Elimina" />
                                             </a>
                                             <form id="del-form${wbsNipote.id}" method="post" action="${delWbs}${wbsNipote.id}" class="modal">
@@ -312,7 +315,7 @@
                                               <br />
                                               <c:choose>
                                                 <c:when test="${wbsNipote.attivita.capacity() eq zero and fn:length(wbsNipote.wbsFiglie) eq zero}">
-                                                  <span class="right"><input type="submit" class="btn btn-danger" id="del-wbs" value="Elimina" /></span>
+                                                  <%@ include file="subPanel.jspf" %>
                                                 </c:when>
                                                 <c:otherwise>
                                                   <div class="alert alert-warning">
@@ -339,7 +342,10 @@
                                                     <cite>(Workpackage)</cite>
                                                   </c:if>
                                                   <div class="text-right">
-                                                    <a href="#del-form${wbsPronipote.id}" class="btn" id="del-wbs" rel="modal:open">
+                                                    <a href="${act}${p.id}&idw=${wbsPronipote.id}" class="ico" id="del-wbs">
+                                                      <img src="${initParam.urlDirectoryImmagini}/ico-act-outline.png" class="btn-del" alt="Link a lista attivita" title="Mostra Attivit&agrave;" />
+                                                    </a>
+                                                    <a href="#del-form${wbsPronipote.id}" class="ico" id="del-wbs" rel="modal:open">
                                                       <img src="${initParam.urlDirectoryImmagini}/ico-del-outline.png" class="btn-del" alt="Elimina" title="Elimina" />
                                                     </a>
                                                     <form id="del-form${wbsPronipote.id}" method="post" action="${delWbs}${wbsPronipote.id}" class="modal">
@@ -433,7 +439,7 @@
                                                       <br />
                                                       <c:choose>
                                                         <c:when test="${wbsPronipote.attivita.capacity() eq zero and fn:length(wbsPronipote.wbsFiglie) eq zero}">
-                                                          <span class="right"><input type="submit" class="btn btn-danger" id="del-wbs" value="Elimina" /></span>
+                                                          <%@ include file="subPanel.jspf" %>
                                                         </c:when>
                                                         <c:otherwise>
                                                           <div class="alert alert-warning">
@@ -460,7 +466,10 @@
                                                               <cite>(Workpackage)</cite>
                                                             </c:if>
                                                             <div class="text-right">
-                                                              <a href="#del-form${wbsProPronipote.id}" class="btn" id="del-wbs" rel="modal:open">
+                                                              <a href="${act}${p.id}&idw=${wbsProPronipote.id}" class="ico" id="del-wbs">
+                                                                <img src="${initParam.urlDirectoryImmagini}/ico-act-outline.png" class="btn-del" alt="Link a lista attivita" title="Mostra Attivit&agrave;" />
+                                                              </a>
+                                                              <a href="#del-form${wbsProPronipote.id}" class="ico" id="del-wbs" rel="modal:open">
                                                                 <img src="${initParam.urlDirectoryImmagini}/ico-del-outline.png" class="btn-del" alt="Elimina" title="Elimina" />
                                                               </a>
                                                               <form id="del-form${wbsProPronipote.id}" method="post" action="${delWbs}${wbsProPronipote.id}" class="modal">
@@ -554,7 +563,7 @@
                                                                 <br />
                                                                 <c:choose>
                                                                   <c:when test="${wbsProPronipote.attivita.capacity() eq zero and fn:length(wbsProPronipote.wbsFiglie) eq zero}">
-                                                                    <span class="right"><input type="submit" class="btn btn-danger" id="del-wbs" value="Elimina" /></span>
+                                                                    <%@ include file="subPanel.jspf" %>
                                                                   </c:when>
                                                                   <c:otherwise>
                                                                     <div class="alert alert-warning">
@@ -604,7 +613,10 @@
                                 </c:choose>
                               </td>
                               <td scope="col" align="center">
-                                <a href="#del-form${wbsFiglio.id}" class="" id="del-wbs" rel="modal:open">
+                                <a href="${act}${p.id}&idw=${wbsFiglio.id}" class="ico" id="del-wbs">
+                                  <img src="${initParam.urlDirectoryImmagini}/ico-act-outline.png" class="btn-del" alt="Link a lista attivita" title="Mostra Attivit&agrave;" />
+                                </a>
+                                <a href="#del-form${wbsFiglio.id}" class="ico" id="del-wbs" rel="modal:open">
                                   <img src="${initParam.urlDirectoryImmagini}/ico-del-outline.png" class="btn-del" alt="Elimina" title="Elimina" />
                                 </a>
                                 <form id="del-form${wbsFiglio.id}" method="post" action="${delWbs}${wbsFiglio.id}" class="modal">
@@ -698,7 +710,7 @@
                                   <br />
                                   <c:choose>
                                     <c:when test="${wbsFiglio.attivita.capacity() eq zero and fn:length(wbsFiglio.wbsFiglie) eq zero}">
-                                      <span class="right"><input type="submit" class="btn btn-danger" id="del-wbs" value="Elimina" /></span>
+                                      <%@ include file="subPanel.jspf" %>
                                     </c:when>
                                     <c:otherwise>
                                       <div class="alert alert-warning">
@@ -745,25 +757,7 @@
           </span>
         </div>
         <div class="col-8 text-center">
-          <%@ include file="subPanel.jspf" %>
+          <a class="btn btn-primary" href="${addWbs}${p.id}" id="add-wbs">Aggiungi</a>
         </div>
       </div>
     </div>
-    <script type="text/javascript">
-      $(document).ready(function() {
-        $("#radioColumn, #nameColumn").click(function () {
-          $('.selected').removeClass('selected');
-          var trElement = $(this).parent();
-          $(this).parent().addClass('selected');
-          var tdElement = $("td", $(this).parent());
-          $("input[name='wbs-select']", tdElement).attr("checked", true);
-          var $radioValue = $("input[name='wbs-select']:checked").val();
-          var $modWbsUrl = '<c:out value="${modWbs}${p.id}" escapeXml="false" />' + "&idw=" + $radioValue;
-          var $delWbsName = "del-wbs" + $radioValue;
-          $('#mod-wbs').attr('href', $modWbsUrl);
-          $('#del-wbs').attr('name', $delWbsName);
-          var $showActUrl = '<c:out value="${act}${p.id}" escapeXml="false" />' + "&idw=" + $radioValue;
-          $('#show_act').attr('href', $showActUrl);
-        });
-      });
-    </script>
