@@ -191,7 +191,7 @@
             <strong>Stato attivit&agrave;</strong>
           </div>
           <div class="col-sm-5">
-            <c:out value="${actInstance.stato.nome}" />
+            <c:out value="${actInstance.stato.nome}" escapeXml="false" />
           </div>
         </div>
         <br />
