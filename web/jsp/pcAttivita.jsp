@@ -211,7 +211,11 @@
           </div>
         </div>
         <br />
-        <a href="<c:out value= "${act}${requestScope.progetto.id}" escapeXml="false" />" id='btn-close' class="btn btnNav">Chiudi</a>
+        <c:set var="redirect" value="${act}${requestScope.progetto.id}" scope="page" />
+        <c:if test="${not empty param['idw']}">
+          <c:set var="redirect" value="${redirect}&idw=${param['idw']}" scope="page" />
+        </c:if>
+        <a href="<c:out value="${redirect}" escapeXml="false" />" id='btn-close' class="btn btnNav">Chiudi</a>
         <input type="button" class="btn btn-primary" name="modifica" value="Modifica" onclick="modify();">
         <%@ include file="subPanel.jspf" %>
     </form>
@@ -221,6 +225,7 @@
     var offsetcharacter = 5;
     // Adesso
     var rightNow = new Date();
+    // Giorno odierno
     var dayOfMonth = rightNow.getUTCDate();
     // Millisecondi trascorsi da UNIX_EPOCH
     var elapsedTimeFromUnixEpochAsMillisec = Date.now();
@@ -234,14 +239,6 @@
     var elapsedDays = elapsedHours/24;
     // Mesi trascorsi da UNIX_EPOCH
     var elapsedMonths = elapsedDays/30;
-    // Data a partire dalla quale sono iniziati i progetti di eccellenza
-    //var start = new Date('2018-01-01');
-    // Millisecondi trascorsi da UNIX_EPOCH fino a start progetti
-    //var startAsMillis = start.getTime();
-    // Giorni trascorsi da UNIX_EPOCH fino a start
-    //var elapsedDaysToStart = Math.round(startAsMillis/(1000*60*60*24));
-    // Giorni trascorsi da start progetti fino ad oggi
-    //var elapsedDaysFromStartToNow = elapsedDays - elapsedDaysToStart;
     // Rappresentazione a stringa della data di oggi, in formato italiano
     var todayAsString = rightNow.getDate() + "/" + (1 + rightNow.getMonth()) + "/" + rightNow.getFullYear();
     // Corpo del programma
@@ -262,15 +259,6 @@
           dateITA: true,
           required: true
         },
-        //'act-guprevisti': {
-        //  number: true
-        //},
-        //'act-gueffettivi': {
-        //  number: true
-        //},
-        //'act-gurimanenti': {
-        //  number: true
-        //}
         'act-datainiziovera': {
           dateITA: true,
           lessThan: true
