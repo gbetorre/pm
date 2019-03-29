@@ -9,6 +9,9 @@
           Report del sotto progetto:&nbsp;<strong><c:out value="${p.titolo}" /></strong>
           <span class="float-right">
             <a href="#" class="btn btn-primary" id="exp-report">Esporta</a>
+            <a class="ico" href="${project}">
+              <img src="${initParam.urlDirectoryImmagini}/ico-home.png" class="ico-home" alt="Torna a elenco progetti" title="Torna a elenco progetti" />
+            </a>
           </span>
         </h2>
         <hr class="riga" />
@@ -87,7 +90,9 @@
       <div class="form-row">
         <div class="col-2">  
           <span class="float-left">
-            <a class="btn btnNav" href="${project}">Chiudi</a>
+            <a class="ico" href="${project}">
+              <img src="${initParam.urlDirectoryImmagini}/ico-home.png" class="ico-home" alt="Torna a elenco progetti" title="Torna a elenco progetti" />
+            </a>
           </span>
         </div>
       </div>
