@@ -8,6 +8,9 @@
     </c:url>
     <h2>WBS del sotto progetto <strong><c:out value="${p.titolo}" /></strong></h2>
     <hr class="separatore" />
+    <span class="float-right">
+      <a class="btn btnNav" href="${project}">Torna a elenco progetti</a>
+    </span>
     <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
       <li class="nav-item"><a class="nav-link active tabactive" data-toggle="tab" href="#">WBS</a></li>
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${grafico}${p.id}">Grafico</a></li>
@@ -757,7 +760,7 @@
           </span>
         </div>
         <div class="col-8 text-center">
-          <a class="btn btn-primary" href="${addWbs}${p.id}" id="add-wbs">Aggiungi</a>
+          <%@ include file="subPanel.jspf" %>
         </div>
       </div>
     </div>
