@@ -39,7 +39,7 @@
           <td scope="row">
             <fmt:formatDate value='${act.dataFine}' pattern='dd/MM/yyyy' />
           </td>
-          <td class="${pageScope.stileSafari}" scope="row">
+          <td scope="row" id="stateActCell${act.id}">
             <a href="javascript:popupWindow('Note','popup1',true,'${act.stato.informativa}');" class="helpInfo" id="helpAct${act.id}">
               <c:out value="${act.stato.nome}" escapeXml="false" />
             </a>
@@ -105,6 +105,7 @@
         $("a#helpAct"+idAct).removeClass("helpInfo");
         $("a#helpAct"+idAct).removeAttr("href");
         $("a#helpAct"+idAct).html("Attivit&agrave; riattivata");
+        $("td#stateActCell"+idAct).addClass("bgSts22");
         $("#aboutSus"+idAct).attr("src","${initParam.urlDirectoryImmagini}/spacer.gif");
         $.post("${resAct}${p.id}&ida="+idAct, { id: "${p.id}", ida: idAct } );  // Values must be in JSON format
       }
