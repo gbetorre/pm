@@ -301,6 +301,8 @@ public class WbsCommand extends ItemBean implements Command {
                     if (nomeFile.containsKey(part)) { 
                         if (part.equalsIgnoreCase(Query.PART_REPORT)) {
                             workPackages = retrieveWorkPackages(idPrj, db);
+                        } else if (part.equalsIgnoreCase(Query.PART_GRAPHIC)) {
+                            vWbsAncestors = db.getWbsHierarchy(idPrj);
                         } else {
                             // Selezioni per visualizzazione, aggiunta e modifica wbs
                             // Seleziona tutte le WBS non workpackage per mostrare i possibili padri nella pagina di dettaglio
