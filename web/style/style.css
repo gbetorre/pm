@@ -332,10 +332,12 @@ textarea {
 }*/
 
 .btn-del {
-    width:30px;
+    width: 30px;
 }
 
-
+.ico-home {
+	width: 40px;
+}
 /*---------------------- Righe Orizzontali ------------------------*/
 hr  {
 	clear: both; height: 1px;
@@ -422,43 +424,43 @@ hr.riga       {
 
 /*---------------------- STATI ------------------------*/
 .bgAct1 {
-  background-image: linear-gradient(to left, #b3e6ff, transparent) !important;
+  background-image: linear-gradient(to right, #b3e6ff, transparent) !important;
 }
 
 .bgAct2 {
-  background-image: linear-gradient(to left, #ffffb3, transparent) !important;
+  background-image: linear-gradient(to right, #ffffb3, transparent) !important;
 }
 
 .bgAct3 {
-	background-image: linear-gradient(to left, #c3e6cb, transparent) !important;
+	background-image: linear-gradient(to right, #c3e6cb, transparent) !important;
 }
 
 .bgAct4 {
-	background-image: linear-gradient(to left, #d9d9d9, transparent) !important;
+	background-image: linear-gradient(to right, #d9d9d9, transparent) !important;
 }
 
 .bgAct5 {
-	background-image: linear-gradient(to left, #ffff33, transparent) !important;
+	background-image: linear-gradient(to right, #ffff33, transparent) !important;
 }
 
 .bgAct6 {
-	background-image: linear-gradient(to left, #ffb380, transparent) !important;
+	background-image: linear-gradient(to right, #ffb380, transparent) !important;
 }
 
 .bgAct7 {
-	background-image: linear-gradient(to left, #ff6600, transparent) !important;
+	background-image: linear-gradient(to right, #ff6600, transparent) !important;
 }
 
 .bgAct8 {
-	background-image: linear-gradient(to left, #bfff00, transparent) !important;
+	background-image: linear-gradient(to right, #bfff00, transparent) !important;
 }
 
 .bgAct9 {
-	background-image: linear-gradient(to left, #28a754, transparent) !important;
+	background-image: linear-gradient(to right, #28a754, transparent) !important;
 }
 
 .bgAct10 {
-	background-image: linear-gradient(to left, #f5c6cb, transparent) !important;
+	background-image: linear-gradient(to right, #f5c6cb, transparent) !important;
 }
 
 .bgSts21, .bgSts22 {
@@ -551,7 +553,8 @@ hr.riga       {
 	  }
         
  a.helpInfo {
-  background: transparent url("../img/help.png") no-repeat right top; 
+  background: transparent url("../img/ico-help.png") no-repeat right top;
+  background-size: 18px;
   padding: 3px 30px 3px 0px;
   color: #484f51;
  }
