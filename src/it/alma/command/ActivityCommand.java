@@ -282,7 +282,10 @@ public class ActivityCommand extends ItemBean implements Command {
                         LinkedHashMap<Integer, Vector<ActivityBean>> userWritableActivitiesByProjectId = (LinkedHashMap<Integer, Vector<ActivityBean>>) ses.getAttribute("writableActivity");
                         // Trasforma un Vector di progetti scrivibili dall'utente loggato in un dictionary degli stessi
                         HashMap<Integer, ProjectBean> writableProjects = ProjectCommand.decant(writablePrj);
-                        // Controlla se deve effettuare un inserimento o un aggiornamento
+                        // Redirect dinamico
+                        StringBuffer redirectAsStringBuffer = new StringBuffer("q=" + Query.PART_ACTIVITY + "&id=" + idPrj);
+                        // Controlla il tipo di operazione in scrittura che deve effettuare 
+                        // (inserimento, aggiornamento, sospensione, riattivazione, eliminazione)
                         if (part.equalsIgnoreCase(Query.PART_PROJECT_CHARTER_MILESTONE)) {
                             /* ************************************************ *
                              *            UPDATE Multiple Activity Part         *
@@ -297,14 +300,20 @@ public class ActivityCommand extends ItemBean implements Command {
                             loadParams(part, parser, params);
                             isHeader = isFooter = false;
                             db.insertActivity(idPrj, user, writablePrj, params.get(Query.ADD_TO_PROJECT));
-                            redirect = "q=" + Query.PART_ACTIVITY + "&id=" + idPrj;
+                            if (idWbs > Utils.DEFAULT_ID) {
+                                redirectAsStringBuffer.append("&idw=" + idWbs);
+                            }
+                            redirect = String.valueOf(redirectAsStringBuffer);
                         } else if (part.equalsIgnoreCase(Query.MODIFY_PART)) {
                             /* ************************************************ *
                              *               UPDATE Single Activity             *
                              * ************************************************ */
                             loadParams(part, parser, params);
                             db.updateActivity(idPrj, user, writablePrj, userWritableActivitiesByProjectId, params.get(Query.MODIFY_PART));
-                            redirect = "q=" + Query.PART_ACTIVITY + "&id=" + idPrj;
+                            if (idWbs > Utils.DEFAULT_ID) {
+                                redirectAsStringBuffer.append("&idw=" + idWbs);
+                            }
+                            redirect = String.valueOf(redirectAsStringBuffer);
                         } else if (part.equalsIgnoreCase(Query.DELETE_PART)  || 
                                    part.equalsIgnoreCase(Query.SUSPEND_PART) ||
                                    part.equalsIgnoreCase(Query.RESUME_PART))    {
@@ -313,7 +322,11 @@ public class ActivityCommand extends ItemBean implements Command {
                              *    SUSPEND or DELETE or RESUME Single Activity   *
                              * ************************************************ */
                             db.updateActivityState(idPrj, idAct, part, user, writablePrj, userWritableActivitiesByProjectId);
-                            redirect = "q=" + Query.PART_ACTIVITY + "&id=" + idPrj;
+                            // Se la funzione è invocata nel contesto di wbs deve redirigere sulle attività di wbs
+                            if (idWbs > Utils.DEFAULT_ID) {
+                                redirectAsStringBuffer.append("&idw=" + idWbs);
+                            }
+                            redirect = String.valueOf(redirectAsStringBuffer);
                         }
                         // Aggiorna le attività dell'utente in sessione
                         ses.removeAttribute("writableActivity");
@@ -378,15 +391,6 @@ public class ActivityCommand extends ItemBean implements Command {
                             // Effettua le selezioni che servono all'eliminazione di una data attività
                             isHeader = isFooter = false;
                             activity = db.getActivity(idPrj, idAct, user);
-                            /*
-                            CodeBean stato = new CodeBean();
-                            int index = activity.getIdStato();
-                            if (index == 1 || index == 2) {
-                                --index;
-                            }
-                            stato.setNome(Query.STATI_PROGETTO[index]);
-                            stato.setInformativa(Query.LIVELLI_RISCHIO[activity.getIdComplessita() - 1]);
-                            activity.setStato(stato);*/
                             wbs = db.getWbsHierarchyByOffspring(idPrj, activity.getIdWbs());
                         }
                         fileJspT = nomeFile.get(part);
