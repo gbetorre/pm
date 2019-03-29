@@ -1,6 +1,14 @@
     <%@ include file="pcURL.jspf" %>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
+      var wbsInstance = new Object();
+      var vectorOfWbs = new Array();
+      <c:forEach var="wbsAvo" items="${requestScope.wbsHierarchy}" varStatus="loop">
+      <c:set var="status" value="${loop.index}" scope="page" />
+      	wbsInstance.nome = ${wbsAvo.nome};
+      	wbsInstance.padre = ${wbsAvo.wbsPadre.nome};
+      	vectorOfWbs[status] = ${wbsInstance};
+  	  </c:forEach>
       google.charts.load('current', {packages:["orgchart"]});
       google.charts.setOnLoadCallback(drawChart);
 
@@ -12,7 +20,7 @@
         // For each orgchart box, provide the name, father, and tooltip to show.
         data.addRows([
         <c:forEach var="wbsAvo" items="${requestScope.wbsHierarchy}">
-          [{v:'${wbsAvo.nome}', f:'${wbsAvo.nome}'},
+          [{v:'${vectorOfWbs[1].wbsInstance.nome}', f:'${wbsAvo.nome}'},
            '', 'WBS capostipite'],
           <c:forEach var="wbsFiglio" items="${wbsAvo.wbsFiglie}">
           [{v:'${wbsFiglio.nome}', f:'${wbsFiglio.nome}'},

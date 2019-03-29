@@ -8,7 +8,9 @@
   </c:if>
 </c:forTokens>
     <span class="float-right">
-      <a class="btn btnNav" href="${project}">Torna a elenco progetti</a>
+      <a class="ico" href="${project}">
+        <img src="${initParam.urlDirectoryImmagini}/ico-home.png" class="ico-home" alt="Torna a elenco progetti" title="Torna a elenco progetti" />
+      </a>
     </span>
     <form id="pcvision_form" name="pcv" action="#" method="post">
   	<ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
@@ -51,7 +53,9 @@
               </div>
               <div class="col-2">
                 <span class="float-right">
-            		  <a class="btn btnNav" href="${stakeholder}${p.id}">Avanti &gt;</a>
+                  <a class="ico" href="${stakeholder}${p.id}">
+                    <img src="${initParam.urlDirectoryImmagini}/ico-forward.png" class="ico-home" alt="Vai a pagina Stakeholder" title="Vai a pagina Stakeholder" />
+                  </a>
                 </span>
               </div>
             </div>
