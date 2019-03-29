@@ -2,6 +2,9 @@
 <%@ include file="pcURL.jspf" %>
     <c:set var="prj" value="${requestScope.progetto}" scope="page" />
     <h4>Report dei Work Packages del sotto progetto: <cite><c:out value="${prj.titolo}" /></cite></h4>
+    <span class="float-right">
+      <a class="btn btnNav" href="${wbs}${p.id}">Torna a elenco WBS</a>
+    </span>
     <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${wbs}${prj.id}">WBS</a></li>
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${grafico}${prj.id}">Grafico</a></li>
@@ -125,9 +128,4 @@
           $('#mod-act').attr('href', $modActUrl);
         });
       });
-    </script>
-    <script>
-      /*function checkUrl() {
-        if ()
-      }*/
     </script>
