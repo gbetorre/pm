@@ -1,6 +1,8 @@
 <%@ include file="pcURL.jspf" %>
     <span class="float-right">
-      <a class="btn btnNav" href="${project}">Torna a elenco progetti</a>
+      <a class="ico" href="${project}">
+        <img src="${initParam.urlDirectoryImmagini}/ico-home.png" class="ico-home" alt="Torna a elenco progetti" title="Torna a elenco progetti" />
+      </a>
     </span>
     <form id="pcstakeholder_form" action="#" method="post">
       <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">

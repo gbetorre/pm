@@ -51,7 +51,9 @@
             <div class="row">
               <div class="col-2">
                 <span class="float-left">
-                  <a class="btn btnNav" href="${project}">Torna a elenco progetti</a>
+                  <a class="ico" href="${project}">
+                    <img src="${initParam.urlDirectoryImmagini}/ico-home.png" class="ico-home" alt="Torna a elenco progetti" title="Torna a elenco progetti" />
+                  </a>
                 </span>
               </div>
               <div class="col-8 text-center">
