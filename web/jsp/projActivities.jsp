@@ -2,6 +2,11 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ include file="pcURL.jspf" %>
     <h2>Attivit&agrave; del sotto progetto <c:out value="${p.titolo}" /></h2>
+    <span class="float-right">
+      <a class="ico" href="${project}">
+        <img src="${initParam.urlDirectoryImmagini}/ico-home.png" class="ico-home" alt="Torna a elenco progetti" title="Torna a elenco progetti" />
+      </a>
+    </span>
     <hr class="separatore" />
   <c:choose>
     <c:when test="${not empty requestScope.attivita}">
@@ -22,8 +27,8 @@
       <c:forEach var="act" items="${requestScope.attivita}" varStatus="loop">
         <c:set var="status" value="${loop.index}" scope="page" />
         <input type="hidden" id="act-id${status}" name="act-id${status}" value="<c:out value="${act.id}"/>">
-        <tr class="bgAct${act.stato.id}">
-          <td scope="row" id="nameColumn" class="success">
+        <tr>
+          <td scope="row" id="nameColumn" class="success bgAct${act.stato.id}">
             <a href="${modAct}${p.id}&ida=${act.id}">
               <c:out value="${act.nome}"/>
             </a>
@@ -91,7 +96,9 @@
       <div class="row">
         <div class="col-2">
           <span class="float-left">
-            <a class="btn btnNav" href="${project}">Chiudi</a>
+            <a class="ico" href="${project}">
+              <img src="${initParam.urlDirectoryImmagini}/ico-home.png" class="ico-home" alt="Torna a elenco progetti" title="Torna a elenco progetti" />
+            </a>
           </span>
         </div>
         <div class="col-8 text-center">
@@ -112,6 +119,10 @@
     </script>
     <script type="text/javascript">
       $(document).ready(function() {
-        $('#listAct').DataTable();
+        $('#listAct').DataTable({
+          "columnDefs": [
+            { "orderable": false, "targets": -1 }
+          ]
+        });
       });
     </script>
