@@ -23,14 +23,9 @@
         <input type="submit" class="btn btn-primary" name="${distinguishingSubmitName}" id="${distinguishingSubmitId}" value="Salva" disabled>
       </c:when>
       <c:when test="${param['q'] eq 'wbs'}">
-        <c:choose>
-        <c:when test="${not empty param['p']}">
+        <c:if test="${not empty param['p']}">
           <input type="submit" class="btn btn-primary" name="${distinguishingSubmitName}" id="${distinguishingSubmitId}" value="Salva">
-        </c:when>
-        <c:otherwise>
-          <input type="submit" class="btn btn-danger" id="del-wbs" value="Elimina" />
-        </c:otherwise>
-        </c:choose>
+        </c:if>
       </c:when>
       <c:when test="${param['q'] eq 'act'}">
       <c:choose>
@@ -57,21 +52,19 @@
           <div class="alert alert-warning">
             <p>
               <span class="ui-icon ui-icon-alert"></span>
-              &nbsp;Il tuo ruolo nel progetto non permette di modificare o eliminare parti dello stesso.
+              &nbsp;Il tuo ruolo nel progetto non permette di aggiungere, modificare o eliminare parti dello stesso.
             </p>
           </div>
         </c:if>
       </c:when>
       <c:when test="${param['q'] eq 'act'}">
-        <c:if test="${not empty param['p']}">
-          <hr class="separatore" />
-          <div class="alert alert-warning">
-            <p>
-              <span class="ui-icon ui-icon-alert"></span>
-              &nbsp;Il tuo ruolo nel progetto non permette di modificare o eliminare parti dello stesso.
-            </p>
-          </div>
-        </c:if>
+        <hr class="separatore" />
+        <div class="alert alert-warning">
+          <p>
+            <span class="ui-icon ui-icon-alert"></span>
+            &nbsp;Il tuo ruolo nel progetto non permette di aggiungere, modificare o eliminare parti dello stesso.
+          </p>
+        </div>
       </c:when>
     </c:choose>
   </c:otherwise>
