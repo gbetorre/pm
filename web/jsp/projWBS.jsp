@@ -16,7 +16,7 @@
     <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
       <li class="nav-item"><a class="nav-link active tabactive" data-toggle="tab" href="#">WBS</a></li>
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${grafico}${p.id}">Grafico</a></li>
-      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="javascript:alert('Occorre selezionare una WBS per visualizzarne le attività')" id="show_act">Attività</a></li>
+      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="javascript:alert('Per visualizzare le attività di una WBS cliccare sull\'iconcina in corrispondenza della WBS')" id="show_act">Attivit&agrave;</a></li>
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${rep}${p.id}">Report</a></li>
     </ul>
     <c:choose>
@@ -62,22 +62,32 @@
                       <c:out value="${wbsInstance.risultatiRaggiunti}" />
                     </td>
                     <td scope="col">
-                      <c:choose>
-                        <c:when test="${wbsInstance.workPackage}">
-                          <div class="form-check text-center">
-                            <input type="checkbox" class="form-check-input" id="wbs-workpackage${status}" name="wbs-workpackage${status}" checked disabled>
-                          </div>
-                        </c:when>
-                        <c:otherwise>
-                          <div class="form-check text-center">
-                            <input type="checkbox" class="form-check-input" id="wbs-workpackage${status}" name="wbs-workpackage${status}" disabled>
-                          </div>
-                        </c:otherwise>
-                      </c:choose>
+                    <c:choose>
+                      <c:when test="${wbsInstance.workPackage}">
+                      <div class="form-check text-center">
+                        <input type="checkbox" class="form-check-input" id="wbs-workpackage${status}" name="wbs-workpackage${status}" checked disabled>
+                      </div>
+                      </c:when>
+                      <c:otherwise>
+                      <div class="form-check text-center">
+                        <input type="checkbox" class="form-check-input" id="wbs-workpackage${status}" name="wbs-workpackage${status}" disabled>
+                      </div>
+                      </c:otherwise>
+                    </c:choose>
                     </td>
                     <td scope="col">
+                    <c:choose>
+                      <c:when test="${wbsInstance.attivita.capacity() gt zero}">
+                        <c:set var="icoAct" value="ico-act-outline.png" scope="page" />
+                        <c:set var="txtAct" value="Mostra Attivit&agrave;" scope="page" />
+                      </c:when>
+                      <c:otherwise>
+                        <c:set var="icoAct" value="ico-act-strike.png" scope="page" />
+                        <c:set var="txtAct" value="A questa WBS non sono state associate attivit&agrave;" scope="page" />
+                      </c:otherwise>
+                    </c:choose>
                       <a href="${act}${p.id}&idw=${wbsInstance.id}" class="ico" id="actOfwbs">
-                        <img src="${initParam.urlDirectoryImmagini}/ico-act-outline.png" class="btn-del" alt="Link a lista attivita" title="Mostra Attivit&agrave;" />
+                        <img src="${initParam.urlDirectoryImmagini}/${icoAct}" class="btn-del" alt="Link a lista attivita" title="${txtAct}" />
                       </a>
                       <a href="#del-form${wbsInstance.id}" class="ico" id="del-wbs" rel="modal:open">
                         <img src="${initParam.urlDirectoryImmagini}/ico-del-outline.png" class="btn-del" alt="Elimina" title="Elimina" />
@@ -147,7 +157,7 @@
                           </div>
                         </div>
                         <br />
-                        <c:if test="${wbsInstance.attivita.capacity() gt 0}">
+                        <c:if test="${wbsInstance.attivita.capacity() gt zero}">
                           <div class="row">
                             <div class="col-sm-5"><strong>Attivit&agrave; collegate: ${wbsInstance.attivita.capacity()}</strong></div>
                             <div class="col-sm-5">
@@ -172,7 +182,7 @@
                         </c:if>
                         <br />
                         <c:choose>
-                          <c:when test="${wbsInstance.attivita.capacity() eq 0 && fn:length(wbsInstance.wbsFiglie) eq 0}">
+                          <c:when test="${wbsInstance.attivita.capacity() eq zero and fn:length(wbsInstance.wbsFiglie) eq zero}">
                             <%@ include file="subPanel.jspf" %>
                           </c:when>
                           <c:otherwise>
@@ -223,8 +233,18 @@
                                             <cite>(Workpackage)</cite>
                                           </c:if>
                       	                  <div class="text-right">
-                                            <a href="${act}${p.id}&idw=${wbsNipote.id}" class="ico" id="del-wbs">
-                                              <img src="${initParam.urlDirectoryImmagini}/ico-act-outline.png" class="btn-del" alt="Link a lista attivita" title="Mostra Attivit&agrave;" />
+                                          <c:choose>
+                                            <c:when test="${wbsNipote.attivita.capacity() gt zero}">
+                                              <c:set var="icoAct" value="ico-act-outline.png" scope="page" />
+                                              <c:set var="txtAct" value="Mostra Attivit&agrave;" scope="page" />
+                                            </c:when>
+                                            <c:otherwise>
+                                              <c:set var="icoAct" value="ico-act-strike.png" scope="page" />
+                                              <c:set var="txtAct" value="A questa WBS non sono state associate attivit&agrave;" scope="page" />
+                                            </c:otherwise>
+                                          </c:choose>
+                                            <a href="${act}${p.id}&idw=${wbsNipote.id}" class="ico" id="wbsAct">
+                                              <img src="${initParam.urlDirectoryImmagini}/${icoAct}" class="btn-del" alt="Link a lista attivita" title="${txtAct}" />
                                             </a>
                                             <a href="#del-form${wbsNipote.id}" class="ico" id="del-wbs" rel="modal:open">
                                               <img src="${initParam.urlDirectoryImmagini}/ico-del-outline.png" class="btn-del" alt="Elimina" title="Elimina" />
@@ -294,7 +314,7 @@
                                                 </div>
                                               </div>
                                               <br />
-                                              <c:if test="${wbsNipote.attivita.capacity() gt 0}">
+                                              <c:if test="${wbsNipote.attivita.capacity() gt zero}">
                                                 <div class="row">
                                                   <div class="col-sm-5"><strong>Attivit&agrave; collegate: ${wbsNipote.attivita.capacity()}</strong></div>
                                                   <div class="col-sm-5">
@@ -303,7 +323,7 @@
                                                 </div>
                                               </c:if>
                                               <br />
-                                              <c:if test="${fn:length(wbsNipote.wbsFiglie) gt 0}">
+                                              <c:if test="${fn:length(wbsNipote.wbsFiglie) gt zero}">
                                                 <div class="row">
                                                   <div class="col-sm-5"><strong>WBS direttamente collegate:</strong></div>
                                                   <div class="col-sm-5">
@@ -347,8 +367,18 @@
                                                     <cite>(Workpackage)</cite>
                                                   </c:if>
                                                   <div class="text-right">
-                                                    <a href="${act}${p.id}&idw=${wbsPronipote.id}" class="ico" id="del-wbs">
-                                                      <img src="${initParam.urlDirectoryImmagini}/ico-act-outline.png" class="btn-del" alt="Link a lista attivita" title="Mostra Attivit&agrave;" />
+                                                  <c:choose>
+                                                    <c:when test="${wbsPronipote.attivita.capacity() gt zero}">
+                                                      <c:set var="icoAct" value="ico-act-outline.png" scope="page" />
+                                                      <c:set var="txtAct" value="Mostra Attivit&agrave;" scope="page" />
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                      <c:set var="icoAct" value="ico-act-strike.png" scope="page" />
+                                                      <c:set var="txtAct" value="A questa WBS non sono state associate attivit&agrave;" scope="page" />
+                                                    </c:otherwise>
+                                                  </c:choose>
+                                                    <a href="${act}${p.id}&idw=${wbsPronipote.id}" class="ico" id="wbsActLev4">
+                                                      <img src="${initParam.urlDirectoryImmagini}/${icoAct}" class="btn-del" alt="Link a lista attivita" title="${txtAct}" />
                                                     </a>
                                                     <a href="#del-form${wbsPronipote.id}" class="ico" id="del-wbs" rel="modal:open">
                                                       <img src="${initParam.urlDirectoryImmagini}/ico-del-outline.png" class="btn-del" alt="Elimina" title="Elimina" />
@@ -418,7 +448,7 @@
                                                         </div>
                                                       </div>
                                                       <br />
-                                                      <c:if test="${wbsPronipote.attivita.capacity() gt 0}">
+                                                      <c:if test="${wbsPronipote.attivita.capacity() gt zero}">
                                                         <div class="row">
                                                           <div class="col-sm-5"><strong>Attivit&agrave; collegate: ${wbsPronipote.attivita.capacity()}</strong></div>
                                                           <div class="col-sm-5">
@@ -427,7 +457,7 @@
                                                         </div>
                                                       </c:if>
                                                       <br />
-                                                      <c:if test="${fn:length(wbsPronipote.wbsFiglie) gt 0}">
+                                                      <c:if test="${fn:length(wbsPronipote.wbsFiglie) gt zero}">
                                                         <div class="row">
                                                           <div class="col-sm-5"><strong>WBS direttamente collegate:</strong></div>
                                                           <div class="col-sm-5">
@@ -471,8 +501,18 @@
                                                               <cite>(Workpackage)</cite>
                                                             </c:if>
                                                             <div class="text-right">
-                                                              <a href="${act}${p.id}&idw=${wbsProPronipote.id}" class="ico" id="del-wbs">
-                                                                <img src="${initParam.urlDirectoryImmagini}/ico-act-outline.png" class="btn-del" alt="Link a lista attivita" title="Mostra Attivit&agrave;" />
+                                                            <c:choose>
+                                                              <c:when test="${wbsProPronipote.attivita.capacity() gt zero}">
+                                                                <c:set var="icoAct" value="ico-act-outline.png" scope="page" />
+                                                                <c:set var="txtAct" value="Mostra Attivit&agrave;" scope="page" />
+                                                              </c:when>
+                                                              <c:otherwise>
+                                                                <c:set var="icoAct" value="ico-act-strike.png" scope="page" />
+                                                                <c:set var="txtAct" value="A questa WBS non sono state associate attivit&agrave;" scope="page" />
+                                                              </c:otherwise>
+                                                            </c:choose>
+                                                              <a href="${act}${p.id}&idw=${wbsProPronipote.id}" class="ico" id="wbsActLev5">
+                                                                <img src="${initParam.urlDirectoryImmagini}/${icoAct}" class="btn-del" alt="Link a lista attivita" title="${txtAct}" />
                                                               </a>
                                                               <a href="#del-form${wbsProPronipote.id}" class="ico" id="del-wbs" rel="modal:open">
                                                                 <img src="${initParam.urlDirectoryImmagini}/ico-del-outline.png" class="btn-del" alt="Elimina" title="Elimina" />
@@ -542,7 +582,7 @@
                                                                   </div>
                                                                 </div>
                                                                 <br />
-                                                                <c:if test="${wbsProPronipote.attivita.capacity() gt 0}">
+                                                                <c:if test="${wbsProPronipote.attivita.capacity() gt zero}">
                                                                   <div class="row">
                                                                     <div class="col-sm-5"><strong>Attivit&agrave; collegate:${wbsProPronipote.attivita.capacity()}</strong></div>
                                                                     <div class="col-sm-5">
@@ -551,7 +591,7 @@
                                                                   </div>
                                                                 </c:if>
                                                                 <br />
-                                                                <c:if test="${fn:length(wbsProPronipote.wbsFiglie) gt 0}">
+                                                                <c:if test="${fn:length(wbsProPronipote.wbsFiglie) gt zero}">
                                                                   <div class="row">
                                                                     <div class="col-sm-5"><strong>WBS direttamente collegate:</strong></div>
                                                                     <div class="col-sm-5">
@@ -618,8 +658,18 @@
                                 </c:choose>
                               </td>
                               <td scope="col" align="center">
-                                <a href="${act}${p.id}&idw=${wbsFiglio.id}" class="ico" id="del-wbs">
-                                  <img src="${initParam.urlDirectoryImmagini}/ico-act-outline.png" class="btn-del" alt="Link a lista attivita" title="Mostra Attivit&agrave;" />
+                              <c:choose>
+                                <c:when test="${wbsFiglio.attivita.capacity() gt zero}">
+                                  <c:set var="icoAct" value="ico-act-outline.png" scope="page" />
+                                  <c:set var="txtAct" value="Mostra Attivit&agrave;" scope="page" />
+                                </c:when>
+                                <c:otherwise>
+                                  <c:set var="icoAct" value="ico-act-strike.png" scope="page" />
+                                  <c:set var="txtAct" value="A questa WBS non sono state associate attivit&agrave;" scope="page" />
+                                </c:otherwise>
+                              </c:choose>
+                                <a href="${act}${p.id}&idw=${wbsFiglio.id}" class="ico" id="wbsActLev2">
+                                  <img src="${initParam.urlDirectoryImmagini}/${icoAct}" class="btn-del" alt="Link a lista attivita" title="${txtAct}" />
                                 </a>
                                 <a href="#del-form${wbsFiglio.id}" class="ico" id="del-wbs" rel="modal:open">
                                   <img src="${initParam.urlDirectoryImmagini}/ico-del-outline.png" class="btn-del" alt="Elimina" title="Elimina" />
