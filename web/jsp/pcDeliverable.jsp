@@ -38,9 +38,11 @@
       <br><br>
       <div id="container-fluid">
         <div class="row">
-          <div class="col-2">  
+          <div class="col-2">
             <span class="float-left">
-              <a class="btn btnNav" href="${stakeholder}${p.id}">&lt; Indietro</a>
+              <a class="ico" href="${stakeholder}${p.id}">
+                <img src="${initParam.urlDirectoryImmagini}/ico-back.png" class="ico-home" alt="Vai a pagina Stakeholder" title="Vai a pagina Stakeholder" />
+              </a>
             </span>
           </div>
           <div class="col-8 text-center">
@@ -48,7 +50,9 @@
           </div>
           <div class="col-2">
             <span class="float-right">
-        		  <a class="btn btnNav" href="${risorse}${p.id}">Avanti &gt;</a>
+              <a class="ico" href="${risorse}${p.id}">
+                <img src="${initParam.urlDirectoryImmagini}/ico-forward.png" class="ico-home" alt="Vai a pagina Stakeholder" title="Vai a pagina Stakeholder" />
+              </a>
             </span>
           </div>
         </div>
