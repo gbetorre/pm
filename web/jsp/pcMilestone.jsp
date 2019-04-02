@@ -62,7 +62,9 @@
             <div class="row">
               <div class="col-2">  
                 <span class="float-left">
-                  <a class="btn btnNav" href="${vincoli}${p.id}">&lt; Indietro</a>
+                  <a class="ico" href="${vincoli}${p.id}">
+                    <img src="${initParam.urlDirectoryImmagini}/ico-back.png" class="ico-home" alt="Vai a pagina Stakeholder" title="Vai a pagina Stakeholder" />
+                  </a>
                 </span>
               </div>
               <div class="col-8 text-center">

@@ -2,7 +2,7 @@
     <span class="float-right">
       <a class="ico" href="${project}">
         <img src="${initParam.urlDirectoryImmagini}/ico-home.png" class="ico-home" alt="Torna a elenco progetti" title="Torna a elenco progetti" />
-      </a>/a>
+      </a>
     </span>
     <form id="pcvincoli_form" action="#" method="post">
       <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
@@ -25,7 +25,9 @@
           <div class="row">
             <div class="col-2">  
               <span class="float-left">
-                <a class="btn btnNav" href="${rischi}${p.id}">&lt; Indietro</a>
+                <a class="ico" href="${rischi}${p.id}">
+                  <img src="${initParam.urlDirectoryImmagini}/ico-back.png" class="ico-home" alt="Vai a pagina Stakeholder" title="Vai a pagina Stakeholder" />
+                </a>
               </span>
             </div>
             <div class="col-8 text-center">
@@ -33,7 +35,9 @@
             </div>
             <div class="col-2">
               <span class="float-right">
-                <a class="btn btnNav" href="${milestone}${p.id}">Avanti &gt;</a>
+                <a class="ico" href="${milestone}${p.id}">
+                  <img src="${initParam.urlDirectoryImmagini}/ico-forward.png" class="ico-home" alt="Vai a pagina Stakeholder" title="Vai a pagina Stakeholder" />
+                </a>
               </span>
             </div>
           </div>
