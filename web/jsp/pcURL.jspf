@@ -122,6 +122,11 @@
   <c:param name="p" value="del" />
   <c:param name="id" value="" />
 </c:url>
+<c:url var="binAct" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="act" />
+  <c:param name="p" value="bin" />
+  <c:param name="id" value="" />
+</c:url>
 <c:url var="mon" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="mon" />
   <c:param name="y" value="${requestScope.theCurrentYear}" />
