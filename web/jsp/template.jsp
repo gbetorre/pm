@@ -69,6 +69,7 @@
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />cookie/cookieconsent.min.css" type="text/css" />
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />jquery/jquery-datatables.css" type="text/css" />
     <link rel="stylesheet" href="<c:out value="${initParam.urlDirectoryStili}" />jquery/jquery-bootstrap-datatables.css" type="text/css" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
   </head>
   <body class="${pageScope.bgbody}">
   <c:catch var="exception">
@@ -92,5 +93,12 @@
   </c:catch>
   <c:out value="${exception}" />
     <script src="<c:out value="${initParam.urlDirectoryScript}" />pol.js"></script>
+    <script>
+      $(document).ready(function(){
+        $("#btnMod").click(function(e) {
+              e.preventDefault(); 
+        });
+      });
+    </script>
   </body>
 </html>
