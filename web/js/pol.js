@@ -30,7 +30,8 @@ function modify() {
   $('.calendarData').on('click', function(e) {
     e.preventDefault();
     $('.calendarData').attr("autocomplete", "off");  
- });
+  });
+  $('#btnMod').prop('disabled', true);
 }
   
 $('textarea').textareaAutoSize();
@@ -104,6 +105,10 @@ function selectionDelete(msg) {
     alert(msg);
     return false;
   };
+}
+
+function submitForm() {
+  $('form').submit();
 }
 
 function confirmSubmit(type) {
