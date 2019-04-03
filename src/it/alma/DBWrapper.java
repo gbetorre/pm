@@ -1181,9 +1181,9 @@ public class DBWrapper implements Query {
         Connection con = null;
         PreparedStatement pst = null;
         ActivityBean attivita = null;
-        PersonBean person = null;
+        //PersonBean person = null;
+        //Vector<PersonBean> people = new Vector<PersonBean>();
         Vector<ActivityBean> activities = new Vector<ActivityBean>();
-        Vector<PersonBean> people = new Vector<PersonBean>();
         try {
             con = pol_manager.getConnection();
             pst = con.prepareStatement(GET_ACTIVITIES);
@@ -1193,7 +1193,7 @@ public class DBWrapper implements Query {
             while (rs.next()) {
                 attivita = new ActivityBean();
                 BeanUtil.populate(attivita, rs);
-                pst = null;
+                /*pst = null;
                 pst = con.prepareStatement(GET_PEOPLE_ON_ACTIVITY);
                 pst.clearParameters();
                 pst.setInt(1, attivita.getId());
@@ -1203,14 +1203,14 @@ public class DBWrapper implements Query {
                     BeanUtil.populate(person, rs1);
                     people.add(person);
                 }
-                attivita.setPersone(people);
+                attivita.setPersone(people);*/
                 activities.add(attivita);
             }
             return activities;
-        } catch (AttributoNonValorizzatoException anve) {
+        /*} catch (AttributoNonValorizzatoException anve) {
             String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
             LOG.severe(msg); 
-            throw new WebStorageException(msg + anve.getMessage(), anve);
+            throw new WebStorageException(msg + anve.getMessage(), anve);*/
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto ActivityBean non valorizzato; problema nella query dell\'utente.\n";
             LOG.severe(msg); 
@@ -1284,8 +1284,8 @@ public class DBWrapper implements Query {
         PreparedStatement pst = null;
         ActivityBean attivita = null;
         PersonBean person = null;
-        Vector<ActivityBean> activities = new Vector<ActivityBean>();
         Vector<PersonBean> people = new Vector<PersonBean>();
+        Vector<ActivityBean> activities = new Vector<ActivityBean>();
         int nextParam = 0;
         try {
             // La connessione è gestita dal finally
@@ -1308,7 +1308,7 @@ public class DBWrapper implements Query {
                 BeanUtil.populate(attivita, rs);
                 computeActivityState(attivita, Utils.convert(Utils.getCurrentDate()));
                 WbsBean wp = getWbsInstance(projId, attivita.getIdWbs());
-                pst = null;
+                /*pst = null;
                 pst = con.prepareStatement(GET_PEOPLE_ON_ACTIVITY);
                 pst.clearParameters();
                 pst.setInt(1, attivita.getId());
@@ -1318,7 +1318,7 @@ public class DBWrapper implements Query {
                     BeanUtil.populate(person, rs1);
                     people.add(person);
                 }
-                attivita.setPersone(people);
+                attivita.setPersone(people);*/
                 attivita.setWbs(wp);
                 activities.add(attivita);
             }
@@ -1329,6 +1329,79 @@ public class DBWrapper implements Query {
             throw new WebStorageException(msg + anve.getMessage(), anve);
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto ActivityBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce un Vector di ActivityBean rappresentante 
+     * le attivit&agrave; in un dato stato, il cui identificativo viene
+     * passato come argomento, appartenenti al progetto attuale, 
+     * il cui identificativo viene passato come argomento, e permette 
+     * di ottenere le attivit&agrave; in funzione di una data, 
+     * passata come argomento.</p>
+     * 
+     * @param projId id del progetto di cui estrarre le attivita'
+     * @param user   utente loggato
+     * @param date   data inizio a partire dalla quale le attivita' devono essere estratte 
+     * @param state  identificativo dello stato in cui devono trovarsi le attivita' selezionate
+     * @return <code>Vector&lt;AttvitaBean&gt;</code> - Vector di ActivityBean, ciascuna rappresentante una attivit&agrave; del progetto in stato desiderato.
+     * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
+     */
+    @SuppressWarnings({ "null" })
+    public Vector<ActivityBean> getActivities(int projId,
+                                              PersonBean user,
+                                              Date date,
+                                              int state) 
+                                       throws WebStorageException {
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        ActivityBean attivita = null;
+        Vector<ActivityBean> activities = new Vector<ActivityBean>();
+        int nextParam = 0;
+        try {
+            // La connessione è gestita dal finally
+            con = pol_manager.getConnection();
+            // Per prima cosa verifica che l'utente abbia i diritti di accesso al progetto
+            if (!userCanRead(projId, user.getId())) {
+                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id progetto non valido!.\n";
+                LOG.severe(msg + "E\' presente il parametro \"q=act\" ma non un valore \"id\" - cioe\' id progetto - significativo!\n");
+                throw new WebStorageException("Attenzione: indirizzo richiesto non valido!\n");
+            }
+            pst = con.prepareStatement(GET_ACTIVITIES_BY_STATE);
+            pst.clearParameters();
+            pst.setInt(++nextParam, projId);
+            pst.setInt(++nextParam, state);
+            pst.setDate(++nextParam, Utils.convert(date));
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                attivita = new ActivityBean();
+                BeanUtil.populate(attivita, rs);
+                computeActivityState(attivita, Utils.convert(Utils.getCurrentDate()));
+                WbsBean wp = getWbsInstance(projId, attivita.getIdWbs());
+                attivita.setWbs(wp);
+                activities.add(attivita);
+            }
+            return activities;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Attributo non valorizzato; problema nella query delle attivita\'.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto ActivityBean non valorizzato; problema nella query delle attivita\'.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
         } finally {
@@ -1398,7 +1471,7 @@ public class DBWrapper implements Query {
     
     
     /**
-     * <p>Restituisce il numero di attivit$agrave; presenti all'interno di una data wbs, 
+     * <p>Restituisce il numero di attivit&agrave; presenti all'interno di una data wbs, 
      * identificata tramite id, passato come parametro.</p>
      * 
      * @param idProj               id del progetto a cui appartengono la wbs e le attivit&agrave;
@@ -1406,6 +1479,7 @@ public class DBWrapper implements Query {
      * @return <code>int</code> - intero che rappresenta il numero di istanze di attivit&agrave; sottostanti alla wbs data
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento
      */
+    @SuppressWarnings({ "static-method", "null" })
     public int getActivitiesAmountByWbs (int idProj, 
                                          int idWbs) 
                                   throws WebStorageException {
