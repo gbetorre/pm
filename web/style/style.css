@@ -264,6 +264,10 @@ select:disabled.bgcolor3 {
   background-color: #007bff;
 }
 
+.btn-spacer {
+  margin-bottom: 5px;
+}
+
 button[type="submit"]:disabled, #btnMod:disabled {
   background: #999999;
 }
