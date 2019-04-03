@@ -151,6 +151,7 @@ public class ActivityCommand extends ItemBean implements Command {
         nomeFile.put(Query.DELETE_PART, nomeFileRecapToDel);
         nomeFile.put(Query.SUSPEND_PART, nomeFileRecapToDel);
         nomeFile.put(Query.RESUME_PART, nomeFileElenco);
+        nomeFile.put(Query.TRASH_PART, nomeFileElenco);
         nomeFile.put(Query.PART_PROJECT, this.getPaginaJsp());
     }  
   
@@ -373,7 +374,7 @@ public class ActivityCommand extends ItemBean implements Command {
                             workPackage = db.getWbs(runtimeProject.getId(), Query.WBS_WP_ONLY);
                             complexity = HomePageCommand.getComplessita();
                             states = HomePageCommand.getStatiAttivita();
-                        // Effettua le selezioni che servono all'eliminazione di una data attività
+                        // Effettua le selezioni che servono all'eliminazione o alla sospensione di una data attività
                         } else if (part.equalsIgnoreCase(Query.DELETE_PART) || part.equalsIgnoreCase(Query.SUSPEND_PART)) {
                             /* ************************************************ *
                              *        Effettua le selezioni che servono         * 
@@ -388,11 +389,20 @@ public class ActivityCommand extends ItemBean implements Command {
                                 LOG.severe(msg + "E\' presente il parametro \'p=del\' ma non un valore \'ida\' - cioe\' id attivita\' - significativo!\n");
                                 throw new CommandException("Attenzione: indirizzo richiesto non valido!\n");
                             }
-                            // Effettua le selezioni che servono all'eliminazione di una data attività
+                            // Effettua le selezioni che servono all'eliminazione o alla sospensione di una data attività
                             isHeader = isFooter = false;
                             activity = db.getActivity(idPrj, idAct, user);
                             wbs = db.getWbsHierarchyByOffspring(idPrj, activity.getIdWbs());
-                        }
+                        // Effettua le selezioni che servono alla visualizzazione del cestino
+                        } else if (part.equalsIgnoreCase(Query.TRASH_PART)) {
+                            /* ************************************************ *
+                             *      Effettua la selezione delle attivita'       *
+                             *      in stato cancellato, ovvero quelle che      *
+                             *      hanno subito una eliminazione logica        *
+                             * ************************************************ */
+                            // Seleziona le attività che hanno subito un'eliminazione logica
+                            vActivities = db.getActivities(idPrj, user, Utils.convert(Utils.getUnixEpoch()), Query.ELIMINATA);
+                         }                           
                         fileJspT = nomeFile.get(part);
                     }
                 } else {
