@@ -27,6 +27,10 @@ function modify() {
   $('button').prop('disabled', false);
   $('input[type=\'text\'].calendarData').datepicker();
   $('input[type=\'submit\']').prop('disabled', false);
+  $('.calendarData').on('click', function(e) {
+    e.preventDefault();
+    $('.calendarData').attr("autocomplete", "off");  
+ });
 }
   
 $('textarea').textareaAutoSize();
