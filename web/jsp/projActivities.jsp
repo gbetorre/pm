@@ -1,12 +1,33 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"  %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ include file="pcURL.jspf" %>
-    <h2>Attivit&agrave; del sotto progetto <c:out value="${p.titolo}" /></h2>
+<c:choose>
+  <c:when test="${param['p'] eq 'bin'}">
+    <h2>Attivit&agrave; eliminate del sotto progetto <strong><c:out value="${p.titolo}" /></strong></h2>
+    <c:set var="isTrash" value="${true}" scope="page" />
+  </c:when>
+  <c:otherwise>
+    <h2>Attivit&agrave; del sotto progetto <strong><c:out value="${p.titolo}" /></strong></h2>
+    <c:set var="isTrash" value="${false}" scope="page" />
+  </c:otherwise>
+</c:choose>
     <span class="float-right">
       <a class="ico" href="${project}">
         <img src="${initParam.urlDirectoryImmagini}/ico-home.png" class="ico-home" alt="Torna a elenco progetti" title="Torna a elenco progetti" />
       </a>
     </span>
+    <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
+  <c:choose>
+    <c:when test="${isTrash}">
+      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${act}${p.id}">Attivit&agrave;</a></li>
+      <li class="nav-item"><a class="nav-link active tabactive" data-toggle="tab" href="#">Cestino</a></li>
+    </c:when>
+    <c:otherwise>
+      <li class="nav-item"><a class="nav-link active tabactive" data-toggle="tab" href="#">Attivit&agrave;</a></li>
+      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${binAct}${p.id}">Cestino</a></li>
+    </c:otherwise>
+  </c:choose>
+    </ul>
     <hr class="separatore" />
   <c:choose>
     <c:when test="${not empty requestScope.attivita}">
@@ -19,7 +40,9 @@
           <th scope="col" width="10%">Data fine</th>
           <th scope="col" width="20%">Stato effettivo</th>
           <th scope="col" width="4%"><div class="text-center">Milestone</div></th>
+        <c:if test="${not isTrash}">
           <th scope="col" width="4%"><div class="text-center">Funzioni</div></th>
+        </c:if>
         </tr>
       </thead>
       <tbody>
@@ -29,9 +52,16 @@
         <input type="hidden" id="act-id${status}" name="act-id${status}" value="<c:out value="${act.id}"/>">
         <tr>
           <td scope="row" id="nameColumn" class="success bgAct${act.stato.id}">
+        <c:choose>
+          <c:when test="${isTrash}">
+            <c:out value="${act.nome}"/>
+          </c:when>
+          <c:otherwise>
             <a href="${modAct}${p.id}&ida=${act.id}">
               <c:out value="${act.nome}"/>
             </a>
+          </c:otherwise>
+        </c:choose>
           </td>
           <td scope="row">
             <a href="${modWbs}${p.id}&idw=${act.wbs.id}">
@@ -64,6 +94,7 @@
               </c:otherwise>
             </c:choose>
           </td>
+        <c:if test="${not isTrash}">
           <td scope="row">
           <c:set var="pauseico" value="/ico-pause.png" scope="page" />
           <c:set var="pausetxt" value="Sospendi" scope="page" />
@@ -80,6 +111,7 @@
               <img id="aboutDel${act.id}" src="${initParam.urlDirectoryImmagini}/ico-del-outline.png" class="btn-del" alt="Gestione eliminazione attivita" title="Elimina Attivit&agrave;" />
             </a>
           </td>
+        </c:if>
         </tr>
       </c:forEach>
       </tbody>
@@ -88,7 +120,7 @@
     </c:when>
     <c:otherwise>
     <div class="alert alert-danger">
-      <p>Non &egrave; stata trovata alcuna attivit&agrave; associata al progetto.</p>
+      <p>Non &egrave; stata trovata alcuna attivit&agrave; <c:if test="${isTrash}">eliminata</c:if> associata al sotto progetto.</p>
     </div>
     </c:otherwise>
   </c:choose>
@@ -101,9 +133,11 @@
             </a>
           </span>
         </div>
+      <c:if test="${not isTrash}">
         <div class="col-8 text-center">
           <%@ include file="subPanel.jspf" %>
         </div>
+      </c:if>
       </div>
     </div>
     <%@ include file="subPopup.jspf" %>
