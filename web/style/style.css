@@ -90,7 +90,7 @@ a:link:not(.btnNav):not(.btn-outline-danger).btn, a:visited:not(.btnNav):not(.bt
 
 a:link.active.tabactive, a:visited.active.tabactive {
 	border-top-width: medium;
-	border-top-color: blue;
+	border-top-color: #007bff;
 }
 
 a:link.nav-link, a:visited.nav-link {
@@ -100,7 +100,7 @@ a:link.nav-link, a:visited.nav-link {
 }
 
 a:hover.nav-link {
-	background-color: blue;
+	background-color: #007bff;
 	color: white;
 }
 
@@ -162,13 +162,17 @@ img.logo {
 }
 
 img.logoHeader{
-	width: 65%;
+	width: 85%;
 	height: 85%;
 }
 
 img.profile {
 	width: 50px;
 	height: 62px;
+}
+
+table.google-visualization-orgchart-table {
+    border-collapse: separate;
 }
 
 .bgcolor1 {
@@ -260,7 +264,7 @@ select:disabled.bgcolor3 {
   background-color: #007bff;
 }
 
-input[type="submit"]:disabled {
+button[type="submit"]:disabled, #btnMod:disabled {
   background: #999999;
 }
 
@@ -338,6 +342,19 @@ textarea {
 .ico-home {
 	width: 40px;
 }
+
+.ico-func {
+	height: 50px;
+}
+
+.ico-save {
+	height: 20px;  
+	background-size: contain;
+  	background-repeat: no-repeat;
+ 	background-position: center center;
+  	background-image: url(../img/ico-save.png);
+}
+
 /*---------------------- Righe Orizzontali ------------------------*/
 hr  {
 	clear: both; height: 1px;
@@ -355,6 +372,15 @@ hr.separatore {
   clear: both;  
   margin-bottom: 10px;  
   margin-top: 10px;
+}
+
+hr.home {
+  height: 1px;
+  border-style: none;
+  background-color: transparent; 
+  display: block; 
+  clear: both;
+  margin-top: -10px;
 }
 
 hr.hrclear {
