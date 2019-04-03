@@ -15,7 +15,6 @@
     <br />
     <form id="delAct_form" action="" method="post" class="subfields">
       <input type="hidden" id="act-id" name="act-id" value="${actInstance.id}" />
-      
       <div class="row">
         <div class="col-sm-5">
           <strong>Persona responsabile </strong>
@@ -195,7 +194,7 @@
           </div>
         </div>
         <br />
-        <a href="${act}${requestScope.progetto.id}" id='btn-close' class="btn btnNav">Chiudi</a>
+        <a href="${act}${requestScope.progetto.id}" id='btn-close' class="btn btnNav"><i class="far fa-window-close"></i> Chiudi</a>
         <%@ include file="subPanel.jspf" %>
     </form>
 </c:catch>

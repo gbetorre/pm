@@ -8,9 +8,9 @@
         <h2 align="center">
           Report del sotto progetto:&nbsp;<strong><c:out value="${p.titolo}" /></strong>
           <span class="float-right">
-            <a href="#" class="btn btn-primary" id="exp-report">Esporta</a>
-            <a class="ico" href="${project}">
-              <img src="${initParam.urlDirectoryImmagini}/ico-home.png" class="ico-home" alt="Torna a elenco progetti" title="Torna a elenco progetti" />
+            <a class="btn btnNav" href="${project}">
+              <i class="fas fa-home"></i>
+              Progetti
             </a>
           </span>
         </h2>
@@ -20,8 +20,9 @@
           <div class="col-3">
             <input type="text" class="form-control calendarData" id="rep-date" name="rep-date" value="<fmt:formatDate value="${selectionDate}" pattern="dd/MM/yyyy" />">
           </div>
-          <div class="col-1">
-            <a href="" class="btn btn-primary" id="rep-view">Visualizza</a>
+          <div class="col-6">
+            <a href="" class="btn btn-success" id="rep-view"><i class="fas fa-search"></i> Visualizza</a>
+            <button class="btn btn-warning" id="expReport"><i class="fas fa-file-export"></i> Esporta</button>
           </div>
         </div>
         <div class="row reportHead">
@@ -90,8 +91,9 @@
       <div class="form-row">
         <div class="col-2">  
           <span class="float-left">
-            <a class="ico" href="${project}">
-              <img src="${initParam.urlDirectoryImmagini}/ico-home.png" class="ico-home" alt="Torna a elenco progetti" title="Torna a elenco progetti" />
+            <a class="btn btnNav" href="${project}">
+              <i class="fas fa-home"></i>
+              Progetti
             </a>
           </span>
         </div>

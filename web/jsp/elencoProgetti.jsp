@@ -26,18 +26,19 @@
               <td scope="row"><a href="<c:out value="${progetto}${prj.id}" />"><c:out value="${prj.titolo}" /></a></td>
               <td scope="row"><c:out value="${prj.statoProgetto.nome}" escapeXml="false" /></td>
               <td width="40%" scope="row">
-                <a href="<c:out value= "${vision}${prj.id}" />"  class="btn btn-primary">Project Charter</a>
-                <a href="<c:out value= "${wbs}${prj.id}" />"  class="btn btn-primary">WBS</a>
-                <a href="<c:out value= "${act}${prj.id}" />" class="btn btn-primary">Attivit&agrave;</a>
-                <a href="<c:out value= "${lastStatus}${prj.id}" />"  class="btn btn-primary">Status</a>
-                <a href="<c:out value= "${report}${prj.id}" />"  class="btn btn-primary">Report</a>
+                <a href="<c:out value= "${vision}${prj.id}" />" class="btn btn-success"><i class="fas fa-file-invoice"></i> Project Charter</a>              
+                <a href="<c:out value= "${wbs}${prj.id}" />" class="btn btn-success"><i class="fas fa-sitemap"></i> WBS</a>
+                <hr class="home" />
+                <a href="<c:out value= "${act}${prj.id}" />" class="btn btn-success"><i class="fas fa-bars"></i> Attivit&agrave;</a>
+                <a href="<c:out value= "${lastStatus}${prj.id}" />" class="btn btn-success"><i class="far fa-clock"></i> Status</a>
+                <a href="<c:out value= "${report}${prj.id}" />" class="btn btn-success"><i class="fas fa-chart-line"></i> Report</a>
               </td>
               <td><cite><c:out value="${prj.tag}" /></cite></td>
             </tr>
             </c:forEach>
             <c:if test="${not empty sessionScope.writableDeparments}">
             <tr>
-              <td colspan="4" align="left"><a href="${mon}${d.id}"  class="btn btn-primary">Monitoraggio MIUR</a></td>
+              <td colspan="4" align="left"><a href="${mon}${d.id}"  class="btn btn-success"><i class="fas fa-tv"></i> Monitoraggio MIUR</a></td>
             </tr>
             </c:if>
           </tbody>

@@ -19,27 +19,42 @@
   <c:when test="${pageScope.superuser}">
     <c:choose>
       <c:when test="${param['q'] eq 'pol'}">
-        <input type="button" class="btn btn-primary" name="modifica" value="Modifica" onclick="modify()">
-        <input type="submit" class="btn btn-primary" name="${distinguishingSubmitName}" id="${distinguishingSubmitId}" value="Salva" disabled>
+        <button class="btn btn-success" id="btnMod" value="Modifica" onclick="modify()">
+          <i class="far fa-edit"></i>
+          Modifica
+        </button>
+        <button type="submit" class="btn btn-success" value="Salva" disabled>
+          <i class="far fa-save"></i>
+          Salva
+        </button>
       </c:when>
       <c:when test="${param['q'] eq 'wbs'}">
         <c:if test="${not empty param['p']}">
-          <input type="submit" class="btn btn-primary" name="${distinguishingSubmitName}" id="${distinguishingSubmitId}" value="Salva">
+          <button type="submit" class="btn btn-success" value="Salva">
+            <i class="far fa-save"></i>
+            Salva
+          </button>
         </c:if>
       </c:when>
       <c:when test="${param['q'] eq 'act'}">
       <c:choose>
         <c:when test="${param['p'] eq 'mod' or param['p'] eq 'add'}">
-          <input type="submit" class="btn btn-primary" name="${distinguishingSubmitName}" id="${distinguishingSubmitId}" value="Salva" disabled>
+          <button type="submit" class="btn btn-success" value="Salva" disabled>
+            <i class="far fa-save"></i>
+            Salva
+          </button>
         </c:when>
         <c:when test="${param['p'] eq 'sus'}">
-          <input type="submit" class="btn btn-primary" id="btn-susAct" value="Sospendi" />
+          <button type="submit" class="btn btn-danger" id="btn-susAct" value="Sospendi"><i class="fas fa-pause"></i> Sospendi</button>
         </c:when>
         <c:when test="${param['p'] eq 'del'}">
-          <input type="submit" class="btn btn-primary" id="btn-delAct" value="Elimina" />
+          <button type="submit" class="btn btn-danger" id="btn-delAct" value="Elimina"><i class="far fa-trash-alt"></i> Elimina</button>
         </c:when>
         <c:otherwise>
-          <a href="${addAct}${p.id}" class="btn btn-primary" id="add-act">Aggiungi</a>
+          <a href="${addAct}${p.id}" class="btn btn-success">
+            <i class="fas fa-plus"></i>
+            Aggiungi
+          </a>
         </c:otherwise>
       </c:choose>
       </c:when>

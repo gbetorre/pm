@@ -51,7 +51,7 @@
           <c:set var="superuser" value="${true}" scope="page" />
         </c:if>
         <c:if test="${pageScope.superuser}">
-          <button type="submit" class="btn btn-primary" id="sts-add" name="sts-add">Aggiungi</button>
+          <button type="submit" class="btn btn-success" id="sts-add" name="sts-add"><i class="fas fa-plus"></i> Aggiungi</button>
         </c:if>
         </div>
       </form> 

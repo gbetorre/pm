@@ -1,7 +1,8 @@
 <%@ include file="pcURL.jspf" %>
     <span class="float-right">
-      <a class="ico" href="${project}">
-        <img src="${initParam.urlDirectoryImmagini}/ico-home.png" class="ico-home" alt="Torna a elenco progetti" title="Torna a elenco progetti" />
+      <a class="btn btnNav" href="${project}">
+        <i class="fas fa-home"></i>
+        Progetti
       </a>
     </span>
     <form action="#" method="post">
@@ -64,8 +65,9 @@
             <div class="row">
               <div class="col-2">  
                 <span class="float-left">
-                  <a class="ico" href="${risorse}${p.id}">
-                    <img src="${initParam.urlDirectoryImmagini}/ico-back.png" class="ico-home" alt="Vai a pagina Stakeholder" title="Vai a pagina Stakeholder" />
+                  <a class="btn btnNav" href="${risorse}${p.id}">
+                    <i class="fas fa-chevron-left"></i>
+                    Indietro
                   </a>
                 </span>
               </div>
@@ -74,8 +76,9 @@
               </div>
               <div class="col-2">
                 <span class="float-right">
-                  <a class="ico" href="${vincoli}${p.id}">
-                    <img src="${initParam.urlDirectoryImmagini}/ico-forward.png" class="ico-home" alt="Vai a pagina Stakeholder" title="Vai a pagina Stakeholder" />
+                  <a class="btn btnNav" href="${vincoli}${p.id}">
+                    Avanti
+                    <i class="fas fa-chevron-right"></i>
                   </a>
                 </span>
               </div>
