@@ -170,6 +170,10 @@ public interface Query extends Serializable {
      */
     public static final String RESUME_PART                      = "res";
     /**
+     * <p>Costante per il parametro identificante la sezione dove vengono mostrate occorrenze marcate come eliminate.</p>
+     */
+    public static final String TRASH_PART                       = "bin";    
+    /**
      * <p>Costante per il parametro identificante la pagina dei monitoraggio.</p>
      */
     public static final String PART_MONITOR                     = "";
@@ -284,7 +288,7 @@ public interface Query extends Serializable {
      * stato 'eliminato' dall'utente che ha diritti di scrittura sul progetto.
      * Mentre le attivit&agrave; sospese si vedono negli elenchi ma non
      * nei report, le  attivit&agrave; cancellate non escono in nessuna
-     * selezione.
+     * selezione &ndash; salvo che in quella esplicita del &quot;Cestino&quot;.
      */
     public static final int ELIMINATA = 12;
     /**
@@ -1074,12 +1078,24 @@ public interface Query extends Serializable {
           //"   ,   A.milestone             AS  \"milestone\"" +
             "   ,   A.id_stato              AS  \"idStato\"" +
             "   FROM attivita A" + 
-            "   WHERE A.id_progetto = ?" +
-            "   ORDER BY A.id";
+            "   WHERE A.id_progetto = ?";
+          //"   ORDER BY A.id";
     
     /**
      * <p>Estrae le attivit&agrave; relative ad un progetto, identificato 
-     * tramite l'id, passato come parametro.</p>
+     * tramite l'id, passato come parametro che non sono state cancellate
+     * logicamente.</p>
+     * <p>Il nome della query fa riferimento al fatto che l'estrazione &egrave;
+     * parametrizzata per:
+     * <ul>
+     * <li>DATE - data a partire dalla quale vengono estratte 
+     * le attivit&agrave;; per estrarle tutte basta passare una data 
+     * &quot;antidiluviana&quot;</li>
+     * <li>TYPE - questo riferimento indica il fatto che, in funzione del
+     * valore dei parametri passato, la query pu&ograve; estrarre le sole
+     * attivit&agrave; di tipo milestone oppure tutte le attivit&agrave;
+     * indipendentemente dal loro &quot;tipo&quot;</li>
+     * </ul></p>  
      */
     public static final String  GET_ACTIVITIES_BY_DATE_AND_TYPE = 
             "SELECT " +
@@ -1088,13 +1104,13 @@ public interface Query extends Serializable {
             "   ,   A.descrizione           AS  \"descrizione\"" +
             "   ,   A.datainizio            AS  \"dataInizio\"" +
             "   ,   A.datafine              AS  \"dataFine\"" +
-            "   ,   A.datainizioattesa      AS  \"dataInizioAttesa\"" +
-            "   ,   A.datafineattesa        AS  \"dataFineAttesa\"" +
+            //"   ,   A.datainizioattesa      AS  \"dataInizioAttesa\"" +
+            //"   ,   A.datafineattesa        AS  \"dataFineAttesa\"" +
             "   ,   A.datainizioeffettiva   AS  \"dataInizioEffettiva\"" +
             "   ,   A.datafineeffettiva     AS  \"dataFineEffettiva\"" +
-            "   ,   A.guprevisti            AS  \"guPrevisti\"" +
-            "   ,   A.gueffettivi           AS  \"guEffettivi\"" +
-            "   ,   A.gurimanenti           AS  \"guRimanenti\"" +
+            //"   ,   A.guprevisti            AS  \"guPrevisti\"" +
+            //"   ,   A.gueffettivi           AS  \"guEffettivi\"" +
+            //"   ,   A.gurimanenti           AS  \"guRimanenti\"" +
             "   ,   A.noteavanzamento       AS  \"noteAvanzamento\"" +
             "   ,   A.risultatiraggiunti    AS  \"risultatiRaggiunti\"" +
             "   ,   A.milestone             AS  \"milestone\"" +
@@ -1105,6 +1121,31 @@ public interface Query extends Serializable {
             "       AND A.id_stato <> 12" +
             "       AND A.datainizio >= ?" +
             "       AND (A.milestone = ? OR ?)" +
+            "   ORDER BY A.dataultimamodifica DESC, A.oraultimamodifica DESC, A.datainizio, A.datafine, A.id_stato";
+    
+    /**
+     * <p>Estrae le attivit&agrave; relative ad un progetto, identificato 
+     * tramite l'id, passato come parametro, e che si trovano in stato
+     * di dato valore, il cui identificativo viene passato come parametro.</p>
+     */
+    public static final String  GET_ACTIVITIES_BY_STATE = 
+            "SELECT " +
+            "       A.id                    AS  \"id\"" +
+            "   ,   A.nome                  AS  \"nome\"" +
+            "   ,   A.descrizione           AS  \"descrizione\"" +
+            "   ,   A.datainizio            AS  \"dataInizio\"" +
+            "   ,   A.datafine              AS  \"dataFine\"" +
+            "   ,   A.datainizioeffettiva   AS  \"dataInizioEffettiva\"" +
+            "   ,   A.datafineeffettiva     AS  \"dataFineEffettiva\"" +
+            "   ,   A.noteavanzamento       AS  \"noteAvanzamento\"" +
+            "   ,   A.risultatiraggiunti    AS  \"risultatiRaggiunti\"" +
+            "   ,   A.milestone             AS  \"milestone\"" +
+            "   ,   A.id_wbs                AS  \"idWbs\"" +
+            "   ,   A.id_stato              AS  \"idStato\"" +
+            "   FROM attivita A" + 
+            "   WHERE A.id_progetto = ?" +
+            "       AND A.id_stato = ?" +
+            "       AND A.datainizio >= ?" +
             "   ORDER BY A.dataultimamodifica DESC, A.oraultimamodifica DESC, A.datainizio, A.datafine, A.id_stato";
     
     /**
