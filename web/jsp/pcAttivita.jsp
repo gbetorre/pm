@@ -164,6 +164,51 @@
             <textarea class="form-control" name="act-progress" class="form-control" aria-label="With textarea" maxlength="8104" readonly><c:out value="${actNotes}" escapeXml="false" /></textarea>
             <div class="charNum"></div>
           </div>
+          <a href="#note-form" class="ico" id="add-note" rel="modal:open">
+            <img src="${initParam.urlDirectoryImmagini}/ico-add.png" class="btn-del" alt="Link ad aggiunta nota" title="Aggiungi nota" />
+          </a>
+          <div id="note-form" method="post" action="${delWbs}${wbsNipote.id}" class="modal">
+            <input type="hidden" id="wbs-id" name="wbs-id" value="${wbsNipote.id}" />
+            <h3 class="heading">Aggiungi una nota di avanzamento</h3>
+            <br />
+            <div class="row">
+              <div class="col-sm-5">
+                <strong>
+                  Data
+                  <sup>&#10039;</sup>:
+                </strong>
+              </div>
+              <div class="col-sm-5">  
+                <input type="text" class="form-control calendarData" id="act-datanota" name="act-datafinevera" pattern='dd/MM/yyyy' placeholder="Inserisci una data nota">
+              </div>
+            </div>
+            <hr class="separatore" />
+            <div class="row">
+              <div class="col-sm-5">
+                <strong>
+                  Titolo Nota
+                  <sup>&#10039;</sup>:
+                </strong>
+              </div>
+              <div class="col-sm-5">  
+                <input type="text" class="form-control" id="act-name" name="act-name" value="" placeholder="Inserisci un titolo nota">
+              </div>
+            </div>
+            <hr class="separatore" />
+            <div class="row">
+              <div class="col-sm-5">
+                <strong>
+                  Descrizione
+                  <sup>&#10039;</sup>:
+                </strong>
+              </div>
+              <div class="col-sm-5">  
+                <textarea class="form-control" name="note-descr" class="form-control" aria-label="With textarea" maxlength="8104" placeholder="Inserisci una descrizione nota"></textarea>
+                <div class="charNum"></div>
+              </div>
+            </div>
+          </div>
+
         </div>
         <br />
         <div class="row">
