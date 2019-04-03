@@ -38,11 +38,12 @@
       }
     </script>
     <span class="float-right">
-      <a class="ico" href="${wbs}${p.id}">
-        <img src="${initParam.urlDirectoryImmagini}/ico-return.png" class="ico-home" alt="Torna a elenco wbs" title="Torna a elenco wbs" />
+      <a class="btn btnNav" href="${wbs}${p.id}">
+        <i class="fas fa-undo"></i> WBS
       </a>
-      <a class="ico" href="${project}">
-        <img src="${initParam.urlDirectoryImmagini}/ico-home.png" class="ico-home" alt="Torna a elenco progetti" title="Torna a elenco progetti" />
+      <a class="btn btnNav" href="${project}">
+        <i class="fas fa-home"></i>
+        Progetti
       </a>
     </span>
     <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">

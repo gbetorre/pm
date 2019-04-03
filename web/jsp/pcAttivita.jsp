@@ -167,7 +167,7 @@
           <a href="#note-form" class="ico" id="add-note" rel="modal:open">
             <img src="${initParam.urlDirectoryImmagini}/ico-add.png" class="btn-del" alt="Link ad aggiunta nota" title="Aggiungi nota" />
           </a>
-          <div id="note-form" method="post" action="${delWbs}${wbsNipote.id}" class="modal">
+          <!-- <div id="note-form" method="post" action="${delWbs}${wbsNipote.id}" class="modal">
             <input type="hidden" id="wbs-id" name="wbs-id" value="${wbsNipote.id}" />
             <h3 class="heading">Aggiungi una nota di avanzamento</h3>
             <br />
@@ -208,7 +208,7 @@
               </div>
             </div>
           </div>
-
+ -->
         </div>
         <br />
         <div class="row">
@@ -260,8 +260,8 @@
         <c:if test="${not empty param['idw']}">
           <c:set var="redirect" value="${redirect}&idw=${param['idw']}" scope="page" />
         </c:if>
-        <a href="<c:out value="${redirect}" escapeXml="false" />" id='btn-close' class="btn btnNav">Chiudi</a>
-        <input type="button" class="btn btn-primary" name="modifica" value="Modifica" onclick="modify();">
+        <a href="<c:out value="${redirect}" escapeXml="false" />" id='btn-close' class="btn btnNav"><i class="far fa-window-close"></i> Chiudi</a>
+        <button class="btn btn-success" id="btnMod" name="modifica" onclick="modify();"><i class="far fa-edit"></i> Modifica</button>
         <%@ include file="subPanel.jspf" %>
     </form>
 </c:catch>

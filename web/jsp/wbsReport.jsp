@@ -3,11 +3,12 @@
     <c:set var="prj" value="${requestScope.progetto}" scope="page" />
     <h4>Report dei Work Packages del sotto progetto: <cite><c:out value="${prj.titolo}" /></cite></h4>
     <span class="float-right">
-      <a class="ico" href="${wbs}${p.id}">
-        <img src="${initParam.urlDirectoryImmagini}/ico-return.png" class="ico-home" alt="Torna a elenco wbs" title="Torna a elenco wbs" />
+      <a class="btn btnNav" href="${wbs}${p.id}">
+        <i class="fas fa-undo"></i> WBS
       </a>
-      <a class="ico" href="${project}">
-        <img src="${initParam.urlDirectoryImmagini}/ico-home.png" class="ico-home" alt="Torna a elenco progetti" title="Torna a elenco progetti" />
+      <a class="btn btnNav" href="${project}">
+        <i class="fas fa-home"></i>
+        Progetti
       </a>
     </span>
     <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
@@ -100,18 +101,19 @@
     </c:choose>
       <div id="container-fluid">
         <div class="row">
-          <div class="col-2">
+          <div class="col-4">
             <span class="float-left">
-              <a class="ico" href="${wbs}${p.id}">
-                <img src="${initParam.urlDirectoryImmagini}/ico-return.png" class="ico-home" alt="Torna a elenco wbs" title="Torna a elenco wbs" />
+              <a class="btn btnNav" href="${wbs}${p.id}">
+                <i class="fas fa-undo"></i> WBS
               </a>
-              <a class="ico" href="${project}">
-                <img src="${initParam.urlDirectoryImmagini}/ico-home.png" class="ico-home" alt="Torna a elenco progetti" title="Torna a elenco progetti" />
+              <a class="btn btnNav" href="${project}">
+                <i class="fas fa-home"></i>
+                Progetti
               </a>
             </span>
           </div>
-          <div class="col-8 text-center">
-            <a href="${addAct}${p.id}" class="btn btn-primary" id="add-act">Esporta</a>
+          <div class="col-4 text-center">
+            <a href="#" class="btn btn-success" id="expReport"><i class="fas fa-file-export"></i> Esporta</a>
           </div>
         </div>
       </div>

@@ -12,7 +12,13 @@
       </a>
     </h4>
     <span class="float-right">
-      <a class="btn btnNav" href="${wbs}${p.id}">Torna a elenco WBS</a>
+      <a class="btn btnNav" href="${wbs}${p.id}">
+        <i class="fas fa-undo"></i> WBS
+      </a>
+      <a class="btn btnNav" href="${project}">
+        <i class="fas fa-home"></i>
+        Progetti
+      </a>
     </span>
     <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${wbs}${p.id}">WBS</a></li>
@@ -103,13 +109,19 @@
       </c:choose>
       <div id="container-fluid">
         <div class="row">
-          <div class="col-2">
+          <div class="col-4">
             <span class="float-left">
-              <a class="btn btnNav" href="${project}">Chiudi</a>
+              <a class="btn btnNav" href="${wbs}${p.id}">
+                <i class="fas fa-undo"></i> WBS
+              </a>
+              <a class="btn btnNav" href="${project}">
+                <i class="fas fa-home"></i>
+                Progetti
+              </a>
             </span>
           </div>
-          <div class="col-8 text-center">
-            <a href="${addAct}${p.id}&idw=${wp.id}" class="btn btn-primary" id="add-act">Aggiungi</a>
+          <div class="col-4 text-center">
+            <a href="${addAct}${p.id}&idw=${wp.id}" class="btn btn-success"><i class="fas fa-plus"></i> Aggiungi</a>
           </div>
         </div>
       </div>
