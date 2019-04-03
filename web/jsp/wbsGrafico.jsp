@@ -1,7 +1,8 @@
     <%@ include file="pcURL.jspf" %>
+    <h2>WBS del sotto progetto <strong><c:out value="${p.titolo}" /></strong></h2>
+    <hr class="separatore" />
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
-     
       google.charts.load('current', {packages:["orgchart"]});
       google.charts.setOnLoadCallback(drawChart);
 
@@ -50,6 +51,4 @@
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="javascript:alert('Occorre selezionare una WBS per indicarne le attività')" id="show_act">Attività</a></li>
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${rep}${p.id}">Report</a></li>
     </ul>
-    <hr class="separatore" />
-    <h2>WBS del sotto progetto <strong><c:out value="${p.titolo}" /></strong></h2>
     <div id="chart_div" style="overflow-y: scroll;"></div>
