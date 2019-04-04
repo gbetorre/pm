@@ -162,22 +162,22 @@
           <div class="col-sm-5">Note di avanzamento</div>
           <div class="col-sm-5">
             <textarea class="form-control" id="act-progress" name="act-progress" class="form-control" aria-label="With textarea" maxlength="8104" readonly><c:out value="${actNotes}" escapeXml="false" /></textarea>
+            <div class="charNum"></div>
           </div>
           <a class="ico" id="act-addNote">
             <img src="${initParam.urlDirectoryImmagini}/ico-add-inactive.png" class="btn-del act-addElement" alt="Link ad aggiunta nota" title="Aggiungi nota"/>
           </a>
-          <div class="charNum"></div>
         </div>
         <br />
         <div class="row">
           <div class="col-sm-5">Risultati raggiunti</div>
           <div class="col-sm-5">
             <textarea class="form-control" id="act-result" name="act-result" class="form-control" aria-label="With textarea" maxlength="1024" readonly><c:out value="${actResult}" escapeXml="false" /></textarea>
+            <div class="charNum"></div>
           </div>
           <a class="ico" id="act-addResult">
             <img src="${initParam.urlDirectoryImmagini}/ico-add-inactive.png" class="btn-del act-addElement" alt="Link ad aggiunta risultati" title="Aggiungi risultati"/>
           </a>
-          <div class="charNum"></div>
         </div>
         <br />
         <div class="row">
