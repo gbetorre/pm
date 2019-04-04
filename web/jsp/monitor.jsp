@@ -9,6 +9,12 @@
   </c:if>
 </c:forTokens>
     <c:set var="years" value="2018,2019,2020,2021,2022" scope="page" />
+    <span class="float-right">
+      <a class="btn btnNav" href="${project}">
+        <i class="fas fa-home"></i>
+        Progetti
+      </a>
+    </span>
     <form id="monitor_form" name="miur" action="#" method="post">
       <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
       <c:forTokens var="year" items="${years}" delims=",">
@@ -51,15 +57,22 @@
             <div class="row">
               <div class="col-2">
                 <span class="float-left">
-                  <a class="ico" href="${project}">
-                    <img src="${initParam.urlDirectoryImmagini}/ico-home.png" class="ico-home" alt="Torna a elenco progetti" title="Torna a elenco progetti" />
+                  <a class="btn btnNav" href="${project}">
+                    <i class="fas fa-home"></i>
+                    Progetti
                   </a>
                 </span>
               </div>
               <div class="col-8 text-center">
               <c:if test="${requestScope.privileges}">
-                <input type="button" class="btn btn-primary" name="modifica" value="Modifica" onclick="modify()">
-                <input type="submit" class="btn btn-primary" name="${distinguishingSubmitName}" id="${distinguishingSubmitId}" value="Salva" disabled>
+                <button class="btn btn-success" id="btnMod" name="modifica" onclick="modify()">
+                  <i class="far fa-edit"></i>
+                  Modifica
+                </button>
+                <button type="submit" class="btn btn-success" name="${distinguishingSubmitName}" id="${distinguishingSubmitId}" disabled>
+                  <i class="far fa-save"></i>
+                  Salva
+                </button>
               </c:if>
               </div>
               <div class="col-2">
