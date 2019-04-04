@@ -161,62 +161,23 @@
         <div class="row">
           <div class="col-sm-5">Note di avanzamento</div>
           <div class="col-sm-5">
-            <textarea class="form-control" name="act-progress" class="form-control" aria-label="With textarea" maxlength="8104" readonly><c:out value="${actNotes}" escapeXml="false" /></textarea>
-            <div class="charNum"></div>
+            <textarea class="form-control" id="act-progress" name="act-progress" class="form-control" aria-label="With textarea" maxlength="8104" readonly><c:out value="${actNotes}" escapeXml="false" /></textarea>
           </div>
-          <a href="#note-form" class="ico" id="add-note" rel="modal:open">
-            <img src="${initParam.urlDirectoryImmagini}/ico-add.png" class="btn-del" alt="Link ad aggiunta nota" title="Aggiungi nota" />
+          <a class="ico" id="act-addNote">
+            <img src="${initParam.urlDirectoryImmagini}/ico-add-inactive.png" class="btn-del act-addElement" alt="Link ad aggiunta nota" title="Aggiungi nota"/>
           </a>
-          <!-- <div id="note-form" method="post" action="${delWbs}${wbsNipote.id}" class="modal">
-            <input type="hidden" id="wbs-id" name="wbs-id" value="${wbsNipote.id}" />
-            <h3 class="heading">Aggiungi una nota di avanzamento</h3>
-            <br />
-            <div class="row">
-              <div class="col-sm-5">
-                <strong>
-                  Data
-                  <sup>&#10039;</sup>:
-                </strong>
-              </div>
-              <div class="col-sm-5">  
-                <input type="text" class="form-control calendarData" id="act-datanota" name="act-datafinevera" pattern='dd/MM/yyyy' placeholder="Inserisci una data nota">
-              </div>
-            </div>
-            <hr class="separatore" />
-            <div class="row">
-              <div class="col-sm-5">
-                <strong>
-                  Titolo Nota
-                  <sup>&#10039;</sup>:
-                </strong>
-              </div>
-              <div class="col-sm-5">  
-                <input type="text" class="form-control" id="act-name" name="act-name" value="" placeholder="Inserisci un titolo nota">
-              </div>
-            </div>
-            <hr class="separatore" />
-            <div class="row">
-              <div class="col-sm-5">
-                <strong>
-                  Descrizione
-                  <sup>&#10039;</sup>:
-                </strong>
-              </div>
-              <div class="col-sm-5">  
-                <textarea class="form-control" name="note-descr" class="form-control" aria-label="With textarea" maxlength="8104" placeholder="Inserisci una descrizione nota"></textarea>
-                <div class="charNum"></div>
-              </div>
-            </div>
-          </div>
- -->
+          <div class="charNum"></div>
         </div>
         <br />
         <div class="row">
           <div class="col-sm-5">Risultati raggiunti</div>
           <div class="col-sm-5">
-            <textarea class="form-control" name="act-result" class="form-control" aria-label="With textarea" maxlength="1024" readonly><c:out value="${actResult}" escapeXml="false" /></textarea>
-            <div class="charNum"></div>
+            <textarea class="form-control" id="act-result" name="act-result" class="form-control" aria-label="With textarea" maxlength="1024" readonly><c:out value="${actResult}" escapeXml="false" /></textarea>
           </div>
+          <a class="ico" id="act-addResult">
+            <img src="${initParam.urlDirectoryImmagini}/ico-add-inactive.png" class="btn-del act-addElement" alt="Link ad aggiunta risultati" title="Aggiungi risultati"/>
+          </a>
+          <div class="charNum"></div>
         </div>
         <br />
         <div class="row">
@@ -261,9 +222,83 @@
           <c:set var="redirect" value="${redirect}&idw=${param['idw']}" scope="page" />
         </c:if>
         <a href="<c:out value="${redirect}" escapeXml="false" />" id='btn-close' class="btn btnNav"><i class="far fa-window-close"></i> Chiudi</a>
-        <button class="btn btn-success" id="btnMod" name="modifica" onclick="modify();"><i class="far fa-edit"></i> Modifica</button>
+        <button class="btn btn-success" id="btnMod" name="modifica" onclick="modifyPart();"><i class="far fa-edit"></i> Modifica</button>
         <%@ include file="subPanel.jspf" %>
     </form>
+    <div id="note-div" class="modal">
+      <h3 class="heading">Aggiungi una nota di avanzamento</h3>
+      <br />
+      <div class="row">
+        <div class="col-sm-5">
+          <strong>
+            Data
+            <sup>&#10039;</sup>:
+          </strong>
+        </div>
+        <div class="col-sm-5">  
+          <input type="text" class="form-control calendarData" id="act-datanota" name="act-datafinevera" pattern='dd/MM/yyyy' placeholder="Inserisci una data nota">
+        </div>
+      </div>
+      <hr class="separatore" />
+      <div class="row">
+        <div class="col-sm-5">
+          <strong>
+            Titolo Nota
+            <sup>&#10039;</sup>:
+          </strong>
+        </div>
+        <div class="col-sm-5">  
+          <input type="text" class="form-control" id="act-titlenote" name="act-titlenote" value="" placeholder="Inserisci un titolo nota">
+        </div>
+      </div>
+      <hr class="separatore" />
+      <div class="row">
+        <div class="col-sm-5">
+          <strong>
+            Descrizione
+            <sup>&#10039;</sup>:
+          </strong>
+        </div>
+        <div class="col-sm-5">  
+          <textarea class="form-control" id="act-descnote" name="act-descnote" class="form-control" aria-label="With textarea" maxlength="8104" placeholder="Inserisci una descrizione nota"></textarea>
+          <div class="charNum"></div>
+        </div>
+      </div>
+      <hr class="separatore" />
+      <a href="#" id='btn-close' class="btn btnNav"><i class="far fa-window-close"></i> Chiudi</a>
+      <a href="#" class="btn btn-success" id="btn-add" onclick="addNote()" rel="modal:close"><i class="fas fa-plus"></i> Aggiungi</a>
+    </div>
+    <div id="result-div" class="modal">
+      <h3 class="heading">Aggiungi un risultato raggiunto</h3>
+      <br />
+      <div class="row">
+        <div class="col-sm-5">
+          <strong>
+            Data
+            <sup>&#10039;</sup>:
+          </strong>
+        </div>
+        <div class="col-sm-5">  
+          <input type="text" class="form-control calendarData" id="act-dataresult" name="act-dataresult" pattern='dd/MM/yyyy' placeholder="Inserisci una data risultato">
+        </div>
+      </div>
+      <hr class="separatore" />
+      <div class="row">
+        <div class="col-sm-5">
+          <strong>
+            Risultato finale
+            <sup>&#10039;</sup>:
+          </strong>
+        </div>
+        <div class="col-sm-5">  
+          <textarea class="form-control" id="act-descresult" name="act-descresult" class="form-control" aria-label="With textarea" maxlength="8104" placeholder="Inserisci una descrizione del risultato"></textarea>
+          <div class="charNum"></div>
+        </div>
+      </div>
+      <hr class="separatore" />
+      <a href="#" id='btn-close' class="btn btnNav"><i class="far fa-window-close"></i> Chiudi</a>
+      <a href="#" class="btn btn-success" id="btn-add" onclick="addResult()" rel="modal:close"><i class="fas fa-plus"></i> Aggiungi</a>
+    </div>
 </c:catch>
 <c:out value="${exception}" />
     <script type="text/javascript">
@@ -286,8 +321,17 @@
     var elapsedMonths = elapsedDays/30;
     // Rappresentazione a stringa della data di oggi, in formato italiano
     var todayAsString = rightNow.getDate() + "/" + (1 + rightNow.getMonth()) + "/" + rightNow.getFullYear();
+    // Variabili per formattazione stringhe
+    var limNoteTitleOpen = "\n - ";
+    var limNoteTitleClose = " -\n";
+    var newLine = "\n";
+    var separatore = "\n================================\n";
     // Corpo del programma
     $(document).ready(function () {
+      $('#btn-add').click(function (e){
+        e.preventDefault;
+      });
+      
       $('#act_form').validate ({
       rules: {
         'act-role': {
@@ -328,8 +372,32 @@
       }
       });
       
-      $('textarea[maxlength]').keyup(function () {
+      $('textarea[maxlength]:not(#act-descnote):not(#act-descresult)').keyup(function () {
         var len = $(this).val().length;
+        var dblength = parseInt($(this).attr('maxlength'));
+        if(len >= dblength) {
+          this.value = this.value.substring(0, dblength);
+          $(this).next('div').text(' hai raggiunto il limite massimo di caratteri inseribili');
+        } else {
+          var chars = dblength - len;
+          $(this).next('div').text(chars + ' caratteri rimanenti');
+        }
+      });
+      
+      $('#act-descnote').keyup(function() {
+        var len = $(this).val().length + $('#act-progress').val().length + $('#act-datanota').val().length + $('#act-titlenote').val().length + limNoteTitleOpen.length + limNoteTitleClose.length + separatore.length;
+        var dblength = parseInt($(this).attr('maxlength'));
+        if(len >= dblength) {
+          this.value = this.value.substring(0, dblength);
+          $(this).next('div').text(' hai raggiunto il limite massimo di caratteri inseribili');
+        } else {
+          var chars = dblength - len;
+          $(this).next('div').text(chars + ' caratteri rimanenti');
+        }
+      });
+      
+      $('#act-descresult').keyup(function() {
+        var len = $(this).val().length + $('#act-result').val().length + $('#act-dataresult').val().length + newLine.length + separatore.length;
         var dblength = parseInt($(this).attr('maxlength'));
         if(len >= dblength) {
           this.value = this.value.substring(0, dblength);
@@ -358,4 +426,32 @@
        </c:forEach>    
        }
     });
+    
+    function addNote() {
+      var currentText = $('#act-progress').val();
+      if ($('#act-datanota').val().length < 10 || $('#act-titlenote').val().length < 1 || $('#act-descnote').val() < 1) {
+        alert("Tutti i campi sono obbligatori!");
+        $('#act-progress').val(currentText);
+      } else {
+        var newText = $('#act-datanota').val() + limNoteTitleOpen + $('#act-titlenote').val() + limNoteTitleClose + $('#act-descnote').val() + separatore + currentText;
+        $('#act-progress').val(newText);
+        $('#act-datanota').val("");
+        $('#act-titlenote').val("");
+        $('#act-descnote').val("");
+      }
+    };
+    
+    function addResult() {
+      var currentText = $('#act-result').val();
+      if ($('#act-dataresult').val().length < 1 || $('#act-descresult').val().length < 1) {
+        alert("Tutti i campi sono obbligatori!");
+        $('#act-result').val(currentText);
+      } else {
+        var newText = $('#act-dataresult').val() + newLine + $('#act-descresult').val() + separatore + currentText;
+        $('#act-result').val(newText);
+        $('#act-dataresult').val("");
+        $('#act-descresult').val("");
+        
+      }
+    }
     </script>
