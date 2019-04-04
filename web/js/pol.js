@@ -18,7 +18,28 @@ $.datepicker.regional['it'] = {
 	yearSuffix: "" 
 };
 $.datepicker.setDefaults($.datepicker.regional['it']);
-  
+
+function modifyPart() {
+  var singleParam;
+  var actionParam;
+  var urlParams = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+  for (var i = 0; i < urlParams.length; i++) {
+    singleParam = urlParams[i].split('=');
+    if (singleParam[0] == 'p') {
+      actionParam = singleParam[1];
+      i = urlParams.length;
+    }
+  }
+  modify();
+  if(actionParam == 'add') {
+    $('#act-progress, #act-result').prop('readonly', true);
+  }
+  var icoAdd = "web/img/ico-add.png";
+  $('.act-addElement').attr('src', icoAdd);
+  $('#act-addNote').attr('href', '#note-div').attr('rel', 'modal:open');
+  $('#act-addResult').attr('href', '#result-div').attr('rel', 'modal:open');
+}
+
 function modify() {
   $('textarea').prop('readonly', false);
   $('input[type=\'text\']').prop('readonly', false);
@@ -27,6 +48,7 @@ function modify() {
   $('button').prop('disabled', false);
   $('input[type=\'text\'].calendarData').datepicker();
   $('input[type=\'submit\']').prop('disabled', false);
+  $('img').prop('disabled', false);
   $('.calendarData').on('click', function(e) {
     e.preventDefault();
     $('.calendarData').attr("autocomplete", "off");  
