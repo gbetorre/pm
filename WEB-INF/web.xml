@@ -17,6 +17,19 @@
       <servlet-name>session</servlet-name>
       <servlet-class>it.alma.SessionManager</servlet-class>
    </servlet>
+   
+    <servlet>
+      <description>Servlet per l'upload dei files</description>
+      <servlet-name>file</servlet-name>
+      <servlet-class>it.alma.FileManager</servlet-class>
+   </servlet>
+   
+    <servlet>
+        <description>Servlet per la generazione degli output in formato file</description>        
+        <servlet-name>data</servlet-name>
+        <servlet-class>it.alma.Data</servlet-class>
+        <load-on-startup>10</load-on-startup>
+    </servlet>
  
    <!-- Note: All <servlet> elements MUST be grouped together and
          placed IN FRONT of the <servlet-mapping> elements -->
@@ -31,9 +44,20 @@
       <url-pattern>/auth</url-pattern>
    </servlet-mapping>
    
+    <servlet-mapping>
+      <servlet-name>file</servlet-name>
+      <url-pattern>/file</url-pattern>
+   </servlet-mapping>
+   
+    <servlet-mapping>
+        <servlet-name>data</servlet-name>
+        <url-pattern>/data</url-pattern>
+    </servlet-mapping>
+   
    <servlet-mapping>
       <servlet-name>default</servlet-name>
       <url-pattern>/web/*</url-pattern>
+      <url-pattern>/documenti/*</url-pattern>
    </servlet-mapping>
 
     <context-param>
@@ -64,6 +88,25 @@
         <description></description>
         <param-name>idToken</param-name>
         <param-value>id</param-value>
+    </context-param>
+
+    <context-param>
+        <description>URL della directory che contiene i documenti
+            allegati. Se inizia per 'http://' la directory è remota, se
+            inizia per '/' la directory è relativa alla DocumentRoot
+            del server web, se inizia con una stringa diversa dalle
+            precedenti, la directory è relativa alla jsp in cui viene
+            invocata.
+        </description>        
+        <param-name>urlDirectoryDocumenti</param-name>
+        <param-value>documenti</param-value>
+    </context-param>
+    
+    <context-param>
+        <description>URL della directory che contiene i bundles
+        </description>        
+        <param-name>urlDirectoryBundles</param-name>
+        <param-value>etc</param-value>
     </context-param>
 
     <context-param>
