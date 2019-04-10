@@ -424,6 +424,16 @@ public class ActivityBean extends CodeBean implements Serializable {
 	public String getNoteAvanzamento() {
 		return noteAvanzamento;
 	}
+	
+    /**
+     * Restituisce le note di avanzamento dell'attivit&agrave;
+     * in formato adatto ad essere mostrato in una pagina JSP
+     * 
+     * @return <code>noteAvanzamento</code> - note di avanzamento dell'attvit&agrave; formattate in HTML
+     */
+    public String getNoteAvanzamentoHtml() {
+        return noteAvanzamento.replaceAll("(\r\n|\n)", "<br />");
+    }
 
 	/**
 	 * Imposta le note di avanzamento di un'attivit&agrave;
@@ -447,6 +457,16 @@ public class ActivityBean extends CodeBean implements Serializable {
         return risultatiRaggiunti;
     }
 
+    /**
+     * Restituisce i risultati raggiunti dall'attivit&agrave;
+     * in formato adatto ad essere mostrato in una pagina JSP
+     * 
+     * @return <code>String</code> - risultati realizzati dall'attivit&agrave; formattati in HTML
+     */
+    public String getRisultatiRaggiuntiHtml() {
+        return risultatiRaggiunti.replaceAll("(\r\n|\n)", "<br />");
+    }    
+    
     /**
      * Imposta i risultati raggiunti dall'attivit&agrave;
      * 
