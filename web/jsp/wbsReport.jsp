@@ -1,4 +1,5 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"  %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ include file="pcURL.jspf" %>
     <c:set var="prj" value="${requestScope.progetto}" scope="page" />
     <h4>Report dei Work Packages del sotto progetto: <cite><c:out value="${prj.titolo}" /></cite></h4>
@@ -25,11 +26,11 @@
         <c:set var="status" value="" scope="page" />
         <c:forEach var="wp" items="${requestScope.wps}" varStatus="loop">
         <c:set var="status" value="${loop.index}" scope="page" />
-          <h5 class="moduleThin">WorkPackage: 
+          <h3 class="heading">WorkPackage: 
             <a href="${modAct}${p.id}&ida=${wp.id}">
               <c:out value="${wp.nome}"/>
             </a>
-          </h5>
+          </h3>
           <table class="table table-striped overviewSummary">
             <thead class="thead-light">
               <tr>
@@ -71,15 +72,15 @@
                 <tr>
                   <td colspan="2">
                     <div>
-                      <label><strong>Note di Avanzamento:</strong></label>
+                      <label>Note di Avanzamento:</label>
                     </div>
-                    <c:out value="${act.noteAvanzamento}" />
+                    <c:out value="${act.noteAvanzamentoHtml}" escapeXml="false" />
                   </td>
                   <td colspan="2">
                     <div>
-                      <label><strong>Risultati Raggiunti:</strong></label>
+                      <label>Risultati Raggiunti:</label>
                     </div>
-                    <c:out value="${act.risultatiRaggiunti}" />
+                    <c:out value="${act.risultatiRaggiuntiHtml}" escapeXml="false" />
                   </td>
                 </tr>
               </c:forEach>
