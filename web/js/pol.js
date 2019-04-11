@@ -19,25 +19,38 @@ $.datepicker.regional['it'] = {
 };
 $.datepicker.setDefaults($.datepicker.regional['it']);
 
+function goBack() {
+  window.history.go(-1);
+}
+
 function modifyPart() {
   var singleParam;
   var actionParam;
+  var partProject;
   var urlParams = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
   for (var i = 0; i < urlParams.length; i++) {
     singleParam = urlParams[i].split('=');
-    if (singleParam[0] == 'p') {
+    if (singleParam[0] == 'q') {
+      partProject = singleParam[1];
+    } else if (singleParam[0] == 'p') {
       actionParam = singleParam[1];
       i = urlParams.length;
     }
   }
   modify();
   if(actionParam == 'add') {
-    $('#act-progress, #act-result').prop('readonly', true);
+    $('.noActivateOnAdd').prop('readonly', true);
   }
   var icoAdd = "web/img/ico-add.png";
-  $('.act-addElement').attr('src', icoAdd);
-  $('#act-addNote').attr('href', '#note-div').attr('rel', 'modal:open');
-  $('#act-addResult').attr('href', '#result-div').attr('rel', 'modal:open');
+  $('.addElement').attr('src', icoAdd);
+  if (partProject == 'act') {
+    $('#act-addNote').attr('href', '#note-div').attr('rel', 'modal:open');
+    $('#act-addResult').attr('href', '#result-div').attr('rel', 'modal:open');
+  } else if (partProject == 'wbs') {
+    $('#wbs-addNote').attr('href', '#note-div').attr('rel', 'modal:open');
+    $('#wbs-addResult').attr('href', '#result-div').attr('rel', 'modal:open');
+    
+  }
 }
 
 function modify() {
@@ -77,34 +90,30 @@ jQuery.validator.addMethod("greaterThan",
 );
 
 jQuery.validator.addMethod("lessThan", 
-    function (value, element, params) {
-      var finalDate = value.split('/');
-      var dayFinalDate = finalDate[0];
-      var monthFinalDate = finalDate[1];
-      var yearFinalDate = finalDate[2];
-      var runtimeDate = new Date(yearFinalDate, monthFinalDate - 1, dayFinalDate);
-      var rightNow = new Date();
-      var dayRuntimeDate = runtimeDate.getUTCDate() + 1;
-      var monthRuntimeDate = runtimeDate.getUTCMonth();
-      var yearRuntimeDate = runtimeDate.getUTCFullYear();
-      var dayCurrentDate = rightNow.getUTCDate();
-      var monthCurrentDate = rightNow.getUTCMonth();
-      var yearCurrentDate = rightNow.getUTCFullYear();
-      if (!/Invalid|NaN/.test(runtimeDate)) {
-        if (yearRuntimeDate <= yearCurrentDate) {
-          if (monthRuntimeDate <= monthCurrentDate) {
-            if (dayRuntimeDate <= dayCurrentDate) {
-              return true;
-            }
-            return false;
-          }
-          return false;
-        }
-        return false;
+  function (value, element, params) {
+    var finalDate = value.split('/');
+    var dayFinalDate = finalDate[0];
+    var monthFinalDate = finalDate[1];
+    var yearFinalDate = finalDate[2];
+    var runtimeDate = new Date(yearFinalDate, monthFinalDate - 1, dayFinalDate);
+    var rightNow = new Date();
+    var dayRuntimeDate = runtimeDate.getUTCDate() + 1;
+    var monthRuntimeDate = runtimeDate.getUTCMonth();
+    var yearRuntimeDate = runtimeDate.getUTCFullYear();
+    var dayCurrentDate = rightNow.getUTCDate();
+    var monthCurrentDate = rightNow.getUTCMonth();
+    var yearCurrentDate = rightNow.getUTCFullYear();
+    var runtimeDateAsMilliseconds = Date.UTC(yearRuntimeDate, monthRuntimeDate, dayRuntimeDate, 0, 0, 0);
+    var tomorrowDateAsMilliseconds = Date.UTC(yearCurrentDate, monthCurrentDate, dayCurrentDate + 1, 0, 0, 0);
+    if (!/Invalid|NaN/.test(runtimeDate)) {
+      if (runtimeDateAsMilliseconds < tomorrowDateAsMilliseconds){
+        return true;
       }
-      return true;
-    }, 'Must be less than {0}.'
-  );
+      return false;
+    }
+    return true;
+  }, 'Must be less than {0}.'
+);
 
 function selectionEdit(element) {
   if(!$("input[type='radio']").is(":checked")) {
