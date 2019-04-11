@@ -44,16 +44,15 @@
     <c:set var="wbs" value="${actInstance.idWbs}" scope="page" />
     <c:set var="complexity" value="${actInstance.idComplessita}" scope="page" />
     <c:set var="state" value="${actInstance.idStato}" scope="page" />
-    <c:set var="tP" value="Modifica attivit&agrave; &quot;${actName}&quot;:" scope="page" />
+    <c:set var="tP" value="Attivit&agrave; <em>${actName}</em>:" scope="page" />
   </c:when>
   <c:otherwise>
     <c:set var="actStartDate" value="${requestScope.now}" scope="page" />
     <c:set var="tP" value="Inserisci una nuova attivit&agrave;:" scope="page" />
   </c:otherwise>
   </c:choose>
-    <h3><c:out value="${pageScope.tP}" escapeXml="false" /></h3>
     <br />
-    <form id="act_form" action="" method="post" class="subfields">
+    <form id="act_form" action="" method="post" class="panel">
       <input type="hidden" id="act-id" name="act-id" value="${actInstance.id}" />
       <c:set var="stato" value="" scope="page" />
       <c:forEach var="status" items="${requestScope.statiAttivita}" varStatus="loop">
@@ -61,62 +60,75 @@
           <c:set var="stato" value="${status.nome}" scope="page" />
         </c:if> 
       </c:forEach>
-      <div class="avvisiTot"><c:out value="Stato: ${stato}" /></div>
-      <div class="row">
-        <div class="col-sm-5 mandatory">
-          Identificativo della persona 
-          <sup>&#10039;</sup>
-        </div>
-        <div class="col-sm-5">
-          <select class="form-control" id="act-people" name="act-people" disabled>
-          <c:forEach var="person" items="${requestScope.people}" varStatus="status">
-            <c:set var="selected" value="" scope="page" />
-            <c:if test="${person.id eq personInCharge.id}">
-              <c:set var="selected" value="selected" scope="page" />
-            </c:if>
-            <option value="${person.id}" ${selected}>
-              <c:out value="${person.nome} ${person.cognome}" />
-            </option>
-            <c:choose>
-              <c:when test="${empty actInstance and (status.index eq pageScope.zero)}">
-                <c:set var="skills" value="${person.competenze}" scope="page" />
-              </c:when>
-              <c:when test="${not empty actInstance}">
-                <c:set var="skills" value="${personInCharge.competenze}" scope="page" />
-              </c:when>
-            </c:choose>
-          </c:forEach>
-          </select>
-        </div>
-      </div>
-      <br />
-      <div class="row">
-        <div class="col-sm-5 mandatory">
-          Identificativo del ruolo ricoperto nell'attivit&agrave;
-          <sup>&#10039;</sup>
-          <c:if test="${pageScope.skills.size() gt zero}">
-          <div id="act-role-label">
-            (selezionarne uno)
-          </div>
-          </c:if>
-        </div>
-        <div class="col-sm-5">
-          <select class="form-control" id="act-role" name="act-role" multiple disabled>
-          <c:forEach var="skill" items="${pageScope.skills}">
-            <c:set var="selected" value="" scope="page" />
-            <c:if test="${skill.id eq personInCharge.idQualificaPrincipaleDip}">
-              <c:set var="selected" value="selected" scope="page" />
-            </c:if>
-            <option value="${skill.id}" ${selected}>
-              <c:out value="${skill.nome}" />
-            </option>
-          </c:forEach>
-          </select>
+      <div class="panel-heading bgAddAct bgAct${state}">
+        <div class="noHeader"><c:out value="${pageScope.tP}" escapeXml="false" /></div>
+        <div class="actstate">
+        <c:choose>
+        <c:when test="${not empty actInstance}">
+        <c:out value="Stato: ${stato}" />
+        </c:when>
+        <c:otherwise>
+        <c:out value="Stato: In apertura" />
+        </c:otherwise>
+        </c:choose>
         </div>
       </div>
       <hr class="separatore" />
+      <div class="panel-body">
+        <%@ include file="subPanel.jspf" %>
         <div class="row">
-          <div class="col-sm-5 mandatory">Nome attivit&agrave; <sup>&#10039;</sup></div>
+          <div class="col-sm-5 mandatory">
+            Identificativo della persona 
+          </div>
+          <div class="col-sm-5">
+            <select class="form-control" id="act-people" name="act-people" disabled>
+            <c:forEach var="person" items="${requestScope.people}" varStatus="status">
+              <c:set var="selected" value="" scope="page" />
+              <c:if test="${person.id eq personInCharge.id}">
+                <c:set var="selected" value="selected" scope="page" />
+              </c:if>
+              <option value="${person.id}" ${selected}>
+                <c:out value="${person.nome} ${person.cognome}" />
+              </option>
+              <c:choose>
+                <c:when test="${empty actInstance and (status.index eq pageScope.zero)}">
+                  <c:set var="skills" value="${person.competenze}" scope="page" />
+                </c:when>
+                <c:when test="${not empty actInstance}">
+                  <c:set var="skills" value="${personInCharge.competenze}" scope="page" />
+                </c:when>
+              </c:choose>
+            </c:forEach>
+            </select>
+          </div>
+        </div>
+        <br />
+        <div class="row">
+          <div class="col-sm-5 mandatory">
+            Identificativo del ruolo ricoperto nell'attivit&agrave;
+            <c:if test="${pageScope.skills.size() gt zero}">
+            <div id="act-role-label">
+              (selezionarne uno)
+            </div>
+            </c:if>
+          </div>
+          <div class="col-sm-5">
+            <select class="form-control" id="act-role" name="act-role" multiple disabled>
+            <c:forEach var="skill" items="${pageScope.skills}">
+              <c:set var="selected" value="" scope="page" />
+              <c:if test="${skill.id eq personInCharge.idQualificaPrincipaleDip}">
+                <c:set var="selected" value="selected" scope="page" />
+              </c:if>
+              <option value="${skill.id}" ${selected}>
+                <c:out value="${skill.nome}" />
+              </option>
+            </c:forEach>
+            </select>
+          </div>
+        </div>
+        <hr class="separatore" />
+        <div class="row">
+          <div class="col-sm-5 mandatory">Nome attivit&agrave;</div>
           <div class="col-sm-5">
             <input type="text" class="form-control" id="act-name" name="act-name" value="${actName}" readonly="readonly"> <%-- readonly="readonly" --%>
           </div>
@@ -138,7 +150,7 @@
         </div>
         <br />
         <div class="row">
-          <div class="col-sm-5 mandatory">Data prevista di fine dell'attivit&agrave; <sup>&#10039;</sup></div>
+          <div class="col-sm-5 mandatory">Data prevista di fine dell'attivit&agrave;</div>
           <div class="col-sm-5">
             <input type="text" class="form-control calendarData" id="act-datafine" name="act-datafine" value="<fmt:formatDate value='${actEndDate}' pattern='dd/MM/yyyy' />" readonly> <%--readonly--%>
           </div>
@@ -161,22 +173,22 @@
         <div class="row">
           <div class="col-sm-5">Note di avanzamento</div>
           <div class="col-sm-5">
-            <textarea class="form-control" id="act-progress" name="act-progress" class="form-control" aria-label="With textarea" maxlength="8104" readonly><c:out value="${actNotes}" escapeXml="false" /></textarea>
+            <textarea class="form-control noActivateOnAdd" id="act-progress" name="act-progress" aria-label="With textarea" maxlength="8104" readonly><c:out value="${actNotes}" escapeXml="false" /></textarea>
             <div class="charNum"></div>
           </div>
           <a class="ico" id="act-addNote">
-            <img src="${initParam.urlDirectoryImmagini}/ico-add-inactive.png" class="btn-del act-addElement" alt="Link ad aggiunta nota" title="Aggiungi nota"/>
+            <img src="${initParam.urlDirectoryImmagini}/ico-add-inactive.png" class="btn-del addElement" alt="Link ad aggiunta nota" title="Aggiungi nota"/>
           </a>
         </div>
         <br />
         <div class="row">
           <div class="col-sm-5">Risultati raggiunti</div>
           <div class="col-sm-5">
-            <textarea class="form-control" id="act-result" name="act-result" class="form-control" aria-label="With textarea" maxlength="1024" readonly><c:out value="${actResult}" escapeXml="false" /></textarea>
+            <textarea class="form-control noActivateOnAdd" id="act-result" name="act-result" aria-label="With textarea" maxlength="1024" readonly><c:out value="${actResult}" escapeXml="false" /></textarea>
             <div class="charNum"></div>
           </div>
           <a class="ico" id="act-addResult">
-            <img src="${initParam.urlDirectoryImmagini}/ico-add-inactive.png" class="btn-del act-addElement" alt="Link ad aggiunta risultati" title="Aggiungi risultati"/>
+            <img src="${initParam.urlDirectoryImmagini}/ico-add-inactive.png" class="btn-del addElement" alt="Link ad aggiunta risultati" title="Aggiungi risultati"/>
           </a>
         </div>
         <br />
@@ -188,7 +200,7 @@
         </div>
         <br />
         <div class="row">
-          <div class="col-sm-5 mandatory">WBS <sup>&#10039;</sup></div>
+          <div class="col-sm-5 mandatory">WBS</div>
           <div class="col-sm-5">
             <select class="form-control" id="act-wbs" name="act-wbs" disabled>
             <c:forEach var="wp" items="${requestScope.wbs}" varStatus="status">
@@ -203,7 +215,7 @@
         </div>
         <br />
         <div class="row">
-          <div class="col-sm-5 mandatory">Complessit&agrave; dell'attivit&agrave; <sup>&#10039;</sup></div>
+          <div class="col-sm-5 mandatory">Complessit&agrave; dell'attivit&agrave;</div>
           <div class="col-sm-5">
             <select class="form-control" id="act-compl" name="act-compl" disabled>
             <c:forEach var="status" items="${requestScope.complessita}" varStatus="loop">
@@ -217,13 +229,9 @@
           </div>
         </div>
         <br />
-        <c:set var="redirect" value="${act}${requestScope.progetto.id}" scope="page" />
-        <c:if test="${not empty param['idw']}">
-          <c:set var="redirect" value="${redirect}&idw=${param['idw']}" scope="page" />
-        </c:if>
-        <a href="<c:out value="${redirect}" escapeXml="false" />" id='btn-close' class="btn btnNav"><i class="far fa-window-close"></i> Chiudi</a>
-        <button class="btn btn-success" id="btnMod" name="modifica" onclick="modifyPart();"><i class="far fa-edit"></i> Modifica</button>
-        <%@ include file="subPanel.jspf" %>
+        <a id="btnBack" class="btn btnNav" onclick="goBack()"><i class="fas fa-chevron-left"></i> Indietro</a>
+        <a href="<c:out value="${project}" escapeXml="false" />" id='btn-close' class="btn btnNav"><i class="fas fa-home"></i> Progetti</a>
+      </div>
     </form>
     <div id="note-div" class="modal">
       <h3 class="heading">Aggiungi una nota di avanzamento</h3>
@@ -265,7 +273,7 @@
         </div>
       </div>
       <hr class="separatore" />
-      <a href="#" id='btn-close' class="btn btnNav"><i class="far fa-window-close"></i> Chiudi</a>
+      <a href="<c:out value="${redirect}" escapeXml="false" />" id='btn-close' class="btn btnNav"><i class="far fa-window-close"></i> Chiudi</a>
       <a href="#" class="btn btn-success" id="btn-add" onclick="addNote()" rel="modal:close"><i class="fas fa-plus"></i> Aggiungi</a>
     </div>
     <div id="result-div" class="modal">
@@ -296,7 +304,7 @@
         </div>
       </div>
       <hr class="separatore" />
-      <a href="#" id='btn-close' class="btn btnNav"><i class="far fa-window-close"></i> Chiudi</a>
+      <a href="<c:out value="${redirect}" escapeXml="false" />" id='btn-close' class="btn btnNav"><i class="far fa-window-close"></i> Chiudi</a>
       <a href="#" class="btn btn-success" id="btn-add" onclick="addResult()" rel="modal:close"><i class="fas fa-plus"></i> Aggiungi</a>
     </div>
 </c:catch>
@@ -328,7 +336,7 @@
     var separatore = "\n================================\n";
     // Corpo del programma
     $(document).ready(function () {
-      $('#btn-add').click(function (e){
+      $('#btn-add, #btnBack').click(function (e){
         e.preventDefault;
       });
       
@@ -453,5 +461,5 @@
         $('#act-descresult').val("");
         
       }
-    }
+    };
     </script>
