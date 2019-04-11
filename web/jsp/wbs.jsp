@@ -8,101 +8,244 @@
       <c:set var="wbsNome" value="" scope="page" />
       <c:set var="wbsDescr" value="" scope="page" />
       <c:set var="isWorkpackage" value="" scope="page" />
-      <c:set var="distinguishingSubmitId" value="${wbs}${p.id}" scope="page" />
-      <form id="newWbs_form" action="#" method="post" class="module2">
-        <hr class="separatore" />
-        <c:choose>
-          <c:when test="${not empty wbsInstance}" >
-            <h3>Modifica la WBS ${wbsInstance.nome}:</h3>
-            <c:set var="wbsPadre" value="${wbsInstance.wbsPadre}" scope="page" />
-            <c:set var="wbsId" value="${wbsInstance.id}" scope="page" />
-            <c:set var="wbsNome" value="${wbsInstance.nome}" scope="page" />
-            <c:set var="wbsDescr" value="${wbsInstance.descrizione}" scope="page" />
-            <c:set var="isWorkpackage" value="${wbsInstance.workPackage}" scope="page" />
-            <c:set var="wbsNote" value="${wbsInstance.noteAvanzamento}" scope="page" />
-            <c:set var="wbsRisultati" value="${wbsInstance.risultatiRaggiunti}" scope="page" />
-          </c:when>
+      <c:set var="distinguishingSubmitId" value="${urlWbs}${p.id}" scope="page" />
+      <c:choose>
+        <c:when test="${not empty wbsInstance}" >
+          <c:set var="tP" value="WBS: <em>${wbsInstance.nome}</em>" scope="page" />
+          <c:set var="wbsPadre" value="${wbsInstance.wbsPadre}" scope="page" />
+          <c:set var="wbsId" value="${wbsInstance.id}" scope="page" />
+          <c:set var="wbsNome" value="${wbsInstance.nome}" scope="page" />
+          <c:set var="wbsDescr" value="${wbsInstance.descrizione}" scope="page" />
+          <c:set var="isWorkpackage" value="${wbsInstance.workPackage}" scope="page" />
+          <c:set var="wbsNote" value="${wbsInstance.noteAvanzamento}" scope="page" />
+          <c:set var="wbsRisultati" value="${wbsInstance.risultatiRaggiunti}" scope="page" />
+        </c:when>
         <c:otherwise>
-          <h3>Inserisci una nuova WBS:</h3>
+          <c:set var="tP" value="Inserisci una nuova WBS:" scope="page" />
         </c:otherwise>
       </c:choose>
-      <br />
-      <input type="hidden" id="wbs-id" name="wbs-id" value="${wbsId}" />
-      <div class="row">
-        <div class="col-sm-5">
-          WBS padre (se &eacute; presente): 
-          <sup>&#10039;</sup>
+      <form id="wbs_form" action="" method="post" class="panel">
+        <input type="hidden" id="wbs-id" name="wbs-id" value="${wbsId}" />
+        <div class="panel-heading bgWbs">
+          <div class="noHeader"><c:out value="${pageScope.tP}" escapeXml="false" /></div>
         </div>
-        <div class="col-sm-5">
-          <select class="form-control" id="wbs-idpadre" name="wbs-idpadre">
-          <c:if test="${wbsPadre.id ne -3}">
-            <option value="${wbsPadre.id}">${wbsPadre.nome}</option>
-          </c:if>
-          <option value="">Nessuna wbs padre</option>
-          <c:forEach var="singleWbs" items="${requestScope.wbs}" varStatus="status">
-            <option value="${singleWbs.id}">${singleWbs.nome}</option>
-          </c:forEach>
-          </select>
-        </div>
-      </div>
-      <br />
-      <div class="row">
-        <div class="col-sm-5">Nome WBS</div>
-        <div class="col-sm-5">
-          <input type="text" class="form-control" id="wbs-name" name="wbs-name" value="${wbsNome}">
-          <div class="charNum"></div> 
-        </div>
-      </div>
-      <br />
-      <div class="row">
-        <div class="col-sm-5">Descrizione della WBS</div>
-        <div class="col-sm-5">
-          <textarea class="form-control" name="wbs-descr">${wbsDescr}</textarea>
-          <div class="charNum"></div>
-        </div>
-      </div>
-      <br />
-      <div class="row">
-        <div class="col-sm-5">Note di avanzamento della WBS</div>
-        <div class="col-sm-5">
-          <textarea class="form-control" name="wbs-note">${wbsNote}</textarea>
-          <div class="charNum"></div>
-        </div>
-      </div>
-      <br />
-      <div class="row">
-        <div class="col-sm-5">Risultati raggiunti da questa WBS</div>
-        <div class="col-sm-5">
-          <textarea class="form-control" name="wbs-result">${wbsRisultati}</textarea>
-          <div class="charNum"></div>
-        </div>
-      </div>
-      <br />
-      <div class="row">
-        <div class="col-sm-5">Workpackage</div>
-        <div class="col-sm-5">
-          <c:choose>
-            <c:when test="${isWorkpackage}">
-              <div class="form-check">
-                <input type="checkbox" class="form-check-input" id="wbs-workpackage" name="wbs-workpackage" checked>
+        <hr class="separatore" />
+        <div class="panel-body">
+          <%@ include file="subPanel.jspf" %>
+          <div class="row">
+            <div class="col-sm-5">
+              WBS padre (se &eacute; presente):
+            </div>
+            <div class="col-sm-5">
+              <select class="form-control" id="wbs-idpadre" name="wbs-idpadre" disabled>
+              <c:if test="${wbsPadre.id ne -3}">
+                <option value="${wbsPadre.id}">${wbsPadre.nome}</option>
+              </c:if>
+              <option value="">Nessuna wbs padre</option>
+              <c:forEach var="singleWbs" items="${requestScope.wbs}" varStatus="status">
+                <option value="${singleWbs.id}">${singleWbs.nome}</option>
+              </c:forEach>
+              </select>
+            </div>
+          </div>
+          <br />
+          <div class="row">
+            <div class="col-sm-5">Nome WBS</div>
+            <div class="col-sm-5">
+              <input type="text" class="form-control" id="wbs-name" name="wbs-name" value="${wbsNome}" placeholder="Inserisci nome WBS" readonly>
+              <div class="charNum"></div> 
+            </div>
+          </div>
+          <br />
+          <div class="row">
+            <div class="col-sm-5">Descrizione della WBS</div>
+            <div class="col-sm-5">
+              <textarea class="form-control" name="wbs-descr" placeholder="Inserisci una descrizione per la WBS" readonly>${wbsDescr}</textarea>
+              <div class="charNum"></div>
+            </div>
+          </div>
+          <br />
+          <div class="row">
+            <div class="col-sm-5">Note di avanzamento della WBS</div>
+            <div class="col-sm-5">
+              <textarea class="form-control noActivateOnAdd" id="wbs-note" name="wbs-note" placeholder="Inserisci note di avanzamento della WBS" readonly>${wbsNote}</textarea>
+              <div class="charNum"></div>
+            </div>
+            <a class="ico" id="wbs-addNote">
+              <img src="${initParam.urlDirectoryImmagini}/ico-add-inactive.png" class="btn-del addElement" alt="Link ad aggiunta note" title="Aggiungi note avanzamento"/>
+            </a>
+          </div>
+          <br />
+          <div class="row">
+            <div class="col-sm-5">Risultati raggiunti da questa WBS</div>
+            <div class="col-sm-5">
+              <textarea class="form-control noActivateOnAdd" id="wbs-result" name="wbs-result"  placeholder="Inserisci risultati raggiunti dalla WBS" readonly>${wbsRisultati}</textarea>
+              <div class="charNum"></div>
+            </div>
+            <a class="ico" id="wbs-addResult">
+              <img src="${initParam.urlDirectoryImmagini}/ico-add-inactive.png" class="btn-del addElement" alt="Link ad aggiunta risultati" title="Aggiungi risultati"/>
+            </a>
+          </div>
+          <br />
+          <div class="row">
+            <div class="col-sm-5">Workpackage</div>
+            <div class="col-sm-5">
+              <c:choose>
+                <c:when test="${isWorkpackage}">
+                  <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="wbs-workpackage" name="wbs-workpackage" checked disabled>
+                  </div>
+                </c:when>
+                <c:otherwise>
+                  <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="wbs-workpackage" name="wbs-workpackage" disabled>
+                  </div>
+                </c:otherwise>
+              </c:choose>
+            </div>
+          </div>
+      <c:if test="${not empty wbsInstance}">
+        <c:choose>
+          <c:when test="${not empty wbsInstance.attivita}">
+          <hr class="separatore" />
+          <div class="actOfWbs">
+            <div class="row">
+              <div class="col"><strong>Attivit&agrave; della WBS</strong></div>
+            </div>
+            <hr class="separatore" />
+            <div class="row">
+              <div class="col-sm-1"></div>
+              <div class="col-sm-3 actOfWbsHead">Nome attivit&agrave;</div>
+              <div class="col-sm-2 actOfWbsHead">Data inizio prevista</div>
+              <div class="col-sm-2 actOfWbsHead">Data fine prevista</div>
+              <div class="col-sm-2 actOfWbsHead">Milestone</div>
+            </div>
+            <hr class="separatore" />
+            <c:forEach var="act" items="${wbsInstance.attivita}" varStatus="loop">
+            <div class="row">
+              <div class="col-sm-1"></div>
+              <div class="col-sm-3">
+                <a href="${modAct}${p.id}&ida=${act.id}"><c:out value="${act.nome}"/></a>
+            	</div>
+              <div class="col-sm-2">
+                <fmt:formatDate value='${act.dataInizio}' pattern='dd/MM/yyyy' />
               </div>
-            </c:when>
-            <c:otherwise>
-              <div class="form-check">
-                <input type="checkbox" class="form-check-input" id="wbs-workpackage" name="wbs-workpackage">
+              <div class="col-sm-2">
+                <fmt:formatDate value='${act.dataFine}' pattern='dd/MM/yyyy' />
               </div>
-            </c:otherwise>
-          </c:choose>
+              <div class="col-sm-2">
+              <c:choose>
+              <c:when test="${act.milestone}">
+                <div class="form-check text-center">
+                  <input type="checkbox" class="form-check-input" checked disabled>
+                </div>
+              </c:when>
+              <c:otherwise>
+                <div class="form-check text-center">
+                  <input type="checkbox" class="form-check-input" disabled>
+                </div>
+              </c:otherwise>
+              </c:choose>
+              </div>
+            </div>
+            </c:forEach>
+          </div>
+          </c:when>
+          <c:otherwise>
+          <div class="alert alert-danger">
+            <p>Non &egrave; stata trovata alcuna attivit&agrave; associata <em>direttamente</em> alla WBS &quot;${wbsNome}&quot;.</p>
+          </div>
+          </c:otherwise>
+        </c:choose>
+      </c:if>
+          <hr class="separatore" />
+          <a id="btnBack" class="btn btnNav" onclick="goBack()"><i class="fas fa-chevron-left"></i> Indietro</a>
+          <a href="<c:out value="${project}" escapeXml="false" />" id='btn-close' class="btn btnNav"><i class="fas fa-home"></i> Progetti</a>
         </div>
-      </div>
-      <hr class="separatore" />
-      <a href="${wbs}${p.id}" class="btn btnNav"><i class="far fa-window-close"></i> Chiudi</a>
-      <%@ include file="subPanel.jspf" %>
+        <div id="note-div" class="modal">
+          <h3 class="heading">Aggiungi una nota di avanzamento</h3>
+          <br />
+          <div class="row">
+            <div class="col-sm-5">
+              <strong>
+                Data
+                <sup>&#10039;</sup>:
+              </strong>
+            </div>
+            <div class="col-sm-5">  
+              <input type="text" class="form-control calendarData" id="wbs-datanota" name="wbs-datafinevera" pattern='dd/MM/yyyy' placeholder="Inserisci una data nota">
+            </div>
+          </div>
+          <hr class="separatore" />
+          <div class="row">
+            <div class="col-sm-5">
+              <strong>
+                Titolo Nota
+                <sup>&#10039;</sup>:
+              </strong>
+            </div>
+            <div class="col-sm-5">  
+              <input type="text" class="form-control" id="wbs-titlenote" name="wbs-titlenote" value="" placeholder="Inserisci un titolo nota">
+            </div>
+          </div>
+          <hr class="separatore" />
+          <div class="row">
+            <div class="col-sm-5">
+              <strong>
+                Descrizione
+                <sup>&#10039;</sup>:
+              </strong>
+            </div>
+            <div class="col-sm-5">  
+              <textarea class="form-control" id="wbs-descnote" name="wbs-descnote" class="form-control" aria-label="With textarea" maxlength="8104" placeholder="Inserisci una descrizione nota"></textarea>
+              <div class="charNum"></div>
+            </div>
+          </div>
+          <hr class="separatore" />
+          <a href="<c:out value="${redirect}" escapeXml="false" />" id='btn-close' class="btn btnNav"><i class="far fa-window-close"></i> Chiudi</a>
+          <a href="#" class="btn btn-success" id="btn-add" onclick="addNote()" rel="modal:close"><i class="fas fa-plus"></i> Aggiungi</a>
+        </div>
+        <div id="result-div" class="modal">
+          <h3 class="heading">Aggiungi un risultato raggiunto</h3>
+          <br />
+          <div class="row">
+            <div class="col-sm-5">
+              <strong>
+                Data
+                <sup>&#10039;</sup>:
+              </strong>
+            </div>
+            <div class="col-sm-5">  
+              <input type="text" class="form-control calendarData" id="wbs-dataresult" name="wbs-dataresult" pattern='dd/MM/yyyy' placeholder="Inserisci una data risultato">
+            </div>
+          </div>
+          <hr class="separatore" />
+          <div class="row">
+            <div class="col-sm-5">
+              <strong>
+                Risultato finale
+                <sup>&#10039;</sup>:
+              </strong>
+            </div>
+            <div class="col-sm-5">  
+              <textarea class="form-control" id="wbs-descresult" name="wbs-descresult" class="form-control" aria-label="With textarea" maxlength="8104" placeholder="Inserisci una descrizione del risultato"></textarea>
+              <div class="charNum"></div>
+            </div>
+          </div>
+          <hr class="separatore" />
+          <a href="<c:out value="${redirect}" escapeXml="false" />" id='btn-close' class="btn btnNav"><i class="far fa-window-close"></i> Chiudi</a>
+          <a href="#" class="btn btn-success" id="btn-add" onclick="addResult()" rel="modal:close"><i class="fas fa-plus"></i> Aggiungi</a>
+        </div>
       </form>
       </c:catch>
       <c:out value="${exception}" />
       <script type="text/javascript">
         var offsetcharacter = 5;
+        // Variabili per formattazione stringhe
+        var limNoteTitleOpen = "\n - ";
+        var limNoteTitleClose = " -\n";
+        var newLine = "\n";
+        var separatore = "\n================================\n";
         $(document).ready(function () {
           $('#newWbs_form').validate ({
             rules: {
@@ -124,12 +267,36 @@
             }
           });
         
-          $('textarea').keyup(function (e) {
+          $('textarea:not(#wbs-descnote):not(#wbs-descresult)').keyup(function (e) {
             var len = $(this).val().length;
             var dblength = 8104;
             if(len >= dblength) {
               this.value = this.value.substring(0, dblength);
               $(this).next('div').text(' è stato raggiunto il limite di caratteri');
+            } else {
+              var chars = dblength - len;
+              $(this).next('div').text(chars + ' caratteri rimanenti');
+            }
+          });
+          
+          $('#wbs-descnote').keyup(function() {
+            var len = $(this).val().length + $('#wbs-note').val().length + $('#wbs-datanota').val().length + $('#wbs-titlenote').val().length + limNoteTitleOpen.length + limNoteTitleClose.length + separatore.length;
+            var dblength = parseInt($(this).attr('maxlength'));
+            if(len >= dblength) {
+              this.value = this.value.substring(0, dblength);
+              $(this).next('div').text(' hai raggiunto il limite massimo di caratteri inseribili');
+            } else {
+              var chars = dblength - len;
+              $(this).next('div').text(chars + ' caratteri rimanenti');
+            }
+          });
+          
+          $('#wbs-descresult').keyup(function() {
+            var len = $(this).val().length + $('#wbs-result').val().length + $('#wbs-dataresult').val().length + newLine.length + separatore.length;
+            var dblength = parseInt($(this).attr('maxlength'));
+            if(len >= dblength) {
+              this.value = this.value.substring(0, dblength);
+              $(this).next('div').text(' hai raggiunto il limite massimo di caratteri inseribili');
             } else {
               var chars = dblength - len;
               $(this).next('div').text(chars + ' caratteri rimanenti');
@@ -148,67 +315,32 @@
             }
           });
         });
+        
+        function addNote() {
+          var currentText = $('#wbs-note').val();
+          if ($('#wbs-datanota').val().length < 10 || $('#wbs-titlenote').val().length < 1 || $('#wbs-descnote').val() < 1) {
+            alert("Tutti i campi sono obbligatori!");
+            $('#wbs-progress').val(currentText);
+          } else {
+            var newText = $('#wbs-datanota').val() + limNoteTitleOpen + $('#wbs-titlenote').val() + limNoteTitleClose + $('#wbs-descnote').val() + separatore + currentText;
+            $('#wbs-note').val(newText);
+            $('#wbs-datanota').val("");
+            $('#wbs-titlenote').val("");
+            $('#wbs-descnote').val("");
+          }
+        };
+        
+        function addResult() {
+          var currentText = $('#wbs-result').val();
+          if ($('#wbs-dataresult').val().length < 1 || $('#wbs-descresult').val().length < 1) {
+            alert("Tutti i campi sono obbligatori!");
+            $('#wbs-result').val(currentText);
+          } else {
+            var newText = $('#wbs-dataresult').val() + newLine + $('#wbs-descresult').val() + separatore + currentText;
+            $('#wbs-result').val(newText);
+            $('#wbs-dataresult').val("");
+            $('#wbs-descresult').val("");
+            
+          }
+        };
       </script>
-    <c:if test="${not empty  wbsInstance.nome}">
-      <c:choose>
-        <c:when test="${not empty wbsInstance.attivita}">
-        <div class="subfields">
-        <h4>Attivit&agrave; di questa WBS</h4>
-        <table class="table table-bordered table-hover" id="listAct">
-          <thead class="thead-light">
-          <tr>
-            <th scope="col">Nome attivit&agrave;</th>
-            <th scope="col">Note di avanzamento</th>
-            <th scope="col">Risultati raggiunti</th>
-            <th scope="col"><div class="text-center">Milestone</div></th>
-          </tr>
-          </thead>
-          <tbody>
-          <c:set var="status" value="" scope="page" />
-          <c:forEach var="act" items="${wbsInstance.attivita}" varStatus="loop">
-            <c:set var="status" value="${loop.index}" scope="page" />
-            <tr>
-              <td scope="row" id="nameColumn">
-                <a href="${modAct}${p.id}&ida=${act.id}">
-                  <c:out value="${act.nome}"/>
-                </a>
-              </td>
-              <td scope="row">
-                <c:out value="${act.noteAvanzamento}"/>
-              </td>
-              <td scope="row">
-                <c:out value="${act.risultatiRaggiunti}"/>
-              </td>
-              <td scope="row">
-                <input type="hidden" value="${act.milestone}" />
-                <c:choose>
-                  <c:when test="${act.milestone}">
-                    <div class="form-check text-center">
-                      <input type="checkbox" class="form-check-input" id="act-milestone${status}" name="act-milestone${status}" checked disabled>
-                    </div>
-                  </c:when>
-                  <c:otherwise>
-                    <div class="form-check text-center">
-                      <input type="checkbox" class="form-check-input" id="act-milestone${status}" name="act-milestone${status}" disabled>
-                    </div>
-                  </c:otherwise>
-                </c:choose>
-              </td>
-            </tr>
-          </c:forEach>
-          </tbody>
-        </table>
-        </div>
-        </c:when>
-        <c:otherwise>
-        <div class="alert alert-danger">
-          <p>Non &egrave; stata trovata alcuna attivit&agrave; associata <em>direttamente</em> alla WBS &quot;${wbsNome}&quot;.</p>
-        </div>
-        </c:otherwise>
-      </c:choose>
-    </c:if>
-    <script type="text/javascript">
-      $(document).ready(function() {
-        $('#listAct').DataTable();
-      });
-    </script>
