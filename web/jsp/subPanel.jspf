@@ -30,19 +30,55 @@
       </c:when>
       <c:when test="${param['q'] eq 'wbs'}">
         <c:if test="${not empty param['p']}">
-          <button type="submit" class="btn btn-success" value="Salva">
-            <i class="far fa-save"></i>
-            Salva
-          </button>
+          <div class="row">
+            <div class="col-5">
+              <label for="btnMod"><em>Per abilitare i campi clicca sul pulsante&nbsp;</em></label>
+            </div>
+            <div class="col-1">
+              <button class="btn btn-success" id="btnMod" name="modifica" onclick="modifyPart();"><i class="far fa-edit"></i> Modifica</button>
+            </div>
+          </div>
+          <hr class="separatore" />
+          <div class="row">
+            <div class="col-5">
+              <label for="btnSave"><em>Per salvare le modifiche clicca sul pulsante&nbsp;</em></label>
+            </div>
+            <div class="col-1">
+              <button type="submit" id="btnSave" class="btn btn-success" value="Salva" disabled>
+                <i class="far fa-save"></i>
+                Salva
+              </button>
+            </div>
+          </div>
+          <br />
+          <hr class="riga" />
         </c:if>
       </c:when>
       <c:when test="${param['q'] eq 'act'}">
       <c:choose>
         <c:when test="${param['p'] eq 'mod' or param['p'] eq 'add'}">
-          <button type="submit" class="btn btn-success" value="Salva" disabled>
-            <i class="far fa-save"></i>
-            Salva
-          </button>
+        <div class="row">
+          <div class="col-5">
+            <label for="btnMod"><em>Per abilitare i campi clicca sul pulsante&nbsp;</em></label>
+          </div>
+          <div class="col-1">
+            <button class="btn btn-success" id="btnMod" name="modifica" onclick="modifyPart();"><i class="far fa-edit"></i> Modifica</button>
+          </div>
+        </div>
+        <hr class="separatore" />
+        <div class="row">
+          <div class="col-5">
+            <label for="btnSave"><em>Per salvare le modifiche clicca sul pulsante&nbsp;</em></label>
+          </div>
+          <div class="col-1">
+            <button type="submit" id="btnSave" class="btn btn-success" value="Salva" disabled>
+              <i class="far fa-save"></i>
+              Salva
+            </button>
+          </div>
+        </div>
+        <br />
+        <hr class="riga" />
         </c:when>
         <c:when test="${param['p'] eq 'sus'}">
           <button type="submit" class="btn btn-danger" id="btn-susAct" value="Sospendi"><i class="fas fa-pause"></i> Sospendi</button>
