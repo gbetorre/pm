@@ -113,16 +113,34 @@ a:hover.btn-outline-danger {
 	color: white;
 }
 
+a:not([href]):not([tabindex]), a:hover:not([href]):not([tabindex]) {
+	color:white;
+}
+
 label.linkStatus {
 	background-color: #ccccff;
 }
 
 label.error { 
-	width: 250px; 
+	width: 100%; 
 	display: block; 
 	float: left; 
-	color: red; 
 	padding-left: 10px;
+	color: red; 
+}
+
+div.actstate{
+	float: right;
+	position: relative;
+	font-weight: bold;
+	color: black;
+}
+
+div.noHeader {
+	font-size: 18pt;
+	padding-left: 20px;
+	color: black;
+	
 }
 
 div.substatus {
@@ -133,7 +151,7 @@ div.substatus {
 
 div.charNum {
 	color: red;
-	font-weight: bold;
+	padding-left: 10px;
 }
 
 div.additional-fields {
@@ -206,6 +224,30 @@ select:disabled.bgcolor3 {
 
 .bgcolorred {
 	background-image: linear-gradient(to right, white, #ff5232);
+}
+
+.panel {
+	margin: auto;
+	margin-top: 5%;
+	margin-bottom: 5%;
+	border: groove;
+	border-radius: 10px;
+	padding-bottom: 20px;
+	width: 80%;
+}
+
+.panel-heading {
+  padding: 10px 15px;
+  border-bottom: 1px solid transparent;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+  min-height: 70px;
+}
+
+.panel-body {
+	padding-right: 15px;
+	padding-left: 15px;
+	padding-top: 20px;
 }
 
 .reportHead {
@@ -331,7 +373,12 @@ textarea {
 /* Additional styles */
 .mandatory {
 	font-weight: bold;
-  color: maroon;
+}
+
+.mandatory:after {
+	font-weight: bold;
+	font-size: 15pt;
+	content: '*';
 }
 
 /*.btn-del {
@@ -453,44 +500,47 @@ hr.riga       {
 }
 
 /*---------------------- STATI ------------------------*/
+.bgAct {
+	background-color: #ffd9b3 !important;
+}
 .bgAct1 {
-  background-image: linear-gradient(to right, #b3e6ff, transparent) !important;
+  background-color: #b3e6ff !important;
 }
 
 .bgAct2 {
-  background-image: linear-gradient(to right, #ffffb3, transparent) !important;
+  background-color: #ffffb3 !important;
 }
 
 .bgAct3 {
-	background-image: linear-gradient(to right, #c3e6cb, transparent) !important;
+	background-color: #c3e6cb !important;
 }
 
 .bgAct4 {
-	background-image: linear-gradient(to right, #d9d9d9, transparent) !important;
+	background-color: #d9d9d9 !important;
 }
 
 .bgAct5 {
-	background-image: linear-gradient(to right, #ffff33, transparent) !important;
+	background-color: #ffff33 !important;
 }
 
 .bgAct6 {
-	background-image: linear-gradient(to right, #ffb380, transparent) !important;
+	background-color: #ffb380 !important;
 }
 
 .bgAct7 {
-	background-image: linear-gradient(to right, #ff6600, transparent) !important;
+	background-color: #ff6600 !important;
 }
 
 .bgAct8 {
-	background-image: linear-gradient(to right, #bfff00, transparent) !important;
+	background-color: #bfff00 !important;
 }
 
 .bgAct9 {
-	background-image: linear-gradient(to right, #28a754, transparent) !important;
+	background-color: #6fdc95 !important;
 }
 
 .bgAct10 {
-	background-image: linear-gradient(to right, #f5c6cb, transparent) !important;
+	background-color: #f5c6cb !important;
 }
 
 .bgSts21, .bgSts22 {
@@ -533,6 +583,38 @@ hr.riga       {
 .bgAct26 {
   background-color: #80aaff;
   border: 1px solid #004de6;
+}
+
+.bgAddAct {
+	background-color: #d9edf7;
+}
+
+.bgFade {
+	background-image: linear-gradient(to right, transparent, white) !important;
+}
+
+.bgWbs {
+	background-color: #ffccff;
+}
+
+.actOfWbs{
+	border-color: #d9d9d9;
+	border-style: solid;
+	border-width: 2px;
+	background-color: #f2f2f2;
+	padding: 10px 15px;
+}
+
+.actOfWbsHead{
+	border-top-style: solid;
+	border-top-width: 1px;
+	border-bottom-style: solid;
+	border-bottom-width: 1px;
+	border-color: #d9d9d9;
+}
+
+.verticalCenter{
+	vertical-align: middle;
 }
 
 /*---------------------- POP-UP ------------------------*/
