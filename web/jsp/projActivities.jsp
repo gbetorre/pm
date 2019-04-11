@@ -52,7 +52,7 @@
         <c:set var="status" value="${loop.index}" scope="page" />
         <input type="hidden" id="act-id${status}" name="act-id${status}" value="<c:out value="${act.id}"/>">
         <tr>
-          <td scope="row" id="nameColumn" class="success bgAct${act.stato.id}">
+          <td scope="row" id="nameColumn" class="success bgAct${act.stato.id} bgFade">
         <c:choose>
           <c:when test="${isTrash}">
             <c:out value="${act.nome}"/>
