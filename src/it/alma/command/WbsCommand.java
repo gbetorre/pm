@@ -306,6 +306,7 @@ public class WbsCommand extends ItemBean implements Command {
                         } else {
                             // Selezioni per visualizzazione, aggiunta e modifica wbs
                             // Seleziona tutte le WBS non workpackage per mostrare i possibili padri nella pagina di dettaglio
+                            isHeader = isFooter = false;
                             wbsPutativeFather = db.getWbs(idPrj, Query.WBS_BUT_WP);
                             if (idWbs != Utils.DEFAULT_ID) {
                                 wbsInstance = db.getWbsInstance(idPrj, idWbs);
