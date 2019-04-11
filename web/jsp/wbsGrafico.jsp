@@ -38,7 +38,7 @@
       }
     </script>
     <span class="float-right">
-      <a class="btn btnNav" href="${wbs}${p.id}">
+      <a class="btn btnNav" href="${urlWbs}${p.id}">
         <i class="fas fa-undo"></i> WBS
       </a>
       <a class="btn btnNav" href="${project}">
@@ -47,7 +47,7 @@
       </a>
     </span>
     <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
-      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${wbs}${p.id}">WBS</a></li>
+      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${urlWbs}${p.id}">WBS</a></li>
       <li class="nav-item"><a class="nav-link active tabactive" data-toggle="tab" href="${grafico}${p.id}">Grafico</a></li>
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="javascript:alert('Occorre selezionare una WBS per indicarne le attività')" id="show_act">Attività</a></li>
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${rep}${p.id}">Report</a></li>

@@ -1,10 +1,9 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"  %>
-<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ include file="pcURL.jspf" %>
     <c:set var="prj" value="${requestScope.progetto}" scope="page" />
     <h4>Report dei Work Packages del sotto progetto: <cite><c:out value="${prj.titolo}" /></cite></h4>
     <span class="float-right">
-      <a class="btn btnNav" href="${wbs}${p.id}">
+      <a class="btn btnNav" href="${urlWbs}${p.id}">
         <i class="fas fa-undo"></i> WBS
       </a>
       <a class="btn btnNav" href="${project}">
@@ -13,7 +12,7 @@
       </a>
     </span>
     <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
-      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${wbs}${prj.id}">WBS</a></li>
+      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${urlWbs}${prj.id}">WBS</a></li>
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${grafico}${prj.id}">Grafico</a></li>
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="javascript:showActivities('${wbs}${prj.id}')" id="show_act">Attivit&agrave;</a></li>
       <li class="nav-item"><a class="nav-link active tabactive" data-toggle="tab" href="#">Report</a></li>
@@ -104,7 +103,7 @@
         <div class="row">
           <div class="col-4">
             <span class="float-left">
-              <a class="btn btnNav" href="${wbs}${p.id}">
+              <a class="btn btnNav" href="${urlWbs}${p.id}">
                 <i class="fas fa-undo"></i> WBS
               </a>
               <a class="btn btnNav" href="${project}">

@@ -69,7 +69,7 @@
   <c:param name="p" value="rep" />
   <c:param name="id" value="" />
 </c:url>
-<c:url var="wbs" context="${initParam.appName}" value="/" scope="page">
+<c:url var="urlWbs" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="wbs" />
   <c:param name="id" value="" />
 </c:url>
