@@ -358,7 +358,7 @@ textarea {
 	margin-left: 20px;
 }
 
-/* Page header and footer styles */
+/*---------------------- Page header and footer styles ------------------------*/
 .header, .footer {
     clear: both;
     margin: 0px 0px;
@@ -370,7 +370,7 @@ textarea {
 	 height: 10%;
 }
 
-/* Additional styles */
+/*---------------------- Additional styles ------------------------*/
 .mandatory {
 	font-weight: bold;
 }
@@ -380,11 +380,6 @@ textarea {
 	font-size: 15pt;
 	content: '*';
 }
-
-/*.btn-del {
-    background: url(../img/ico-del.png) no-repeat left top;
-    background-size: 22px 22px;
-}*/
 
 .btn-del {
     width: 30px;
@@ -401,10 +396,36 @@ textarea {
 .ico-save {
 	height: 20px;  
 	background-size: contain;
-  	background-repeat: no-repeat;
+  background-repeat: no-repeat;
  	background-position: center center;
-  	background-image: url(../img/ico-save.png);
+  background-image: url(../img/ico-save.png);
 }
+
+.form-custom {
+  background: #E8E6D8;
+  border: 1px solid #DFDAB7;
+  padding: 0.5em 1em;
+  border-radius: 3px;
+  margin-bottom: 1em;
+}
+
+.form-control-custom {
+	background:transparent;
+	border:none;
+}
+
+.bordo {
+  color: #000;
+  text-transform: uppercase;
+  font-weight: normal;
+  border-left-width: 3px;
+  border-left-style: solid;
+  border-left-color: #990000;
+  padding-left: 15px;
+  line-height: 1.45em;
+  }
+
+.file-data {color: #999;  font-variant: italic;}
 
 /*---------------------- Righe Orizzontali ------------------------*/
 hr  {
@@ -597,7 +618,7 @@ hr.riga       {
 	background-color: #ffccff;
 }
 
-.actOfWbs{
+.lightTable{
 	border-color: #d9d9d9;
 	border-style: solid;
 	border-width: 2px;
@@ -605,7 +626,7 @@ hr.riga       {
 	padding: 10px 15px;
 }
 
-.actOfWbsHead{
+.lightTableHead{
 	border-top-style: solid;
 	border-top-width: 1px;
 	border-bottom-style: solid;
@@ -670,10 +691,6 @@ hr.riga       {
   padding: 3px 30px 3px 0px;
   color: #484f51;
  }
- 
-/* .popup dt {
-  margin-left: 9px;
- }*/ 
  
  .popup dd {
   margin-left: 18px;
