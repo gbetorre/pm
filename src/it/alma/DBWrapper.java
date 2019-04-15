@@ -347,6 +347,53 @@ public class DBWrapper implements Query {
     
     
     /**
+     * <p>Restituisce un Vector&lt;ItemBean&gt; contenente ciascuno
+     * i riferimenti al progetto, all'utente e ai suoi ruoli all'interno
+     * del progetto stesso.</p>
+     * 
+     * @param userId id dell'utente loggato
+     * @return Vector&lt;ItemBean&gt; - lista dei progetti con dipartimento e ruolo
+     * @throws WebStorageException se si verifica un problema SQL o in qualsiasi puntamento
+     */
+    public Vector<ItemBean> getProjectsByRole (int userId)
+                                       throws WebStorageException {
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        int nextInt = 0;
+        ItemBean project = null;
+        Vector<ItemBean> projects = new Vector<ItemBean>();
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_PROJECTS_BY_ROLE);
+            pst.clearParameters();
+            pst.setInt(++nextInt, userId);
+            rs = pst.executeQuery();
+            while (rs.next()) {
+              project = new ItemBean();
+              BeanUtil.populate(project, rs);
+              projects.add(project);
+            }
+            return projects;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
      * <p>Restituisce un Vector di PersonBean, ciascuno rappresentante 
      * un utente del dipartimento il cui identificativo viene 
      * passato come argomento.</p>
@@ -2601,6 +2648,59 @@ public class DBWrapper implements Query {
     /* ********************************************************** *
      *                   Metodi di AGGIORNAMENTO                  *
      * ********************************************************** */
+    /**
+     * <p>Metodo per aggiornamento della password dell'utente.</p>
+     * <p>Effettua il controlllo sulla login dell'utente.</p>
+     * 
+     * @param userId        id dell'utente sul quale cambiare la password
+     * @param passwd        password inserita dall'utente
+     * @param passwdform    password criptata
+     * @throws WebStorageException  se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
+     */
+    public void updatePassword (int userId,
+                                String passwd,
+                                String passwdform)
+                         throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        int nextInt = 0;
+        try {
+            // Ottiene la connessione
+            con = pol_manager.getConnection();
+            con.setAutoCommit(false);
+            pst = con.prepareStatement(UPDATE_PWD);
+            pst.clearParameters();
+            pst.setString(++nextInt, passwd);
+            pst.setString(++nextInt, passwdform);
+            pst.setInt(++nextInt, userId);
+            pst.executeUpdate();
+            con.commit();
+        } catch (NumberFormatException nfe) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna la password.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + nfe.getMessage(), nfe);
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna la password.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna la password.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + npe.getMessage(), npe);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
     /**
      * <p>Metodo che controlla la query da eseguire 
      * e chiama il metodo opportuno.</p>
