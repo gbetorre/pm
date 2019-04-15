@@ -86,6 +86,10 @@ public class SessionManager extends HttpServlet {
      */
     static final String FOR_NAME = "\n" + Logger.getLogger(new Throwable().getStackTrace()[0].getClassName()) + ": ";
     /**
+     * Logger della classe per scrivere i messaggi di errore  
+     */
+    private Logger log = Logger.getLogger(SessionManager.class.getName());
+    /**
      * Log per debug in produzione
      */
     protected static Logger LOG = Logger.getLogger(Main.class.getName());
@@ -142,7 +146,6 @@ public class SessionManager extends HttpServlet {
     protected void doGet(HttpServletRequest req, 
                          HttpServletResponse res)
                   throws ServletException, IOException {
-        //doPost(req, res);
         try {
             // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
             HttpSession session = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
@@ -152,16 +155,22 @@ public class SessionManager extends HttpServlet {
                          " in data"  + Utils.BLANK_SPACE + Utils.format(Utils.getCurrentDate()) +
                          " alle ore" + Utils.BLANK_SPACE + Utils.getCurrentTime() +
                          ".\n";
-            LOG.info(msg);
+            log.info(msg);
             session.invalidate();
             final RequestDispatcher rd = getServletContext().getRequestDispatcher(templateJsp);
             rd.forward(req, res);
-        } catch (IllegalStateException e) {
-            throw new ServletException("Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n" + e.getMessage(), e);
-        } catch (NullPointerException e) {
-            throw new ServletException("Errore nell'estrazione dei dipartimenti che gestiscono il corso.\n" + e.getMessage(), e);
-        } catch (Exception ignored) {
-            ; // TODO
+        } catch (IllegalStateException ise) {
+            String msg = "Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n" + ise.getMessage();
+            log.severe(msg);
+            throw new ServletException(msg, ise);
+        } catch (NullPointerException npe) {
+            String msg = "Problemi nel recupero della sessione.\n" + npe.getMessage();
+            log.severe(msg);
+            throw new ServletException(msg, npe);
+        } catch (Exception e) {
+            String msg = "Problemi nel metodo doGet.\n" + e.getMessage();
+            log.severe(msg);
+            throw new ServletException(msg, e);
         }
     }
     
