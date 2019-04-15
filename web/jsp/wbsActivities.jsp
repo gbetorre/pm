@@ -47,8 +47,8 @@
             <c:forEach var="act" items="${requestScope.attivita}" varStatus="loop">
               <c:set var="status" value="${loop.index}" scope="page" />
               <input type="hidden" id="act-id${status}" name="act-id${status}" value="<c:out value="${act.id}"/>">
-              <tr class="bgAct${act.stato.id}">
-                <td scope="row" id="nameColumn">
+              <tr>
+                <td scope="row" id="nameColumn" class="bgAct${act.stato.id} bgFade">
                   <a href="${modAct}${p.id}&ida=${act.id}&idw=${wp.id}">
                     <c:out value="${act.nome}"/>
                   </a>
