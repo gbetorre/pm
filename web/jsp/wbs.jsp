@@ -11,7 +11,7 @@
       <c:set var="distinguishingSubmitId" value="${urlWbs}${p.id}" scope="page" />
       <c:choose>
         <c:when test="${not empty wbsInstance}" >
-          <c:set var="tP" value="WBS: <em>${wbsInstance.nome}</em>" scope="page" />
+          <c:set var="tP" value="${wbsInstance.nome}" scope="page" />
           <c:set var="wbsPadre" value="${wbsInstance.wbsPadre}" scope="page" />
           <c:set var="wbsId" value="${wbsInstance.id}" scope="page" />
           <c:set var="wbsNome" value="${wbsInstance.nome}" scope="page" />
@@ -27,11 +27,11 @@
       <form id="wbs_form" action="" method="post" class="panel">
         <input type="hidden" id="wbs-id" name="wbs-id" value="${wbsId}" />
         <div class="panel-heading bgWbs">
-          <div class="noHeader"><c:out value="${pageScope.tP}" escapeXml="false" /></div>
+          <div class="noHeader"><em><c:out value="${pageScope.tP}" escapeXml="false" /></em></div>
         </div>
         <hr class="separatore" />
         <div class="panel-body">
-          <%@ include file="subPanel.jspf" %>
+          <%@ include file="subButton.jspf" %>
           <div class="row">
             <div class="col-sm-5">
               WBS padre (se &eacute; presente):
@@ -108,17 +108,17 @@
         <c:choose>
           <c:when test="${not empty wbsInstance.attivita}">
           <hr class="separatore" />
-          <div class="actOfWbs">
+          <div class="lightTable">
             <div class="row">
               <div class="col"><strong>Attivit&agrave; della WBS</strong></div>
             </div>
             <hr class="separatore" />
             <div class="row">
               <div class="col-sm-1"></div>
-              <div class="col-sm-3 actOfWbsHead">Nome attivit&agrave;</div>
-              <div class="col-sm-2 actOfWbsHead">Data inizio prevista</div>
-              <div class="col-sm-2 actOfWbsHead">Data fine prevista</div>
-              <div class="col-sm-2 actOfWbsHead">Milestone</div>
+              <div class="col-sm-3 lightTableHead">Nome attivit&agrave;</div>
+              <div class="col-sm-2 lightTableHead">Data inizio prevista</div>
+              <div class="col-sm-2 lightTableHead">Data fine prevista</div>
+              <div class="col-sm-2 lightTableHead">Milestone</div>
             </div>
             <hr class="separatore" />
             <c:forEach var="act" items="${wbsInstance.attivita}" varStatus="loop">
@@ -152,15 +152,23 @@
           </div>
           </c:when>
           <c:otherwise>
-          <div class="alert alert-danger">
+          <hr class="separatore" />
+          <div class="alert alert-warning">
             <p>Non &egrave; stata trovata alcuna attivit&agrave; associata <em>direttamente</em> alla WBS &quot;${wbsNome}&quot;.</p>
           </div>
           </c:otherwise>
         </c:choose>
       </c:if>
-          <hr class="separatore" />
-          <a id="btnBack" class="btn btnNav" onclick="goBack()"><i class="fas fa-chevron-left"></i> Indietro</a>
-          <a href="<c:out value="${project}" escapeXml="false" />" id='btn-close' class="btn btnNav"><i class="fas fa-home"></i> Progetti</a>
+          <br />
+          <div class="row">
+            <div class="col-sm-5">
+              <a id="btnBack" class="btn btnNav" onclick="goBack()"><i class="fas fa-chevron-left"></i> Indietro</a>
+              <a href="<c:out value="${project}" escapeXml="false" />" id='btn-close' class="btn btnNav"><i class="fas fa-home"></i> Progetti</a>
+            </div>
+            <div class="col-sm-5">
+              <%@ include file="subPanel.jspf" %>
+            </div>
+          </div>
         </div>
         <div id="note-div" class="modal">
           <h3 class="heading">Aggiungi una nota di avanzamento</h3>
