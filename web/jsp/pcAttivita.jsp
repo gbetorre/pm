@@ -44,7 +44,7 @@
     <c:set var="wbs" value="${actInstance.idWbs}" scope="page" />
     <c:set var="complexity" value="${actInstance.idComplessita}" scope="page" />
     <c:set var="state" value="${actInstance.idStato}" scope="page" />
-    <c:set var="tP" value="Attivit&agrave; <em>${actName}</em>:" scope="page" />
+    <c:set var="tP" value="${actName}:" scope="page" />
   </c:when>
   <c:otherwise>
     <c:set var="actStartDate" value="${requestScope.now}" scope="page" />
@@ -61,7 +61,7 @@
         </c:if> 
       </c:forEach>
       <div class="panel-heading bgAddAct bgAct${state}">
-        <div class="noHeader"><c:out value="${pageScope.tP}" escapeXml="false" /></div>
+        <div class="noHeader"><em><c:out value="${pageScope.tP}" escapeXml="false" /></em></div>
         <div class="actstate">
         <c:choose>
         <c:when test="${not empty actInstance}">
@@ -75,7 +75,7 @@
       </div>
       <hr class="separatore" />
       <div class="panel-body">
-        <%@ include file="subPanel.jspf" %>
+        <%@ include file="subButton.jspf" %>
         <div class="row">
           <div class="col-sm-5 mandatory">
             Identificativo della persona 
@@ -229,8 +229,15 @@
           </div>
         </div>
         <br />
-        <a id="btnBack" class="btn btnNav" onclick="goBack()"><i class="fas fa-chevron-left"></i> Indietro</a>
-        <a href="<c:out value="${project}" escapeXml="false" />" id='btn-close' class="btn btnNav"><i class="fas fa-home"></i> Progetti</a>
+        <div class="row">
+          <div class="col-sm-5">
+            <a id="btnBack" class="btn btnNav" onclick="goBack()"><i class="fas fa-chevron-left"></i> Indietro</a>
+            <a href="<c:out value="${project}" escapeXml="false" />" id='btn-close' class="btn btnNav"><i class="fas fa-home"></i> Progetti</a>
+          </div>
+          <div class="col-sm-5">
+            <%@ include file="subPanel.jspf" %>
+          </div>
+        </div>
       </div>
     </form>
     <div id="note-div" class="modal">
@@ -310,7 +317,7 @@
 </c:catch>
 <c:out value="${exception}" />
     <script type="text/javascript">
-    var offsetcharacter = 5;
+    var offsetcharacter = 2;
     // Adesso
     var rightNow = new Date();
     // Giorno odierno
@@ -367,7 +374,7 @@
       }, 
       messages: {
         'act-role': "Scegliere una competenza (ruolo) per la persona selezionata",
-        'act-name': "Inserire il nome dell\'attivita\'" + "--" + dayOfMonth + "--" + elapsedDays + $("#act-datainiziovera").val(),
+        'act-name': "Inserire il nome dell\'attivita\'",
         'act-datainizio': "Inserire una data di inizio valida",
         'act-datafine': "Inserire una data di fine valida",
         'act-datainiziovera': "La data inserita deve essere in formato italiano e non pu&ograve; essere maggiore della data odierna (" + todayAsString + ")",
