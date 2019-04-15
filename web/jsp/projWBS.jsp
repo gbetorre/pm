@@ -87,7 +87,7 @@
                         <c:set var="txtAct" value="A questa WBS non sono state associate attivit&agrave;" scope="page" />
                       </c:otherwise>
                     </c:choose>
-                      <a href="${act}${p.id}&idw=${wbsInstance.id}" class="ico" id="actOfwbs">
+                      <a href="${act}${p.id}&idw=${wbsInstance.id}" class="ico" id="lightTable">
                         <img src="${initParam.urlDirectoryImmagini}/${icoAct}" class="btn-del" alt="Link a lista attivita" title="${txtAct}" />
                       </a>
                       <a href="#del-form${wbsInstance.id}" class="ico" id="del-wbs" rel="modal:open">
