@@ -1,0 +1,55 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<c:set var="ruoli" value="${sessionScope.usr.ruoli}" scope="page" />
+<c:set var="ruolo" value="" scope="page" />
+<fmt:parseNumber var="found" type="number" value="${fn:length(ruoli)}" />
+<c:forEach var="c" items="${ruoli}" varStatus="loop" begin="0" end="${found}">
+  <c:if test="${c.id eq p.id}">
+    <c:set var="ruolo" value="${c.nome}" scope="page" />
+    <c:set var="found" value="${loop.getIndex()}" scope="page" />
+  </c:if>
+</c:forEach>
+<c:set var="superuser" value="${false}" scope="page" />
+<c:if test="${(ruolo eq 'PMOATE') or (ruolo eq 'PMODIP') or (ruolo eq 'PM') or (ruolo eq 'TL')}">
+  <c:set var="superuser" value="${true}" scope="page" />
+</c:if>
+<c:choose>
+  <c:when test="${pageScope.superuser}">
+    <c:choose>
+      <c:when test="${param['q'] eq 'wbs'}">
+        <c:if test="${not empty param['p']}">
+          <div class="row">
+            <div class="col-5">
+              <label for="btnMod"><em>Per abilitare i campi clicca sul pulsante&nbsp;</em></label>
+            </div>
+            <div class="col-1">
+              <button class="btn btn-success" id="btnMod" name="modifica" onclick="modifyPart();"><i class="far fa-edit"></i> Modifica</button>
+            </div>
+          </div>
+          <br />
+          <hr class="riga" />
+          <hr class="separatore" />
+        </c:if>
+      </c:when>
+      <c:when test="${param['q'] eq 'act'}">
+      <c:choose>
+        <c:when test="${param['p'] eq 'mod' or param['p'] eq 'add'}">
+        <div class="row">
+          <div class="col-5">
+            <label for="btnMod"><em>Per abilitare i campi clicca sul pulsante&nbsp;</em></label>
+          </div>
+          <div class="col-1">
+            <button class="btn btn-success" id="btnMod" name="modifica" onclick="modifyPart();"><i class="far fa-edit"></i> Modifica</button>
+          </div>
+        </div>
+        <br />
+        <hr class="riga" />
+        <hr class="separatore" />
+        </c:when>
+      </c:choose>
+      </c:when>
+    </c:choose>
+  </c:when>
+</c:choose>
+      
