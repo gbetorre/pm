@@ -71,6 +71,8 @@ public class PersonBean implements Serializable {
     private Date dataNascita;
     /** Sesso attuale della persona */
     private String sesso;
+    /** Codice fiscale della persona */
+    private String codiceFiscale;
     /** Numero telefonico dell'ufficio della persona */
     private String telefono;
     /** Cellulare (di servizio) della persona */
@@ -97,7 +99,7 @@ public class PersonBean implements Serializable {
     private String url;
     /** Flag per specificare se la persona lavora in ateneo a tempo pieno o parziale */
     private boolean tempoPieno;
-    /** Note in caso di aspettativa o di fine servizio */
+    /** Note */
     private String note;
     /** Campo note contenente una descrizione testuale del ruolo della persona */
     private String ruolo;
@@ -144,7 +146,7 @@ public class PersonBean implements Serializable {
      */
     public PersonBean() {
         id = idDipartimento = idQualificaPrincipaleDip = -2;
-        nome = cognome = telefono = telefonoMobile = fax = email = emailCertificata = urlPersonalPage = null;
+        nome = cognome = codiceFiscale = telefono = telefonoMobile = fax = email = emailCertificata = urlPersonalPage = null;
         note = codiceSettore = descrizioneSettore = null;
         nomeCiclo = nomeCS = null;
         dipartimento = qualificaPrincipaleDip = urlDipartimento = null;
@@ -235,6 +237,13 @@ public class PersonBean implements Serializable {
         } else {
             return this.dataNascita;
         }
+    }
+    
+    /**
+     * @return codiceFiscale
+     */
+    public String getCodiceFiscale() {
+        return this.codiceFiscale;
     }
     
     /**
@@ -494,6 +503,13 @@ public class PersonBean implements Serializable {
      */
     public void setDataNascita(Date date) {
         dataNascita = date;
+    }
+    
+    /**
+     * @param codiceFiscale
+     */
+    public void setCodiceFiscale(String string) {
+        codiceFiscale = string;
     }
     
     /**
