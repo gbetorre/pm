@@ -90,6 +90,10 @@ public interface Query extends Serializable {
      *      Costanti corrispondenti ai parametri ammessi sulla querystring      *
      * ************************************************************************ */
     /**
+     * <p>Costante per il parametro identificante la pagina dell'utente.</p>
+     */
+    public static final String PART_USR                         = "usr";
+    /**
      * <p>Costante per il parametro identificante la pagina della Vision di un progetto.</p>
      */
     public static final String PART_PROJECT_CHARTER_VISION      = "pcv";
@@ -653,6 +657,25 @@ public interface Query extends Serializable {
             "   WHERE   P.id = ?" +
             "       AND PJ.id_dipart = ?" + 
             "   ORDER BY PJ.titolo ASC";
+    
+    
+    /**
+     * <p>Estrae i progetti, con il loro dipartimento, partendo dal ruolo
+     * che la persona possiede su quel progetto.</p>
+     */
+    public static final String GET_PROJECTS_BY_ROLE = 
+            "SELECT " + 
+            "       P.id" +
+            "   ,   P.titolo        AS \"informativa\"" +
+            "   ,   D.nome          AS \"nome\"" +
+            "   ,   R.nome          AS \"extraInfo\"" +
+            "   FROM progetto P" +
+            "       INNER JOIN dipartimento D on D.id = P.id_dipart" +
+            "       INNER JOIN ruologestione RG on RG.id_progetto = P.id" +
+            "       INNER JOIN ruolo R on R.id = RG.id_ruolo" +
+            "   WHERE RG.id_persona = ?" +
+            "   ORDER BY (D.nome, P.titolo) ASC";
+    
     
     /**
      * <p>Estrae i progetti dell'utente avente <code>username</code> 
@@ -1584,7 +1607,24 @@ public interface Query extends Serializable {
      *                               QUERY DI POL                               *
      * ************************************************************************ *
      *                       2.  Query di aggiornamento                         *
-     * ************************************************************************ */ 
+     * ************************************************************************ */
+    /**
+     * <p>Query per modifica della password dell'utente loggato</p>
+     * <p>I parametri da passare sono: 
+     * <ul>
+     * <li>passwd - password inserita dall'utente</li>
+     * <li>passwdform - password criptata</li>
+     * <li>id - id dell'utente sul quale cambiare la password</li>
+     * </ul>
+     * </p>
+     */
+    public static final String UPDATE_PWD =
+            "UPDATE usr" +
+            "   SET     passwd = ?" +
+            "   ,       passwdform = ?" +
+            "   WHERE id = ?";
+    
+    
     /**
      * <p>Modifica la tupla della tabella attivit&agrave; identificata dall'id, 
      * che &egrave; passato come parametro.</p>
