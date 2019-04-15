@@ -38,6 +38,7 @@ package it.alma.command;
 
 import java.util.Enumeration;
 import java.util.LinkedList;
+import java.util.Vector;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -52,6 +53,7 @@ import it.alma.Utils;
 import it.alma.bean.CodeBean;
 import it.alma.bean.ItemBean;
 import it.alma.bean.PersonBean;
+import it.alma.exception.AttributoNonValorizzatoException;
 import it.alma.exception.CommandException;
 import it.alma.exception.WebStorageException;
 
@@ -79,6 +81,10 @@ public class HomePageCommand extends ItemBean implements Command {
      * Pagina a cui la command reindirizza per mostrare la form di login
      */
     private static final String nomeFileElenco = "/jsp/login.jsp";
+    /**
+     * Pagina a cui la command reindirizza per mostrare la form dell'utenza
+     */
+    private static final String nomeFileProfilo = "/jsp/profile.jsp";
     /**
      * DataBound.
      */
@@ -164,6 +170,14 @@ public class HomePageCommand extends ItemBean implements Command {
         ParameterParser parser = new ParameterParser(req);
         // Utente loggato
         PersonBean user = null;
+        // Recupera o inizializza 'tipo pagina'   
+        String part = parser.getStringParameter("p", "-");
+        // Flag di scrittura
+        boolean write = (boolean) req.getAttribute("w");
+        // Dichiara la pagina a cui reindirizzare
+        String fileJspT = null;
+        // Dichiara l'elenco dei progetti estratti dell'utente, partendo dal ruolo
+        Vector<ItemBean> projectsByRole = null;
         /* ******************************************************************** *
          *      Instanzia nuova classe WebStorage per il recupero dei dati      *
          * ******************************************************************** */
@@ -178,9 +192,6 @@ public class HomePageCommand extends ItemBean implements Command {
         try {
             // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
             HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
-            //if (ses == null) {
-            //    return;
-            //} 
         } catch (IllegalStateException ise) {
             String msg = FOR_NAME + "Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n";
             LOG.severe(msg);
@@ -198,6 +209,50 @@ public class HomePageCommand extends ItemBean implements Command {
             LOG.severe(msg);
             throw new CommandException(msg + e.getMessage(), e);
         }
+        /* *************************************************** *
+         *                 Corpo del programma                 *
+         * *************************************************** */
+        // Selezione profilo utente
+        try {
+            if (part.equals(Query.PART_USR)) {
+                // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
+                HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
+                user = (PersonBean) ses.getAttribute("usr");
+                if (user == null) {
+                    throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
+                }
+                if (write) {
+                    /* **************************************** *
+                     *          UPDATE Profile User             *
+                     * **************************************** */
+                    String passwd = parser.getStringParameter("txtPwd", Utils.VOID_STRING);
+                    String passwdform = parser.getStringParameter("txtConfPwd", Utils.VOID_STRING);
+                    if (passwd != Utils.VOID_STRING || passwdform != Utils.VOID_STRING) {
+                        db.updatePassword(user.getId(), passwd, passwdform);
+                    }
+                }
+                projectsByRole = db.getProjectsByRole(user.getId());
+                fileJspT = nomeFileProfilo;
+            } else {
+                fileJspT = nomeFileElenco;
+            }
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio del bean.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + anve.getMessage(), anve);
+        } catch (WebStorageException wse) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di valori dal db.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + wse.getMessage(), wse);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + npe.getMessage(), npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
         /* ******************************************************************** *
          *                          Recupera i parametri                        *
          * ******************************************************************** */
@@ -205,12 +260,12 @@ public class HomePageCommand extends ItemBean implements Command {
         //int idPrj = parser.getIntParameter("id", -1);       
         // Imposta il testo del Titolo da visualizzare prima dell'elenco
         req.setAttribute("titoloE", "Progetti di eccellenza: login");
-        // Salva nella request: Titolo pagina (da mostrare nell'HTML)
-        //req.setAttribute("tP", req.getAttribute("titoloE"));
+        // Imposta nella request i progetti dell'utente tramite il ruolo, nel caso in cui siano valorizzati
+        if (projectsByRole != null) {
+            req.setAttribute("projectsByRole", projectsByRole);
+        }
         // Imposta la Pagina JSP di forwarding
-        req.setAttribute("fileJsp", nomeFileElenco);
-        // Salva nella request: utente
-        //req.setAttribute("user", user);
+        req.setAttribute("fileJsp", fileJspT);
     }
     
     /* ************************************************************************ *
