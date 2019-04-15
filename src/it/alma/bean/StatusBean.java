@@ -10,7 +10,7 @@
  *   Alma on Line (aol), Projects on Line (pol), Questionnaire on Line (qol);
  *   web applications to publish, and manage, students evaluation,
  *   projects, students and degrees information.
- *   Copyright (C) renewed 2018 Universita' degli Studi di Verona, 
+ *   Copyright (C) renewed 2019 Universita' degli Studi di Verona, 
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify 
@@ -40,18 +40,20 @@
 package it.alma.bean;
 
 import java.io.Serializable;
+import java.sql.Time;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Vector;
 
-import it.alma.Query;
 import it.alma.exception.AttributoNonValorizzatoException;
 
 /**
  * <p>Classe usata per rappresentare lo status di un progetto.</p>
  * 
  * @author <a href="mailto:andrea.tonel@studenti.univr.it">Andrea Tonel</a>
+ * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
  */
-public class StatusBean implements Serializable, Query {
+public class StatusBean implements Serializable {
 
     /**
      * La serializzazione necessita di dichiarare una costante di tipo long
@@ -65,14 +67,14 @@ public class StatusBean implements Serializable, Query {
      *  Viene utilizzato per contestualizzare i messaggi di errore.
      */
     private final String FOR_NAME = "\n" + this.getClass().getName() + ": "; //$NON-NLS-1$
-    /* ************************************************************************ *  
-     *                    Dati identificativi dello status                      *
-     * ************************************************************************ */
+    /* ******************************************************** *
+     *             Dati identificativi dello status             *
+     * ******************************************************** */
     /** Attributo identificativo dello status */
     private int id;
-    /* ************************************************************ *
-     *                 Dati descrittivi dello status                *
-     * ************************************************************ */
+    /* ******************************************************** *
+     *               Dati descrittivi dello status              *
+     * ******************************************************** */
     /** Data inizio dell'attivit&agrave; */
     private Date dataInizio;
     /** Data fine dell'attivit&agrave; */
@@ -81,17 +83,25 @@ public class StatusBean implements Serializable, Query {
     private String descrizioneAvanzamento;
     /** Stati dell'avanzamento di un progetto */
     private HashMap<String, CodeBean> stati;
-    /* ******************************************************* *
-     *          Dati descrittivi dell'ultima modifica          *
-     * ******************************************************* */
+    /* ******************************************************** *
+     *          Dati descrittivi dell'ultima modifica           *
+     * ******************************************************** */
     /** Data ultima modifica */
     private Date dataUltimaModifica;
     /** Ora ultima modifica */
-    private String oraUltimaModifica;
+    private Time oraUltimaModifica;
     /** Autore ultima modifica */
     private String autoreUltimaModifica;
-    
+    /* *******************************************************  *
+     *                         Allegati                         *
+     * ******************************************************** */
+    /**
+     * Vector di fileset, ciascuno rappresentante 
+     * un riferimento logico ad un allegato fisico
+     */
+    private Vector<FileDocBean> allegati;
 
+    
     /**
      * <p>Costruttore: inizializza i campi a valori di default.</p>
      */
@@ -100,8 +110,10 @@ public class StatusBean implements Serializable, Query {
         descrizioneAvanzamento = null;
         stati = null;
         dataInizio = dataFine = dataUltimaModifica = new Date(0);
-        oraUltimaModifica = autoreUltimaModifica = null;        
-    };
+        oraUltimaModifica = null;
+        autoreUltimaModifica = null;
+        allegati = null;
+    }
     
     
     /* **************************************************** *
@@ -110,7 +122,7 @@ public class StatusBean implements Serializable, Query {
     /**
      * Restituisce l'id dello status corrente di un progetto
      * 
-     * @return <code>id</code> - l'id dello status corrente di un progetto
+     * @return <code>int</code> - l'id dello status corrente di un progetto
      * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e l'id non &egrave; stato valorizzato (&egrave; un dato obbligatorio)
      */
     public int getId() throws AttributoNonValorizzatoException {
@@ -136,7 +148,7 @@ public class StatusBean implements Serializable, Query {
     /**
      * Restituisce la data di inizio dello status corrente di un progetto
      * 
-     * @return <code>dataInizio</code> - data di inizio dello status corrente
+     * @return <code>java.util.Date</code> - data di inizio dello status corrente
      */
     public Date getDataInizio() {
         return dataInizio;
@@ -158,7 +170,7 @@ public class StatusBean implements Serializable, Query {
     /**
      * Restituisce la data di fine dello status corrente di un progetto
      * 
-     * @return <code>dataFine</code> - data di fine dello status corrente
+     * @return <code>java.util.Date</code> - data di fine dello status corrente
      */
     public Date getDataFine() {
         return dataFine;
@@ -173,13 +185,14 @@ public class StatusBean implements Serializable, Query {
         this.dataFine = dataFine;
     }
 
+    
     /* ****************************************************************** *
      *          Metodi getter e setter per descrizioneAvanzamento         *
      * ****************************************************************** */
     /**
      * Restituisce la descrizione dell'avanzamento del progetto
      * 
-     * @return <code>descrizioneAvanzamento</code> - descrizione avanzamento dello status corrente
+     * @return <code>String</code> - descrizione avanzamento dello status corrente
      */
     public String getDescrizioneAvanzamento() {
         return descrizioneAvanzamento;
@@ -201,7 +214,7 @@ public class StatusBean implements Serializable, Query {
     /**
      * Restituisce gli stati dell'avanzamento
      * 
-     * @return <code>stati</code> - stati di un avanzamento progetto
+     * @return <code>HashMap&lt;String, CodeBean&gt;</code> - stati di un avanzamento progetto
      * @throws AttributoNonValorizzatoException eccezione che viene sollevata se questo oggetto viene usato e stati non &egrave; stato valorizzato (&egrave; un dato obbligatorio)
      */
     public HashMap<String, CodeBean> getStati() throws AttributoNonValorizzatoException {
@@ -227,12 +240,11 @@ public class StatusBean implements Serializable, Query {
     /**
      * Restituisce la data dell'ultima modifica dello status di un progetto
      * 
-     * @return <code>dataUltimaModifica</code> - data dell'ultima modifica
+     * @return <code>java.util.Date</code> - data dell'ultima modifica
      */
     public Date getDataUltimaModifica() {
         return dataUltimaModifica;
     }
-
 
     /**
      * Imposta la data dell'ultima dello status di un progetto
@@ -243,25 +255,25 @@ public class StatusBean implements Serializable, Query {
         this.dataUltimaModifica = dataUltimaModifica;
     }
 
+    
     /* *********************************************************** *
      *       Metodi getter e setter per ora ultima modifica        *
      * *********************************************************** */
     /**
      * Restituisce l'ora dell'ultima modifica dello status di un progetto
      * 
-     * @return <code>oraUltimaModifica</code> - ora dell'ultima modifica
+     * @return <code>java.sql.Time</code> - ora dell'ultima modifica
      */
-    public String getOraUltimaModifica() {
+    public Time getOraUltimaModifica() {
         return oraUltimaModifica;
     }
     
-
     /**
      * Imposta l'ora dell'ultima modifica dello status di un progetto
      * 
      * @param oraUltimaModifica ora ultima modifica da impostare
      */
-    public void setOraUltimaModifica(String oraUltimaModifica) {
+    public void setOraUltimaModifica(Time oraUltimaModifica) {
         this.oraUltimaModifica = oraUltimaModifica;
     }
 
@@ -272,12 +284,11 @@ public class StatusBean implements Serializable, Query {
     /**
      * Restituisce l'autore dell'ultima modifica dello status di un progetto
      * 
-     * @return <code>autoreUltimaModifica</code> - autore ultima modifica
+     * @return <code>String</code> - autore ultima modifica
      */
     public String getAutoreUltimaModifica() {
         return autoreUltimaModifica;
     }
-
 
     /**
      * Imposta l'autore dell'ultima modifica dello status di un progetto
@@ -289,5 +300,27 @@ public class StatusBean implements Serializable, Query {
     }
 
     
+    /* ************************************************************** *
+     *              Metodi getter e setter per allegati               *
+     * ************************************************************** */
+    /**
+     * Restituisce l'elenco dei riferimenti logici agli allegati fisici
+     * in precedenza caricati per lo status di progetto corrente 
+     * 
+     * @return <code>Vector&lt;FileDocBean&gt;</code> - elenco di riferimenti logici ad allegati fisici
+     */
+    public Vector<FileDocBean> getAllegati() {
+        return allegati;
+    }
 
+    /**
+     * Imposta l'elenco dei riferimenti logici agli allegati fisici
+     * caricati per lo status di progetto corrente
+     * 
+     * @param allegati Vector di FileDocBean da impostare
+     */
+    public void setAllegati(Vector<FileDocBean> allegati) {
+        this.allegati = allegati;
+    }
+    
 }
