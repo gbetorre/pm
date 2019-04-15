@@ -19,10 +19,20 @@
   <c:when test="${pageScope.superuser}">
     <c:choose>
       <c:when test="${param['q'] eq 'pol'}">
-        <button class="btn btn-success" id="btnMod" value="Modifica" onclick="modify()">
-          <i class="far fa-edit"></i>
-          Modifica
-        </button>
+        <c:choose>
+          <c:when test="${param['p'] eq 'sts'}">
+            <button class="btn btn-success" id="btnMod" value="Modifica" onclick="modifyPart()">
+              <i class="far fa-edit"></i>
+              Modifica
+            </button>
+          </c:when>
+          <c:otherwise>
+            <button class="btn btn-success" id="btnMod" value="Modifica" onclick="modify()">
+              <i class="far fa-edit"></i>
+              Modifica
+            </button>
+          </c:otherwise>
+        </c:choose>
         <button type="submit" class="btn btn-success" value="Salva" disabled>
           <i class="far fa-save"></i>
           Salva
