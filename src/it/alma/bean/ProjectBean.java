@@ -48,7 +48,7 @@ import it.alma.exception.AttributoNonValorizzatoException;
  * 
  * @author <a href="mailto:andrea.tonel@studenti.univr.it">Andrea Tonel</a>
  */
-public class ProjectBean implements Serializable, Query {
+public class ProjectBean implements Serializable {
 
 	/**
      * La serializzazione necessita di dichiarare una costante di tipo long
@@ -324,7 +324,7 @@ public class ProjectBean implements Serializable, Query {
 		if (statoTempi == null) {
 			throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoTempi non valorizzato!");
 		}
-		else if (!STATI_AS_LIST.contains(statoTempi)) {
+		else if (!Query.STATI_AS_LIST.contains(statoTempi)) {
 			throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoTempi non valorizzato correttamente!");
 		}
 		else {
@@ -354,7 +354,7 @@ public class ProjectBean implements Serializable, Query {
 		if (statoCosti == null) {
 			throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoCosti non valorizzato!");
 		}
-		else if (!STATI_AS_LIST.contains(statoCosti)) {
+		else if (!Query.STATI_AS_LIST.contains(statoCosti)) {
 			throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoCosti non valorizzato correttamente!");
 		}
 		else {
@@ -384,7 +384,7 @@ public class ProjectBean implements Serializable, Query {
 		if (statoRischi == null) {
 			throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoRischi non valorizzato!");
 		}
-		else if (!STATI_AS_LIST.contains(statoRischi)) {
+		else if (!Query.STATI_AS_LIST.contains(statoRischi)) {
 			throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoRischi non valorizzato correttamente!");
 		}
 		else {
@@ -414,7 +414,7 @@ public class ProjectBean implements Serializable, Query {
 		if (statoRisorse == null) {
 			throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoRisorse non valorizzato!");
 		}
-		else if (!STATI_AS_LIST.contains(statoRisorse)) {
+		else if (!Query.STATI_AS_LIST.contains(statoRisorse)) {
 			throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoRisorse non valorizzato correttamente!");
 		}
 		else {
@@ -444,7 +444,7 @@ public class ProjectBean implements Serializable, Query {
 		if (statoScope == null) {
 			throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoScope non valorizzato!");
 		}
-		else if (!STATI_AS_LIST.contains(statoScope)) {
+		else if (!Query.STATI_AS_LIST.contains(statoScope)) {
 			throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoScope non valorizzato correttamente!");
 		}
 		else {
@@ -474,7 +474,7 @@ public class ProjectBean implements Serializable, Query {
 		if (statoComunicazione == null) {
 			throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoComunicazione non valorizzato!");
 		}
-		else if (!STATI_AS_LIST.contains(statoComunicazione)) {
+		else if (!Query.STATI_AS_LIST.contains(statoComunicazione)) {
 			throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoComunicazione non valorizzato correttamente!");
 		}
 		else {
@@ -504,7 +504,7 @@ public class ProjectBean implements Serializable, Query {
 		if (statoQualita == null) {
 			throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoQualita non valorizzato!");
 		}
-		else if (!STATI_AS_LIST.contains(statoQualita)) {
+		else if (!Query.STATI_AS_LIST.contains(statoQualita)) {
 			throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoQualita non valorizzato correttamente!");
 		}
 		else {
@@ -534,7 +534,7 @@ public class ProjectBean implements Serializable, Query {
 		if (statoApprovvigionamenti == null) {
 			throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoApprovvigionamenti non valorizzato!");
 		}
-		else if (!STATI_AS_LIST.contains(statoApprovvigionamenti)) {
+		else if (!Query.STATI_AS_LIST.contains(statoApprovvigionamenti)) {
 			throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoApprovvigionamenti non valorizzato correttamente!");
 		}
 		else {
@@ -564,7 +564,7 @@ public class ProjectBean implements Serializable, Query {
 		if (statoStakeholder == null) {
 			throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoStakeholder non valorizzato!");
 		}
-		else if (!STATI_AS_LIST.contains(statoStakeholder)) {
+		else if (!Query.STATI_AS_LIST.contains(statoStakeholder)) {
 			throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo statoStakeholder non valorizzato correttamente!");
 		}
 		else {
