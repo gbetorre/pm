@@ -40,6 +40,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Time;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Date;
@@ -59,6 +60,7 @@ import it.alma.bean.ActivityBean;
 import it.alma.bean.BeanUtil;
 import it.alma.bean.CodeBean;
 import it.alma.bean.DepartmentBean;
+import it.alma.bean.FileDocBean;
 import it.alma.bean.ItemBean;
 import it.alma.bean.MonitorBean;
 import it.alma.bean.PersonBean;
@@ -234,7 +236,6 @@ public class DBWrapper implements Query {
             }
         }
     }
-    
     
     /* ********************************************************** *
      *                        Metodi di POL                       *
@@ -891,7 +892,8 @@ public class DBWrapper implements Query {
         CodeBean statiTemp = new CodeBean();
         HashMap<String, CodeBean> stati = new HashMap<String, CodeBean>(15);
         int ordinal = 0;
-        StringBuffer statoString = null; //new StringBuffer();
+        StringBuffer statoString = null;
+        Vector<FileDocBean> attachments = null;
         try {
             con = pol_manager.getConnection();
             pst = con.prepareStatement(GET_STATUS);
@@ -901,70 +903,80 @@ public class DBWrapper implements Query {
             if (rs.next()) {
                 status = new StatusBean();
                 BeanUtil.populate(status, rs);
-                // Ramo di stato costi
+                // Recupero di stato costi
                 statiTemp = retrieve(GET_STATOCOSTI, idStatus);
                 statoString = new StringBuffer("StatoCosti");
                 statiTemp.setInformativa(statoString.toString());
                 statiTemp.setOrdinale(ordinal++);
                 stati.put(statoString.toString(), statiTemp);
-                // Ramo di stato tempi
+                // Recupero di stato tempi
                 statiTemp = retrieve(GET_STATOTEMPI, idStatus);
                 statoString = null;
                 statoString = new StringBuffer("StatoTempi");
                 statiTemp.setInformativa(statoString.toString());
                 statiTemp.setOrdinale(ordinal++);
                 stati.put(statoString.toString(), statiTemp);
-                // Ramo di stato rischi
+                // Recupero di stato rischi
                 statiTemp = retrieve(GET_STATORISCHI, idStatus);
                 statoString = null;
                 statoString = new StringBuffer("StatoRischi");
                 statiTemp.setInformativa(statoString.toString());
                 statiTemp.setOrdinale(ordinal++);
                 stati.put(statoString.toString(), statiTemp);
-                // Ramo di stato risorse
+                // Recupero di stato risorse
                 statiTemp = retrieve(GET_STATORISORSE, idStatus);
                 statoString = null;
                 statoString = new StringBuffer("StatoRisorse");
                 statiTemp.setInformativa(statoString.toString());
                 statiTemp.setOrdinale(ordinal++);
                 stati.put(statoString.toString(), statiTemp);
-                // Ramo di stato scope
+                // Recupero di stato scope
                 statiTemp = retrieve(GET_STATOSCOPE, idStatus);
                 statoString = null;
                 statoString = new StringBuffer("StatoScope");
                 statiTemp.setInformativa(statoString.toString());
                 statiTemp.setOrdinale(ordinal++);
                 stati.put(statoString.toString(), statiTemp);
-                // Ramo di stato comunicazione
+                // Recupero di stato comunicazione
                 statiTemp = retrieve(GET_STATOCOMUNICAZIONE, idStatus);
                 statoString = null;
                 statoString = new StringBuffer("StatoComunicazione");
                 statiTemp.setInformativa(statoString.toString());
                 statiTemp.setOrdinale(ordinal++);
                 stati.put(statoString.toString(), statiTemp);
-                // Ramo di stato qualita
+                // Recupero di stato qualita
                 statiTemp = retrieve(GET_STATOQUALITA, idStatus);
                 statoString = null;
                 statoString = new StringBuffer("StatoQualita");
                 statiTemp.setInformativa(statoString.toString());
                 statiTemp.setOrdinale(ordinal++);
                 stati.put(statoString.toString(), statiTemp);
-                // Ramo di stato approvvigionamenti
+                // Recupero di stato approvvigionamenti
                 statiTemp = retrieve(GET_STATOAPPROVVIGIONAMENTI, idStatus);
                 statoString = null;
                 statoString = new StringBuffer("StatoApprovvigionamenti");
                 statiTemp.setInformativa(statoString.toString());
                 statiTemp.setOrdinale(ordinal++);
                 stati.put(statoString.toString(), statiTemp);
-                // Ramo di stato stakeholder
+                // Recupero di stato stakeholder
                 statiTemp = retrieve(GET_STATOSTAKEHOLDER, idStatus);
                 statoString = null;
                 statoString = new StringBuffer("StatoStakeholder");
                 statiTemp.setInformativa(statoString.toString());
                 statiTemp.setOrdinale(ordinal++);
                 stati.put(statoString.toString(), statiTemp);
+                // Settaggio dei "semafori" (aree di conoscenza)
+                status.setStati(stati);
+                // Recupero e settaggio degli allegati
+                try {
+                    attachments = getFileDoc("avanzamento", "all", status.getId(), NOTHING);
+                    status.setAllegati(attachments);
+                } catch (AttributoNonValorizzatoException anve) {
+                    String msg = FOR_NAME + "Oggetto status.id non valorizzato; problema nella query che recupera lo status attraverso l\'id.\n";
+                    LOG.severe(msg); 
+                    throw new WebStorageException(msg + anve.getMessage(), anve);
+                }
             }
-            status.setStati(stati);
             return status;
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto StatusBean non valorizzato; problema nella query dello status.\n";
@@ -1006,7 +1018,8 @@ public class DBWrapper implements Query {
         CodeBean statiTemp = new CodeBean();
         HashMap<String, CodeBean> stati = new HashMap<String, CodeBean>(15);
         int ordinal = 0;
-        StringBuffer statoString = null; //new StringBuffer();
+        StringBuffer statoString = null;
+        Vector<FileDocBean> attachments = null;
         try {
             con = pol_manager.getConnection();
             pst = con.prepareStatement(GET_PROJECT_STATUS);
@@ -1079,8 +1092,17 @@ public class DBWrapper implements Query {
                 statiTemp.setInformativa(statoString.toString());
                 statiTemp.setOrdinale(ordinal++);
                 stati.put(statoString.toString(), statiTemp);
-                // Settaggio degli stati nel bean status
+                // Settaggio degli stati ("semafori" o aree di conoscenza PMBOK) nel bean status
                 status.setStati(stati);
+                // Recupero e settaggio degli allegati
+                try {
+                    attachments = getFileDoc("avanzamento", "all", status.getId(), NOTHING);
+                    status.setAllegati(attachments);
+                } catch (AttributoNonValorizzatoException anve) {
+                    String msg = FOR_NAME + "Oggetto status.id non valorizzato; problema nella query che recupera lo status attraverso l\'id.\n";
+                    LOG.severe(msg); 
+                    throw new WebStorageException(msg + anve.getMessage(), anve);
+                }
             }
             return status;
         } catch (SQLException sqle) {
@@ -2448,6 +2470,132 @@ public class DBWrapper implements Query {
         }
     }
     
+    
+    /**
+     * <p>Restituisce un Vector di FileDocBean estratti da data entit&agrave;
+     * e dato attributo, entrambi passati come argomenti.</p>
+     * <p>In particolare, potrebbero esistere pi&uacute; tabelle di allegati
+     * per ciascuna entit&agrave; referenziata (p.es. 'dipartimento_all',
+     * 'dipartimento_logo' etc.), per cui il suffisso della tabella potrebbe
+     * variare ed &egrave; stato parametrizzato.</p>
+     *
+     * @param nomeEntita nome dell'entit&agrave; da cui estrarre gli allegati
+     * @param nomeAttributo suffisso del nome della tabella dei fileset referenzianti
+     * @param idBelongs identificativo dell'entita' cui gli allegati fanno riferimento
+     * @param getAll intero usato come clausola in OR in funzione del cui valore vengono estratti solo gli allegati di una data entita' oppure di tutte
+     * @return <code>Vector&lt;FileDocBean&gt;</code> - Vector di fileset (riferimenti) agli allegati caricati
+     * @throws WebStorageException se si verifica un problema SQL o in qualche puntamento
+     */
+    @SuppressWarnings("static-method")
+    public Vector<FileDocBean> getFileDoc(String nomeEntita, 
+                                          String nomeAttributo,
+                                          int idBelongs,
+                                          int getAll)
+                                   throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+        FileDocBean fileDoc = null;
+        Vector<FileDocBean> vD = new Vector<FileDocBean>();
+        String query =
+                "SELECT  " +  nomeEntita + "_" + nomeAttributo + ".*" +
+                "  FROM "   + nomeEntita + "_" + nomeAttributo + 
+                " WHERE id_belongs_" + nomeEntita   + " = ? OR -1 = ? " +
+                " ORDER BY data";
+        try {
+            con = pol_manager.getConnection();
+            try {
+                pst = con.prepareStatement(query);
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nel puntamento alla connessione.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + npe.getMessage());
+            }
+            pst = con.prepareStatement(query);
+            pst.clearParameters();
+            pst.setInt(1, idBelongs);
+            pst.setInt(2, getAll);
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                fileDoc = new FileDocBean();
+                BeanUtil.populate(fileDoc, rs);
+                vD.add(fileDoc);
+            }
+            return vD;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema nella query dei fileset.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                if ( con != null ) con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + npe.getMessage());                
+            } catch (SQLException sqle) {
+                throw new WebStorageException(sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce un Vector di FileDocBean estratti da data entit&agrave;
+     * e dato attributo, entrambi passati come argomenti.</p>
+     *
+     * @param idBelongs identificativo del proprietario degli allegati
+     * @param nomeEntita nome dell'entit&agrave; da cui estrarre gli allegati
+     * @param nomeAttributo
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public boolean existsFileName(String nomeEntita, 
+                                  String nomeAttributo,
+                                  String nomeFile)
+                           throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+        String table = nomeEntita + "_" + nomeAttributo;        
+        String query =
+                "SELECT " +  table + ".*" +
+                "  FROM "  + table +
+                "   WHERE file = ?";
+        try {
+            con = pol_manager.getConnection();
+            try {
+                pst = con.prepareStatement(query);
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nel puntamento della connessione.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + npe.getMessage());
+            }
+            pst.clearParameters();
+            pst.setString(1, nomeFile);
+            rs = pst.executeQuery();
+            // Il nome esiste già
+            if (rs.next()) {
+                return true;
+            }
+            // Il nome non esiste
+            return false;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema nella query.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
     /* ********************************************************** *
      *                        Metodi di POL                       *
     /* ********************************************************** *
@@ -3517,6 +3665,72 @@ public class DBWrapper implements Query {
         }
     }
     
+    
+    /**
+     * <p>Restituisce un Vector di FileDocBean estratti da data entit&agrave;
+     * e dato attributo, entrambi passati come argomenti.</p>
+     *
+     * @param idBelongs identificativo del proprietario degli allegati
+     * @param nomeEntita nome dell'entit&agrave; da cui estrarre gli allegati
+     * @param nomeAttributo
+     */
+    @SuppressWarnings({ "static-method", "null" })
+    public boolean postUpdateFileDoc(HashMap<String, Object> params)
+                              throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        String table = params.get("nomeEntita") + "_" + params.get("nomeAttributo");
+        assert(!table.equals("_"));
+        try {
+            if (!params.containsKey("file")) {
+                String msg = FOR_NAME + "Problema nel recupero di attributi del file.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg);
+            }
+            String file = (String) params.get("file");
+            long size = (Long) params.get("dimensione");
+            PersonBean user = (PersonBean) params.get("usr");
+            // Campi calcolati al momento
+            String usr = user.getCognome() + String.valueOf(Utils.BLANK_SPACE) + user.getNome();
+            java.sql.Date today = Utils.convert(Utils.convert(Utils.getCurrentDate()));
+            Time now = Utils.getCurrentTime();
+            // BEGIN
+            con = pol_manager.getConnection();
+            con.setAutoCommit(false); 
+            String query =
+                    "UPDATE " + table +
+                    "   SET dimensione = " + size +
+                    "   ,   dataultimamodifica =    '" + today + "'" +
+                    "   ,   oraultimamodifica =     '"   + now + "'" +
+                    "   ,   autoreultimamodifica =  '" +  usr  + "'" + 
+                    "   WHERE file = '" + file + "'"
+                    ;
+            pst = con.prepareStatement(query);
+            pst.executeUpdate();
+            // END
+            con.commit();
+            return true;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema nella query di PostUpdate allegato.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Problema nel PostUpdate allegato.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
     /* ********************************************************** *
      *                        Metodi di POL                       *
     /* ********************************************************** *
@@ -3946,6 +4160,97 @@ public class DBWrapper implements Query {
     }
     
     
+    /**
+     * <p>Restituisce un Vector di FileDocBean estratti da data entit&agrave;
+     * e dato attributo, entrambi passati come argomenti.</p>
+     *
+     * @param idBelongs identificativo del proprietario degli allegati
+     * @param nomeEntita nome dell'entit&agrave; da cui estrarre gli allegati
+     * @param nomeAttributo
+     */
+    public int setFileDoc(HashMap<String, Object> params)
+                   throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        String table = params.get("nomeEntita") + "_" + params.get("nomeAttributo");
+        assert(!table.equals("_"));
+        int nextId = Utils.DEFAULT_ID;
+        try {
+            // Campi passati da fuori
+            if (params.containsKey("id")) {
+                nextId = (Integer) params.get("id");
+            } else {
+                nextId = getMax(table) + 1;
+            }
+            String file = (String) params.get("file");
+            String ext = (String) params.get("ext");
+            String fileName = (String) params.get("nome");
+            int idBelongs = (Integer) params.get("belongs");
+            String title = (String) params.get("titolo");
+            long size = (Long) params.get("dimensione");
+            String mime = (String) params.get("mime");
+            PersonBean user = (PersonBean) params.get("usr");
+            // Campi calcolati al momento
+            String usr = user.getCognome() + String.valueOf(Utils.BLANK_SPACE) + user.getNome();
+            java.sql.Date today = Utils.convert(Utils.convert(Utils.getCurrentDate()));
+            Time now = Utils.getCurrentTime();
+            // BEGIN
+            con = pol_manager.getConnection();
+            con.setAutoCommit(false); 
+            String query =
+                    "INSERT INTO " + table +
+                    "   (   id" +
+                    "   ,   file" +
+                    "   ,   estensione" +
+                    "   ,   original" +
+                    "   ,   id_belongs_" + params.get("nomeEntita") +
+                    "   ,   titolo" +
+                    "   ,   data" +
+                    "   ,   dimensione" +
+                    "   ,   mime" +
+                    "   ,   dataultimamodifica" +
+                    "   ,   oraultimamodifica" +
+                    "   ,   autoreultimamodifica)" +
+                    "   VALUES (" + String.valueOf(nextId) +// id
+                    "   ,      '" + file + "'"  +           // file
+                    "   ,      '" + ext  + "'"  +           // file extension
+                    "   ,      '" + fileName + "'"  +       // original name
+                    "   ,       " + idBelongs   +           // id belongs
+                    "   ,      '" + title + "'" +           // titolo
+                    "   ,      '" + today + "'" +           // CURRENT_DATE
+                    "   ,       " + size        +           // dimensione
+                    "   ,      '" + mime + "'"  +           // MIME
+                    "   ,      '" + today + "'" +           // oggi in SQL date
+                    "   ,      '" + now + "'"   +           // ora in SQL time
+                    "   ,      '" + usr + "'"   +           // usr full name
+                    ")" ;       
+            pst = con.prepareStatement(query);
+            pst.executeUpdate();
+            // END
+            con.commit();
+            return nextId;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema nella query di inserimento allegato.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Problema nel recupero di attributi del bean.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
     /* ********************************************************** *
      *                        Metodi di POL                       *
     /* ********************************************************** *
@@ -4242,9 +4547,9 @@ public class DBWrapper implements Query {
      * @throws WebStorageException se si verifica un problema nel recupero di attributi o in qualche puntamento
      */
     @SuppressWarnings({ "static-method" })
-    private boolean userCanWrite(int idProj,
-                                 Vector<ProjectBean> projectsWritableByUser) 
-                          throws WebStorageException {
+    public boolean userCanWrite(int idProj,
+                                Vector<ProjectBean> projectsWritableByUser) 
+                         throws WebStorageException {
         try {
             /* ==       Controllo lato server sui diritti dell'utente.       == * 
              * == Controlla per prima cosa che l'id progetto sulla querystring== * 
