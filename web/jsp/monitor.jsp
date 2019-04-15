@@ -9,6 +9,7 @@
   </c:if>
 </c:forTokens>
     <c:set var="years" value="2018,2019,2020,2021,2022" scope="page" />
+    <hr class="separatore" />
     <span class="float-right">
       <a class="btn btnNav" href="${project}">
         <i class="fas fa-home"></i>
@@ -33,24 +34,23 @@
       <hr class="separatore" />
       <div class="tab-content responsive hidden-xs hidden-sm">
         <div role="tabpanel" class="tab-pane active" id="tab-pcvision">
+          <div class="charNum"></div>
+          <hr class="separatore" />
           <label for="mon-d4">QUADRO D.4 Reclutamento del personale</label><br />
           <textarea id="mon-d4" name="mon-d4" class="form-control" aria-label="With textarea" maxlength="22000" readonly>${m.quadroD4}</textarea>
-          <div class="charNum"></div>
           <br /><br />
           <label for="mon-d5">QUADRO D.5 Infrastrutture</label><br />
           <textarea id="mon-d5" name="mon-d5" class="form-control" aria-label="With textarea" maxlength="22000" readonly>${m.quadroD5}</textarea>
-          <div class="charNum"></div>
           <br /><br />
           <label for="mon-d6">QUADRO D.6 Premialit&agrave;</label><br />
           <textarea id="mon-d6" name="mon-d6" class="form-control" aria-label="With textarea" maxlength="22000" readonly>${m.quadroD6}</textarea>
-          <div class="charNum"></div>
           <br /><br />
           <label for="mon-d7">QUADRO D.7 Attivit&agrave; didattiche di eleveta qualificazione</label><br />
           <textarea id="mon-d7" name="mon-d7" class="form-control" aria-label="With textarea" maxlength="22000" readonly>${m.quadroD7}</textarea>
-          <div class="charNum"></div>
           <br /><br />
           <label for="mon-d8">QUADRO D.8 Modalit&agrave; e fasi del monitoraggio</label><br />
           <textarea id="mon-d8" name="mon-d8" class="form-control" aria-label="With textarea" maxlength="22000" readonly>${m.quadroD8}</textarea>
+          <hr class="separatore" />
           <div class="charNum"></div>
           <br /><br />
           <div id="container-fluid">
@@ -116,15 +116,16 @@
           }
         });
         
-        $('textarea[maxlength]').keyup(function () {
-          var len = $(this).val().length;
-          var dblength = parseInt($(this).attr('maxlength'));
+        $('textarea').keyup(function () {
+          var len = $('#mon-d4').val().length + $('#mon-d5').val().length + $('#mon-d6').val().length + $('#mon-d7').val().length + $('#mon-d8').val().length;
+          var dblength = 20000;
+          $('.charNum').addClass('errorPwd');
           if(len >= dblength) {
             this.value = this.value.substring(0, dblength);
-            $(this).next('div').text(' limite raggiunto');
+            $('.charNum').text(' limite raggiunto');
           } else {
             var chars = dblength - len;
-            $(this).next('div').text(chars + ' caratteri rimanenti');
+            $('.charNum').text(chars + ' caratteri rimanenti');
           }
         });
       });
