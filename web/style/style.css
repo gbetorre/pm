@@ -57,10 +57,15 @@ a:visited:not(.btn):not(.cc-link):not(.linkFooter):not(.nav-link):not(.btnNav):n
 	color: #005c99; 
 }
 
-a:hover:not(.btn):not(.logoHeader):not(.cc-link):not(.ui-datepicker-prev):not(.ui-datepicker-next):not(.nav-link):not(.linkFooter):not(.cc-link):not(.helpInfo):not(.page-link):not(.ico) {
+a:hover:not(.btn):not(.logoHeader):not(.cc-link):not(.ui-datepicker-prev):not(.ui-datepicker-next):not(.nav-link):not(.linkFooter):not(.cc-link):not(.helpInfo):not(.page-link):not(.ico):not(.linkHeader) {
 	text-decoration: underline;
 	color: #002e4d;
 	background-color: #d7d9d9;
+}
+
+a:hover.linkHeader {
+	color: #002e4d;
+	text-decoration: underline;
 }
 
 a:link.linkFooter, a:visited.linkFooter {
@@ -129,6 +134,15 @@ label.error {
 	color: red; 
 }
 
+label.profileLabel {
+	font-weight: bold;
+	margin-left: 50px;
+}
+
+.marginLeft {
+	margin-left: 50px;
+}
+
 div.actstate{
 	float: right;
 	position: relative;
@@ -154,6 +168,14 @@ div.charNum {
 	padding-left: 10px;
 }
 
+div.errorPwd {
+	color: #721c24;
+	padding: 10px;
+	border: 1px solid red;
+	background-color: #ffcccc;
+	width: 100%;
+}
+
 div.additional-fields {
   display:none;
 }
@@ -167,6 +189,11 @@ div.centre {
   display: block;
   margin-left: auto;
   margin-right: auto;
+}
+
+p.profileInfo {
+	color: #003e80;
+	font-weight: bold;
 }
 
 span.right {
@@ -636,6 +663,12 @@ hr.riga       {
 
 .verticalCenter{
 	vertical-align: middle;
+}
+
+.rowBottomLine{
+	border-bottom-style: dotted;
+	border-bottom-width: 1px;
+	border-color: #d9d9d9;
 }
 
 /*---------------------- POP-UP ------------------------*/
