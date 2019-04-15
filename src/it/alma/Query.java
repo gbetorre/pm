@@ -174,9 +174,13 @@ public interface Query extends Serializable {
      */
     public static final String TRASH_PART                       = "bin";    
     /**
+     * <p>Costante per il parametro identificante il token dei monitoraggio.</p>
+     */
+    public static final String MONITOR_PART                     = "mon";
+    /**
      * <p>Costante per il parametro identificante la pagina dei monitoraggio.</p>
      */
-    public static final String PART_MONITOR                     = "";
+    public static final String PROJECT_PART                     = "pol";
     /**
      * <p>Costante per il parametro identificante la pagina dei credits dell'applicazione.</p>
      */
