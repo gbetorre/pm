@@ -14,9 +14,11 @@
                 <c:set var="benve" value="BENVENUTA" scope="page" />
               </c:if>
                 <c:out value="${benve}" />
-                <c:out value="${sessionScope.usr.nome}" />
-                <c:out value="${sessionScope.usr.cognome}" />&nbsp;
-                <a class="btn btn-outline-danger" href="${initParam.appName}/auth?q=logout" >Esci</a>
+                <a href="${utente}" class="linkHeader" title="Clicca per dettagli e cambio password">
+                  <c:out value="${sessionScope.usr.nome}" />
+                  <c:out value="${sessionScope.usr.cognome}" />
+                </a>&nbsp;
+                <a class="btn btn-outline-danger" href="${initParam.appName}/auth?q=logout" ><i class="fas fa-sign-out-alt"></i> Esci</a>
               </span>
             </p>
           </div>
