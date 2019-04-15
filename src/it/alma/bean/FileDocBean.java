@@ -76,6 +76,8 @@ public class FileDocBean implements Serializable {
     private String titolo;
     /** Tipo MIME dell'allegato. */
     private String mime;
+    /** Estensione dell'allegato, se presente. */
+    private String estensione;
     /** Tipologia di documento. */
     private int tipologia;
     /** Id dell'utente a cui il file set è associato. */
@@ -93,7 +95,7 @@ public class FileDocBean implements Serializable {
         id = idProprietario = -2;
         dimensione = -2;
         tipologia = -2;
-        file = autore = lingua = titolo = mime =  null;
+        file = autore = lingua = titolo = mime = estensione = null;
         data = new Date(0);
         riservato = false;
     }
@@ -261,7 +263,7 @@ public class FileDocBean implements Serializable {
      * @return titolo
      */
     public String getTitolo() throws AttributoNonValorizzatoException {
-        if (titolo == null) {
+        if (isTitoloEmpty()) {
             throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo titolo non valorizzato!");
         }
         return this.titolo;
@@ -303,6 +305,28 @@ public class FileDocBean implements Serializable {
     }
    
    
+    /* **************************************************** *
+     *         Metodi getter e setter per estensione        *
+     * **************************************************** */
+    /**
+     * Restituisce l'esensione del file originale.
+     * L'estensione &egrave; un concetto convenzionale, in alcun modo necessario
+     * all'esistenza di un file, e pertanto potrebbe non esistere.
+     * 
+     * @return estensione - estensione del file
+     */
+    public String getEstensione() {
+        return estensione;
+    }
+    
+    /**
+     * @param ext l'estensione recuperata dal file originariamente caricato, da impstare
+     */
+    public void setEstensione(String ext) {
+        estensione = ext;
+    }
+    
+    
     /* **************************************************** *
      *           Metodi getter e setter per data            *
      * **************************************************** */
