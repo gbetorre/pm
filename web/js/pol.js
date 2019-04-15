@@ -49,7 +49,10 @@ function modifyPart() {
   } else if (partProject == 'wbs') {
     $('#wbs-addNote').attr('href', '#note-div').attr('rel', 'modal:open');
     $('#wbs-addResult').attr('href', '#result-div').attr('rel', 'modal:open');
-    
+  } else if (partProject == 'pol') {
+    $('#add-all').attr('href', '#note-form').attr('rel', 'modal:open');
+    $('#add-label').wrap('<a id="label-for" />');
+    $('#label-for').attr('href', '#note-form').attr('rel', 'modal:open');
   }
 }
 
