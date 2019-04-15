@@ -38,7 +38,6 @@ package it.alma.bean;
 
 import java.io.Serializable;
 
-import it.alma.Query;
 import it.alma.exception.AttributoNonValorizzatoException;
 
 /**
@@ -46,7 +45,7 @@ import it.alma.exception.AttributoNonValorizzatoException;
  * 
  * @author <a href="mailto:andrea.tonel@studenti.univr.it">Andrea Tonel</a>
  */
-public class DepartmentBean implements Serializable, Query {
+public class DepartmentBean implements Serializable {
 
 	/**
      * La serializzazione necessita di dichiarare una costante di tipo long
