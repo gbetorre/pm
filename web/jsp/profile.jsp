@@ -33,16 +33,16 @@
     <br />
   <c:if test="${not empty sessionScope.usr.ruoli}">
     <hr class="separatore" />
-    <div class="actOfWbs">
+    <div class="lightTable">
       <div class="row">
         <div class="col"><strong>I tuoi progetti</strong></div>
       </div>
       <hr class="separatore" />
       <div class="row">
         <div class="col-sm-1"></div>
-        <div class="col-sm-4 actOfWbsHead">Titolo progetto</div>
-        <div class="col-sm-3 actOfWbsHead">Dipartimento</div>
-        <div class="col-sm-1 actOfWbsHead">Ruolo</div>
+        <div class="col-sm-4 lightTableHead avvisiTot">Titolo progetto</div>
+        <div class="col-sm-3 lightTableHead avvisiTot">Dipartimento</div>
+        <div class="col-sm-1 lightTableHead avvisiTot">Ruolo</div>
       </div>
       <hr class="separatore" />
       <c:forEach var="role" items="${projectsByRole}" varStatus="loop">
