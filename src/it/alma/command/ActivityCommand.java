@@ -329,13 +329,16 @@ public class ActivityCommand extends ItemBean implements Command {
                             }
                             redirect = String.valueOf(redirectAsStringBuffer);
                         }
-                        // Aggiorna le attività dell'utente in sessione
+                        /* ************************************************ *
+                         *   Aggiorna le attività dell'utente in sessione   *
+                         * ************************************************ */
+                        // Rifà la query
+                        Vector<ActivityBean> userWritableActivitiesByCurrentPrj = db.getActivities(idPrj);
+                        // Aggiorna la HashMap delle attività indicizzate per identificativo di progetto (wrapped)
+                        userWritableActivitiesByProjectId.put(new Integer(idPrj), userWritableActivitiesByCurrentPrj);
+                        // Aggiorna la sessione
                         ses.removeAttribute("writableActivity");
-                        LinkedHashMap<Integer, Vector<ActivityBean>> userWritableActivitiesByProject = new LinkedHashMap<Integer, Vector<ActivityBean>>();
-                        Integer key = new Integer(idPrj);
-                        Vector<ActivityBean> userWritableActivities = db.getActivities(idPrj);
-                        userWritableActivitiesByProject.put(key, userWritableActivities);
-                        ses.setAttribute("writableActivity", userWritableActivitiesByProject);
+                        ses.setAttribute("writableActivity", userWritableActivitiesByProjectId);
                     } else {    // Ramo delle selezioni (ramo di lettura)
                         /* **************************************************** *
                          *                 SELECT Activity/ies                  *
@@ -545,7 +548,7 @@ public class ActivityCommand extends ItemBean implements Command {
             act.put("act-id",           parser.getStringParameter("act-id", Utils.VOID_STRING));
             act.put("act-name",         parser.getStringParameter("act-name", Utils.VOID_STRING));
             act.put("act-descr",        parser.getStringParameter("act-descr", null));
-            act.put("act-datainizio",       parser.getStringParameter("act-datainizio", dateAsString));
+            act.put("act-datainizio",       parser.getStringParameter("act-datainizio", null));
             act.put("act-datafine",         parser.getStringParameter("act-datafine", dateAsString));
             act.put("act-datainiziovera",   parser.getStringParameter("act-datainiziovera", null));
             act.put("act-datafinevera",     parser.getStringParameter("act-datafinevera", null));
