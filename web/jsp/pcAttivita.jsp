@@ -130,14 +130,14 @@
         <div class="row">
           <div class="col-sm-5 mandatory">Nome attivit&agrave;</div>
           <div class="col-sm-5">
-            <input type="text" class="form-control" id="act-name" name="act-name" value="${actName}" readonly="readonly"> <%-- readonly="readonly" --%>
+            <input type="text" class="form-control" id="act-name" name="act-name" value="${actName}" placeholder="Inserisci il nome" readonly="readonly">
           </div>
         </div>
         <br />
         <div class="row">
           <div class="col-sm-5">Descrizione dell'attivit&agrave;</div>
           <div class="col-sm-5">
-            <textarea class="form-control" name="act-descr" class="form-control" aria-label="With textarea" maxlength="8104" readonly><c:out value="${actDescr}" escapeXml="false" /></textarea>
+            <textarea class="form-control" name="act-descr" class="form-control" aria-label="With textarea" maxlength="8104" placeholder="Inserisci una descrizione" readonly><c:out value="${actDescr}" escapeXml="false" /></textarea>
             <div class="charNum"></div>
           </div>
         </div>
@@ -145,35 +145,35 @@
         <div class="row">
           <div class="col-sm-5">Data prevista di inizio dell'attivit&agrave;</div>
           <div class="col-sm-5">
-            <input type="text" class="form-control calendarData" id="act-datainizio" name="act-datainizio" value="<fmt:formatDate value='${actStartDate}' pattern='dd/MM/yyyy' />" readonly> <%--readonly--%>
+            <input type="text" class="form-control calendarData" id="act-datainizio" name="act-datainizio" value="<fmt:formatDate value='${actStartDate}' pattern='dd/MM/yyyy' />" placeholder="Inserisci data in cui prevedi di iniziare" readonly>
           </div>
         </div>
         <br />
         <div class="row">
           <div class="col-sm-5 mandatory">Data prevista di fine dell'attivit&agrave;</div>
           <div class="col-sm-5">
-            <input type="text" class="form-control calendarData" id="act-datafine" name="act-datafine" value="<fmt:formatDate value='${actEndDate}' pattern='dd/MM/yyyy' />" readonly> <%--readonly--%>
+            <input type="text" class="form-control calendarData" id="act-datafine" name="act-datafine" value="<fmt:formatDate value='${actEndDate}' pattern='dd/MM/yyyy' />" placeholder="Inserisci data in cui prevedi di finire" readonly>
           </div>
         </div>
         <br />
         <div class="row">
           <div class="col-sm-5">Data di inizio effettiva</div>
           <div class="col-sm-5">
-            <input type="text" class="form-control calendarData" id="act-datainiziovera" name="act-datainiziovera" value="<fmt:formatDate value='${actualStartDate}' pattern='dd/MM/yyyy' />" readonly> <%--readonly--%>
+            <input type="text" class="form-control calendarData" id="act-datainiziovera" name="act-datainiziovera" value="<fmt:formatDate value='${actualStartDate}' pattern='dd/MM/yyyy' />" placeholder="Inserisci data di inizio lavoro" readonly>
           </div>
         </div>
         <br />
         <div class="row">
           <div class="col-sm-5">Data di fine effettiva</div>
           <div class="col-sm-5">
-            <input type="text" class="form-control calendarData" id="act-datafinevera" name="act-datafinevera" value="<fmt:formatDate value='${actualEndDate}' pattern='dd/MM/yyyy' />" readonly> <%--readonly--%>
+            <input type="text" class="form-control calendarData" id="act-datafinevera" name="act-datafinevera" value="<fmt:formatDate value='${actualEndDate}' pattern='dd/MM/yyyy' />" placeholder="Inserisci data di fine lavoro" readonly>
           </div>
         </div>
         <br />
         <div class="row">
           <div class="col-sm-5">Note di avanzamento</div>
           <div class="col-sm-5">
-            <textarea class="form-control noActivateOnAdd" id="act-progress" name="act-progress" aria-label="With textarea" maxlength="8104" readonly><c:out value="${actNotes}" escapeXml="false" /></textarea>
+            <textarea class="form-control noActivateOnAdd" id="act-progress" name="act-progress" aria-label="With textarea" maxlength="8104" placeholder="Inserisci le note o clicca sul bottone +" readonly><c:out value="${actNotes}" escapeXml="false" /></textarea>
             <div class="charNum"></div>
           </div>
           <a class="ico" id="act-addNote">
@@ -184,7 +184,7 @@
         <div class="row">
           <div class="col-sm-5">Risultati raggiunti</div>
           <div class="col-sm-5">
-            <textarea class="form-control noActivateOnAdd" id="act-result" name="act-result" aria-label="With textarea" maxlength="1024" readonly><c:out value="${actResult}" escapeXml="false" /></textarea>
+            <textarea class="form-control noActivateOnAdd" id="act-result" name="act-result" aria-label="With textarea" maxlength="1024" placeholder="Inserisci i risultati o clicca sul bottone +" readonly><c:out value="${actResult}" escapeXml="false" /></textarea>
             <div class="charNum"></div>
           </div>
           <a class="ico" id="act-addResult">
@@ -193,7 +193,11 @@
         </div>
         <br />
         <div class="row">
-          <div class="col-sm-5">Milestone</div>
+          <div class="col-sm-5">
+            <a href="javascript:popupWindow('Note','popup1',true,'Milestone indica che l\'attivit&agrave; &egrave; usata per segnalare un momento significativo del sottoprogetto, p.es. il termine di una fase preliminare. Le Milestone dovrebbero iniziare e terminare nello stesso giorno, cio&egrave; essere attivit&agrave; di durata uno.');" class="helpInfo" id="milestone">
+              Milestone
+            </a>
+          </div>
           <div class="col-sm-5" style="margin-left:25px;">
             <input type="checkbox" class="form-check-input" id="act-milestone" name="act-milestone" <c:out value='${checked}' />>
           </div>
@@ -314,6 +318,7 @@
       <a href="<c:out value="${redirect}" escapeXml="false" />" id='btn-close' class="btn btnNav"><i class="far fa-window-close"></i> Chiudi</a>
       <a href="#" class="btn btn-success" id="btn-add" onclick="addResult()" rel="modal:close"><i class="fas fa-plus"></i> Aggiungi</a>
     </div>
+    <%@ include file="subPopup.jspf" %>
 </c:catch>
 <c:out value="${exception}" />
     <script type="text/javascript">
