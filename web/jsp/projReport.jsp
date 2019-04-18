@@ -22,7 +22,7 @@
           </div>
           <div class="col-6">
             <a href="" class="btn btn-success" id="rep-view"><i class="fas fa-search"></i> Visualizza</a>
-            <button class="btn btn-warning" id="expReport"><i class="fas fa-file-export"></i> Esporta</button>
+            <button class="btn btn-warning" id="expReport" onclick="alert('Funzionalit&agrave; in corso di implementazione');"><i class="fas fa-file-export"></i> Esporta</button>
           </div>
         </div>
         <div class="row reportHead">
