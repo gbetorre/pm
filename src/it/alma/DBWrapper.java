@@ -3222,14 +3222,19 @@ public class DBWrapper implements Query {
                 /* === Descrizione === */
                 pst.setString(++nextParam, params.get("act-descr"));
                 /* === Controllo lato server sull'input delle date previste === */
-                java.util.Date dataInizio = Utils.format(params.get("act-datainizio"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
+                java.util.Date dataInizio = null;
+                java.sql.Date dataInizioSQL = null;
+                if (params.get("act-datainizio") != null) {
+                    dataInizio = Utils.format(params.get("act-datainizio"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
+                    dataInizioSQL = Utils.convert(dataInizio);
+                }
                 java.util.Date dataFine = Utils.format(params.get("act-datafine"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
                 // Data fine non deve essere minore di Data inizio
-                if (dataInizio.compareTo(dataFine) > NOTHING) {
+                if (dataInizio != null && dataInizio.compareTo(dataFine) > NOTHING) {
                     throw new WebStorageException("La data di fine attivita\' e\' minore di quella di inizio attivita\'.\n");
                 }
-                // Data inizio (obbligatoria)
-                pst.setDate(++nextParam, Utils.convert(dataInizio)); // non accetta una data italiana, ma java.sql.Date
+                // Data inizio (facoltativa, potrebbe valere null)
+                pst.setDate(++nextParam, dataInizioSQL);
                 // Data fine (obbligatoria)
                 pst.setDate(++nextParam, Utils.convert(dataFine)); // non accetta una data gg/mm/aaaa, ma java.sql.Date
                 // Campo residuale (Data inizio attesa)
@@ -3946,15 +3951,20 @@ public class DBWrapper implements Query {
                 pst.setString(++nextParam, params.get("act-name"));
                 /* === Descrizione === */
                 pst.setString(++nextParam, params.get("act-descr"));
-                /* === Controllo lato server sull'input delle date === */
-                java.util.Date dataInizio = Utils.format(params.get("act-datainizio"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
+                /* === Controllo lato server sull'input delle date previste === */
+                java.util.Date dataInizio = null;
+                java.sql.Date dataInizioSQL = null;
+                if (params.get("act-datainizio") != null) {
+                    dataInizio = Utils.format(params.get("act-datainizio"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
+                    dataInizioSQL = Utils.convert(dataInizio);
+                }
                 java.util.Date dataFine = Utils.format(params.get("act-datafine"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
                 // Data fine non deve essere minore di Data inizio
-                if (dataInizio.compareTo(dataFine) > NOTHING) {
+                if (dataInizio != null && dataInizio.compareTo(dataFine) > NOTHING) {
                     throw new WebStorageException("La data di fine attivita\' e\' minore di quella di inizio attivita\'.\n");
                 }
-                // Data inizio (obbligatoria)
-                pst.setDate(++nextParam, Utils.convert(dataInizio)); // non accetta una data italiana, ma java.sql.Date
+                // Data inizio (facoltativa, potrebbe valere null)
+                pst.setDate(++nextParam, dataInizioSQL);
                 // Data fine (obbligatoria)
                 pst.setDate(++nextParam, Utils.convert(dataFine)); // non accetta una data gg/mm/aaaa, ma java.sql.Date
                 // Campo residuale
