@@ -1083,30 +1083,16 @@ public interface Query extends Serializable {
     		"	WHERE SP.id = ?";
     
     /**
-     * <p>Estrae le attivit&agrave; relative ad un progetto, identificato 
+     * <p>Estrae gli identificativi di tutte le attivit&agrave; 
+     * relative ad un progetto, individuato 
      * tramite l'id, passato come parametro.</p>
      */
     public static final String  GET_ACTIVITIES = 
             "SELECT " +
             "       A.id                    AS  \"id\"" +
-          //"   ,   A.nome                  AS  \"nome\"" +
-          //"   ,   A.descrizione           AS  \"descrizione\"" +
-          //"   ,   A.datainizio            AS  \"dataInizio\"" +
-          //"   ,   A.datafine              AS  \"dataFine\"" +
-          //"   ,   A.datainizioattesa      AS  \"dataInizioAttesa\"" +
-          //"   ,   A.datafineattesa        AS  \"dataFineAttesa\"" +
-          //"   ,   A.datainizioeffettiva   AS  \"dataInizioEffettiva\"" +
-          //"   ,   A.datafineeffettiva     AS  \"dataFineEffettiva\"" +
-          //"   ,   A.guprevisti            AS  \"guPrevisti\"" +
-          //"   ,   A.gueffettivi           AS  \"guEffettivi\"" +
-          //"   ,   A.gurimanenti           AS  \"guRimanenti\"" +
-          //"   ,   A.noteavanzamento       AS  \"noteAvanzamento\"" +
-          //"   ,   A.risultatiraggiunti    AS  \"risultatiRaggiunti\"" +
-          //"   ,   A.milestone             AS  \"milestone\"" +
             "   ,   A.id_stato              AS  \"idStato\"" +
             "   FROM attivita A" + 
             "   WHERE A.id_progetto = ?";
-          //"   ORDER BY A.id";
     
     /**
      * <p>Estrae le attivit&agrave; relative ad un progetto, identificato 
@@ -1131,13 +1117,8 @@ public interface Query extends Serializable {
             "   ,   A.descrizione           AS  \"descrizione\"" +
             "   ,   A.datainizio            AS  \"dataInizio\"" +
             "   ,   A.datafine              AS  \"dataFine\"" +
-            //"   ,   A.datainizioattesa      AS  \"dataInizioAttesa\"" +
-            //"   ,   A.datafineattesa        AS  \"dataFineAttesa\"" +
             "   ,   A.datainizioeffettiva   AS  \"dataInizioEffettiva\"" +
             "   ,   A.datafineeffettiva     AS  \"dataFineEffettiva\"" +
-            //"   ,   A.guprevisti            AS  \"guPrevisti\"" +
-            //"   ,   A.gueffettivi           AS  \"guEffettivi\"" +
-            //"   ,   A.gurimanenti           AS  \"guRimanenti\"" +
             "   ,   A.noteavanzamento       AS  \"noteAvanzamento\"" +
             "   ,   A.risultatiraggiunti    AS  \"risultatiRaggiunti\"" +
             "   ,   A.milestone             AS  \"milestone\"" +
@@ -1146,9 +1127,9 @@ public interface Query extends Serializable {
             "   FROM attivita A" + 
             "   WHERE A.id_progetto = ?" +
             "       AND A.id_stato <> 12" +
-            "       AND A.datainizio >= ?" +
+            "       AND (A.datainizio >= ? OR A.datainizio IS NULL)" +
             "       AND (A.milestone = ? OR ?)" +
-            "   ORDER BY A.dataultimamodifica DESC, A.oraultimamodifica DESC, A.datainizio, A.datafine, A.id_stato";
+            "   ORDER BY A.nome";
     
     /**
      * <p>Estrae le attivit&agrave; relative ad un progetto, identificato 
@@ -1172,8 +1153,8 @@ public interface Query extends Serializable {
             "   FROM attivita A" + 
             "   WHERE A.id_progetto = ?" +
             "       AND A.id_stato = ?" +
-            "       AND A.datainizio >= ?" +
-            "   ORDER BY A.dataultimamodifica DESC, A.oraultimamodifica DESC, A.datainizio, A.datafine, A.id_stato";
+            "       AND (A.datainizio >= ? OR A.datainizio IS NULL)" +
+            "   ORDER BY A.nome";
     
     /**
      * <p>Estrae le attivit&agrave; di una specifica WBS,
