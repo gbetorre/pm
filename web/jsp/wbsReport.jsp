@@ -113,7 +113,7 @@
             </span>
           </div>
           <div class="col-4 text-center">
-            <a href="#" class="btn btn-success" id="expReport"><i class="fas fa-file-export"></i> Esporta</a>
+            <a href="javascript:alert('Funzionalit&agrave; in corso di implementazione')" class="btn btn-success" id="expReport"><i class="fas fa-file-export"></i> Esporta</a>
           </div>
         </div>
       </div>
