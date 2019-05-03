@@ -1581,7 +1581,30 @@ public interface Query extends Serializable {
             "SELECT " +
             "       A.id                    AS  \"id\"" +
             "   FROM accesslog A " + 
-            "   WHERE A.login = ? ";    
+            "   WHERE A.login = ? ";
+    
+    /**
+     * <p>Estrae tuple ultimi accessi di tutti gli utenti 
+     * da mostrare ad utenti con particolari privilegi amministrativi
+     * (PMOATE = 1).</p>
+     */
+    public static final String GET_ACCESSLOG = 
+            "SELECT " +
+            "       A.id                        AS  \"id\"" +
+            "   ,   P.cognome || ' ' || P.nome  AS  \"autoreUltimaModifica\"" +
+            "   ,   A.dataultimoaccesso         AS  \"dataUltimaModifica\"" +
+            "   ,   A.oraultimoaccesso          AS  \"oraUltimaModifica\"" +
+            "   ,   A.ipv4                      AS  \"descrizioneAvanzamento\"" +
+            "   FROM accesslog A " + 
+            "       INNER JOIN usr ON A.login = usr.login" +
+            "       INNER JOIN identita I ON I.id0_usr = usr.id" +
+            "       INNER JOIN persona P ON I.id1_persona = P.id" +
+            "   WHERE EXISTS " +
+            "       (SELECT RG.id_ruolo "       + 
+            "           FROM ruologestione RG "  +
+            "           WHERE RG.id_persona = ? " +
+            "               AND RG.id_ruolo = 1)"  +
+            "   ORDER BY A.dataultimoaccesso DESC";
     
     
     /* ************************************************************************ *
