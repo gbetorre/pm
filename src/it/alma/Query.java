@@ -1604,7 +1604,7 @@ public interface Query extends Serializable {
             "           FROM ruologestione RG "  +
             "           WHERE RG.id_persona = ? " +
             "               AND RG.id_ruolo = 1)"  +
-            "   ORDER BY A.dataultimoaccesso DESC";
+            "   ORDER BY A.dataultimoaccesso DESC, A.oraultimoaccesso DESC";
     
     
     /* ************************************************************************ *
