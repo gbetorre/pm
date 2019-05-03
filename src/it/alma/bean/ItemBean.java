@@ -10,7 +10,7 @@
  *   Alma on Line (aol), Projects on Line (pol), Questionnaire on Line (qol);
  *   web applications to publish, and manage, students evaluation,
  *   projects, students and degrees information.
- *   Copyright (C) renewed 2018 Universita' degli Studi di Verona, 
+ *   Copyright (C) renewed 2019 Universita' degli Studi di Verona, 
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify 
@@ -38,44 +38,50 @@ package it.alma.bean;
 
 
 /**
- * Classe che serve a rappresentare <cite>in primis</cite> le voci di menu
- * del menu verticale, in tutte le sue accezioni (classico, indentato, 
- * a soffietto, responsive...)
+ * <p>Classe che serve a rappresentare oggetti generici (p.es. link in un menu,
+ * righe di un log, etc.)</p>
  * 
+ * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
  */
 public class ItemBean implements Comparable<ItemBean> {
-    /**
-    * Suffisso per le Command
-    */
+    /** 
+     * Suffisso per le Command                                     
+     */
     static final String COMMAND_SUFFIX = "Command";
-    /** Identificativo della voce                       */
+    /** 
+     * Identificativo della voce                                   
+     */
     private int id;
-    /** Il nome corrisponde nel DB al campo token       */
+    /** 
+     * Nome della voce                                             
+     */
     private String nome;
-    /** Il nome reale corrisponde nel DB al campo nome  */
+    /** 
+     * Nome reale della voce, in caso di corrispondenze logiche    
+     */
     private String nomeReale;
-    /** Etichetta da visualizzare per la voce           */
+    /** 
+     * Etichetta da visualizzare per la voce                       
+     */
     private String labelWeb;
     /** 
      * Attributo che pu&ograve; essere usato per memorizzare
-     * il nome della Command associata alla voce di menu,
+     * il nome di una entit&agrave; associata alla voce
      * oppure altre informazioni attinenti 
      */
     private String nomeClasse;
     /**
      * Attributo che pu&ograve; essere usato per memorizzare
-     * il valore della pagina associata di default alla Command
-     * incapsulata nella voce di menu, 
-     * oppure altre informazioni attinenti
+     * il valore della pagina associata ad una classe referenziata
+     * dalla voce di menu, oppure altre informazioni attinenti
      */
     private String paginaJsp;
-    /**
-     * Attributo per memorizzare il link sotteso all'etichetta
-     * della voce di menu
+    /** 
+     * Attributo per memorizzare il link sotteso all'etichetta     
      */
     private String url;
-    /**
-     * Attributo che pu&ograve; contenere informazioni descrittive
+    /** 
+     * Attributo che pu&ograve; contenere informazioni descrittive 
      */
     private String informativa;
     /**
@@ -86,21 +92,25 @@ public class ItemBean implements Comparable<ItemBean> {
     private String icona;
     /**
      * Attributo per la definizione del livello di 
-     * indentazione della voce nel menu
+     * indentazione della voce nel menu o per contenere altre informazioni
+     * di contesto
      */
     private int livello;
     /**
      * Attributo che serve a definire se l'url della voce di menu
-     * punta a un'applicazione web istituzionale 
-     * oppure a un sito esterno
+     * punta a un'applicazione web istituzionale oppure a un sito esterno
      */
     private boolean urlInterno;
+    /**
+     * Attributo per definire altre informazioni contestuali, p.es. il fatto
+     * che il link richiede un'autenticazione a monte del <cite>landing</cite>
+     * o il fatto che l'elemento non &egrave; pubblico
+     */
     private boolean privato;
     /**
      * Attributo che serve a memorizzare ulteriori informazioni,
      * utile e.g. quando questo oggetto viene usato per 
-     * incapsulare valori non strettamente attinenti alle 
-     * voci di menu
+     * incapsulare valori che necessitano di molte informazioni aggiuntive
      */
     private String extraInfo;
     
@@ -256,7 +266,9 @@ public class ItemBean implements Comparable<ItemBean> {
         else return 1;
     }
     
-    /*--- Accessori e Mutatori ---*/
+    /* ************************************************************************ *  
+     *                          Accessori e Mutatori                            *
+     * ************************************************************************ */
     
     /**
      * @return <code>id</code> - l'identificativo della voce di menu
@@ -403,8 +415,8 @@ public class ItemBean implements Comparable<ItemBean> {
     
     
     /**
-     * <p>Restituisce un intero rappresentante il livello di indentazione
-     * della voce del menu:
+     * <p>Restituisce un intero rappresentante ad esempio 
+     * il livello di indentazione della voce del menu:
      * <dl>
      * <dt>0</dt>
      * <dd>primo livello, ovvero voci presentate di default,
@@ -458,17 +470,31 @@ public class ItemBean implements Comparable<ItemBean> {
         urlInterno = v;
     }
 
+    
+    /**
+     * Restituisce il valore dell'attributo specificante se l'item 
+     * deve essere considerato 'privato'
+     * 
+     * @return boolean - true se l'elemento e' privato, false altrimenti
+     */
     public boolean isPrivato() {
         return privato;
     }
 
+    
+    /**
+     * Imposta il valore dell'attributo specificante se l'item
+     * deve essere considerato 'privato'
+     * 
+     * @param privato flag boolean true se l'elemento e' privato, false altrimenti
+     */
     public void setPrivato(boolean privato) {
         this.privato = privato;
     }
     
 
     /**
-     * @return <code>extraInfo</code> - un oggetto String contenente eventuali informazioni aggiuntive
+     * @return <code>String</code> extraInfo - un oggetto String contenente eventuali informazioni aggiuntive
      */
     public String getExtraInfo() {
         return extraInfo;
