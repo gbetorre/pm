@@ -10,7 +10,7 @@
  *   Alma on Line (aol), Projects on Line (pol), Questionnaire on Line (qol);
  *   web applications to publish, and manage, students evaluation,
  *   projects, students and degrees information.
- *   Copyright (C) renewed 2018 Universita' degli Studi di Verona, 
+ *   Copyright (C) renewed 2019 Universita' degli Studi di Verona, 
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify 
@@ -53,6 +53,7 @@ import it.alma.Utils;
 import it.alma.bean.CodeBean;
 import it.alma.bean.ItemBean;
 import it.alma.bean.PersonBean;
+import it.alma.bean.StatusBean;
 import it.alma.exception.AttributoNonValorizzatoException;
 import it.alma.exception.CommandException;
 import it.alma.exception.WebStorageException;
@@ -161,11 +162,12 @@ public class HomePageCommand extends ItemBean implements Command {
      * <p>Gestisce il flusso principale.</p>
      * <p>Prepara i bean.</p>
      * <p>Passa nella Request i valori che verranno utilizzati dall'applicazione.</p>
+     * 
+     * @param req HttpServletRequest contenente parametri e attributi, e in cui settare attributi
+     * @throws CommandException incapsula qualunque genere di eccezione che si possa verificare in qualunque punto del programma
      */
     public void execute(HttpServletRequest req) 
                  throws CommandException {
-        // Databound
-        DBWrapper db = null;
         // Parser per la gestione assistita dei parametri di input
         ParameterParser parser = new ParameterParser(req);
         // Utente loggato
@@ -178,6 +180,8 @@ public class HomePageCommand extends ItemBean implements Command {
         String fileJspT = null;
         // Dichiara l'elenco dei progetti estratti dell'utente, partendo dal ruolo
         Vector<ItemBean> projectsByRole = null;
+        // Dichiara l'elenco degli accessi degli utenti, da mostrare solo a root
+        Vector<StatusBean> accessList = null;
         /* ******************************************************************** *
          *      Instanzia nuova classe WebStorage per il recupero dei dati      *
          * ******************************************************************** */
@@ -188,7 +192,7 @@ public class HomePageCommand extends ItemBean implements Command {
         }
         /* ******************************************************************** *
          *                         Recupera la Sessione                         *
-         * ******************************************************************** */
+         * ******************************************************************** *
         try {
             // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
             HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
@@ -231,7 +235,11 @@ public class HomePageCommand extends ItemBean implements Command {
                         db.updatePassword(user.getId(), passwd, passwdform);
                     }
                 }
+                /* **************************************************** *
+                 *                  SELECT Profile Part                 *
+                 * **************************************************** */
                 projectsByRole = db.getProjectsByRole(user.getId());
+                accessList = db.getAccessLog(user.getId());
                 fileJspT = nomeFileProfilo;
             } else {
                 fileJspT = nomeFileElenco;
@@ -244,6 +252,14 @@ public class HomePageCommand extends ItemBean implements Command {
             String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di valori dal db.\n";
             LOG.severe(msg);
             throw new CommandException(msg + wse.getMessage(), wse);
+        } catch (IllegalStateException ise) {
+            String msg = FOR_NAME + "Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + ise.getMessage(), ise);
+        } catch (ClassCastException cce) {
+            String msg = FOR_NAME + ": Si e\' verificato un problema in una conversione di tipo.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + cce.getMessage(), cce);
         } catch (NullPointerException npe) {
             String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n";
             LOG.severe(msg);
@@ -263,6 +279,10 @@ public class HomePageCommand extends ItemBean implements Command {
         // Imposta nella request i progetti dell'utente tramite il ruolo, nel caso in cui siano valorizzati
         if (projectsByRole != null) {
             req.setAttribute("projectsByRole", projectsByRole);
+        }
+        // Imposta nella request il log degli accessi se l'utente ne ha i privilegi
+        if (accessList != null) {   // Se l'utente non ne ha il privilegio, la lista è nulla
+            req.setAttribute("accesslog", accessList);
         }
         // Imposta la Pagina JSP di forwarding
         req.setAttribute("fileJsp", fileJspT);
