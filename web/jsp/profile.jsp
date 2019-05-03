@@ -24,9 +24,14 @@
         </div>
         <br />
         <div class="row">
-          <div class="col-sm-6 marginLeft">
-            <a href="#form-changePwd" class="btn btn-success" id="btn-changePwd" name="btn-changePwd" rel="modal:open"><i class="fas fa-lock"></i> Cambia password</a>
-          </div> 
+          <div class="col-sm-4">
+            <a href="#form-changePwd" class="btn btn-success marginLeft" id="btn-changePwd" name="btn-changePwd" rel="modal:open"><i class="fas fa-lock"></i> Cambia password</a>
+          </div>
+          <c:if test="${not empty requestScope.accesslog}">
+          <div class="col-sm-4">
+            <a href="#accessLog" class="btn btn-success" id="btn-accessLog" name="btn-accessLog" rel="modal:open"><i class="fas fa-user-check"></i> Log degli accessi</a>
+          </div>
+          </c:if>
         </div>
       </div>
     </div>
@@ -45,7 +50,7 @@
         <div class="col-sm-1 lightTableHead avvisiTot">Ruolo</div>
       </div>
       <hr class="separatore" />
-      <c:forEach var="role" items="${projectsByRole}" varStatus="loop">
+      <c:forEach var="role" items="${requestScope.projectsByRole}" varStatus="loop">
       <div class="row">
         <div class="col-sm-1"></div>
         <div class="col-sm-4 rowBottomLine">
@@ -83,6 +88,41 @@
         </button>
       </form>
     </div>
+    <div id="accessLog" class="modal">
+    <hr class="separatore" />
+      <div class="lightTable">
+        <div class="row">
+          <div class="col"><strong>Log degli accessi</strong></div>
+        </div>
+        <hr class="separatore" />
+        <div class="row">
+          <div class="col-sm-1 lightTableHead avvisiTot">&nbsp;N.</div>
+          <div class="col-sm-4 lightTableHead avvisiTot">Utente</div>
+          <div class="col-sm-2 lightTableHead avvisiTot">Data ultimo accesso</div>
+          <div class="col-sm-2 lightTableHead avvisiTot">Ora ultimo<br /> accesso</div>
+          <div class="col-sm-3 lightTableHead avvisiTot">Indirizzo IP</div>
+        </div>
+        <hr class="separatore" />
+        <c:forEach var="access" items="${requestScope.accesslog}" varStatus="loop">
+        <div class="row">
+          <div class="col-sm-1">${loop.index + 1}</div>
+          <div class="col-sm-4 rowBottomLine">
+            <c:out value="${access.autoreUltimaModifica}"/>
+          </div>
+          <div class="col-sm-2 rowBottomLine">
+            <fmt:formatDate value="${access.dataUltimaModifica}" pattern="dd/MM/yyyy" />
+          </div>
+          <div class="col-sm-2 rowBottomLine">
+            <c:out value="${fn:substring(access.oraUltimaModifica, 0, 5)}"/>
+          </div>
+          <div class="col-sm-3 rowBottomLine">
+            <c:out value="${access.descrizioneAvanzamento}"/>
+          </div>
+        </div>
+        <hr class="separatore" />
+        </c:forEach>
+      </div>
+    </div>
     <script type="text/javascript">
       function checkForm(form) {
         if ($('#txtPwd').val().length < 1 || $('#txtConfPwd').val().length < 1 || $('#txtPwd').val() != $('#txtConfPwd').val()) {
@@ -93,4 +133,3 @@
         }
       }
     </script>
-    
