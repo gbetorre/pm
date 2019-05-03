@@ -355,6 +355,7 @@ public class DBWrapper implements Query {
      * @return Vector&lt;ItemBean&gt; - lista dei progetti con dipartimento e ruolo
      * @throws WebStorageException se si verifica un problema SQL o in qualsiasi puntamento
      */
+    @SuppressWarnings({ "null", "static-method" })
     public Vector<ItemBean> getProjectsByRole (int userId)
                                        throws WebStorageException {
         ResultSet rs = null;
@@ -1246,7 +1247,7 @@ public class DBWrapper implements Query {
     @SuppressWarnings({ "null", "static-method" })
     public Vector<ActivityBean> getActivities(int projId) 
                                        throws WebStorageException {
-        ResultSet rs, rs1 = null;
+        ResultSet rs = null;
         Connection con = null;
         PreparedStatement pst = null;
         ActivityBean attivita = null;
@@ -1348,12 +1349,12 @@ public class DBWrapper implements Query {
                                               boolean getMilestoneOnly,
                                               boolean getAll) 
                                        throws WebStorageException {
-        ResultSet rs, rs1 = null;
+        ResultSet rs = null;
         Connection con = null;
         PreparedStatement pst = null;
         ActivityBean attivita = null;
-        PersonBean person = null;
-        Vector<PersonBean> people = new Vector<PersonBean>();
+        /*PersonBean person = null;
+        Vector<PersonBean> people = new Vector<PersonBean>();*/
         Vector<ActivityBean> activities = new Vector<ActivityBean>();
         int nextParam = 0;
         try {
@@ -2008,7 +2009,7 @@ public class DBWrapper implements Query {
      * @return vectorWbs - vettore contenente tutte la gerarchia di Wbs di un progetto
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
-    @SuppressWarnings({ "null", "static-method" })
+    @SuppressWarnings({ "null" })
     public Vector<WbsBean> getWbsHierarchy(int idProj) 
                            throws WebStorageException {
         ResultSet rs, rs1, rs2, rs3, rs4 = null;
@@ -2240,7 +2241,16 @@ public class DBWrapper implements Query {
         }
     }
     
-    // TODO: commento
+    
+    /**
+     * <p>Dato l'identificato di un progetto e l'identificativo di una WBS,
+     * restituisce tutta la gerarchia degli ascendenti della WBS di dato id.</p>
+     * 
+     * @param idProj identificativo del progetto a cui la WBS di cui si vuol cercare l'ascendenza deve appartenere
+     * @param idWbs  identificativo della WBS di cui si vuol cercare l'ascendenza
+     * @return <code>WbsBean</code> - una WBS contenente al proprio interno la gerarchia completa da scorrere per mostrare l'albero genealogico della WBS di dato id
+     * @throws WebStorageException se si verifica qualche problema nell'esecuzione di query o in qualche tipo di puntamento
+     */
     @SuppressWarnings("null")
     public WbsBean getWbsHierarchyByOffspring(int idProj,
                                               int idWbs) 
@@ -2519,6 +2529,54 @@ public class DBWrapper implements Query {
     
     
     /**
+    * <p>Restituisce un Vector&lt;ActivityBean&gt; contenente tutto il log 
+    * degli accessi disponibile, purch&eacute; l'utente loggato abbia 
+    * privilegi di livello massimo.</p>
+    * 
+    * @param idUsr  id dell'utente di cui verificare il livello di autorizzazione
+    * @return Vector&lt;StatusBean&gt; - vector contenente tutti gli accessi
+    * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
+    */
+    @SuppressWarnings({ "null", "static-method" })
+    public Vector<StatusBean> getAccessLog(int idUsr) 
+                                      throws WebStorageException {
+        Connection con = null;
+        ResultSet rs = null;
+        PreparedStatement pst = null;
+        StatusBean accessInstance = null;
+        Vector<StatusBean> accessList = new Vector<StatusBean>();
+        int nextParam = 0;
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_ACCESSLOG);
+            pst.clearParameters();
+            pst.setInt(++nextParam, idUsr);
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                accessInstance = new StatusBean();
+                BeanUtil.populate(accessInstance, rs);
+                accessList.add(accessInstance);
+            }
+            return accessList;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Elenco degli accessi non valorizzato; problema nella query dell\'access log.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
      * <p>Restituisce un Vector di FileDocBean estratti da data entit&agrave;
      * e dato attributo, entrambi passati come argomenti.</p>
      * <p>In particolare, potrebbero esistere pi&uacute; tabelle di allegati
@@ -2588,12 +2646,15 @@ public class DBWrapper implements Query {
     
     
     /**
-     * <p>Restituisce un Vector di FileDocBean estratti da data entit&agrave;
-     * e dato attributo, entrambi passati come argomenti.</p>
+     * <p>Restituisce un valore boolean <code>true</code> se esiste un file
+     * di dato nome, in data entit&agrave; e dato attributo, 
+     * tutti passati come argomenti.</p>
      *
-     * @param idBelongs identificativo del proprietario degli allegati
-     * @param nomeEntita nome dell'entit&agrave; da cui estrarre gli allegati
-     * @param nomeAttributo
+     * @param nomeEntita prefisso del nome dell'entit&agrave; in cui verificare l'esistenza dell'allegato
+     * @param nomeAttributo suffisso del nome dell'entit&agrave; in cui verificare l'esistenza dell'allegato
+     * @param nomeFile nome del file di cui verificare la presenza nell'entit&agrave; di nome ricavabile dai parametri
+     * @return <code>boolean</code> - true se il nome del file &egrave; gi&agrave; presente, false altrimenti
+     * @throws WebStorageException se si verifica un problema di tipo SQL o in qualche puntamento
      */
     @SuppressWarnings({ "null", "static-method" })
     public boolean existsFileName(String nomeEntita, 
@@ -2657,6 +2718,7 @@ public class DBWrapper implements Query {
      * @param passwdform    password criptata
      * @throws WebStorageException  se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
      */
+    @SuppressWarnings({ "null", "static-method" })
     public void updatePassword (int userId,
                                 String passwd,
                                 String passwdform)
