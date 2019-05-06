@@ -3724,6 +3724,60 @@ public class DBWrapper implements Query {
     
     
     /**
+     * <p>Aggiorna un monitoraggio relativo a un dato anno solare, 
+     * passato come argomento, e a un relativo dipartimento, il cui 
+     * identificativo viene passato come argomento.</p>
+     * 
+     * @param year  anno del monitoraggio
+     * @param idDip identificativo del dipartimento oggetto del monitoraggio
+     * @param flag  valore boolean che sostituisce il valore del campo 'attivo' nel monitor individuato
+     * @throws WebStorageException se si verifica un problema nel recupero di qualche attributo, nella query o in qualche altro tipo di puntamento
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public void updateMonitor(int year,
+                              int idDip,
+                              boolean flag) 
+                       throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;        
+        try {
+            // Ottiene la connessione
+            con = pol_manager.getConnection();
+            con.setAutoCommit(false);
+            pst = con.prepareStatement(UPDATE_MONITOR_BY_TOGGLE);
+            pst.clearParameters();
+            pst.setBoolean(1, flag);
+            pst.setInt(2, year);
+            pst.setInt(3, idDip);
+            pst.executeUpdate();
+            con.commit();
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il monitoraggio.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } catch (NumberFormatException nfe) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il monitoraggio.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + nfe.getMessage(), nfe);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il monitoraggio.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + npe.getMessage(), npe);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
      * <p>Verifica se per l'utente loggato esiste una tupla che indica
      * un precedente login. 
      * <ul>
@@ -4173,6 +4227,7 @@ public class DBWrapper implements Query {
      * @param valuesRisk    Vector contenente i valori inseriti dall'utente per inserimento nuovo rischio
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
+    @SuppressWarnings({ "static-method", "null" })
     public void insertRisk(int idProj,
                            int userId, 
                            Vector<String> valuesRisk)
@@ -4222,6 +4277,7 @@ public class DBWrapper implements Query {
      * @param valuesSkill   Vector contenente i valori inseriti dall'utente per inserimento nuovo rischio
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
+    @SuppressWarnings({ "static-method", "null" })
     public void insertSkill(int idProj,
                             int userId, 
                             Vector<String> valuesSkill)
@@ -4771,8 +4827,8 @@ public class DBWrapper implements Query {
     /**
      * <p>Dato in input un identificativo di dipartimento e un Vector
      * di dipartimenti scrivibili dall'utente, restituisce <code>true</code> 
-     * se il progetto avente tale id &egrave; presente in lista progetti, 
-     * <code>false</code> altrimenti.</p>
+     * se il dipartimento avente tale id &egrave; presente in lista dipartimenti
+     * scrivibili, <code>false</code> altrimenti.</p>
      * 
      * @param idDip identificativo del dipartimento di cui si vuol verificare la presenza tra quelli scrivibili dall'utente
      * @param departmentWritableByUser lista dei dipartimenti su cui l'utente ha i diritti di scrittura (cioe' su cui e' almeno PMODip)
