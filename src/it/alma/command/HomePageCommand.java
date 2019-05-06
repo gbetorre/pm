@@ -345,7 +345,7 @@ public class HomePageCommand extends ItemBean implements Command {
      * quali parametri sono presenti in Request onde evitare duplicazioni
      * e/o ridondanze.</p>
      * 
-     * @param req HttpServletRequest contenente gli attributi che si vogliono conoscere
+     * @param req HttpServletRequest contenente i parametri che si vogliono conoscere
      * @param mime argomento specificante il formato dell'output desiderato
      * @return un unico oggetto contenente tutti i valori e i nomi dei parametri settati in request nel momento in cui lo chiede il chiamante
      */
@@ -375,6 +375,31 @@ public class HomePageCommand extends ItemBean implements Command {
             }
         }
         return String.valueOf(parametersName);
+    }
+ 
+    
+    /**
+     * <p>Restituisce <code>true</code> se un nome di un parametro,
+     * il cui valore viene passato come argomento del metodo, esiste
+     * tra i parametri della HttpServletRequest; <code>false</code>
+     * altrimenti.</p>
+     * <p>Pu&ograve; essere utilizzato per verificare rapidamente 
+     * se un dato parametro sia stato passato in Request.</p>
+     * 
+     * @param req HttpServletRequest contenente i parametri che si vogliono conoscere
+     * @param paramName argomento specificante il nome del parametro cercato
+     * @return un unico oggetto contenente tutti i valori e i nomi dei parametri settati in request nel momento in cui lo chiede il chiamante
+     */
+    public static boolean isParameter(HttpServletRequest req,
+                                      String paramName) {
+        Enumeration<String> parameters = req.getParameterNames();
+        while (parameters.hasMoreElements()) {
+            String parameterName = parameters.nextElement();
+            if (parameterName.equalsIgnoreCase(paramName)) {
+                return true;
+            }
+        }
+        return false;
     }
     
     /* ************************************************************************ *
