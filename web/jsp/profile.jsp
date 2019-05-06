@@ -24,18 +24,16 @@
         </div>
         <br />
         <div class="row">
-          <div class="col-sm-4">
-            <a href="#form-changePwd" class="btn btn-success marginLeft" id="btn-changePwd" name="btn-changePwd" rel="modal:open"><i class="fas fa-lock"></i> Cambia password</a>
-          </div>
+          <div class="col">
+            <a href="#form-changePwd" class="btn btn-success marginLeft marginBottom" id="btn-changePwd" name="btn-changePwd" rel="modal:open"><i class="fas fa-lock"></i> Cambia password</a>
           <c:if test="${not empty requestScope.accesslog}">
-          <div class="col-sm-4">
-            <a href="#accessLog" class="btn btn-success" id="btn-accessLog" name="btn-accessLog" rel="modal:open"><i class="fas fa-user-check"></i> Log degli accessi</a>
-          </div>
+            <a href="#accessLog" class="btn btn-success marginLeft marginBottom" id="btn-accessLog" name="btn-accessLog" rel="modal:open"><i class="fas fa-user-check"></i> Log degli accessi</a>
           </c:if>
+          </div>
         </div>
       </div>
-    </div>
     <br />
+    </div>
   <c:if test="${not empty sessionScope.usr.ruoli}">
     <hr class="separatore" />
     <div class="lightTable">
