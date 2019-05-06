@@ -143,6 +143,10 @@ label.profileLabel {
 	margin-left: 50px;
 }
 
+.marginBottom {
+	margin-bottom: 10px;
+}
+
 div.actstate{
 	float: right;
 	position: relative;
