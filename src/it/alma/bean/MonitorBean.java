@@ -69,6 +69,8 @@ public class MonitorBean extends CodeBean implements Serializable {
     private int anno;
     /** Identificativo del dipartimento monitorato */
     private int idDipart;
+    /** Identifica se il monitoraggio &egrave; aperto o chiuso */
+    private boolean open;
     /** Identificativo facoltativo per la descrizione della tipologia di quadro monitorato */
     private String descrizione;
     /** Informazioni su D4 = reclutamento */
@@ -91,10 +93,12 @@ public class MonitorBean extends CodeBean implements Serializable {
     public MonitorBean() {
     	anno = -2;
     	idDipart = -2;
+    	open = false;
     	descrizione = null;
     	quadroD4 = quadroD5 = quadroD6 = quadroD7 = quadroD8 = null;
     	allegati = null;
     }
+    
     
     /* **************************************************** *
      *           Metodi getter e setter per anno              *
@@ -147,8 +151,30 @@ public class MonitorBean extends CodeBean implements Serializable {
         this.idDipart = idDipart;
     }
     
-	
-	/* ************************************************************* *
+
+    /* ******************************************************** *
+     *  Metodi getter e setter per flag di monitoraggio aperto  *
+     * ******************************************************** */
+	/**
+	 * Restituisce il flag boolean che specifica se il monitoraggio &egrave; editabile o meno
+	 * 
+     * @return <code>booolean</code> - flag che vale 'true' se il monitoraggio e' editabile, 'false' altrimenti
+     */
+    public boolean isOpen() {
+        return open;
+    }
+
+    /**
+     * Imposta il flag boolean che specifica se il monitoraggio &egrave; editabile o meno
+     * 
+     * @param open flag specificante se il monitoraggio deve essere editabile (true) o non modificabile (false)
+     */
+    public void setOpen(boolean open) {
+        this.open = open;
+    }
+    
+
+    /* ************************************************************* *
      *           Metodi getter e setter per descrizione              *
      * ************************************************************* */
 	/**
@@ -168,6 +194,7 @@ public class MonitorBean extends CodeBean implements Serializable {
 	public void setDescrizione(String descrizione) {
 		this.descrizione = descrizione;
 	}
+	
 	
     /* ************************************************************* *
      *             Metodi getter e setter per quadro D4              *
