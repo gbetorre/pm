@@ -10,7 +10,7 @@
  *   Alma on Line (aol), Projects on Line (pol), Questionnaire on Line (qol);
  *   web applications to publish, and manage, students evaluation,
  *   projects, students and degrees information.
- *   Copyright (C) renewed 2018 Universita' degli Studi di Verona, 
+ *   Copyright (C) renewed 2019 Universita' degli Studi di Verona, 
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify 
@@ -56,6 +56,15 @@ public class PersonBean implements Serializable {
      * dalla JVM, e questo potrebbe portare a errori riguardo alla serializzazione). 
      */
     private static final long serialVersionUID = -3415439696526030885L;
+    /**
+     *  Nome di questa classe. 
+     *  Viene utilizzato per contestualizzare i messaggi di errore.
+     */
+    private final String FOR_NAME = "\n" + this.getClass().getName() + ": "; //$NON-NLS-1$
+    /**
+     *  Costante parlante per l'id del ruolo &quot;PMO di Ateneo&quot;
+     */
+    private static final int PMO_ATE = 1;
     /* ************************************************************************ *  
      *                    Dati identificativi della persona                     *
      * ************************************************************************ */
@@ -90,9 +99,9 @@ public class PersonBean implements Serializable {
     /** Attributo per memorizzare l'ID Skype ai fini della visualizzazione dello stato su web */
     private String skypeid;
     /** Ritratto della persona */
-    private Vector foto;
+    private Vector<FileDocBean> foto;
     /** Curriculum personale */
-    private Vector currFileDoc;
+    private Vector<FileDocBean> currFileDoc;
     /** Url della pagina personale in caso di necessit&agrave; di mostrare la propria persona in ulteriore contesto */
     private String urlPersonalPage;
     /** link alla pagina della persona (dipende dal contesto) */ 
@@ -101,8 +110,14 @@ public class PersonBean implements Serializable {
     private boolean tempoPieno;
     /** Note */
     private String note;
+    /** Elenco delle competenze della persona */
+    private Vector<SkillBean> competenze;
+    /** Ruolo della persona  */
+    private Vector<CodeBean> ruoli;
     /** Campo note contenente una descrizione testuale del ruolo della persona */
     private String ruolo;
+    /** Flag specificante se trattasi di un PMO di Ateneo */
+    private boolean pmoAteneo;
     /** Campo note contenente la presentazione della persona */
     private String presentazione;
     /** Flag specificante se si tratta di una persona non appartenente all'ateneo */
@@ -133,13 +148,7 @@ public class PersonBean implements Serializable {
     private int idQualificaPrincipaleDip; // modificato per non superare i 32 caratteri
     /** Denominazione della qualifica principale nel contesto dell'afferenza */
     private String qualificaPrincipaleDip; // modificato per non superare i 32 caratteri
-    /** Flag specificante se trattasi di un tecnico di ex-facolt&agrave; */
-    private boolean isTAFacolta;
-    /** Ruolo della persona  */
-    private Vector<CodeBean> ruoli;
-    /** Elenco delle competenze della persona */
-    private Vector<SkillBean> competenze;
-    
+
     
     /**
      * <p>Costruttore: inizializza i campi a valori di default.</p>
@@ -159,11 +168,11 @@ public class PersonBean implements Serializable {
         skypeid = null;
         foto = null;
         competenze = null;
-        universita = null;
-        ruolo = null;
-        url=null;
-        isTAFacolta = false;
         ruoli = null;
+        ruolo = null;
+        pmoAteneo = false;
+        universita = null;
+        url = null;
     }
     
 
@@ -210,7 +219,7 @@ public class PersonBean implements Serializable {
      */
     public String getCodiceSettore() throws AttributoNonValorizzatoException {
         if (codiceSettore == null) {
-            throw new AttributoNonValorizzatoException("PersonBean: attributo codiceSettore non valorizzato!");
+            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo codiceSettore non valorizzato!\n");
         } else {
             return this.codiceSettore;
         }
@@ -781,7 +790,6 @@ public class PersonBean implements Serializable {
         return esterno;
     }
     
-
     /**
      * @param esterno
      */
@@ -797,13 +805,6 @@ public class PersonBean implements Serializable {
         return foto;
     }
 
-    public void setCompetenze(Vector<SkillBean> argomenti) {
-        this.competenze = argomenti;
-    }
-    
-    public Vector<SkillBean> getCompetenze() {
-        return this.competenze;
-    }
 
 	/**
 	 * @return the universita
@@ -822,25 +823,6 @@ public class PersonBean implements Serializable {
 	public void setUniversita(String universita) {
 		this.universita = universita;
 	}
-
-	/**
-	 * @return the ruolo
-	 */
-	public String getRuolo() throws AttributoNonValorizzatoException {
-		if (this.ruolo == null) {
-			throw new AttributoNonValorizzatoException("PersonBean: attributo ruolo non valorizzato.");
-		} else {
-			return ruolo;
-		}
-	}
-
-	/**
-	 * @param ruolo the ruolo to set
-	 */
-	public void setRuolo(String ruolo) {
-		this.ruolo = ruolo;
-	}
-
 
     /**
      * @param url the url to set
@@ -885,24 +867,6 @@ public class PersonBean implements Serializable {
 	}
 
     /**
-     * @return the isTAFacolta
-     */
-    public boolean isTAFacolta() {
-        return isTAFacolta;
-    }
-
-    /**
-     * @param isTAFacolta the isTAFacolta to set
-     */
-    public void setTAFacolta(char isTAFacolta) {
-        if (isTAFacolta == '1') {
-            this.isTAFacolta = true;
-        } else {
-            this.isTAFacolta = false;
-        }
-    }
-
-    /**
      * @return the presentazione
      */
     public String getPresentazione() {
@@ -917,6 +881,19 @@ public class PersonBean implements Serializable {
         this.presentazione = presentazione;
     }
 
+    
+    /* ******************************************************* *
+     *         Metodi getter e setter per competenze           *
+     * ******************************************************* */
+    public void setCompetenze(Vector<SkillBean> argomenti) {
+        this.competenze = argomenti;
+    }
+    
+    public Vector<SkillBean> getCompetenze() {
+        return this.competenze;
+    }
+    
+    
     /* ******************************************************* *
      *           Metodi getter e setter per ruoli              *
      * ******************************************************* */
@@ -936,4 +913,45 @@ public class PersonBean implements Serializable {
         this.ruoli = ruoli;
     }
 
+    
+    /* ******************************************************* *
+     *           Metodi getter e setter per ruolo              *
+     * ******************************************************* */
+    /**
+     * @return the ruolo
+     */
+    public String getRuolo() throws AttributoNonValorizzatoException {
+        if (this.ruolo == null) {
+            throw new AttributoNonValorizzatoException("PersonBean: attributo ruolo non valorizzato.");
+        } else {
+            return ruolo;
+        }
+    }
+
+    /**
+     * @param ruolo the ruolo to set
+     */
+    public void setRuolo(String ruolo) {
+        this.ruolo = ruolo;
+    }
+
+    /* ******************************************************* *
+     *      Metodi getter e setter per flag PMO di Ateneo      *
+     * ******************************************************* */
+    public boolean isPmoAteneo() {
+        // Se PMOAte è false verifica se è giusto o meno
+        if (!this.pmoAteneo) {
+            for (CodeBean ruolo : ruoli) {
+                if (ruolo.getOrdinale() == PMO_ATE) {
+                    return true;
+                }
+            }
+        }
+        return pmoAteneo;
+    }
+
+    public void setPMOAteneo(boolean pmoAte) {
+        pmoAteneo = pmoAte;
+    }
+    
 }
