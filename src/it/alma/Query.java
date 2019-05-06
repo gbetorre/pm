@@ -1563,7 +1563,8 @@ public interface Query extends Serializable {
     public static final String GET_MONITOR_BY_DEPART = 
             "SELECT DISTINCT " +
             "       M.id                    AS  \"id\"" +
-            "   ,   M.anno                  AS  \"anno\"" +        
+            "   ,   M.anno                  AS  \"anno\"" +  
+            "   ,   M.aperto                AS  \"open\"" +
             "   ,   M.d4_reclutamento       AS  \"quadroD4\"" +
             "   ,   M.d5_infrastrutture     AS  \"quadroD5\"" +
             "   ,   M.d6_premialita         AS  \"quadroD6\"" +
@@ -1845,6 +1846,15 @@ public interface Query extends Serializable {
             "   ,       dataultimamodifica = ?" +
             "   ,       oraultimamodifica = ?" +
             "   ,       autoreultimamodifica = ?" +
+            "   WHERE  anno = ? " +
+            "      AND id_dipart = ?";
+    
+    /**
+     * <p>Aggiorna un monitoraggio dipartimentale di un dato anno.</p>
+     */
+    public static final String UPDATE_MONITOR_BY_TOGGLE = 
+            "UPDATE monitoraggio " +
+            "   SET     aperto = ?" +
             "   WHERE  anno = ? " +
             "      AND id_dipart = ?";   
     
