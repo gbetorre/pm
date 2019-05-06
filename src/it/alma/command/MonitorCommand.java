@@ -201,14 +201,27 @@ public class MonitorCommand extends ItemBean implements Command {
                 writePriv = db.userCanMonitor(idDip, writableDepts);
                 // Verifica se deve eseguire un'operazione di scrittura
                 if (write && writePriv) {
-                    // Creazione della tabella che conterrà i valori dei parametri passati dalle form
-                    ConcurrentHashMap<String, String> params = new ConcurrentHashMap<String, String>();
-                    loadParams(String.valueOf(yMon), parser, params);
-                    /* **************************************************** *
-                     *                  UPDATE Monitor Part                 *
-                     * **************************************************** */
-                    // Imposta il monitoraggio MIUR
-                    db.updateMonitorPart(yMon, idDip, user, writableDepts, params);
+                    if (HomePageCommand.isParameter(req, "start") && user.isPmoAteneo()) {
+                        /* **************************************************** *
+                         *                  STARTS Monitoring                   *
+                         * **************************************************** */
+                        db.updateMonitor(yMon, idDip, true);
+                    } else if (HomePageCommand.isParameter(req, "end") && user.isPmoAteneo()) {
+                        /* **************************************************** *
+                         *                   ENDS Monitoring                    *
+                         * **************************************************** */                        
+                        db.updateMonitor(yMon, idDip, false);                        
+                    } else {
+                        /* **************************************************** *
+                         *                UPDATE Monitor Values                 *
+                         * **************************************************** */
+                        // Creazione della tabella che conterrà i valori dei parametri passati dalle form
+                        ConcurrentHashMap<String, String> params = new ConcurrentHashMap<String, String>();
+                        // Caricamento della tabella con i valori dei parametri passati dalla form
+                        loadParams(String.valueOf(yMon), parser, params);
+                        // Imposta il monitoraggio MIUR
+                        db.updateMonitorPart(yMon, idDip, user, writableDepts, params);                        
+                    }
                 }
                 /* **************************************************** *
                  *                  SELECT Monitor Part                 *
