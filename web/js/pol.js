@@ -56,21 +56,21 @@ function modifyPart() {
     $('#add-label').wrap('<a id="label-for" />');
     $('#label-for').attr('href', '#note-form').attr('rel', 'modal:open');
   } else if (partProject == 'mon') {
+    $('#d4-all').removeClass("btn-disabled");
+    $('#d4-all').addClass("btn-success");
     $('#d4-all').attr('href', '#note-form').attr('rel', 'modal:open');
-    $('#d4-label').wrap('<a id="label-for-d4" />');
-    $('#label-for-d4').attr('href', '#note-form').attr('rel', 'modal:open').attr('title', 'Clicca per aggiungere un allegato al quadro D.4');
+    $('#d5-all').removeClass("btn-disabled");
+    $('#d5-all').addClass("btn-success");
     $('#d5-all').attr('href', '#note-form').attr('rel', 'modal:open');
-    $('#d5-label').wrap('<a id="label-for-d5" />');
-    $('#label-for-d5').attr('href', '#note-form').attr('rel', 'modal:open').attr('title', 'Clicca per aggiungere un allegato al quadro D.5');
+    $('#d6-all').removeClass("btn-disabled");
+    $('#d6-all').addClass("btn-success");
     $('#d6-all').attr('href', '#note-form').attr('rel', 'modal:open');
-    $('#d6-label').wrap('<a id="label-for-d6" />');
-    $('#label-for-d6').attr('href', '#note-form').attr('rel', 'modal:open').attr('title', 'Clicca per aggiungere un allegato al quadro D.6');
+    $('#d7-all').removeClass("btn-disabled");
+    $('#d7-all').addClass("btn-success");
     $('#d7-all').attr('href', '#note-form').attr('rel', 'modal:open');
-    $('#d7-label').wrap('<a id="label-for-d7" />');
-    $('#label-for-d7').attr('href', '#note-form').attr('rel', 'modal:open').attr('title', 'Clicca per aggiungere un allegato al quadro D.7');
+    $('#d8-all').removeClass("btn-disabled");
+    $('#d8-all').addClass("btn-success");
     $('#d8-all').attr('href', '#note-form').attr('rel', 'modal:open');
-    $('#d8-label').wrap('<a id="label-for-d8" />');
-    $('#label-for-d8').attr('href', '#note-form').attr('rel', 'modal:open').attr('title', 'Clicca per aggiungere un allegato al quadro D.8');
   }
 }
 
