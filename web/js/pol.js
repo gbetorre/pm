@@ -1,3 +1,5 @@
+  var callerId = 'undefined';
+
 $.datepicker.regional['it'] = {
 	closeText: "Chiudi",
 	prevText: "&#x3C;Prec",
@@ -53,6 +55,22 @@ function modifyPart() {
     $('#add-all').attr('href', '#note-form').attr('rel', 'modal:open');
     $('#add-label').wrap('<a id="label-for" />');
     $('#label-for').attr('href', '#note-form').attr('rel', 'modal:open');
+  } else if (partProject == 'mon') {
+    $('#d4-all').attr('href', '#note-form').attr('rel', 'modal:open');
+    $('#d4-label').wrap('<a id="label-for-d4" />');
+    $('#label-for-d4').attr('href', '#note-form').attr('rel', 'modal:open').attr('title', 'Clicca per aggiungere un allegato al quadro D.4');
+    $('#d5-all').attr('href', '#note-form').attr('rel', 'modal:open');
+    $('#d5-label').wrap('<a id="label-for-d5" />');
+    $('#label-for-d5').attr('href', '#note-form').attr('rel', 'modal:open').attr('title', 'Clicca per aggiungere un allegato al quadro D.5');
+    $('#d6-all').attr('href', '#note-form').attr('rel', 'modal:open');
+    $('#d6-label').wrap('<a id="label-for-d6" />');
+    $('#label-for-d6').attr('href', '#note-form').attr('rel', 'modal:open').attr('title', 'Clicca per aggiungere un allegato al quadro D.6');
+    $('#d7-all').attr('href', '#note-form').attr('rel', 'modal:open');
+    $('#d7-label').wrap('<a id="label-for-d7" />');
+    $('#label-for-d7').attr('href', '#note-form').attr('rel', 'modal:open').attr('title', 'Clicca per aggiungere un allegato al quadro D.7');
+    $('#d8-all').attr('href', '#note-form').attr('rel', 'modal:open');
+    $('#d8-label').wrap('<a id="label-for-d8" />');
+    $('#label-for-d8').attr('href', '#note-form').attr('rel', 'modal:open').attr('title', 'Clicca per aggiungere un allegato al quadro D.8');
   }
 }
 
@@ -218,7 +236,6 @@ function showActivities(indirizzo) {
     var dd = document.getElementById(d);
     AssignPosition(dd, tipo);
     dd.style.display = "block";
-    dd.style.width= "230px";
     dd.style.height = "200px";
   }
   
