@@ -3615,10 +3615,13 @@ public class DBWrapper implements Query {
         try {
             // Ottiene la connessione
             con = pol_manager.getConnection();
+            HashMap<String, String> paramsWbs = null;
+            int nextParam = 0;
+            con.setAutoCommit(false);
+            // Ramo di modifica di tutti i campi di una wbs
             if (params.containsKey(MODIFY_PART)) {
-                HashMap<String, String> paramsWbs = params.get(MODIFY_PART);
+                paramsWbs = params.get(MODIFY_PART);
                 if (Utils.containsValues(paramsWbs)) {
-                    int nextParam = 0;
                     boolean workpackage = paramsWbs.get("wbs-workpackage").equals("on") ? true : false;
                     con.setAutoCommit(false);
                     pst = con.prepareStatement(UPDATE_WBS);
@@ -3643,6 +3646,29 @@ public class DBWrapper implements Query {
                     pst.setInt(++nextParam, Integer.parseInt(paramsWbs.get("wbs-id")));
                     pst.executeUpdate();
                     con.commit();
+                }
+                // Ramo di modifica del solo padre della wbs
+                else if (params.containsKey(PART_GRAPHIC)) {
+                    paramsWbs = params.get(PART_GRAPHIC);
+                    if (Utils.containsValues(paramsWbs)) {
+                        pst = con.prepareStatement(UPDATE_WBS_FATHER);
+                        pst.clearParameters();
+                        // Controllo che l'id del padre non sia null
+                        Integer idpadre = null;
+                        if (!paramsWbs.get("wbs-idpadre").equals(Utils.VOID_STRING)) {
+                            idpadre = new Integer(paramsWbs.get("wbs-idpadre"));
+                            pst.setInt(++nextParam, idpadre);
+                        } else {
+                            // dato facoltativo non inserito
+                            pst.setNull(++nextParam, Types.NULL);
+                        }
+                        pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate())));
+                        pst.setTime(++nextParam, Utils.getCurrentTime());
+                        pst.setString(++nextParam, user.getCognome() + " " + user.getNome());
+                        pst.setInt(++nextParam, Integer.parseInt(paramsWbs.get("wbs-id")));
+                        pst.executeUpdate();
+                        con.commit();
+                    }
                 }
             }
         } catch (NotFoundException nfe) {
