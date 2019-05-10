@@ -2,14 +2,6 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <c:set var="m" value="${requestScope.monitor}" scope="page" />
-<%--c:set var="paramsAsTokens" value="${param}" scope="page" />
-<c:set var="distinguishingSubmitName" value="" scope="page" />
-<c:forTokens var="paramAsToken" items="${paramsAsTokens}" delims=",">
-  <c:if test="${fn:startsWith(paramAsToken, ' p=')}">
-    <c:set var="distinguishingSubmitName" value="${fn:substring(fn:substringAfter(paramAsToken, '='), 0, 3)}" scope="page" />
-  </c:if>
-</c:forTokens>--%>
-<c:set var="localDocumentRoot" value="${initParam.urlDirectoryDocumenti}/upload/monitoraggio_d5/${param['dip']}" scope="page" />
     <c:set var="years" value="2018,2019,2020,2021,2022" scope="page" />
     <hr class="separatore" />
     <span class="float-right">
@@ -37,7 +29,7 @@
       <c:when test="${not m.open}">
       <br /><div class="avvisiTot">Questo monitoraggio &egrave; chiuso</div>
       <form id="monitor_start" name="ctrl-mon-s" action="" method="post">
-        <span class="float-right">
+        <span>
           <button type="submit" class="btn btn-success" name="start" id="mon-start">
             <i class="fas fa-play"></i> &nbsp;ATTIVA MONITORAGGIO
           </button>
@@ -47,7 +39,7 @@
       <c:otherwise>
       <br /><div class="avvisiTot">Questo monitoraggio &egrave; aperto</div>
       <form id="monitor_end" name="ctrl-mon-e" action="" method="post">
-        <span class="float-right">
+        <span>
           <button type="submit" class="btn btn-success" name="end" id="mon-end">
             <i class="fas fa-square"></i> &nbsp;CHIUDI MONITORAGGIO
           </button>
@@ -60,10 +52,10 @@
     <form id="monitor_form" name="miur" action="#" method="post">
       <div class="tab-content responsive hidden-xs hidden-sm">
         <div role="tabpanel" class="tab-pane active" id="tab-pcvision">
+          <div class="charNum"></div>
+          <hr class="separatore" />
           <div class="row">
             <div class="col-9">
-              <div class="charNum"></div>
-              <hr class="separatore" />
               <label for="mon-d4"><strong>QUADRO D.4 Reclutamento del personale</strong></label><br />
               <textarea id="mon-d4" name="mon-d4" class="form-control" aria-label="With textarea" maxlength="22000" readonly>${m.quadroD4}</textarea>
             </div>
@@ -76,6 +68,7 @@
                   <hr class="separatore" />
               <c:if test="${not empty m.allegatiD4}">
                 <c:catch var="exception">
+                  <c:set var="localDocumentRoot" value="${initParam.urlDirectoryDocumenti}/upload/monitoraggio_d4/${param['dip']}" scope="page" />
                   <ul class="list-unstyled">
                   <c:forEach var="all" items="${m.allegatiD4}" varStatus="loop">
                     <c:set var="ext" value="${fn:substring(all.estensione, 1, fn:length(all.estensione))}" scope="page" />
@@ -118,6 +111,7 @@
                   <hr class="separatore" />
               <c:if test="${not empty m.allegatiD5}">
                 <c:catch var="exception">
+                  <c:set var="localDocumentRoot" value="${initParam.urlDirectoryDocumenti}/upload/monitoraggio_d5/${param['dip']}" scope="page" />
                   <ul class="list-unstyled">
                   <c:forEach var="all" items="${m.allegatiD5}" varStatus="loop">
                     <c:set var="ext" value="${fn:substring(all.estensione, 1, fn:length(all.estensione))}" scope="page" />
@@ -160,6 +154,7 @@
                   <hr class="separatore" />
               <c:if test="${not empty m.allegatiD6}">
                 <c:catch var="exception">
+                  <c:set var="localDocumentRoot" value="${initParam.urlDirectoryDocumenti}/upload/monitoraggio_d6/${param['dip']}" scope="page" />
                   <ul class="list-unstyled">
                   <c:forEach var="all" items="${m.allegatiD6}" varStatus="loop">
                     <c:set var="ext" value="${fn:substring(all.estensione, 1, fn:length(all.estensione))}" scope="page" />
@@ -202,6 +197,7 @@
                   <hr class="separatore" />
               <c:if test="${not empty m.allegatiD7}">
                 <c:catch var="exception">
+                  <c:set var="localDocumentRoot" value="${initParam.urlDirectoryDocumenti}/upload/monitoraggio_d7/${param['dip']}" scope="page" />
                   <ul class="list-unstyled">
                   <c:forEach var="all" items="${m.allegatiD7}" varStatus="loop">
                     <c:set var="ext" value="${fn:substring(all.estensione, 1, fn:length(all.estensione))}" scope="page" />
@@ -244,6 +240,7 @@
                   <hr class="separatore" />
               <c:if test="${not empty m.allegatiD8}">
                 <c:catch var="exception">
+                  <c:set var="localDocumentRoot" value="${initParam.urlDirectoryDocumenti}/upload/monitoraggio_d8/${param['dip']}" scope="page" />
                   <ul class="list-unstyled">
                   <c:forEach var="all" items="${m.allegatiD8}" varStatus="loop">
                     <c:set var="ext" value="${fn:substring(all.estensione, 1, fn:length(all.estensione))}" scope="page" />
