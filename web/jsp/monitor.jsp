@@ -1,4 +1,5 @@
 <%@ include file="pcURL.jspf" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <c:set var="m" value="${requestScope.monitor}" scope="page" />
 <%--c:set var="paramsAsTokens" value="${param}" scope="page" />
@@ -59,112 +60,216 @@
     <form id="monitor_form" name="miur" action="#" method="post">
       <div class="tab-content responsive hidden-xs hidden-sm">
         <div role="tabpanel" class="tab-pane active" id="tab-pcvision">
-          <div class="charNum"></div>
-          <hr class="separatore" />
-          <label for="mon-d4"><strong>QUADRO D.4 Reclutamento del personale</strong></label><br />
-          <textarea id="mon-d4" name="mon-d4" class="form-control" aria-label="With textarea" maxlength="22000" readonly>${m.quadroD4}</textarea>
-          <hr class="separatore" />
-          <div class="col-2 text-center form-control" onclick="callerId='d4';">
-            <a class="ico" id="d4-all">
-              <img src="${initParam.urlDirectoryImmagini}/ico-add-inactive.png" class="btn-del addElement" alt="Link ad aggiunta documento allegato" title="Aggiungi un Allegato" />
-            </a>
-            <span id="d4-label">Aggiungi Allegato</span>
-    <c:if test="${not empty m.allegatiD4}">
-      <c:catch var="exception">
-      <hr class="separatore" />
-      <div class=" lightTable">
-        <div class="row">
-          <div class="col bordo"><strong>Allegati dell'Avanzamento</strong></div>
-        </div>
-        <hr class="separatore" />
-        <ul class="list-unstyled">
-        <c:forEach var="all" items="${m.allegatiD4}" varStatus="loop">
-          <c:set var="ext" value="${fn:substring(all.estensione, 1, fn:length(all.estensione))}" scope="page" />
-          <li>
-            <span>
-              <img src="${initParam.urlDirectoryImmagini}ico_${ext}.png" border="0" alt="${all.estensione}">
-            </span>
-            <a href="${localDocumentRoot}/${all.file}${all.estensione}" class="transition">
-              <c:out value="${all.titolo}" escapeXml="false" />
-            </a>
-            <span class="file-data">
-              (<c:out value="${ext}" />,&nbsp;<fmt:formatNumber type="number" value="${all.dimensione/1024}" maxFractionDigits ="2" />&nbsp;KB,&nbsp;<fmt:formatDate value="${all.data}" pattern="dd/MM/yyyy" />)
-            </span>
-          </li>
-        </c:forEach>
-        </ul>
-      </div>
-      </c:catch>
-      <c:out value="${exception}" />
-    </c:if>
+          <div class="row">
+            <div class="col-9">
+              <div class="charNum"></div>
+              <hr class="separatore" />
+              <label for="mon-d4"><strong>QUADRO D.4 Reclutamento del personale</strong></label><br />
+              <textarea id="mon-d4" name="mon-d4" class="form-control" aria-label="With textarea" maxlength="22000" readonly>${m.quadroD4}</textarea>
+            </div>
+            <div class="col-3">
+              <div class="row">
+                <div class="col-1"></div>
+                <hr class="separatore" />
+                <div class="col-10 substatus">
+                  <h6 class="monospace">&nbsp;Allegati quadro D.4</h6>
+                  <hr class="separatore" />
+              <c:if test="${not empty m.allegatiD4}">
+                <c:catch var="exception">
+                  <ul class="list-unstyled">
+                  <c:forEach var="all" items="${m.allegatiD4}" varStatus="loop">
+                    <c:set var="ext" value="${fn:substring(all.estensione, 1, fn:length(all.estensione))}" scope="page" />
+                    <li>
+                      <span>
+                        <img src="${initParam.urlDirectoryImmagini}ico_${ext}.png" border="0" alt="${all.estensione}">
+                      </span>
+                      <a href="${localDocumentRoot}/${all.file}${all.estensione}" class="transition monospace">
+                        <c:out value="${all.titolo}" escapeXml="false" />
+                      </a>
+                      <span class="file-data monospace">
+                        (<c:out value="${ext}" />,&nbsp;<fmt:formatNumber type="number" value="${all.dimensione/1024}" maxFractionDigits ="2" />&nbsp;KB,&nbsp;<fmt:formatDate value="${all.data}" pattern="dd/MM/yyyy" />)
+                      </span>
+                    </li>
+                  </c:forEach>
+                  </ul>
+                </c:catch>
+                <c:out value="${exception}" />
+              </c:if>
+                  <div class="centerlayout" onclick="callerId='d4';">
+                    <a class="btn btn-disabled" id="d4-all"><i class="fas fa-plus"></i> Aggiungi</a>
+                  </div>
+                  <br />
+                </div>
+              </div>
+            </div>
           </div>
-          <br /><br />
-          <label for="mon-d5"><strong>QUADRO D.5 Infrastrutture</strong></label><br />
-          <textarea id="mon-d5" name="mon-d5" class="form-control" aria-label="With textarea" maxlength="22000" readonly>${m.quadroD5}</textarea>
           <hr class="separatore" />
-          <div class="col-2 text-center form-control" onclick="callerId='d5';">
-            <a class="ico" id="d5-all">
-              <img src="${initParam.urlDirectoryImmagini}/ico-add-inactive.png" class="btn-del addElement" alt="Link ad aggiunta documento allegato" title="Aggiungi un Allegato" />
-            </a>
-            <span id="d5-label">Aggiungi Allegato</span>
-    <c:if test="${not empty m.allegatiD5}">
-      <c:catch var="exception">
-      <hr class="separatore" />
-      <div class=" lightTable" style="float:right;">
-        <div class="row">
-          <div class="col bordo"><strong>Allegati dell'Avanzamento</strong></div>
-        </div>
-        <hr class="separatore" />
-        <ul class="list-unstyled">
-        <c:forEach var="all" items="${m.allegatiD5}" varStatus="loop">
-          <c:set var="ext" value="${fn:substring(all.estensione, 1, fn:length(all.estensione))}" scope="page" />
-          <li>
-            <span>
-              <img src="${initParam.urlDirectoryImmagini}ico_${ext}.png" border="0" alt="${all.estensione}">
-            </span>
-            <a href="${localDocumentRoot}/${all.file}${all.estensione}" class="transition">
-              <c:out value="${all.titolo}" escapeXml="false" />
-            </a>
-            <span class="file-data">
-              (<c:out value="${ext}" />,&nbsp;<fmt:formatNumber type="number" value="${all.dimensione/1024}" maxFractionDigits ="2" />&nbsp;KB,&nbsp;<fmt:formatDate value="${all.data}" pattern="dd/MM/yyyy" />)
-            </span>
-          </li>
-        </c:forEach>
-        </ul>
-      </div>
-      </c:catch>
-      <c:out value="${exception}" />
-    </c:if>
+          <div class="row">
+            <div class="col-9">
+              <label for="mon-d5"><strong>QUADRO D.5 Infrastrutture</strong></label><br />
+              <textarea id="mon-d5" name="mon-d5" class="form-control" aria-label="With textarea" maxlength="22000" readonly>${m.quadroD5}</textarea>
+            </div>
+            <div class="col-3">
+              <div class="row">
+                <div class="col-1"></div>
+                <hr class="separatore" />
+                <div class="col-10 substatus">
+                  <h6 class="monospace">&nbsp;Allegati quadro D.5</h6>
+                  <hr class="separatore" />
+              <c:if test="${not empty m.allegatiD5}">
+                <c:catch var="exception">
+                  <ul class="list-unstyled">
+                  <c:forEach var="all" items="${m.allegatiD5}" varStatus="loop">
+                    <c:set var="ext" value="${fn:substring(all.estensione, 1, fn:length(all.estensione))}" scope="page" />
+                    <li>
+                      <span>
+                        <img src="${initParam.urlDirectoryImmagini}ico_${ext}.png" border="0" alt="${all.estensione}">
+                      </span>
+                      <a href="${localDocumentRoot}/${all.file}${all.estensione}" class="transition">
+                        <c:out value="${all.titolo}" escapeXml="false" />
+                      </a>
+                      <span class="file-data monospace">
+                        (<c:out value="${ext}" />,&nbsp;<fmt:formatNumber type="number" value="${all.dimensione/1024}" maxFractionDigits ="2" />&nbsp;KB,&nbsp;<fmt:formatDate value="${all.data}" pattern="dd/MM/yyyy" />)
+                      </span>
+                    </li>
+                  </c:forEach>
+                  </ul>
+                </c:catch>
+                <c:out value="${exception}" />
+              </c:if>
+                  <div class="centerlayout" onclick="callerId='d5';">
+                    <a class="btn btn-disabled" id="d5-all"><i class="fas fa-plus"></i> Aggiungi</a>
+                  </div>
+                  <br />
+                </div>
+              </div>
+            </div>
           </div>
-          <br /><br />
-          <label for="mon-d6"><strong>QUADRO D.6 Premialit&agrave;</strong></label><br />
-          <textarea id="mon-d6" name="mon-d6" class="form-control" aria-label="With textarea" maxlength="22000" readonly>${m.quadroD6}</textarea>
           <hr class="separatore" />
-          <div class="col-2 text-center form-control" onclick="callerId='d6';">
-            <a class="ico" id="d6-all">
-              <img src="${initParam.urlDirectoryImmagini}/ico-add-inactive.png" class="btn-del addElement" alt="Link ad aggiunta documento allegato" title="Aggiungi un Allegato" />
-            </a>
-            <span id="d6-label">Aggiungi Allegato</span>
+          <div class="row">
+            <div class="col-9">
+              <label for="mon-d6"><strong>QUADRO D.6 Premialit&agrave;</strong></label><br />
+              <textarea id="mon-d6" name="mon-d6" class="form-control" aria-label="With textarea" maxlength="22000" readonly>${m.quadroD6}</textarea>
+            </div>
+            <div class="col-3">
+              <div class="row">
+                <div class="col-1"></div>
+                <hr class="separatore" />
+                <div class="col-10 substatus">
+                  <h6 class="monospace">&nbsp;Allegati quadro D.6</h6>
+                  <hr class="separatore" />
+              <c:if test="${not empty m.allegatiD6}">
+                <c:catch var="exception">
+                  <ul class="list-unstyled">
+                  <c:forEach var="all" items="${m.allegatiD6}" varStatus="loop">
+                    <c:set var="ext" value="${fn:substring(all.estensione, 1, fn:length(all.estensione))}" scope="page" />
+                    <li>
+                      <span>
+                        <img src="${initParam.urlDirectoryImmagini}ico_${ext}.png" border="0" alt="${all.estensione}">
+                      </span>
+                      <a href="${localDocumentRoot}/${all.file}${all.estensione}" class="transition">
+                        <c:out value="${all.titolo}" escapeXml="false" />
+                      </a>
+                      <span class="file-data monospace">
+                        (<c:out value="${ext}" />,&nbsp;<fmt:formatNumber type="number" value="${all.dimensione/1024}" maxFractionDigits ="2" />&nbsp;KB,&nbsp;<fmt:formatDate value="${all.data}" pattern="dd/MM/yyyy" />)
+                      </span>
+                    </li>
+                  </c:forEach>
+                  </ul>
+                </c:catch>
+                <c:out value="${exception}" />
+              </c:if>
+                  <div class="centerlayout" onclick="callerId='d6';">
+                    <a class="btn btn-disabled" id="d6-all"><i class="fas fa-plus"></i> Aggiungi</a>
+                  </div>
+                  <br />
+                </div>
+              </div>
+            </div>
           </div>
-          <br /><br />
-          <label for="mon-d7"><strong>QUADRO D.7 Attivit&agrave; didattiche di eleveta qualificazione</strong></label><br />
-          <textarea id="mon-d7" name="mon-d7" class="form-control" aria-label="With textarea" maxlength="22000" readonly>${m.quadroD7}</textarea>
           <hr class="separatore" />
-          <div class="col-2 text-center form-control" onclick="callerId='d7';">
-            <a class="ico" id="d7-all">
-              <img src="${initParam.urlDirectoryImmagini}/ico-add-inactive.png" class="btn-del addElement" alt="Link ad aggiunta documento allegato" title="Aggiungi un Allegato" />
-            </a>
-            <span id="d7-label">Aggiungi Allegato</span>
+          <div class="row">
+            <div class="col-9">
+              <label for="mon-d7"><strong>QUADRO D.7 Attivit&agrave; didattiche di eleveta qualificazione</strong></label><br />
+              <textarea id="mon-d7" name="mon-d7" class="form-control" aria-label="With textarea" maxlength="22000" readonly>${m.quadroD7}</textarea>
+            </div>
+          <div class="col-3">
+              <div class="row">
+                <div class="col-1"></div>
+                <hr class="separatore" />
+                <div class="col-10 substatus">
+                  <h6 class="monospace">&nbsp;Allegati quadro D.7</h6>
+                  <hr class="separatore" />
+              <c:if test="${not empty m.allegatiD7}">
+                <c:catch var="exception">
+                  <ul class="list-unstyled">
+                  <c:forEach var="all" items="${m.allegatiD7}" varStatus="loop">
+                    <c:set var="ext" value="${fn:substring(all.estensione, 1, fn:length(all.estensione))}" scope="page" />
+                    <li>
+                      <span>
+                        <img src="${initParam.urlDirectoryImmagini}ico_${ext}.png" border="0" alt="${all.estensione}">
+                      </span>
+                      <a href="${localDocumentRoot}/${all.file}${all.estensione}" class="transition">
+                        <c:out value="${all.titolo}" escapeXml="false" />
+                      </a>
+                      <span class="file-data monospace">
+                        (<c:out value="${ext}" />,&nbsp;<fmt:formatNumber type="number" value="${all.dimensione/1024}" maxFractionDigits ="2" />&nbsp;KB,&nbsp;<fmt:formatDate value="${all.data}" pattern="dd/MM/yyyy" />)
+                      </span>
+                    </li>
+                  </c:forEach>
+                  </ul>
+                </c:catch>
+                <c:out value="${exception}" />
+              </c:if>
+                  <div class="centerlayout" onclick="callerId='d7';">
+                    <a class="btn btn-disabled" id="d7-all"><i class="fas fa-plus"></i> Aggiungi</a>
+                  </div>
+                  <br />
+                </div>
+              </div>
+            </div>
           </div>
-          <br /><br />
-          <label for="mon-d8"><strong>QUADRO D.8 Modalit&agrave; e fasi del monitoraggio</strong></label><br />
-          <textarea id="mon-d8" name="mon-d8" class="form-control" aria-label="With textarea" maxlength="22000" readonly>${m.quadroD8}</textarea>
           <hr class="separatore" />
-          <div class="col-2 text-center form-control" onclick="callerId='d8';">
-            <a class="ico" id="d8-all">
-              <img src="${initParam.urlDirectoryImmagini}/ico-add-inactive.png" class="btn-del addElement" alt="Link ad aggiunta documento allegato" title="Aggiungi un Allegato" />
-            </a>
-            <span id="d8-label">Aggiungi Allegato</span>
+          <div class="row">
+            <div class="col-9">
+              <label for="mon-d8"><strong>QUADRO D.8 Modalit&agrave; e fasi del monitoraggio</strong></label><br />
+              <textarea id="mon-d8" name="mon-d8" class="form-control" aria-label="With textarea" maxlength="22000" readonly>${m.quadroD8}</textarea>
+            </div>
+            <div class="col-3">
+              <div class="row">
+                <div class="col-1"></div>
+                <hr class="separatore" />
+                <div class="col-10 substatus">
+                  <h6 class="monospace">&nbsp;Allegati quadro D.8</h6>
+                  <hr class="separatore" />
+              <c:if test="${not empty m.allegatiD8}">
+                <c:catch var="exception">
+                  <ul class="list-unstyled">
+                  <c:forEach var="all" items="${m.allegatiD8}" varStatus="loop">
+                    <c:set var="ext" value="${fn:substring(all.estensione, 1, fn:length(all.estensione))}" scope="page" />
+                    <li>
+                      <span>
+                        <img src="${initParam.urlDirectoryImmagini}ico_${ext}.png" border="0" alt="${all.estensione}">
+                      </span>
+                      <a href="${localDocumentRoot}/${all.file}${all.estensione}" class="transition">
+                        <c:out value="${all.titolo}" escapeXml="false" />
+                      </a>
+                      <span class="file-data monospace">
+                        (<c:out value="${ext}" />,&nbsp;<fmt:formatNumber type="number" value="${all.dimensione/1024}" maxFractionDigits ="2" />&nbsp;KB,&nbsp;<fmt:formatDate value="${all.data}" pattern="dd/MM/yyyy" />)
+                      </span>
+                    </li>
+                  </c:forEach>
+                  </ul>
+                </c:catch>
+                <c:out value="${exception}" />
+              </c:if>
+                  <div class="centerlayout" onclick="callerId='d8';">
+                    <a class="btn btn-disabled" id="d8-all"><i class="fas fa-plus"></i> Aggiungi</a>
+                  </div>
+                  <br />
+                </div>
+              </div>
+            </div>
           </div>
           <hr class="separatore" />
           <div class="charNum"></div>
@@ -217,7 +322,7 @@
     </form>
     <form id="note-form" method="post" action="file" enctype="multipart/form-data" class="modal">
       <script>
-      $('div.form-control').click(function(){
+      $('div.centerlayout').click(function(){
         if (callerId == 'd4') {
           $("#mon-frame option[value=4]").attr('selected', 'selected');
         } else if (callerId == 'd5') {
