@@ -194,6 +194,8 @@ public class WbsCommand extends ItemBean implements Command {
         int idPrj = parser.getIntParameter("id", Utils.DEFAULT_ID);
         // Recupera o inizializza 'id wbs' (per modifica)
         int idWbs = parser.getIntParameter("idw", Utils.DEFAULT_ID);
+        // Recupera o inizializza 'id wbs padre' (per aggiunta wbs figlia)
+        int idWbsP = parser.getIntParameter("idwp", Utils.DEFAULT_ID);
         // Recupera o inizializza 'tipo pagina'   
         String part = parser.getStringParameter("p", "-");
         // Flag di scrittura
@@ -292,6 +294,15 @@ public class WbsCommand extends ItemBean implements Command {
                                 db.deleteWbs(runtimeProject.getIdDipart(), idWbsToDel);
                                 redirect = "q=" + Query.PART_WBS + "&id=" + idPrj;
                             }
+                        } else if (part.equalsIgnoreCase(Query.PART_GRAPHIC)) {
+                            /* ************************************************ *
+                             *                  UPDATE Wbs padre                *
+                             * ************************************************ */
+                            loadParams(part, parser, params);
+                            db.updateWbsPart(idPrj, user, writableProjects, userWritableWbsByProjectId, params);
+                            vWbsAncestors = db.getWbsHierarchy(idPrj);
+                            wbsPutativeFather = db.getWbs(idPrj, Query.WBS_BUT_WP);
+                            fileJspT = nomeFile.get(part);
                         }
                     }
                 } else {
@@ -303,6 +314,7 @@ public class WbsCommand extends ItemBean implements Command {
                             workPackages = retrieveWorkPackages(idPrj, db);
                         } else if (part.equalsIgnoreCase(Query.PART_GRAPHIC)) {
                             vWbsAncestors = db.getWbsHierarchy(idPrj);
+                            wbsPutativeFather = db.getWbs(idPrj, Query.WBS_BUT_WP);
                         } else {
                             // Selezioni per visualizzazione, aggiunta e modifica wbs
                             // Seleziona tutte le WBS non workpackage per mostrare i possibili padri nella pagina di dettaglio
@@ -368,6 +380,8 @@ public class WbsCommand extends ItemBean implements Command {
         req.setAttribute("progetto", runtimeProject);
         // Imposta nella request data di oggi 
         req.setAttribute("now", Utils.format(today));
+        // Imposta nella request l'id della wbs padre, nel caso di aggiunta nuova wbs
+        req.setAttribute("idWbsP", idWbsP);
         // Imposta la Pagina JSP di forwarding
         req.setAttribute("fileJsp", fileJspT);
         /* ******************************************************************** *
@@ -445,6 +459,15 @@ public class WbsCommand extends ItemBean implements Command {
             wbs.put("wbs-note",         parser.getStringParameter("wbs-note", Utils.VOID_STRING));
             wbs.put("wbs-result",       parser.getStringParameter("wbs-result", Utils.VOID_STRING));
             formParams.put(Query.ADD_TO_PROJECT, wbs);
+        }
+        /* **************************************************** *
+         *              Ramo di UPDATE wbs padre                *
+         * **************************************************** */
+        else if (part.equalsIgnoreCase(Query.PART_GRAPHIC)) {
+            HashMap<String, String> wbs = new HashMap<String, String>();
+            wbs.put("wbs-id",              parser.getStringParameter("wbs-id", Utils.VOID_STRING));
+            wbs.put("wbs-idpadre",         parser.getStringParameter("wbs-padre", Utils.VOID_STRING));
+            formParams.put(Query.PART_GRAPHIC, wbs);
         }
     }
     
