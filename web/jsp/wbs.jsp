@@ -1,6 +1,7 @@
 <%@ include file="pcURL.jspf" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"  %>
       <c:set var="wbsInstance" value="${requestScope.wbsInstance}" scope="page" />
+      <c:set var="idWbsP" value="${requestScope.idWbsP}" scope="page" />
       <jsp:useBean id="wbsPadre" class="it.alma.bean.WbsBean" scope="page" />
       <c:set target="${pageScope.wbsPadre}" property="id" value="-3" />
       <c:set var="wbsPadre" value="${wbsPadre}" scope="page" />
@@ -43,7 +44,11 @@
               </c:if>
               <option value="">Nessuna wbs padre</option>
               <c:forEach var="singleWbs" items="${requestScope.wbs}" varStatus="status">
-                <option value="${singleWbs.id}">${singleWbs.nome}</option>
+                <c:set var="selected" value="" scope="page" />
+                <c:if test="${idWbsP eq singleWbs.id}">
+                  <c:set var="selected" value="selected" scope="page" />
+                </c:if>
+                <option value="${singleWbs.id}" ${selected}>${singleWbs.nome}</option>
               </c:forEach>
               </select>
             </div>
