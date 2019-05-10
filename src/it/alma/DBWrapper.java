@@ -2497,6 +2497,7 @@ public class DBWrapper implements Query {
         ResultSet rs = null;
         PreparedStatement pst = null;
         MonitorBean mon = null;
+        Vector<FileDocBean> attachments = null;
         int nextParam = 0;
         try {
             con = pol_manager.getConnection();
@@ -2508,6 +2509,27 @@ public class DBWrapper implements Query {
             if (rs.next()) {
                 mon = new MonitorBean();
                 BeanUtil.populate(mon, rs);
+                // Recupero e settaggio degli allegati
+                try {
+                    attachments = getFileDoc("monitoraggio", "d4", mon.getId(), NOTHING);
+                    mon.setAllegatiD4(attachments);
+                    attachments = null;
+                    attachments = getFileDoc("monitoraggio", "d5", mon.getId(), NOTHING);
+                    mon.setAllegatiD5(attachments);
+                    attachments = null;
+                    attachments = getFileDoc("monitoraggio", "d6", mon.getId(), NOTHING);
+                    mon.setAllegatiD6(attachments);
+                    attachments = null;
+                    attachments = getFileDoc("monitoraggio", "d7", mon.getId(), NOTHING);
+                    mon.setAllegatiD7(attachments);
+                    attachments = null;
+                    attachments = getFileDoc("monitoraggio", "d8", mon.getId(), NOTHING);
+                    mon.setAllegatiD8(attachments);
+                } catch (AttributoNonValorizzatoException anve) {
+                    String msg = FOR_NAME + "Oggetto status.id non valorizzato; problema nella query che recupera lo status attraverso l\'id.\n";
+                    LOG.severe(msg); 
+                    throw new WebStorageException(msg + anve.getMessage(), anve);
+                }
             }
             return mon;
         } catch (SQLException sqle) {
