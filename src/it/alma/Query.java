@@ -1833,6 +1833,20 @@ public interface Query extends Serializable {
             "   ,       autoreultimamodifica = ?" +
             "   WHERE id = ?";
 
+    
+    /**
+     * <p>Modifica il padre di una WBS (o workpackage) selezionato,
+     * identificato tramite l'id, passato come parametro.</p>
+     */
+    public static final String UPDATE_WBS_FATHER = 
+            "UPDATE wbs" +
+            "   SET     id_wbs = ?" +
+            "   ,       dataultimamodifica = ?" +
+            "   ,       oraultimamodifica = ?" +
+            "   ,       autoreultimamodifica = ?" +
+            "   WHERE id = ?";
+    
+    
     /**
      * <p>Aggiorna un monitoraggio dipartimentale di un dato anno.</p>
      */
