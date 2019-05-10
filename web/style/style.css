@@ -52,12 +52,12 @@ body.loginbody {
 	background-image: radial-gradient(#ffffff, #ddeeff);
 }
 
-a:link:not(.btn):not(.cc-link):not(.linkFooter):not(.nav-link):not(.helpInfo):not(.page-link):not(.ico), 
-a:visited:not(.btn):not(.cc-link):not(.linkFooter):not(.nav-link):not(.btnNav):not(.helpInfo):not(.page-link):not(.ico) {
+a:link:not(.btn):not(.cc-link):not(.linkFooter):not(.nav-link):not(.helpInfo):not(.page-link):not(.ico):not(.linkPopup), 
+a:visited:not(.btn):not(.cc-link):not(.linkFooter):not(.nav-link):not(.btnNav):not(.helpInfo):not(.page-link):not(.ico):not(.linkPopup) {
 	color: #005c99; 
 }
 
-a:hover:not(.btn):not(.logoHeader):not(.cc-link):not(.ui-datepicker-prev):not(.ui-datepicker-next):not(.nav-link):not(.linkFooter):not(.cc-link):not(.helpInfo):not(.page-link):not(.ico):not(.linkHeader) {
+a:hover:not(.btn):not(.logoHeader):not(.cc-link):not(.ui-datepicker-prev):not(.ui-datepicker-next):not(.nav-link):not(.linkFooter):not(.cc-link):not(.helpInfo):not(.page-link):not(.ico):not(.linkHeader):not(.linkPopup) {
 	text-decoration: underline;
 	color: #002e4d;
 	background-color: #d7d9d9;
@@ -120,6 +120,10 @@ a:hover.btn-outline-danger {
 
 a:not([href]):not([tabindex]), a:hover:not([href]):not([tabindex]) {
 	color:white;
+}
+
+a.btn-disabled {
+  background: #999999;
 }
 
 label.linkStatus {
@@ -222,6 +226,10 @@ img.profile {
 
 table.google-visualization-orgchart-table {
     border-collapse: separate;
+}
+
+.monospace {
+	font-family: Consolas;
 }
 
 .bgcolor1 {
@@ -460,7 +468,7 @@ textarea {
 
 /*---------------------- Righe Orizzontali ------------------------*/
 hr  {
-	clear: both; height: 1px;
+  clear: both; height: 1px;
   border-top: 1px solid transparent;
   border-right: 0 solid #FFFFFF;
   border-bottom: 0 solid #FFFFFF;
@@ -677,62 +685,99 @@ hr.riga       {
 
 /*---------------------- POP-UP ------------------------*/
 .popup {
+	font-size: 12px;
+	display: none;
+	background-color: rgba(0,0,0,0.7);
+	/*background-image: url("../image/nero_85.png");*/
+	position: absolute;
+	width:230px;
+	height:auto;
+	z-index: 999;
+	color: #fff;
+	border-radius: 10px;
+	box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+}
 
-        font-size: 12px;
-        display: none;
-        background-color: rgba(0,0,0,0.7);
-        *background-image: url("../image/nero_85.png");
-        position: absolute;
-        width:250px;
-        height:auto;
-        z-index: 999;
-        color: #fff;
-        border-radius: 10px;
-        box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
-      }
+.popup1 {
+	font-size: 12px;
+	display: none;
+	background-color: rgba(0,0,0,0.7);
+	/*background-image: url("../image/nero_85.png");*/
+	position: absolute;
+	width:190px;
+	height:auto;
+	z-index: 999;
+	color: #fff;
+	border-radius: 10px;
+	box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+}
       
- .popupundertitle {
-          background: #333;
-          border-radius: 10px 10px 0 0;
-          color: #00f;
-          height: 30px;
-          padding: 0px;
-        
-        }
+.popupundertitle {
+	background: #333;
+	border-radius: 10px 10px 0 0;
+	height: 30px;
+	padding: 0px;
+}
         
 #titolopopup1Under {
-  position:relative; float:right; top:3px; padding:4px;
+	position:relative; float:right; top:3px; padding:4px;
 }
 
 .popuptitle {
-          color: #ff0;
-          font-size: 12px;
-          text-transform: uppercase;
-          height: 30px; line-height: 30px;
-          padding-left: 10px;
-          position:relative;
-          float:left;
-          top:0;
-        }
+	color: #ff0;
+	font-size: 12px;
+	text-transform: uppercase;
+	height: 30px; line-height: 30px;
+	padding-left: 10px;
+	position:relative;
+	float:left;
+	top:0;
+}
         
 .popupbody {
-  position:absolute;
-      padding: 5px;
-      margin: 5px;
-      height:auto;
-	  }
-        
- a.helpInfo {
-  background: transparent url("../img/ico-help.png") no-repeat right top;
-  background-size: 18px;
-  padding: 3px 30px 3px 0px;
-  color: #484f51;
- }
+	position: absolute;
+	padding: 5px;
+	margin: 5px;
+	height: auto;
+}
+
+.popupMenu {
+	list-style: none;
+	padding: 0px;
+	margin: 0px;
+}
+
+.popupMenuContent {
+	border-bottom: 1px solid #d9d9d9;
+	margin: 0px;
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+.lastMenuContent {
+	padding-top: 10px;
+	padding-bottom: 10px;
+}     
+
+a.helpInfo {
+	background: transparent url("../img/ico-help.png") no-repeat right top;
+	background-size: 18px;
+	padding: 3px 30px 3px 0px;
+	color: #484f51;
+}
+
+a.linkPopup {
+	color: white;
+}
+
+a:hover.linkPopup {
+	text-decoration: underline;
+}
  
- .popup dd {
-  margin-left: 18px;
-  margin-bottom: 0px;
- } 
+.popup dd {
+	margin-left: 18px;
+	margin-bottom: 0px;
+} 
  
 /*---------------------- Tot risultati ------------------------*/
 .avvisiTot {
