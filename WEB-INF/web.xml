@@ -58,6 +58,11 @@
       <servlet-name>default</servlet-name>
       <url-pattern>/web/*</url-pattern>
       <url-pattern>/documenti/upload/avanzamento_all/*</url-pattern>
+      <url-pattern>/documenti/upload/monitoraggio_d4/*</url-pattern>
+      <url-pattern>/documenti/upload/monitoraggio_d5/*</url-pattern>
+      <url-pattern>/documenti/upload/monitoraggio_d6/*</url-pattern>
+      <url-pattern>/documenti/upload/monitoraggio_d7/*</url-pattern>
+      <url-pattern>/documenti/upload/monitoraggio_d8/*</url-pattern>
    </servlet-mapping>
 
     <context-param>
