@@ -83,8 +83,21 @@ public class MonitorBean extends CodeBean implements Serializable {
     private String quadroD7;
     /** Informazioni su D8 = modalit&agrave; e fasi del monitoraggio */
     private String quadroD8;
-    /** Vector di allegati che contribuiscono al monitoraggio */
-    private Vector<FileDocBean> allegati;
+    /* *******************************************************  *
+     *        Allegati che contribuiscono al monitoraggio       *
+     *        Vector di fileset, ciascuno rappresentante        * 
+     *        un riferimento logico ad un allegato fisico       *
+     * ******************************************************** */
+    /** Allegati al quadro 4 */
+    private Vector<FileDocBean> allegatiD4;
+    /** Allegati al quadro 5  */
+    private Vector<FileDocBean> allegatiD5;
+    /** Allegati al quadro 5  */
+    private Vector<FileDocBean> allegatiD6;
+    /** Allegati al quadro 5  */
+    private Vector<FileDocBean> allegatiD7;
+    /** Allegati al quadro 5  */
+    private Vector<FileDocBean> allegatiD8;
 
     
     /**
@@ -96,7 +109,7 @@ public class MonitorBean extends CodeBean implements Serializable {
     	open = false;
     	descrizione = null;
     	quadroD4 = quadroD5 = quadroD6 = quadroD7 = quadroD8 = null;
-    	allegati = null;
+    	allegatiD4 = allegatiD5 = allegatiD6 = allegatiD7 = allegatiD8 = null;
     }
     
     
@@ -312,10 +325,10 @@ public class MonitorBean extends CodeBean implements Serializable {
     /**
      * Restituisce gli allegati di un'attivit&agrave; di monitoraggio
      * 
-     * @return <code>Vector&lt;FileDocBean&gt;</code> - allegati dell'attivit&agrave; di monitoraggio
+     * @return <code>Vector&lt;FileDocBean&gt;</code> - ciascuno rappresentante un riferimento logico ad un allegato fisico all'attivita' di monitoraggio
      */
-    public Vector<FileDocBean> getAllegati() {
-        return allegati;
+    public Vector<FileDocBean> getAllegatiD4() {
+        return allegatiD4;
     }
 
     /**
@@ -323,8 +336,84 @@ public class MonitorBean extends CodeBean implements Serializable {
      * 
      * @param allegati - allegati da settare
      */
-    public void setAllegati(Vector<FileDocBean> allegati) {
-        this.allegati = allegati;
+    public void setAllegatiD4(Vector<FileDocBean> allegati) {
+        this.allegatiD4 = allegati;
+    }
+    
+    
+    /**
+     * Restituisce gli allegati di un'attivit&agrave; di monitoraggio
+     * 
+     * @return <code>Vector&lt;FileDocBean&gt;</code> - ciascuno rappresentante un riferimento logico ad un allegato fisico all'attivita' di monitoraggio
+     */
+    public Vector<FileDocBean> getAllegatiD5() {
+        return allegatiD5;
+    }
+
+    /**
+     * Imposta gli allegati di un'attivit&agrave; di monitoraggio
+     * 
+     * @param allegati - allegati da settare
+     */
+    public void setAllegatiD5(Vector<FileDocBean> allegati) {
+        this.allegatiD5 = allegati;
+    }
+    
+    
+    /**
+     * Restituisce gli allegati di un'attivit&agrave; di monitoraggio
+     * 
+     * @return <code>Vector&lt;FileDocBean&gt;</code> - ciascuno rappresentante un riferimento logico ad un allegato fisico all'attivita' di monitoraggio
+     */
+    public Vector<FileDocBean> getAllegatiD6() {
+        return allegatiD6;
+    }
+
+    /**
+     * Imposta gli allegati di un'attivit&agrave; di monitoraggio
+     * 
+     * @param allegati - allegati da settare
+     */
+    public void setAllegatiD6(Vector<FileDocBean> allegati) {
+        this.allegatiD6 = allegati;
+    }
+    
+    
+    /**
+     * Restituisce gli allegati di un'attivit&agrave; di monitoraggio
+     * 
+     * @return <code>Vector&lt;FileDocBean&gt;</code> - ciascuno rappresentante un riferimento logico ad un allegato fisico all'attivita' di monitoraggio
+     */
+    public Vector<FileDocBean> getAllegatiD7() {
+        return allegatiD7;
+    }
+
+    /**
+     * Imposta gli allegati di un'attivit&agrave; di monitoraggio
+     * 
+     * @param allegati - allegati da settare
+     */
+    public void setAllegatiD7(Vector<FileDocBean> allegati) {
+        this.allegatiD7 = allegati;
+    }
+    
+    
+    /**
+     * Restituisce gli allegati di un'attivit&agrave; di monitoraggio
+     * 
+     * @return <code>Vector&lt;FileDocBean&gt;</code> - ciascuno rappresentante un riferimento logico ad un allegato fisico all'attivita' di monitoraggio
+     */
+    public Vector<FileDocBean> getAllegatiD8() {
+        return allegatiD8;
+    }
+
+    /**
+     * Imposta gli allegati di un'attivit&agrave; di monitoraggio
+     * 
+     * @param allegati - allegati da settare
+     */
+    public void setAllegatiD8(Vector<FileDocBean> allegati) {
+        this.allegatiD8 = allegati;
     }
 	
 }
