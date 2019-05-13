@@ -39,7 +39,8 @@
         </button>
       </c:when>
       <c:when test="${param['q'] eq 'wbs'}">
-        <c:if test="${not empty param['p']}">
+        <c:choose>
+          <c:when test="${not empty param['p']}">
           <div class="row">
             <div class="col-1">
               <button type="submit" id="btnSave" class="btn btn-success" value="Salva" disabled>
@@ -49,8 +50,20 @@
             </div>
           </div>
           <br />
-          <hr class="riga" />
-        </c:if>
+          <hr class="separatore" />
+          </c:when>
+          <c:otherwise>
+          <div class="row">
+            <div class="col-1">
+              <button type="submit" id="btnDel" class="btn btn-success" value="Elimina">
+                <i class="far fa-trash-alt"></i>
+                Elimina
+              </button>
+            </div>
+          </div>
+          <hr class="separatore" />
+          </c:otherwise>
+        </c:choose>
       </c:when>
       <c:when test="${param['q'] eq 'act'}">
       <c:choose>
