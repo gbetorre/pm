@@ -55,16 +55,16 @@
           <div class="charNum"></div>
           <hr class="separatore" />
           <div class="row">
-            <div class="col-9">
+            <div class="col-8">
               <label for="mon-d4"><strong>QUADRO D.4 Reclutamento del personale</strong></label><br />
               <textarea id="mon-d4" name="mon-d4" class="form-control" aria-label="With textarea" maxlength="22000" readonly>${m.quadroD4}</textarea>
             </div>
-            <div class="col-3">
+            <div class="col-4">
               <div class="row">
                 <div class="col-1"></div>
                 <hr class="separatore" />
                 <div class="col-10 substatus">
-                  <h6 class="monospace">&nbsp;Allegati quadro D.4</h6>
+                  <h6>&nbsp;Allegati quadro D.4</h6>
                   <hr class="separatore" />
               <c:if test="${not empty m.allegatiD4}">
                 <c:catch var="exception">
@@ -76,7 +76,7 @@
                       <span>
                         <img src="${initParam.urlDirectoryImmagini}ico_${ext}.png" border="0" alt="${all.estensione}">
                       </span>
-                      <a href="${localDocumentRoot}/${all.file}${all.estensione}" class="transition monospace">
+                      <a href="${localDocumentRoot}/${all.file}${all.estensione}" class="transition">
                         <c:out value="${all.titolo}" escapeXml="false" />
                       </a>
                       <span class="file-data monospace">
@@ -98,16 +98,16 @@
           </div>
           <hr class="separatore" />
           <div class="row">
-            <div class="col-9">
+            <div class="col-8">
               <label for="mon-d5"><strong>QUADRO D.5 Infrastrutture</strong></label><br />
               <textarea id="mon-d5" name="mon-d5" class="form-control" aria-label="With textarea" maxlength="22000" readonly>${m.quadroD5}</textarea>
             </div>
-            <div class="col-3">
+            <div class="col-4">
               <div class="row">
                 <div class="col-1"></div>
                 <hr class="separatore" />
                 <div class="col-10 substatus">
-                  <h6 class="monospace">&nbsp;Allegati quadro D.5</h6>
+                  <h6>&nbsp;Allegati quadro D.5</h6>
                   <hr class="separatore" />
               <c:if test="${not empty m.allegatiD5}">
                 <c:catch var="exception">
@@ -141,16 +141,16 @@
           </div>
           <hr class="separatore" />
           <div class="row">
-            <div class="col-9">
+            <div class="col-8">
               <label for="mon-d6"><strong>QUADRO D.6 Premialit&agrave;</strong></label><br />
               <textarea id="mon-d6" name="mon-d6" class="form-control" aria-label="With textarea" maxlength="22000" readonly>${m.quadroD6}</textarea>
             </div>
-            <div class="col-3">
+            <div class="col-4">
               <div class="row">
                 <div class="col-1"></div>
                 <hr class="separatore" />
                 <div class="col-10 substatus">
-                  <h6 class="monospace">&nbsp;Allegati quadro D.6</h6>
+                  <h6>&nbsp;Allegati quadro D.6</h6>
                   <hr class="separatore" />
               <c:if test="${not empty m.allegatiD6}">
                 <c:catch var="exception">
@@ -184,16 +184,16 @@
           </div>
           <hr class="separatore" />
           <div class="row">
-            <div class="col-9">
+            <div class="col-8">
               <label for="mon-d7"><strong>QUADRO D.7 Attivit&agrave; didattiche di eleveta qualificazione</strong></label><br />
               <textarea id="mon-d7" name="mon-d7" class="form-control" aria-label="With textarea" maxlength="22000" readonly>${m.quadroD7}</textarea>
             </div>
-          <div class="col-3">
+            <div class="col-4">
               <div class="row">
                 <div class="col-1"></div>
                 <hr class="separatore" />
                 <div class="col-10 substatus">
-                  <h6 class="monospace">&nbsp;Allegati quadro D.7</h6>
+                  <h6>&nbsp;Allegati quadro D.7</h6>
                   <hr class="separatore" />
               <c:if test="${not empty m.allegatiD7}">
                 <c:catch var="exception">
@@ -227,16 +227,16 @@
           </div>
           <hr class="separatore" />
           <div class="row">
-            <div class="col-9">
+            <div class="col-8">
               <label for="mon-d8"><strong>QUADRO D.8 Modalit&agrave; e fasi del monitoraggio</strong></label><br />
               <textarea id="mon-d8" name="mon-d8" class="form-control" aria-label="With textarea" maxlength="22000" readonly>${m.quadroD8}</textarea>
             </div>
-            <div class="col-3">
+            <div class="col-4">
               <div class="row">
                 <div class="col-1"></div>
                 <hr class="separatore" />
                 <div class="col-10 substatus">
-                  <h6 class="monospace">&nbsp;Allegati quadro D.8</h6>
+                  <h6>&nbsp;Allegati quadro D.8</h6>
                   <hr class="separatore" />
               <c:if test="${not empty m.allegatiD8}">
                 <c:catch var="exception">
