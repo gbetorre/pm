@@ -3,6 +3,7 @@
 <c:set var="actInstance" value="${requestScope.singolaAttivita}" scope="page" />
 <c:catch var="exception">
 <c:set var="checked" value="" scope="page" />
+<c:set var="state" value="${actInstance.idStato}" scope="page" />
 <c:if test="${not empty actInstance}">
   <c:if test="${actInstance.milestone}">
     <c:set var="checked" value="checked" scope="page" />
@@ -11,34 +12,46 @@
   <c:set var="complexityIdAsIndex" value="${actInstance.idComplessita - 1}" scope="page" />
   <c:set var="complexityValues" value="ALTA,MEDIA,BASSA" scope="page" /> 
 </c:if>
-    <h3>Riepilogo attivit&agrave; &quot;${actInstance.nome}&quot;:</h3>
-    <br />
-    <form id="delAct_form" action="" method="post" class="subfields">
+    <form id="delAct_form" action="" method="post" class="panel">
       <input type="hidden" id="act-id" name="act-id" value="${actInstance.id}" />
-      <div class="row">
-        <div class="col-sm-5">
-          <strong>Persona responsabile </strong>
+      <c:set var="stato" value="" scope="page" />
+      <c:forEach var="status" items="${requestScope.statiAttivita}" varStatus="loop">
+        <c:if test="${status.id eq state}">
+          <c:set var="stato" value="${status.nome}" scope="page" />
+        </c:if> 
+      </c:forEach>
+      <div class="panel-heading bgAddAct bgAct${state}">
+        <div class="noHeader"><em>Riepilogo attivit&agrave; <strong>${actInstance.nome}</strong></em></div>
+        <div class="actstate">
+        <c:out value="Stato: ${stato}" />
         </div>
-        <div class="col-sm-5">
-        <c:set var="skills" value="" scope="page" />
-        <c:forEach var="person" items="${actInstance.persone}" begin="0" end="0">
-          <c:out value="${person.nome} ${person.cognome}" />
-          <c:set var="skills" value="${person.competenze}" scope="page" />
-        </c:forEach>
-        </div>
-      </div>
-      <br />
-      <div class="row">
-        <div class="col-sm-5">
-          <strong>Identificativo della competenza</strong>
-        </div>
-        <div class="col-sm-5">
-          <c:forEach var="skill" items="${skills}" begin="0" end="0">
-            <c:out value="${skill.nome}" />
-          </c:forEach>
-        </div>
-      </div>
+      </div> 
       <hr class="separatore" />
+      <div class="panel-body">
+        <div class="row">
+          <div class="col-sm-5">
+            <strong>Persona responsabile </strong>
+          </div>
+          <div class="col-sm-5">
+          <c:set var="skills" value="" scope="page" />
+          <c:forEach var="person" items="${actInstance.persone}" begin="0" end="0">
+            <c:out value="${person.nome} ${person.cognome}" />
+            <c:set var="skills" value="${person.competenze}" scope="page" />
+          </c:forEach>
+          </div>
+        </div>
+        <br />
+        <div class="row">
+          <div class="col-sm-5">
+            <strong>Identificativo della competenza</strong>
+          </div>
+          <div class="col-sm-5">
+            <c:forEach var="skill" items="${skills}" begin="0" end="0">
+              <c:out value="${skill.nome}" />
+            </c:forEach>
+          </div>
+        </div>
+        <hr class="separatore" />
         <div class="row">
           <div class="col-sm-5">
             <strong>Nome attivit&agrave;</strong>
@@ -193,9 +206,10 @@
             <c:out value="${actInstance.stato.nome}" escapeXml="false" />
           </div>
         </div>
-        <br />
+        <hr class="separatore" />
         <a href="${act}${requestScope.progetto.id}" id='btn-close' class="btn btnNav"><i class="far fa-window-close"></i> Chiudi</a>
         <%@ include file="subPanel.jspf" %>
+      </div>
     </form>
 </c:catch>
 <c:out value="${exception}" />
