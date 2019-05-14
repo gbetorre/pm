@@ -829,7 +829,6 @@ public interface Query extends Serializable {
             "   ,   W.workpackage           AS \"workPackage\"" + 
             "   ,   W.noteavanzamento       AS \"noteAvanzamento\"" +
             "   ,   W.risultatiraggiunti    AS \"risultatiRaggiunti\"" +
-            "   ,   W.id_progetto           AS \"idProgetto\"" +
             "   ,   W.dataultimamodifica    AS \"dataUltimaModifica\"" +
             "   ,   W.oraultimamodifica     AS \"oraUltimaModifica\"" +
             "   ,   W.autoreultimamodifica  AS \"autoreUltimaModifica\"" +
@@ -852,7 +851,6 @@ public interface Query extends Serializable {
             "   ,   W.workpackage           AS \"workPackage\"" + 
             "   ,   W.noteavanzamento       AS \"noteAvanzamento\"" +
             "   ,   W.risultatiraggiunti    AS \"risultatiRaggiunti\"" +
-            "   ,   W.id_progetto           AS \"idProgetto\"" +
             "   FROM wbs W" + 
             "   WHERE W.id_progetto = ?" +
             "       AND W.id_wbs = ?" + 
@@ -869,7 +867,6 @@ public interface Query extends Serializable {
             "   ,   W.descrizione           AS \"descrizione\"" + 
             "   ,   W.noteavanzamento       AS \"noteAvanzamento\"" +
             "   ,   W.risultatiraggiunti    AS \"risultatiRaggiunti\"" +
-            "   ,   W.id_progetto           AS \"idProgetto\"" +
             "   ,   W.dataultimamodifica    AS \"dataUltimaModifica\"" +
             "   ,   W.oraultimamodifica     AS \"oraUltimaModifica\"" +
             "   ,   W.autoreultimamodifica  AS \"autoreUltimaModifica\"" +
@@ -889,7 +886,6 @@ public interface Query extends Serializable {
             "   ,   W.workpackage           AS \"workPackage\"" + 
             "   ,   W.noteavanzamento       AS \"noteAvanzamento\"" +
             "   ,   W.risultatiraggiunti    AS \"risultatiRaggiunti\"" +
-            "   ,   W.id_progetto           AS \"idProgetto\"" +
             "   ,   W.dataultimamodifica    AS \"dataUltimaModifica\"" +
             "   ,   W.oraultimamodifica     AS \"oraUltimaModifica\"" +
             "   ,   W.autoreultimamodifica  AS \"autoreUltimaModifica\"" +
@@ -909,7 +905,6 @@ public interface Query extends Serializable {
             "   ,   W.workpackage           AS \"workPackage\"" + 
             "   ,   W.noteavanzamento       AS \"noteAvanzamento\"" +
             "   ,   W.risultatiraggiunti    AS \"risultatiRaggiunti\"" +
-            "   ,   W.id_progetto           AS \"idProgetto\"" +
             "   ,   W.dataultimamodifica    AS \"dataUltimaModifica\"" +
             "   ,   W.oraultimamodifica     AS \"oraUltimaModifica\"" +
             "   ,   W.autoreultimamodifica  AS \"autoreUltimaModifica\"" +
@@ -929,7 +924,6 @@ public interface Query extends Serializable {
             "   ,   W.workpackage           AS \"workPackage\"" + 
             "   ,   W.noteavanzamento       AS \"noteAvanzamento\"" +
             "   ,   W.risultatiraggiunti    AS \"risultatiRaggiunti\"" +
-            "   ,   W.id_progetto           AS \"idProgetto\"" +
             "   FROM wbs W" +
             "   WHERE id_progetto = ?" +
             "     AND W.workpackage = true" +
