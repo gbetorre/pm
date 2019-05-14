@@ -53,6 +53,13 @@
           <hr class="separatore" />
           </c:when>
           <c:otherwise>
+          <div class="alert alert-warning">
+            <p>
+              <span class="ui-icon ui-icon-alert"></span>
+              &nbsp;<strong>Sei sicuro?</strong> Cliccando sul bottone ELIMINA, si conferma l'operazione.<br />
+              <strong>Attenzione</strong>: Questa operazione non potr&agrave; essere annullata.
+            </p>
+          </div>
           <div class="row">
             <div class="col-1">
               <button type="submit" id="btnDel" class="btn btn-success" value="Elimina">
