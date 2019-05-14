@@ -87,8 +87,6 @@ public class WbsBean implements Serializable {
     private String noteAvanzamento;
     /** Risultati raggiunti da questa WBS */
     private String risultatiRaggiunti;
-    /** Id del progetto a cui appartiene la wbs */
-    private int idProgetto;
     /* ******************************************************** *
      *          Dati descrittivi dell'ultima modifica           *
      * ******************************************************** */
@@ -104,7 +102,7 @@ public class WbsBean implements Serializable {
      * <p>Costruttore: inizializza i campi a valori di default.</p>
      */
 	public WbsBean() {
-		id = idProgetto = -2;
+		id = -2;
 		nome = null;
 		descrizione = null;
 		workPackage = false;
@@ -315,30 +313,6 @@ public class WbsBean implements Serializable {
      */
     public void setRisultatiRaggiunti(String risultatiRaggiunti) {
         this.risultatiRaggiunti = risultatiRaggiunti;
-    }
-    
-    
-    /* **************************************************** *
-     *       Metodi getter e setter per idProgetto          *
-     * **************************************************** */
-    /**
-     * Restituisce l'id del progetto di appartenenza.
-     * @return <code>idProgetto</code> - l'id del progetto
-     * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e l'idProgetto non &egrave; stato valorizzato (&egrave; un dato obbligatorio)
-     */
-    public int getIdProgetto() throws AttributoNonValorizzatoException {
-        if (idProgetto == -2) {
-            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo idProgetto non valorizzato!");
-        }
-        return idProgetto;
-    }
-
-    /**
-     * Imposta l'id di un progetto.
-     * @param idProgetto - l'id del progetto della wbs da impostare
-     */
-    public void setIdProgetto(int idProgetto) {
-        this.idProgetto = idProgetto;
     }
     
     
