@@ -29,15 +29,15 @@
         // For each orgchart box, provide the name, father, and tooltip to show.
         data.addRows([
         <c:forEach var="wbsAvo" items="${requestScope.wbsHierarchy}">
-          [{v:`${wbsAvo.nome}`, f:`${wbsAvo.nome}`}, ``, `${wbsAvo.id}_0_${wbsAvo.workPackage}`],
+          [{v:`${fn:trim(wbsAvo.nome)}_${wbsAvo.id}`, f:`${fn:trim(wbsAvo.nome)}`}, ``, `${wbsAvo.id}_0_${wbsAvo.workPackage}`],
           <c:forEach var="wbsFiglio" items="${wbsAvo.wbsFiglie}">
-          [{v:`${wbsFiglio.nome}`, f:`${wbsFiglio.nome}`}, `${wbsFiglio.wbsPadre.nome}`, `${wbsFiglio.id}_${wbsFiglio.wbsPadre.id}_${wbsFiglio.workPackage}`],
+          [{v:`${fn:trim(wbsFiglio.nome)}_${wbsFiglio.id}`, f:`${fn:trim(wbsFiglio.nome)}`}, `${fn:trim(wbsFiglio.wbsPadre.nome)}_${wbsFiglio.wbsPadre.id}`, `${wbsFiglio.id}_${wbsFiglio.wbsPadre.id}_${wbsFiglio.workPackage}`],
             <c:forEach var="wbsNipote" items="${wbsFiglio.wbsFiglie}">
-          [`${wbsNipote.nome}`, `${wbsNipote.wbsPadre.nome}`, `${wbsNipote.id}_${wbsNipote.wbsPadre.id}_${wbsNipote.workPackage}`],
+          [{v:`${fn:trim(wbsNipote.nome)}_${wbsNipote.id}`, f:`${fn:trim(wbsNipote.nome)}`}, `${fn:trim(wbsNipote.wbsPadre.nome)}_${wbsNipote.wbsPadre.id}`, `${wbsNipote.id}_${wbsNipote.wbsPadre.id}_${wbsNipote.workPackage}`],
               <c:forEach var="wbsPronipote" items="${wbsNipote.wbsFiglie}">
-          [`${wbsPronipote.nome}`, `${wbsPronipote.wbsPadre.nome}`, `${wbsPronipote.id}_${wbsPronipote.wbsPadre.id}_${wbsPronipote.workPackage}`],
+          [{v:`${fn:trim(wbsPronipote.nome)}_${wbsPronipote.id}`, f:`${fn:trim(wbsPronipote.nome)}`}, `${fn:trim(wbsPronipote.wbsPadre.nome)}_${wbsPronipote.wbsPadre.id}`, `${wbsPronipote.id}_${wbsPronipote.wbsPadre.id}_${wbsPronipote.workPackage}`],
                 <c:forEach var="wbsProPronipote" items="${wbsPronipote.wbsFiglie}">
-          [`${wbsProPronipote.nome}`, `${wbsProPronipote.wbsPadre.nome}`, `${wbsProPronipote.id}_${wbsProPronipote.wbsPadre.id}_${wbsProPronipote.workPackage}`],
+          [{v:`${fn:trim(wbsProPronipote.nome)}_${wbsProPronipote.id}`, f:`${fn:trim(wbsProPronipote.nome)}`}, `${fn:trim(wbsProPronipote.wbsPadre.nome)}_${wbsProPronipote.wbsPadre.id}`, `${wbsProPronipote.id}_${wbsProPronipote.wbsPadre.id}_${wbsProPronipote.workPackage}`],
                 </c:forEach>
               </c:forEach>
             </c:forEach>
@@ -127,7 +127,7 @@
         <c:if test="${idPadre ne -3}">
           <option value="${wbsPadre.id}">${wbsPadre.nome}</option>
         </c:if>
-          <option value="0">Nessuna wbs padre</option>
+          <option value="">Nessuna wbs padre</option>
         <c:forEach var="singleWbs" items="${requestScope.wbs}" varStatus="status">
           <option value="${singleWbs.id}">${singleWbs.nome}</option>
         </c:forEach>
