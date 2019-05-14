@@ -2108,7 +2108,7 @@ public class DBWrapper implements Query {
             String msg = FOR_NAME + "id WBS padre non valorizzato; problema nella query delle WBS figlie.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + anve.getMessage(), anve);
-        }  catch (SQLException sqle) {
+        } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
@@ -3647,28 +3647,28 @@ public class DBWrapper implements Query {
                     pst.executeUpdate();
                     con.commit();
                 }
-                // Ramo di modifica del solo padre della wbs
-                else if (params.containsKey(PART_GRAPHIC)) {
-                    paramsWbs = params.get(PART_GRAPHIC);
-                    if (Utils.containsValues(paramsWbs)) {
-                        pst = con.prepareStatement(UPDATE_WBS_FATHER);
-                        pst.clearParameters();
-                        // Controllo che l'id del padre non sia null
-                        Integer idpadre = null;
-                        if (!paramsWbs.get("wbs-idpadre").equals(Utils.VOID_STRING)) {
-                            idpadre = new Integer(paramsWbs.get("wbs-idpadre"));
-                            pst.setInt(++nextParam, idpadre);
-                        } else {
-                            // dato facoltativo non inserito
-                            pst.setNull(++nextParam, Types.NULL);
-                        }
-                        pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate())));
-                        pst.setTime(++nextParam, Utils.getCurrentTime());
-                        pst.setString(++nextParam, user.getCognome() + " " + user.getNome());
-                        pst.setInt(++nextParam, Integer.parseInt(paramsWbs.get("wbs-id")));
-                        pst.executeUpdate();
-                        con.commit();
+            }
+            // Ramo di modifica del solo padre della wbs
+            else if (params.containsKey(PART_GRAPHIC)) {
+                paramsWbs = params.get(PART_GRAPHIC);
+                if (Utils.containsValues(paramsWbs)) {
+                    pst = con.prepareStatement(UPDATE_WBS_FATHER);
+                    pst.clearParameters();
+                    // Controllo che l'id del padre non sia null
+                    Integer idpadre = null;
+                    if (!paramsWbs.get("wbs-idpadre").equals(Utils.VOID_STRING)) {
+                        idpadre = new Integer(paramsWbs.get("wbs-idpadre"));
+                        pst.setInt(++nextParam, idpadre);
+                    } else {
+                        // dato facoltativo non inserito
+                        pst.setNull(++nextParam, Types.NULL);
                     }
+                    pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate())));
+                    pst.setTime(++nextParam, Utils.getCurrentTime());
+                    pst.setString(++nextParam, user.getCognome() + " " + user.getNome());
+                    pst.setInt(++nextParam, Integer.parseInt(paramsWbs.get("wbs-id")));
+                    pst.executeUpdate();
+                    con.commit();
                 }
             }
         } catch (NotFoundException nfe) {
@@ -4543,12 +4543,14 @@ public class DBWrapper implements Query {
      * ma sar&agrave; logica, in quanto consister&agrave; di una 
      * de-referenziazione della wbs stessa dal progetto corrente.</p> 
      * 
+     * @param user      identificativo dell'utente che ha eliminato la WBS
      * @param idWbs     identificativo della WBS da dereferenziare
      * @param idDipart  identificativo del dipartimento al quale appartiene la WBS da eliminare
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
     @SuppressWarnings({ "static-method", "null" })
-    public void deleteWbs(int idDipart, 
+    public void deleteWbs(PersonBean user,
+                          int idDipart, 
                           int idWbs)
                    throws WebStorageException {
         Connection con = null;
@@ -4571,9 +4573,16 @@ public class DBWrapper implements Query {
             pst = con.prepareStatement(DELETE_WBS);
             pst.clearParameters();
             pst.setInt(++nextParam, idProj);
+            pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+            pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
+            pst.setString(++nextParam, user.getCognome() + String.valueOf(Utils.BLANK_SPACE) + user.getNome());
             pst.setInt(++nextParam, idWbs);
             pst.executeUpdate();
             con.commit();
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Attributi di PersonBean o CodeBean non valorizzati; problema nella query di eliminazione wbs\'.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto idProj non valorizzato; problema nella query di eliminazione wbs.\n";
             LOG.severe(msg); 
