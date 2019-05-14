@@ -396,6 +396,7 @@ public class ActivityCommand extends ItemBean implements Command {
                             isHeader = isFooter = false;
                             activity = db.getActivity(idPrj, idAct, user);
                             wbs = db.getWbsHierarchyByOffspring(idPrj, activity.getIdWbs());
+                            states = HomePageCommand.getStatiAttivita();
                         // Effettua le selezioni che servono alla visualizzazione del cestino
                         } else if (part.equalsIgnoreCase(Query.TRASH_PART)) {
                             /* ************************************************ *
