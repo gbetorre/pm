@@ -291,7 +291,7 @@ public class WbsCommand extends ItemBean implements Command {
                             wbsOfWbs = db.getWbsFiglie(idPrj, idWbsToDel);
                             wbsActivities = db.getActivitiesByWbs(idWbsToDel, idPrj);
                             if (wbsActivities.isEmpty() && wbsOfWbs.isEmpty()) {
-                                db.deleteWbs(runtimeProject.getIdDipart(), idWbsToDel);
+                                db.deleteWbs(user, runtimeProject.getIdDipart(), idWbsToDel);
                                 redirect = "q=" + Query.PART_WBS + "&id=" + idPrj;
                             }
                         } else if (part.equalsIgnoreCase(Query.PART_GRAPHIC)) {
