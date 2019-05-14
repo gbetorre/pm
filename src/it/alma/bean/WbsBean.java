@@ -37,6 +37,8 @@
 package it.alma.bean;
 
 import java.io.Serializable;
+import java.sql.Time;
+import java.util.Date;
 import java.util.Vector;
 
 import it.alma.exception.AttributoNonValorizzatoException;
@@ -85,13 +87,24 @@ public class WbsBean implements Serializable {
     private String noteAvanzamento;
     /** Risultati raggiunti da questa WBS */
     private String risultatiRaggiunti;
+    /** Id del progetto a cui appartiene la wbs */
+    private int idProgetto;
+    /* ******************************************************** *
+     *          Dati descrittivi dell'ultima modifica           *
+     * ******************************************************** */
+    /** Data ultima modifica */
+    private Date dataUltimaModifica;
+    /** Ora ultima modifica */
+    private Time oraUltimaModifica;
+    /** Autore ultima modifica */
+    private String autoreUltimaModifica;
     
 	
     /**
      * <p>Costruttore: inizializza i campi a valori di default.</p>
      */
 	public WbsBean() {
-		id = -2;
+		id = idProgetto = -2;
 		nome = null;
 		descrizione = null;
 		workPackage = false;
@@ -99,6 +112,9 @@ public class WbsBean implements Serializable {
 		wbsFiglie = null;
 		attivita = null;
 		noteAvanzamento = risultatiRaggiunti = null;
+		dataUltimaModifica = new Date(0);
+        oraUltimaModifica = null;
+        autoreUltimaModifica = null;
 	}
 
 
@@ -299,6 +315,96 @@ public class WbsBean implements Serializable {
      */
     public void setRisultatiRaggiunti(String risultatiRaggiunti) {
         this.risultatiRaggiunti = risultatiRaggiunti;
+    }
+    
+    
+    /* **************************************************** *
+     *       Metodi getter e setter per idProgetto          *
+     * **************************************************** */
+    /**
+     * Restituisce l'id del progetto di appartenenza.
+     * @return <code>idProgetto</code> - l'id del progetto
+     * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e l'idProgetto non &egrave; stato valorizzato (&egrave; un dato obbligatorio)
+     */
+    public int getIdProgetto() throws AttributoNonValorizzatoException {
+        if (idProgetto == -2) {
+            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo idProgetto non valorizzato!");
+        }
+        return idProgetto;
+    }
+
+    /**
+     * Imposta l'id di un progetto.
+     * @param idProgetto - l'id del progetto della wbs da impostare
+     */
+    public void setIdProgetto(int idProgetto) {
+        this.idProgetto = idProgetto;
+    }
+    
+    
+    /* *********************************************************** *
+     *       Metodi getter e setter per data ultima modifica       *
+     * *********************************************************** */
+    /**
+     * Restituisce la data dell'ultima modifica dello status di un progetto
+     * 
+     * @return <code>java.util.Date</code> - data dell'ultima modifica
+     */
+    public Date getDataUltimaModifica() {
+        return dataUltimaModifica;
+    }
+
+    /**
+     * Imposta la data dell'ultima dello status di un progetto
+     * 
+     * @param dataUltimaModifica data ultima modifica da impostare
+     */
+    public void setDataUltimaModifica(Date dataUltimaModifica) {
+        this.dataUltimaModifica = dataUltimaModifica;
+    }
+
+    
+    /* *********************************************************** *
+     *       Metodi getter e setter per ora ultima modifica        *
+     * *********************************************************** */
+    /**
+     * Restituisce l'ora dell'ultima modifica dello status di un progetto
+     * 
+     * @return <code>java.sql.Time</code> - ora dell'ultima modifica
+     */
+    public Time getOraUltimaModifica() {
+        return oraUltimaModifica;
+    }
+    
+    /**
+     * Imposta l'ora dell'ultima modifica dello status di un progetto
+     * 
+     * @param oraUltimaModifica ora ultima modifica da impostare
+     */
+    public void setOraUltimaModifica(Time oraUltimaModifica) {
+        this.oraUltimaModifica = oraUltimaModifica;
+    }
+
+
+    /* ************************************************************** *
+     *       Metodi getter e setter per autore ultima modifica        *
+     * ************************************************************** */
+    /**
+     * Restituisce l'autore dell'ultima modifica dello status di un progetto
+     * 
+     * @return <code>String</code> - autore ultima modifica
+     */
+    public String getAutoreUltimaModifica() {
+        return autoreUltimaModifica;
+    }
+
+    /**
+     * Imposta l'autore dell'ultima modifica dello status di un progetto
+     * 
+     * @param autoreUltimaModifica autore ultima modifica da impostare
+     */
+    public void setAutoreUltimaModifica(String autoreUltimaModifica) {
+        this.autoreUltimaModifica = autoreUltimaModifica;
     }
     
 }
