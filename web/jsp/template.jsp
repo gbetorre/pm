@@ -81,6 +81,11 @@
     </c:if>
     <!-- Corpo pagina -->
     <div class="page">
+      <a href="#top" id="goTop">
+        <span>
+          <img src="${initParam.urlDirectoryImmagini}ico-up.png" class="imgTop">
+        </span>
+      </a>
       <jsp:include page="${fileJsp}" />
     </div>
     <br /><br />
@@ -98,6 +103,21 @@
         $("#btnMod").click(function(e) {
               e.preventDefault(); 
         });
+      });
+      
+   	  // When the user scrolls down 20px from the top of the document, show the button
+      window.onscroll = function() {scrollFunction()};
+      function scrollFunction() {
+        if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+          document.getElementById("goTop").style.display = "block";
+        } else {
+          document.getElementById("goTop").style.display = "none";
+        }
+      }
+      
+      $('a[href="#top"]').click(function(){
+          $('html, body').animate({scrollTop:0}, 'slow');
+          return false;
       });
     </script>
   </body>
