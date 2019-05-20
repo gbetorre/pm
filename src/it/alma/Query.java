@@ -56,7 +56,7 @@ public interface Query extends Serializable {
      * <p>Costante parlante per i test che controllano 
      * che interi abbiano un valore maggiore di zero.</p>
      * <p>Maggiormente visibile e chiara del valore che incapsula (0) 
-     * per questo motivo può essere utilizzata in inizializzazioni di 
+     * per questo motivo pu&ograve; essere utilizzata in inizializzazioni di 
      * variabili e in test che controllano che specifici parametri
      * abbiano un valore significativo.</p> 
      */
@@ -233,13 +233,13 @@ public interface Query extends Serializable {
      */
     public static final int APERTA = 1;
     /**
-     * Un'attività IN PROGRESS &egrave; un'attivit&agrave; avviata 
+     * Un'attivit&agrave; IN PROGRESS &egrave; un'attivit&agrave; avviata 
      * su cui &egrave; stato imputato lavoro (giorni uomo o data inizio effettiva)
      */
     public static final int IN_PROGRESS = 2;
     /**
-     * Un'attivit&agrave; CHIUSA è un'attivit&agrave; conclusa, 
-     * su cui non &egrave; più possibile allocare GU o risorse
+     * Un'attivit&agrave; CHIUSA &egrave; un'attivit&agrave; conclusa, 
+     * su cui non &egrave; pi&ugrave; possibile allocare GU o risorse
      */
     public static final int CHIUSA = 3;
     /**
@@ -355,7 +355,7 @@ public interface Query extends Serializable {
      */
     public static final String APERTA_REGOLARE_HELP = APERTA_HELP + "Quelle <cite>APERTE REGOLARMENTE</cite> hanno: <dl><dt>DATA FINE PREVISTA</dt><dd> futura o presente</dd></dl>";
     /**
-     * <p>Un'attività IN PROGRESS regolare &egrave; un'attivit&agrave; 
+     * <p>Un'attivit&agrave; IN PROGRESS regolare &egrave; un'attivit&agrave; 
      * avviata ed iniziata, ovvero su cui &egrave; stato imputato lavoro 
      * (data di inizio effettiva diversa da NULL), quindi:
      * <ul>
@@ -366,8 +366,8 @@ public interface Query extends Serializable {
      */
     public static final String IN_PROGRESS_REGOLARE_HELP = IN_PROGRESS_HELP + "Quelle<cite>IN PROGRESS REGOLARE</cite> hanno: <dl><dt>&ndash; DATA FINE PREVISTA</dt><dd> futura o presente</dd></dl>";
     /**
-     * Un'attivit&agrave; CHIUSA è un'attivit&agrave; conclusa, 
-     * su cui non &egrave; più possibile allocare GU o risorse
+     * Un'attivit&agrave; CHIUSA &egrave; un'attivit&agrave; conclusa, 
+     * su cui non &egrave; pi&ugrave; possibile allocare GU o risorse
      */
     public static final String CHIUSA_REGOLARE_HELP = CHIUSA_HELP + "Su quelle <cite>CHIUSE REGOLARMENTE</cite> non &egrave; pi&ugrave; possibile allocare risorse.";
     /**

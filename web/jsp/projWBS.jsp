@@ -17,7 +17,7 @@
     <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
       <li class="nav-item"><a class="nav-link active tabactive" data-toggle="tab" href="#">WBS</a></li>
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${grafico}${p.id}">Grafico</a></li>
-      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="javascript:alert('Per visualizzare le attività di una WBS cliccare sull\'iconcina in corrispondenza della WBS')" id="show_act">Attivit&agrave;</a></li>
+      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="javascript:alert('Per visualizzare le attivit&agrave; di una WBS cliccare sull\'iconcina in corrispondenza della WBS')" id="show_act">Attivit&agrave;</a></li>
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${rep}${p.id}">Report</a></li>
     </ul>
     <c:choose>
