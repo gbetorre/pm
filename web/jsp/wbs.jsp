@@ -285,7 +285,7 @@
             var dblength = 8104;
             if(len >= dblength) {
               this.value = this.value.substring(0, dblength);
-              $(this).next('div').text(' è stato raggiunto il limite di caratteri');
+              $(this).next('div').text(' &egrave; stato raggiunto il limite di caratteri');
             } else {
               var chars = dblength - len;
               $(this).next('div').text(chars + ' caratteri rimanenti');
@@ -321,7 +321,7 @@
             var dblength = 1024;
             if(len >= dblength) {
               this.value = this.value.substring(0, dblength);
-              $(this).next('div').text(' è stato raggiunto il limite di caratteri');
+              $(this).next('div').text(' &egrave; stato raggiunto il limite di caratteri');
             } else {
               var chars = dblength - len;
               $(this).next('div').text(chars + ' caratteri rimanenti');
