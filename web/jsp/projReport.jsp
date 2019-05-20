@@ -6,7 +6,7 @@
     <form id="status_form" action="#" method="post">
       <hr class="separatore" />
         <h2 align="center">
-          Report del sotto progetto:&nbsp;<strong><c:out value="${p.titolo}" /></strong>
+          Report del sotto progetto:&nbsp;<strong><em><c:out value="${p.titolo}" /></em></strong>
           <span class="float-right">
             <a class="btn btnNav" href="${project}">
               <i class="fas fa-home"></i>
@@ -14,9 +14,11 @@
             </a>
           </span>
         </h2>
+        <h3 align="center"><span class="avvisiTot">&nbsp; alla data <fmt:formatDate value="${selectionDate}" pattern="dd/MM/yyyy" /> &nbsp;</span>
+        </h3>
         <hr class="riga" />
         <div class="row">
-          <div class="col-3"><label for="">Seleziona la data sulla quale calcolare il report:</label></div>
+          <div class="col-3 avvisiTot"><label for="">Seleziona la data sulla quale calcolare il report:</label></div>
           <div class="col-3">
             <input type="text" class="form-control calendarData" id="rep-date" name="rep-date" value="<fmt:formatDate value="${selectionDate}" pattern="dd/MM/yyyy" />">
           </div>
@@ -25,15 +27,16 @@
             <button class="btn btn-warning" id="expReport" onclick="alert('Funzionalit&agrave; in corso di implementazione');"><i class="fas fa-file-export"></i> Esporta</button>
           </div>
         </div>
+        <hr class="separatore" />
         <div class="row reportHead">
           <div class="col-2">
             Workpackage
           </div>
           <div class="col-4">
-            Nome attività
+            Nome attivit&agrave;
           </div>
-          <div class="col-6" style="text-align: center;">
-            Stato attività
+          <div class="col-6 centerlayout">
+            Stato attivit&agrave;
           </div>
         </div>
         <div class="row reportStateAct">
@@ -43,7 +46,7 @@
             Chiusa da pi&ugrave; tempo
           </div>
           <div class="col-1 bgSts22">
-            Chiusa il mese scorso
+            Chiusa entro il mese precedente
           </div>
           <div class="col-1 bgSts23">
             In ritardo
