@@ -1516,9 +1516,15 @@ public class DBWrapper implements Query {
             pst.setInt(++nextParam, idWbs);
             rs = pst.executeQuery();
             while (rs.next()) {
+                // Per ogni attività crea un oggetto vuoto
                 activity = new ActivityBean();
+                // Lo valorizza
                 BeanUtil.populate(activity, rs);
+                // Ne calcola lo stato
                 computeActivityState(activity, Utils.convert(Utils.getCurrentDate()));
+                // Ne calcola i giorni uomo
+                computeDays(activity, Utils.convert(Utils.getCurrentDate()));
+                // Lo aggiunge all'elenco
                 activities.add(activity);
             }
             return activities;
@@ -2243,7 +2249,7 @@ public class DBWrapper implements Query {
     
     
     /**
-     * <p>Dato l'identificato di un progetto e l'identificativo di una WBS,
+     * <p>Dato l'identificativo di un progetto e l'identificativo di una WBS,
      * restituisce tutta la gerarchia degli ascendenti della WBS di dato id.</p>
      * 
      * @param idProj identificativo del progetto a cui la WBS di cui si vuol cercare l'ascendenza deve appartenere
@@ -2258,7 +2264,7 @@ public class DBWrapper implements Query {
         Connection con = null;
         PreparedStatement pst = null;
         ResultSet rs, rs1, rs2, rs3 = null;
-        WbsBean wbs = null, wbsP, wbsF, wbsN, wbsPN, wbsPPN = null;
+        WbsBean wbsP, wbsF, wbsN, wbsPN, wbsPPN = null;
         Vector<WbsBean> wbsFiglie = null;
         try {
             // Valorizza WBS di partenza (livello 0)
@@ -2489,7 +2495,7 @@ public class DBWrapper implements Query {
     * @return MonitorBean - oggetto contenente tutti i campi del monitoraggio 
     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
     */
-    @SuppressWarnings({ "null", "static-method" })
+    @SuppressWarnings({ "null" })
     public MonitorBean getMonitor(int idDip, 
                                   int anno) 
                            throws WebStorageException {
@@ -2814,7 +2820,7 @@ public class DBWrapper implements Query {
      * @param params    hashmap che contiene i parametri che si vogliono aggiornare del progetto
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
      */
-    @SuppressWarnings({ "null" })
+    @SuppressWarnings({ "null", "rawtypes" })
     public void updateProjectPart(int idProj,
                                   int userId,
                                   HashMap<Integer, ProjectBean> projects, 
@@ -2830,9 +2836,9 @@ public class DBWrapper implements Query {
             ProjectBean sessionPrj = projects.get(key);
             // Dichiara un oggetto dello stesso tipo che conterrà i risultati della query
             ProjectBean requestPrj = null;
-            // Recuperare le liste di attività, skill e rischi
+            /* Recupera le liste di attività, skill e rischi
             HashMap<Integer, Vector> activitiesOfProject = objectsRelatedToProject.get(Query.PART_PROJECT_CHARTER_MILESTONE);
-            Vector<ActivityBean> activities = (Vector<ActivityBean>) activitiesOfProject.get(key);
+            Vector<ActivityBean> activities = (Vector<ActivityBean>) activitiesOfProject.get(key);*/
             // Ottiene la connessione
             con = pol_manager.getConnection();
             /* **************************************************************** *
@@ -3144,15 +3150,15 @@ public class DBWrapper implements Query {
                                    HashMap<Integer, Vector<ActivityBean>> activitiesRelatedToProject,
                                    HashMap<String, HashMap<String, String>>params) 
                             throws WebStorageException {
-        ResultSet rs = null;
+        //ResultSet rs = null;
         Connection con = null;
         PreparedStatement pst = null;        
         try {
-            // Ottiene il progetto precaricato quando l'utente si è loggato corrispondente al progetto che vuole aggiornare
+            /* Ottiene il progetto precaricato quando l'utente si è loggato corrispondente al progetto che vuole aggiornare
             Integer key = new Integer(idProj);
             ProjectBean project = projects.get(key);
-            // Recuperare le liste di attività
-            Vector<ActivityBean> activities = activitiesRelatedToProject.get(key);
+            // Recupera le liste di attività
+            Vector<ActivityBean> activities = activitiesRelatedToProject.get(key);*/
             // Ottiene la connessione
             con = pol_manager.getConnection();
             /* **************************************************************** *
@@ -3936,12 +3942,34 @@ public class DBWrapper implements Query {
     
     
     /**
-     * <p>Restituisce un Vector di FileDocBean estratti da data entit&agrave;
-     * e dato attributo, entrambi passati come argomenti.</p>
+     * <p>Aggiorna le informazioni relative alla dimensione di un file, i cui 
+     * estremi vengono comunicati in un dictionary passato come argomento.</p>
+     * <p>Notare che, almeno nel contesto di <code>Java 7</code>, con cui 
+     * la presente applicazione &egrave; <cite>compliant</cite>, nel momento 
+     * in cui un file si trova ancora in memoria volatile, 
+     * cio&egrave; &ndash; in pratica &ndash; non in memoria di massa del server, 
+     * Java non &egrave; in grado di calcolarne la dimensione. 
+     * Per questo motivo, all'atto del caricamento
+     * di un file vengono eseguite le seguenti operazioni, in transazione:
+     * <ol>
+     * <li>lettura del file da client e sua memorizzazione in RAM;</li>
+     * <li>scrittura del file su server e salvataggio nel db della tupla che
+     * rappresenta il file da un punto di vista logico;</li>
+     * <li>lettura del file da disco (ovvero da file system del server); solo
+     * ora &egrave; possibile calcolare la dimensione del file;</li>
+     * <li>aggiornamento (postUpdate) della tupla che rappresenta il file
+     * nel db, con indicazione della dimensione e di eventuali altre informazioni
+     * non desumibili all'atto dell'upload.</li>
+     * </ol>
+     * Questo tipo di aggiornamento contestuale, anche se
+     * logicamente successivo, ad un'altra operazione di scrittura 
+     * prende il nome di <cite>meccanismo di post-update</cite> 
+     * o <cite>postUpdate hook</cite> 
+     * (nel caso specifico, si tratta di un <cite>post-insert</cite>).</p>
      *
-     * @param idBelongs identificativo del proprietario degli allegati
-     * @param nomeEntita nome dell'entit&agrave; da cui estrarre gli allegati
-     * @param nomeAttributo
+     * @param params HashMap contenente gli estremi del file, al fine di aggiornare la tupla esatta e nel modo corretto
+     * @return <code>boolean</code> - true se l'operazione di aggiornamento e' andata a buon fine
+     * @throws WebStorageException se si verifica un problema SQL o in qualche tipo di puntamento
      */
     @SuppressWarnings({ "static-method", "null" })
     public boolean postUpdateFileDoc(HashMap<String, Object> params)
@@ -4437,13 +4465,29 @@ public class DBWrapper implements Query {
     
     
     /**
-     * <p>Restituisce un Vector di FileDocBean estratti da data entit&agrave;
-     * e dato attributo, entrambi passati come argomenti.</p>
-     *
-     * @param idBelongs identificativo del proprietario degli allegati
-     * @param nomeEntita nome dell'entit&agrave; da cui estrarre gli allegati
-     * @param nomeAttributo
+     * <p>Inserisce le informazioni relative ad un file, i cui 
+     * estremi vengono comunicati in un dictionary passato come argomento.</p>
+     * <p>Questo inserimento, una volta andato a buon fine, rappresenter&agrave;
+     * una rappresentazione logica, nel database, di un allegato fisico presente
+     * nel file system (del server).</p>
+     * <p>Notare che non esiste alcuna garanzia che la rappresentazione logica
+     * dell'allegato corrisponda effettivamente all'allegato fisico, nel senso
+     * che, una volta terminato il caricamento, un utente con accessi alla 
+     * directory degli upload potrebbe eliminare l'allegato fisico, mentre
+     * l'allegato logico, ovvero la tupla inserita dal presente metodo, potrebbe
+     * restare. Ci&ograve; porterebbe, a valle, alla generazione di un link che
+     * produce un errore di tipo 404.</p> 
+     * <p><small>Per evitare questo inconveniente,
+     * &egrave; possibile prevedere meccanismi di protezione delle directories
+     * e/o anche meccanismi di trigger che si riverberano sul db &ndash;
+     * la cui implementazione comunque non attiene alla natura applicativa
+     * dei sorgenti del presente software.</small></p>
+     * 
+     * @param params HashMap contenente gli estremi del file, al fine di inserire la tupla
+     * @return identificativo, calcolato, per la tupla che rappresentera' logicamente l'allegato fisico
+     * @throws WebStorageException se si verifica un problema SQL, nel recupero di attributi di bean, o in qualche altro puntamento
      */
+    @SuppressWarnings("null")
     public int setFileDoc(HashMap<String, Object> params)
                    throws WebStorageException {
         Connection con = null;
@@ -4602,21 +4646,30 @@ public class DBWrapper implements Query {
     
     
     /** 
-     * <p>Metodo per fare una dereferenziazione di una attivit&agrave; 
+     * <p>Effettua una cancellazione logica di una attivit&agrave; 
      * relativa a un progetto.</p>
-     * <p>A partire dall'identificativo del dipartimento 
-     * e da quello dell'attivit&agrave;, passati come 
-     * argomenti, identifica un progetto "fantasma" di dipartimento
+     * <p>In un primo momento, nell'ottica di evitare la cancellazione fisica,
+     * si era pensato infatti di dereferenziare un'attivit&agrave; 
+     * collegandola ad un progetto fantasma; quindi, a partire 
+     * dall'identificativo del dipartimento e da quello dell'attivit&agrave;, 
+     * passati come argomenti, si pensava di identificare un progetto "fantasma" 
+     * di dipartimento
      * (avente come identificativo lo stesso identificativo del dipartimento
      * moltiplicato per -1), una wbs parimenti "fantasma" 
-     * ed associa ad entrambi l'attivit&agrave; che si vuol eliminare.
+     * ed associare ad entrambi l'attivit&agrave; che si vuol eliminare.
      * In questo modo la cancellazione dell'attivit&agrave; 
-     * non sar&agrave; fisica, ma sar&agrave; logica, in quanto 
-     * consister&agrave; di una de-referenziazione della wbs stessa 
-     * dal progetto corrente.</p> 
+     * non sarebbe stata fisica, ma logica, in quanto avrebbe 
+     * consistito di una de-referenziazione della wbs stessa 
+     * dal progetto corrente.</p>
+     * <p>Successivamente, si &egrave; deciso di gestire l'eliminazione 
+     * logica in un modo diverso, ovvero valorizzando un valore di stato 
+     * riservandolo per indicare un'eliminazione.
+     * La prima, ora abbandonata, &egrave; la strada implementata 
+     * dal presente metodo.</p>
      * 
-     * @param idActivity     identificativo dell'attivita' da dereferenziare
-     * @param idDipart  identificativo del dipartimento al quale appartiene l'attivita' da eliminare
+     * @param user          utente loggato, per il tracciamento dell'operazione nel db
+     * @param idActivity    identificativo dell'attivita' da eliminare logicamente
+     * @param idDipart      identificativo del dipartimento al quale appartiene l'attivita' da eliminare
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
     @SuppressWarnings({ "static-method", "null" })
@@ -5346,6 +5399,124 @@ public class DBWrapper implements Query {
             throw new WebStorageException(msg + e.getMessage(), e);
         }
         return stato;
+    }
+    
+    
+    /**
+     * <p>Data in input una attivit&agrave; passata come argomento,
+     * ne calcola la durata in base alle date dell'attivit&agrave; stessa.</p>
+     * <p>In particolare:<br />
+     * se ci sono le date effettive considera le date effettive, cio&egrave:
+     * <p><code>durata = data fine effettiva - data inizio effettiva</code></p>
+     * Se non ci sono le date effettive, cerca di ricavare la durata in base
+     * a quello che sa, ovvero:
+     * la fine prevista è obbligatoria e dunque dev'esserci;
+     * se c'è la fine effettiva considera quella e non la fine prevista
+     * se non c'è la fine effettiva considera la fine prevista.</p>
+     * <hr />
+     * <p>Dettaglio algoritmo:
+     * <ul>
+     * <li><tt>1.</tt> se ci sono entrambe (le date effettive) usa quelle, quindi: 
+     *      <pre>d = fine effettiva - inizio effettivo</pre>
+     *      <code>(durata effettiva: guEffettivi)</code></li>
+     * <li><tt>2.</tt> se non ci sono entrambe cerca la fine effettiva
+     * <ul>
+     * <li><tt>2.1.</tt> se la fine effettiva c'&egrave; vuole dire che non c'&egrave; 
+     *      l'inizio effettivo (altrimenti saremmo nel caso precedente) quindi:
+     *      <ul>
+     *      <li><tt>2.1.1.</tt> cerca l'inizio previsto: c'&egrave; l'inizio previsto
+     *          <pre>d = fine effettiva - inizio previsto</pre>
+     *          <code>(durata effettiva, gueffettivi)</code></li>
+     *      <li><tt>2.1.2.</tt> non c'&egrave; l'inizio previsto: 
+     *          <pre>d = non computabile</pre>
+     *          <code>(gueffettivi)</code></li>
+     *      </ul>
+     * <li><tt>2.2.</tt> se la fine effettiva non c'&egrave;  cerco l'inizio effettivo. 
+     * A quel punto:
+     *      <ul>
+     *      <li><tt>2.2.1.</tt> c'&egrave; l'inizio effettivo. dunque:
+     *          <pre>d = fine prevista - inizio effettivo</pre>
+     *          <code>(gueffettivi)</code></li>
+     *      <li><tt>2.2.2.</tt> non c'&egrave; l'inizio effettivo:
+     *          <ul>
+     *          <li><tt>2.2.2.1.</tt>cerco l'inizio previsto. C'&egrave; l'inizio previsto:
+     *              <pre>d = fine prevista - inizio previsto</pre>
+     *              <code>(durata prevista, guprevisti)</code></li>
+     *          <li><tt>2.2.2.2.</tt>non c'&egrave; l'inizio previsto:
+     *              <pre>d = non computabile</pre>
+     *              <code>(guprevisti)</code></li>
+     *          </ul>
+     *      </li>
+     *      </ul>
+     * </li>
+     * </ul>
+     * </ul></p>
+     * <p>Implementa un algoritmo che calcola tale dato e lo setta 
+     * nell'argomento, valorizzandolo per riferimento.</p>
+     * 
+     * @param awl       activity without last
+     * @param rightNow  today
+     * @return <code>CodeBean</code> - oggetto rappresentante lo stato calcolato per l'attivita' passata come argomento
+     * @throws WebStorageException se si verfica un problema nel recupero di qualche attributo obbligatorio o in qualche altro tipo di puntamento
+     */
+    public static ActivityBean computeDays(ActivityBean awl,
+                                           Date rightNow) 
+                                    throws WebStorageException {
+        ActivityBean act = null;
+        try {
+            // 1. Cerca entrambe le date effettive
+            if ( (awl.getDataInizioEffettiva() != null && awl.getDataInizioEffettiva().after(new Date(0)))
+                 &&
+                 (awl.getDataFineEffettiva() != null && awl.getDataFineEffettiva().after(new Date(0)))
+               ) {
+                long endDate = awl.getDataFineEffettiva().getTime();
+                long startDate = awl.getDataInizioEffettiva().getTime();
+                long duration = endDate - startDate;
+                long days = duration / (1000 * 60 * 60 * 24);
+                awl.setGuEffettivi((int) days); 
+            } else {
+                // Se non ci sono entrambe le date effettive verifica se c'è quella di fine effettiva
+                if ((awl.getDataFineEffettiva() != null && awl.getDataFineEffettiva().after(new Date(0)))) {
+                    // Se c'è, verifica se c'è quella di inizio previsto (quella di inizio effettivo non può esserci perché altrimenti non saremmo nell'else!)
+                    if ((awl.getDataInizio() != null && awl.getDataInizio().after(new Date(0)))) {
+                        long endDate = awl.getDataFineEffettiva().getTime();
+                        long startDate = awl.getDataInizio().getTime();
+                        long duration = endDate - startDate;
+                        long days = duration / (1000 * 60 * 60 * 24);
+                        awl.setGuEffettivi((int) days); 
+                    }
+                } else if ((awl.getDataInizioEffettiva() != null && awl.getDataInizioEffettiva().after(new Date(0)))) {
+                    // Se non c'è la data di fine effettiva potrebbe esserci quella di inizio effettiva
+                    long endDate = awl.getDataFine().getTime();
+                    long startDate = awl.getDataInizioEffettiva().getTime();
+                    long duration = endDate - startDate;
+                    long days = duration / (1000 * 60 * 60 * 24);
+                    awl.setGuEffettivi((int) days); 
+                } else if ((awl.getDataInizio() != null && awl.getDataInizio().after(new Date(0)))) {
+                    // Se non c'è neppure la data di inizio effettiva potrebbe esserci quella di inizio prevista
+                    long endDate = awl.getDataFine().getTime();
+                    long startDate = awl.getDataInizio().getTime();
+                    long duration = endDate - startDate;
+                    long days = duration / (1000 * 60 * 60 * 24);
+                    // In questo caso però i giorni sono previsti, non effettivi, perché computati solo in base a date previste!
+                    awl.setGuPrevisti((int) days); 
+                }
+            }
+            act = new ActivityBean(awl);
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio del bean, probabilmente una data.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + npe.getMessage(), npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new WebStorageException(msg + e.getMessage(), e);
+        }
+        return act;
     }
     
 }
