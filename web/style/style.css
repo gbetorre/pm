@@ -262,6 +262,34 @@ table.google-visualization-orgchart-table {
     border-collapse: separate;
 }
 
+table.thin {
+    border-width: thin;
+    border-spacing: 2px;
+    border-style: ridge;
+    border-color: black;
+    border-collapse: collapse;
+    vertical-align: middle;
+    line-height: 4px;
+}
+
+tr.thin {
+    line-height: 16px;
+    border: 1px solid black;
+}
+
+td.thin, th.thin {
+    line-height: 6px;
+    border: 1px solid black;
+}
+
+tr.selected {
+  background-color: #f2f9fb;  
+}
+
+td.statoActRep {
+  margin-left: 
+}
+
 .monospace {
 	font-size: 10pt;
 	font-family: Consolas;
@@ -354,6 +382,17 @@ select:disabled.bgcolor3 {
 	background-image: linear-gradient(to right, #cccccc, #ffffff);
 }
 
+.reportHead {
+  font-weight: bold;
+}
+
+.reportRow {
+  background-color: #dcdcdc;
+  font-weight: bold;
+  border-bottom-style: groove;
+  border-color: #929aa0;
+}
+
 .reportAct {
 	border-top: 2px solid #8c8c8c;
 }
@@ -386,14 +425,6 @@ select:disabled.bgcolor3 {
 
 button[type="submit"]:disabled, #btnMod:disabled {
   background: #999999;
-}
-
-tr.selected {
-	background-color: #f2f9fb;	
-}
-
-td.statoActRep {
-	margin-left: 
 }
 
 textarea {
