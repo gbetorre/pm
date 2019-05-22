@@ -137,6 +137,39 @@ public class ActivityBean extends CodeBean implements Serializable {
     	stato = null;
     }
     
+    /**
+     * <p>Costruttore da ActivityBean</p>
+     * <p>Inizializza le variabili di classe a valori presi da
+     * un ActivityBean passato come argomento</p>
+     *  
+     * @param old il ActivityBean di cui si vogliono recuperare i valori
+     * @throws AttributoNonValorizzatoException  se manca qualche valore di attributo considerato obbligatorio
+     */
+    public ActivityBean(final ActivityBean old) 
+                 throws AttributoNonValorizzatoException {
+        this.id = old.getId();
+        this.nome = old.getNome();
+        this.descrizione = old.getDescrizione();
+        this.dataInizio = old.getDataInizio();
+        this.dataFine = old.getDataFine();
+        this.dataInizioAttesa = old.getDataInizioAttesa();
+        this.dataFineAttesa = old.getDataFineAttesa();
+        this.dataInizioEffettiva = old.getDataInizioEffettiva();
+        this.dataFineEffettiva = old.getDataFineEffettiva();
+        this.guPrevisti = old.getGuPrevisti();
+        this.guEffettivi = old.getGuEffettivi();
+        this.guRimanenti = old.getGuRimanenti();
+        this.noteAvanzamento = old.getNoteAvanzamento();
+        this.risultatiRaggiunti = old.getRisultatiRaggiunti();
+        this.milestone = old.isMilestone();
+        this.persone = old.getPersone();
+        this.idWbs = old.getIdWbs();
+        this.idComplessita = old.getIdComplessita();
+        this.idStato = old.getIdStato();
+        this.wbs = old.getWbs();
+        this.stato = old.getStato();
+    }
+    
     /* **************************************************** *
      *           Metodi getter e setter per id              *
      * **************************************************** */
