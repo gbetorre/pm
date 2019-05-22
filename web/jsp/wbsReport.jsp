@@ -50,7 +50,7 @@
               <td>&nbsp;</td>
                <td scope="row" id="nameColumn" class="success bgAct${act.stato.id} bgFade">
                 <span class="monospace"><c:out value="${innerStatus}" /></span>&nbsp;
-                <a href="${modAct}${p.id}&ida=${act.id}" title="">
+                <a href="${modAct}${p.id}&ida=${act.id}" title="${act.nome}">
                 <c:choose>
                   <c:when test="${fn:length(act.nome) gt 35}">
                     <c:out value="${fn:substring(act.nome, 0, 35)} ..." />
@@ -74,91 +74,6 @@
       </table>
     </div>
     <hr class="separatore" />
-<%--    <c:choose>
-      <c:when test="${not empty requestScope.wps}">
-      <div class="table-responsive">
-        <c:set var="status" value="" scope="page" />
-        <c:forEach var="wp" items="${requestScope.wps}" varStatus="loop">
-        <c:set var="status" value="${loop.index}" scope="page" />
-          <h3 class="heading">WorkPackage: 
-            <a href="${modAct}${p.id}&ida=${wp.id}">
-              <c:out value="${wp.nome}"/>
-            </a>
-          </h3>
-          <c:choose>
-          <c:when test="${not empty wp.attivita}">
-          <table class="table table-striped overviewSummary">
-            <thead class="thead-light">
-              <tr>
-                <th scope="col">Attivit&agrave; del Work Package</th>
-                <th scope="col">Data inizio</th>
-                <th scope="col">Data fine</th>
-                <th scope="col">Stato effettivo</th>
-              </tr>
-            </thead>
-            <tbody>
-              <c:set var="status" value="" scope="page" />
-              <c:forEach var="act" items="${wp.attivita}" varStatus="loop">
-                <c:set var="status" value="${loop.index}" scope="page" />
-                <tr class="bgAct${act.stato.id}">
-                  <td class="page">
-                    <a href="${modAct}${p.id}&ida=${act.id}">
-                      <c:out value="${act.nome}" />
-                    </a>
-                  </td>
-                  <td style="width: 10%;">
-                    <fmt:formatDate value="${act.dataInizio}" pattern='dd/MM/yyyy' />
-                  </td>
-                  <td style="width: 10%;">
-                    <fmt:formatDate value="${act.dataFine}" pattern='dd/MM/yyyy' />
-                  </td>
-                  <td class="${pageScope.stile}" style="width: 25%; text-align: center;">
-                    <c:choose>
-                      <c:when test="${act.stato.id ne 1}">
-                      <a href="javascript:popupWindow('Note','popup1',true,'${act.stato.informativa}');" class="helpInfo">
-                        <c:out value="${act.stato.nome}" escapeXml="false" />
-                      </a>
-                      </c:when>
-                      <c:otherwise>
-                        <c:out value="${act.stato.nome}" escapeXml="false" />
-                      </c:otherwise>
-                    </c:choose>
-                  </td>
-                </tr>
-                <c:if test="${(not empty act.noteAvanzamento) or (not empty act.risultatiRaggiunti)}">
-                <tr>
-                  <td colspan="2">
-                    <c:out value="${act.noteAvanzamentoHtml}" escapeXml="false" />
-                  </td>
-                  <td colspan="2">
-                    <c:out value="${act.risultatiRaggiuntiHtml}" escapeXml="false" />
-                  </td>
-                </tr>
-                </c:if>
-              </c:forEach>
-            </tbody>
-          </table>
-          </c:when>
-          <c:otherwise>
-          <div class="alert alert-warning">
-            Workpackage senza attivit&agrave;.
-          </div>
-          </c:otherwise>
-          </c:choose>
-          <br />
-        </c:forEach>
-      </div>
-      </c:when>
-      <c:otherwise>
-      <div class="alert alert-danger">
-        <strong>Spiacente 
-          <c:out value="${sessionScope.usr.nome}" />
-          <c:out value="${sessionScope.usr.cognome}" />.<br />
-        </strong>
-        <p>Non &egrave; stata trovata alcuna WBS con attivit&agrave; per questo progetto.</p>
-      </div>
-      </c:otherwise>
-    </c:choose> --%>
       <div id="container-fluid">
         <div class="row">
           <div class="col-4">
