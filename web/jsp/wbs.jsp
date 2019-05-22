@@ -159,7 +159,12 @@
           <c:otherwise>
           <hr class="separatore" />
           <div class="alert alert-warning">
-            <p>Non &egrave; stata trovata alcuna attivit&agrave; associata <em>direttamente</em> alla WBS &quot;${wbsNome}&quot;.</p>
+            <p>Non &egrave; stata trovata alcuna attivit&agrave; associata <em>direttamente</em> alla WBS &quot;${wbsNome}&quot; 
+            <c:if test="${not empty wbsPadre.id}">
+              <br />
+              (figlia di <a href="${modWbs}${p.id}&idw=${wbsPadre.id}">${wbsPadre.nome}</a>)
+            </c:if>
+            </p>
           </div>
           </c:otherwise>
         </c:choose>
