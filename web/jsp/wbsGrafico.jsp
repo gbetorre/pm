@@ -13,7 +13,7 @@
     <c:if test="${(ruolo eq 'PMOATE') or (ruolo eq 'PMODIP') or (ruolo eq 'PM') or (ruolo eq 'TL')}">
       <c:set var="superuser" value="${true}" scope="page" />
     </c:if>
-    <h2>WBS del sotto progetto <strong><c:out value="${p.titolo}" /></strong></h2>
+    <h4>WBS del sotto progetto <strong><c:out value="${p.titolo}" /></strong> (rappresentazione grafica)</h4>
     <hr class="separatore" />
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
