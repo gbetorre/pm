@@ -1309,7 +1309,8 @@ public interface Query extends Serializable {
             "SELECT " +
             "       R.id            AS \"id\"" +
             "   ,   R.descrizione   AS \"nome\"" +
-            "   ,   R.probabilita   AS \"informativa\"" + 
+            "   ,   R.tipologia     AS \"informativa\"" + 
+            "   ,   R.urgenza       AS \"urgenza\"" + 
             "   ,   R.impatto       AS \"impatto\"" + 
             "   ,   R.livello       AS \"livello\"" +
             "   ,   R.stato         AS \"stato\"" +
