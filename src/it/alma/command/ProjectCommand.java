@@ -765,6 +765,9 @@ public class ProjectCommand extends ItemBean implements Command {
                         else {
                             activity.getStato().setOrdinale(Query.CHIUSA_DA_POCO);
                         }
+                        // settaggio date attese per visualizzazione title report progetto
+                        activity.setDataInizioAttesa(dataInizio);
+                        activity.setDataFineAttesa(activity.getDataFineEffettiva());
                     }
                     // CASI IN CUI LA DATA DI FINE EFFETTIVA NON SIA SIGNIFICATIVA
                     else {
@@ -798,6 +801,9 @@ public class ProjectCommand extends ItemBean implements Command {
                                 }
                             }
                         }
+                        // settaggio date attese per visualizzazione title report progetto
+                        activity.setDataInizioAttesa(dataInizio);
+                        activity.setDataFineAttesa(activity.getDataFine());
                     }
                 }
             }
