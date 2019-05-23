@@ -6,7 +6,7 @@
     <form id="status_form" action="#" method="post">
       <hr class="separatore" />
         <h2 align="center">
-          Report del sotto progetto:&nbsp;<strong><em><c:out value="${p.titolo}" /></em></strong>
+          Report del sotto progetto&nbsp;<strong><c:out value="${p.titolo}" /></strong>
           <span class="float-right">
             <a class="btn btnNav" href="${project}">
               <i class="fas fa-home"></i>
@@ -14,15 +14,16 @@
             </a>
           </span>
         </h2>
-        <h3 align="center"><span class="avvisiTot">&nbsp; alla data <fmt:formatDate value="${selectionDate}" pattern="dd/MM/yyyy" /> &nbsp;</span>
-        </h3>
+        <h4 align="center">
+          <span class="avvisiTot">&nbsp; alla data <fmt:formatDate value="${selectionDate}" pattern="dd/MM/yyyy" /> &nbsp;</span>
+        </h4>
         <hr class="riga" />
         <div class="row">
-          <div class="col-3 avvisiTot"><label for="">Seleziona la data sulla quale calcolare il report:</label></div>
+          <div class="col-4 avvisiTot"><label for="">Seleziona la data sulla quale calcolare il report:</label></div>
           <div class="col-3">
             <input type="text" class="form-control calendarData" id="rep-date" name="rep-date" value="<fmt:formatDate value="${selectionDate}" pattern="dd/MM/yyyy" />">
           </div>
-          <div class="col-6">
+          <div class="col-5">
             <a href="" class="btn btn-success" id="rep-view"><i class="fas fa-search"></i> Visualizza</a>
             <button class="btn btn-warning" id="expReport" onclick="alert('Funzionalit&agrave; in corso di implementazione');"><i class="fas fa-file-export"></i> Esporta</button>
           </div>
@@ -85,7 +86,7 @@
                 <c:if test="${act.stato.ordinale eq divSts}">
                   <c:set var="bgAct" value="bgAct${act.stato.ordinale}" scope="page" />
                 </c:if>
-                <div class="col-1 bgSts${divSts} ${bgAct}"></div>
+                <div class="col-1 bgSts${divSts} ${bgAct}" title="Dal <fmt:formatDate value='${act.dataInizioAttesa}' pattern='dd/MM/yyyy' /> al <fmt:formatDate value='${act.dataFineAttesa}' pattern='dd/MM/yyyy' />"></div>
               </c:forTokens>
             </div>
           </c:forEach>
