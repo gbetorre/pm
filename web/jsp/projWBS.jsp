@@ -6,7 +6,7 @@
       <c:param name="id" value="${p.id}" />
       <c:param name="idw" value="" />
     </c:url>
-    <h2>WBS del sotto progetto <strong><c:out value="${p.titolo}" /></strong></h2>
+    <h4>WBS del sotto progetto <strong><c:out value="${p.titolo}" /></strong></h4>
     <hr class="separatore" />
     <span class="float-right">
       <a class="btn btnNav" href="${project}">
