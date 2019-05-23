@@ -36,25 +36,38 @@
             <thead class="thead-light">
               <tr>
                 <th>Descrizione</th>
-                <th>Probabilit&agrave;</th>
-                <th>Impatto</th>
-                <th>Livello</th>
-                <th>Stato</th>
+                <th>Dimensione</th>
+                <th>Tipologia</th>
+                <th>Urgente</th>
               </tr>
             </thead>
             <tbody>
             <c:set var="status" value="" scope="page" />
             <c:forEach var="risk" items="${requestScope.rischi}" varStatus="loop">
             <c:set var="status" value="${loop.index}" scope="page" />
-            <input type="hidden" id="pck-id${status}" name="pck-id${status}" value="<c:out value="${risk.id}"/>">
-                <tr>
-                  <th scope="row"><input type="text" class="form-control" id="pck-nome${status}" name="pck-nome${status}" value="<c:out value="${risk.nome}" />" readonly></th>
-                  <th scope="row"><input type="text" class="form-control" id="pck-informativa${status}" name="pck-informativa${status}" value="<c:out value="${risk.informativa}" />" readonly></th>
-                  <th scope="row"><input type="text" class="form-control" id="pck-impatto${status}" name="pck-impatto${status}" value="<c:out value="${risk.impatto}" />" readonly></th>
-                  <th scope="row"><input type="text" class="form-control" id="pck-livello${status}" name="pck-livello${status}" value="<c:out value="${risk.livello}" />" readonly></th>
-                  <th scope="row"><input type="text" class="form-control" id="pck-stato${status}" name="pck-stato${status}" value="<c:out value="${risk.stato}" />" readonly></th>             
-                </tr>
-              </c:forEach>
+              <input type="hidden" id="pck-id${status}" name="pck-id${status}" value="<c:out value="${risk.id}"/>">
+              <tr>
+                <td scope="row"><c:out value="${risk.nome}" /></td>
+                <td scope="row"><c:out value="${risk.impatto}" /></td>
+                <td scope="row"><c:out value="${risk.informativa}" /></td>
+            <c:choose>
+              <c:when test="${risk.urgenza}">
+                <td scope="row" class="bgcolorred">
+                  <div class="form-check text-center">
+                    <span>SI</span>
+                  </div>
+                </td>
+              </c:when>
+              <c:otherwise>
+              <td scope="row" class="bgcolorgreen">
+                <div class="form-check text-center">
+                  <span>NO</span>
+                </div>
+              </td>
+              </c:otherwise>
+            </c:choose>          
+              </tr>
+            </c:forEach>
             </tbody>
           </table>
           <input type="hidden" id="pck-loop-status" name="pck-loop-status" value="<c:out value="${status}"/>">
