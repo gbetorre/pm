@@ -69,6 +69,8 @@ public class RiskBean extends CodeBean implements Serializable, Query {
     private String livello;
     /** Stato del rischio */
     private String stato;
+    /** Urgenza del rischio */
+    private boolean urgenza;
 	
     
     /**
@@ -169,5 +171,27 @@ public class RiskBean extends CodeBean implements Serializable, Query {
 	public void setStato(String stato) {
 		this.stato = stato;
 	}
+	
+	
+	/* ********************************************************* *
+     *           Metodi getter e setter per urgenza              *
+     * ********************************************************* */
+    /**
+     * Restituisce true se il rischio &egrave; urgenze - false (default) se non lo &egrave;
+     * 
+     * @return <code>Boolean</code> - true/false rischio urgente
+     */
+    public boolean isUrgenza() {
+        return urgenza;
+    }
+
+    /**
+     * Imposta l'urgenza del rischio
+     *  
+     * @param urgenza - urgenza true/false da impostare
+     */
+    public void setUrgenza(boolean urgenza) {
+        this.urgenza = urgenza;
+    }
 	
 }
