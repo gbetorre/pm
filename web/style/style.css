@@ -52,12 +52,12 @@ body.loginbody {
 	background-image: radial-gradient(#ffffff, #ddeeff);
 }
 
-a:link:not(.btn):not(.cc-link):not(.linkFooter):not(.nav-link):not(.helpInfo):not(.page-link):not(.ico):not(.linkPopup), 
-a:visited:not(.btn):not(.cc-link):not(.linkFooter):not(.nav-link):not(.btnNav):not(.helpInfo):not(.page-link):not(.ico):not(.linkPopup) {
+a:link:not(.btn):not(.cc-link):not(.linkFooter):not(.nav-link):not(.helpInfo):not(.page-link):not(.ico):not(.linkPopup):not(.linkWbsGrafico), 
+a:visited:not(.btn):not(.cc-link):not(.linkFooter):not(.nav-link):not(.btnNav):not(.helpInfo):not(.page-link):not(.ico):not(.linkPopup):not(.linkWbsGrafico) {
 	color: #005c99; 
 }
 
-a:hover:not(.btn):not(.logoHeader):not(.cc-link):not(.ui-datepicker-prev):not(.ui-datepicker-next):not(.nav-link):not(.linkFooter):not(.cc-link):not(.helpInfo):not(.page-link):not(.ico):not(.linkHeader):not(.linkPopup) {
+a:hover:not(.btn):not(.logoHeader):not(.cc-link):not(.ui-datepicker-prev):not(.ui-datepicker-next):not(.nav-link):not(.linkFooter):not(.cc-link):not(.helpInfo):not(.page-link):not(.ico):not(.linkHeader):not(.linkPopup):not(.linkWbsGrafico) {
 	text-decoration: underline;
 	color: #002e4d;
 	background-color: #d7d9d9;
@@ -124,6 +124,15 @@ a:not([href]):not([tabindex]), a:hover:not([href]):not([tabindex]) {
 
 a.btn-disabled {
   background: #999999;
+}
+
+a:link.linkWbsGrafico, a:visited.linkWbsGrafico {
+	color: #e6e6e6;
+}
+
+a:hover.linkWbsGrafico {
+	color: white;
+	text-decoration: underline;
 }
 
 #goTop {
@@ -226,6 +235,11 @@ div.centre {
   display: block;
   margin-left: auto;
   margin-right: auto;
+}
+
+.expandedTree {
+	margin-top: -11px;
+	margin-bottom: -11px;
 }
 
 p.profileInfo {
