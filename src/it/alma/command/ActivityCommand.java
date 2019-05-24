@@ -87,6 +87,10 @@ public class ActivityCommand extends ItemBean implements Command {
      */
     private static final String nomeFileElenco = "/jsp/projActivities.jsp";
     /**
+     * Pagina a cui la command reindirizza per mostrare il grafico delle attivit&agrave; del progetto
+     */
+    private static final String nomeFileGrafico = "/jsp/projActivitiesGrafico.jsp";
+    /**
      * Pagina a cui la command fa riferimento per mostrare la lista delle 
      * attivit&agrave; del progetto nel contesto del Project Charter
      */
@@ -145,6 +149,7 @@ public class ActivityCommand extends ItemBean implements Command {
         }
         // Carica la hashmap contenente le pagine da includere in funzione dei parametri sulla querystring
         nomeFile.put(Query.PART_ACTIVITY, nomeFileElenco);
+        nomeFile.put(Query.PART_GRAPHIC, nomeFileGrafico);
         nomeFile.put(Query.PART_PROJECT_CHARTER_MILESTONE, nomeFileMilestone);
         nomeFile.put(Query.ADD_TO_PROJECT, nomeFileActivity);
         nomeFile.put(Query.MODIFY_PART, nomeFileActivity);
@@ -189,6 +194,8 @@ public class ActivityCommand extends ItemBean implements Command {
         Vector<PersonBean> candidates = null;
         // Dichiara struttura di Work Package cui può essere aggiunta un'attività
         Vector<WbsBean> workPackage = null;
+        // Dichiara elenco di wbs in gerarchia
+        Vector<WbsBean> vWbsAncestors  = null; 
         // Dichiara lista di valori di complessità
         LinkedList<CodeBean> complexity = null;
         // Dichiara lista di valori di stati attività
@@ -355,7 +362,10 @@ public class ActivityCommand extends ItemBean implements Command {
                              * ************************************************ */
                             isHeader = isFooter = false;
                             candidates = db.getPeople(runtimeProject.getId());
-                            workPackage = db.getWbs(runtimeProject.getId(), Query.WBS_WP_ONLY); 
+                            workPackage = db.getWbs(runtimeProject.getId(), Query.WBS_WP_ONLY);
+                            for (WbsBean wp: workPackage) {
+                                wp.setWbsPadre(db.getWbsParentByOffspring(idPrj, wp.getId()));
+                            }
                             complexity = HomePageCommand.getComplessita();
                             states = HomePageCommand.getStatiAttivita();
                         } else if (part.equals(Query.MODIFY_PART)) {
@@ -375,6 +385,9 @@ public class ActivityCommand extends ItemBean implements Command {
                             activity = db.getActivity(idPrj, idAct, user);
                             candidates = db.getPeople(runtimeProject.getId());
                             workPackage = db.getWbs(runtimeProject.getId(), Query.WBS_WP_ONLY);
+                            for (WbsBean wp: workPackage) {
+                                wp.setWbsPadre(db.getWbsParentByOffspring(idPrj, wp.getId()));
+                            }
                             complexity = HomePageCommand.getComplessita();
                             states = HomePageCommand.getStatiAttivita();
                         // Effettua le selezioni che servono all'eliminazione o alla sospensione di una data attività
@@ -397,8 +410,64 @@ public class ActivityCommand extends ItemBean implements Command {
                             activity = db.getActivity(idPrj, idAct, user);
                             wbs = db.getWbsHierarchyByOffspring(idPrj, activity.getIdWbs());
                             states = HomePageCommand.getStatiAttivita();
-                        // Effettua le selezioni che servono alla visualizzazione del cestino
-                        } else if (part.equalsIgnoreCase(Query.TRASH_PART)) {
+                         // Effettua le selezioni che servono alla visualizzazione del grafico
+                        } else if (part.equalsIgnoreCase(Query.PART_GRAPHIC)) {
+                            /* ************************************************ *
+                             *      Effettua la selezione delle attivita'       *
+                             *         per la visualizzazione grafica           *
+                             * ************************************************ */
+                            // Costruisco la gerarchia di wbs e attività
+                            vWbsAncestors = db.getWbsHierarchy(idPrj);
+                            for (WbsBean wbsAvo: vWbsAncestors) {
+                                if (wbsAvo.getWbsFiglie().isEmpty()) {
+                                    // Se la wbs corrente non ha wbs figlie, significa che potrebbe avere attività
+                                    // dunque, se ci sono, posso settare nella wbs corrente le sue attività 
+                                    vActivities = db.getActivitiesByWbs(wbsAvo.getId(), idPrj);
+                                    wbsAvo.setAttivita(vActivities);
+                                } else {
+                                    // Significa che wbsAvo ha figlie, dunque controllo le figlie
+                                    for (WbsBean wbsFiglia: wbsAvo.getWbsFiglie()) {
+                                        if (wbsFiglia.getWbsFiglie().isEmpty()) {
+                                            // Se la wbs corrente non ha wbs figlie, significa che potrebbe avere attività
+                                            // dunque, se ci sono, posso settare nella wbs corrente le sue attività 
+                                            vActivities = db.getActivitiesByWbs(wbsFiglia.getId(), idPrj);
+                                            wbsFiglia.setAttivita(vActivities);
+                                        } else {
+                                            // Significa che wbsFiglia ha figlie, dunque controllo le figlie
+                                            for (WbsBean wbsNipote: wbsFiglia.getWbsFiglie()) {
+                                                if (wbsNipote.getWbsFiglie().isEmpty()) {
+                                                    // Se la wbs corrente non ha wbs figlie, significa che potrebbe avere attività
+                                                    // dunque, se ci sono, posso settare nella wbs corrente le sue attività 
+                                                    vActivities = db.getActivitiesByWbs(wbsNipote.getId(), idPrj);
+                                                    wbsNipote.setAttivita(vActivities);
+                                                } else {
+                                                    // Significa che wbsNipote ha figlie, dunque controllo le figlie
+                                                    for (WbsBean wbsProNipote: wbsNipote.getWbsFiglie()) {
+                                                        if (wbsProNipote.getWbsFiglie().isEmpty()) {
+                                                            // Se la wbs corrente non ha wbs figlie, significa che potrebbe avere attività
+                                                            // dunque, se ci sono, posso settare nella wbs corrente le sue attività 
+                                                            vActivities = db.getActivitiesByWbs(wbsProNipote.getId(), idPrj);
+                                                            wbsProNipote.setAttivita(vActivities);
+                                                        } else {
+                                                            // Significa che wbsProNipote ha figlie, dunque controllo le figlie
+                                                            for (WbsBean wbsProProNipote: wbsProNipote.getWbsFiglie()) {
+                                                                if (wbsProProNipote.getWbsFiglie() == null ||wbsProProNipote.getWbsFiglie().isEmpty()) {
+                                                                    // Se la wbs corrente non ha wbs figlie, significa che potrebbe avere attività
+                                                                    // dunque, se ci sono, posso settare nella wbs corrente le sue attività 
+                                                                    vActivities = db.getActivitiesByWbs(wbsProProNipote.getId(), idPrj);
+                                                                    wbsProProNipote.setAttivita(vActivities);
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                         // Effettua le selezioni che servono alla visualizzazione del cestino
+                         } else if (part.equalsIgnoreCase(Query.TRASH_PART)) {
                             /* ************************************************ *
                              *      Effettua la selezione delle attivita'       *
                              *      in stato cancellato, ovvero quelle che      *
@@ -406,7 +475,7 @@ public class ActivityCommand extends ItemBean implements Command {
                              * ************************************************ */
                             // Seleziona le attività che hanno subito un'eliminazione logica
                             vActivities = db.getActivities(idPrj, user, Utils.convert(Utils.getUnixEpoch()), Query.ELIMINATA);
-                         }                           
+                         }
                         fileJspT = nomeFile.get(part);
                     }
                 } else {
@@ -484,6 +553,10 @@ public class ActivityCommand extends ItemBean implements Command {
         if (workPackage != null) {
             // Imposta nella request elenco wbs associabili
             req.setAttribute("wbs", workPackage);
+        }
+        if (vWbsAncestors != null) {
+            // Imposta nella request la gerarchia delle wbs + attività
+            req.setAttribute("wbsHierarchy", vWbsAncestors);
         }
         if (complexity != null) {
             // Imposta nella request elenco wbs associabili
