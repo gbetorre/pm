@@ -2080,7 +2080,7 @@ public class DBWrapper implements Query {
                             pst.setInt(1, idProj);
                             pst.setInt(2, wbsPN.getId());
                             rs4 = pst.executeQuery();
-                            // Valorizza lista pronipoti
+                            // Valorizza lista propronipoti
                             while (rs4.next()) {
                                 wbsPPN = new WbsBean();
                                 BeanUtil.populate(wbsPPN, rs4);
@@ -2388,6 +2388,59 @@ public class DBWrapper implements Query {
         }
     }
 
+    
+    /**
+     * <p>Dato l'identificativo di un progetto e l'identificativo di una WBS,
+     * restituisce solo il padre della WBS di dato id.</p>
+     * 
+     * @param idProj identificativo del progetto a cui la WBS di cui si vuol cercare l'ascendenza deve appartenere
+     * @param idWbs  identificativo della WBS di cui si vuol cercare l'ascendenza
+     * @return <code>WbsBean</code> - una WBS contenente al proprio interno la gerarchia completa da scorrere per mostrare l'albero genealogico della WBS di dato id
+     * @throws WebStorageException se si verifica qualche problema nell'esecuzione di query o in qualche tipo di puntamento
+     */
+    @SuppressWarnings("null")
+    public WbsBean getWbsParentByOffspring(int idProj,
+                                           int idWbs) 
+                                    throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+        WbsBean wbsInstance, wbsP = null;
+        try {
+            wbsInstance = getWbsInstance(idProj, idWbs);
+            // Ne cerca il padre
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_WBS_PADRE);
+            pst.clearParameters();
+            pst.setInt(1, wbsInstance.getId());
+            rs = pst.executeQuery();
+            // Valorizza padre di L0
+            if (rs.next()) {
+                wbsP = new WbsBean();
+                BeanUtil.populate(wbsP, rs);
+            }
+            return wbsP;           
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "id WBS padre non valorizzato; problema nella query delle WBS figlie.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        }  catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
     
     /**
     * <p>Restituisce un Vector&lt;WbsBean&gt; contenente tutte le WBS figlie
