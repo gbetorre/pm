@@ -3,11 +3,11 @@
 <%@ include file="pcURL.jspf" %>
 <c:choose>
   <c:when test="${param['p'] eq 'bin'}">
-    <h2>Attivit&agrave; eliminate del sotto progetto <strong><c:out value="${p.titolo}" /></strong></h2>
+    <h4>Attivit&agrave; eliminate del sotto progetto <strong><c:out value="${p.titolo}" /></strong></h4>
     <c:set var="isTrash" value="${true}" scope="page" />
   </c:when>
   <c:otherwise>
-    <h2>Attivit&agrave; del sotto progetto <strong><c:out value="${p.titolo}" /></strong></h2>
+    <h4>Attivit&agrave; del sotto progetto <strong><c:out value="${p.titolo}" /></strong></h4>
     <c:set var="isTrash" value="${false}" scope="page" />
   </c:otherwise>
 </c:choose>
@@ -21,10 +21,12 @@
   <c:choose>
     <c:when test="${isTrash}">
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${act}${p.id}">Attivit&agrave;</a></li>
+      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${grafAct}${p.id}">Grafico</a></li>
       <li class="nav-item"><a class="nav-link active tabactive" data-toggle="tab" href="#">Cestino</a></li>
     </c:when>
     <c:otherwise>
       <li class="nav-item"><a class="nav-link active tabactive" data-toggle="tab" href="#">Attivit&agrave;</a></li>
+      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${grafAct}${p.id}">Grafico</a></li>
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${binAct}${p.id}">Cestino</a></li>
     </c:otherwise>
   </c:choose>
