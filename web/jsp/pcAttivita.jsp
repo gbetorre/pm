@@ -212,7 +212,19 @@
               <c:if test="${wp.id eq wbs}">
                 <c:set var="selected" value="selected" scope="page" />
               </c:if>          
-              <option value="${wp.id}" ${selected}>${wp.nome}</option>
+              <option value="${wp.id}" ${selected}>
+              <c:choose>
+                <c:when test="${empty wp.wbsPadre}">
+                  <c:out value="${wp.nome}" />
+                </c:when>
+                <c:when test="${fn:length(wp.wbsPadre.nome) gt 35}">
+                  <c:out value="${wp.nome} [figlia di: ${fn:substring(wp.wbsPadre.nome, 0, 35)}...]" />
+                </c:when>
+                <c:otherwise>
+                  <c:out value="${wp.nome} [figlia di: ${wp.wbsPadre.nome}]" />
+                </c:otherwise>
+              </c:choose>
+              </option>
             </c:forEach>
             </select>
           </div>
