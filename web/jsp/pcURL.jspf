@@ -106,6 +106,11 @@
   <c:param name="p" value="add" />
   <c:param name="id" value="" />
 </c:url>
+<c:url var="grafAct" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="act" />
+  <c:param name="p" value="gra" />
+  <c:param name="id" value="" />
+</c:url>
 <c:url var="modAct" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="act" />
   <c:param name="p" value="mod" />
