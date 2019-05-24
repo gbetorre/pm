@@ -2,6 +2,8 @@
     <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
     <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
     <%@ include file="pcURL.jspf" %>
+    <c:set var="linkWbs" value="${modWbs}${p.id}&idw=" scope="page"/>
+    <c:set var="linkAct" value="${modAct}${p.id}&ida=" scope="page"/>
     <c:set var="ruoli" value="${sessionScope.usr.ruoli}" scope="page" />
     <c:set var="ruolo" value="" scope="page" />
     <c:forEach var="c" items="${ruoli}" varStatus="loop">
@@ -69,25 +71,31 @@
 		   				   '<li class="popupMenuContent"><a href="${modWbs}${p.id}&idw=' + valueIdWbs + '" class="linkPopup">Visualizza WBS</a></li>' +
         				   '<li class="popupMenuContent"><a href="#form-moveWbs" class="linkPopup" id="link-moveWbs" name="link-moveWbs" rel="modal:open" onclick>Sposta WBS</a></li>' +
         				   '<li class="popupMenuContent"><a href="${addWbs}${p.id}&idwp=' + valueIdWbs + '" class="linkPopup">Aggiungi WBS figlia</a></li>' +
-        				   '<li class="lastMenuContent"><a href="${act}${p.id}&idw=' + valueIdWbs + '" class="linkPopup">Visualizza attivit&agrave; di WBS</a></li>' +
+        				   '<li class="lastMenuContent"><a href="${act}${p.id}&idw=' + valueIdWbs + '" class="linkPopup">Visualizza attivit&agrave; di WBS</a></li>' + <%-- (elenco) --%>
       					   '</ul>';
-      	    console.log(isWorkPackage);
 		   	if (isWorkPackage == "true") {
-		   	    console.log("entrato");
          		popupContent = '<ul class="popupMenu">'+
         				   	   '<li class="popupMenuContent"><a href="${modWbs}${p.id}&idw=' + valueIdWbs + '" class="linkPopup">Visualizza WBS</a></li>' +
         				   	   '<li class="popupMenuContent"><a href="#form-moveWbs" class="linkPopup" id="link-moveWbs" name="link-moveWbs" rel="modal:open">Sposta WBS</a></li>' +
         				       '<li class="popupMenuContent"><a href="#alertWorkPackage" class="linkPopup" id="link-alert" name="link-alert" rel="modal:open">Aggiungi WBS figlia</a></li>' +
-        				   	   '<li class="lastMenuContent"><a href="${act}${p.id}&idw=' + valueIdWbs + '" class="linkPopup">Visualizza attivit&agrave; di WBS</a></li>' +
+        				   	   '<li class="lastMenuContent"><a href="${act}${p.id}&idw=' + valueIdWbs + '" class="linkPopup">Visualizza attivit&agrave; di WBS</a></li>' + <%-- (elenco) --%>
+        				   	   <%-- '<li class="lastMenuContent"><a href="#form-grafico" class="linkPopup" id="link-form-grafico" name="link-form-grafico" rel="modal:open">Visualizza attivit&agrave; di WBS (grafico)</a></li>' + --%>
         				   	   '</ul>';
 		   	   	$("a[href='#']").attr('href', "${modWbs}${p.id}&idw=" + valueIdWbs);
 		   	}
           </c:when>
           <c:otherwise>
-          	popupContent = '<ul class="popupMenu">'+
-   				 		   '<li class="popupMenuContent"><a href="${modWbs}${p.id}&idw=' + valueIdWbs + '" class="linkPopup">Visualizza WBS</a></li>' +
-   				  	 	   '<li class="lastMenuContent"><a href="${act}${p.id}&idw=' + valueIdWbs + '" class="linkPopup">Visualizza attivit&agrave; di WBS</a></li>' +
- 					  	   '</ul>';
+        	popupContent = '<ul class="popupMenu">'+
+ 				 		   '<li class="popupMenuContent"><a href="${modWbs}${p.id}&idw=' + valueIdWbs + '" class="linkPopup">Visualizza WBS</a></li>' +
+ 				  	 	   '<li class="lastMenuContent"><a href="${act}${p.id}&idw=' + valueIdWbs + '" class="linkPopup">Visualizza attivit&agrave; di WBS</a></li>' + <%-- (elenco) --%>
+					  	   '</ul>';
+          	if (isWorkPackage == "true") {
+          	  popupContent = '<ul class="popupMenu">'+
+        				   	 '<li class="popupMenuContent"><a href="${modWbs}${p.id}&idw=' + valueIdWbs + '" class="linkPopup">Visualizza WBS</a></li>' +
+        				   	 '<li class="lastMenuContent"><a href="${act}${p.id}&idw=' + valueIdWbs + '" class="linkPopup">Visualizza attivit&agrave; di WBS (elenco)</a></li>' +
+        			  	 	 <%-- '<li class="lastMenuContent"><a href="#form-grafico" class="linkPopup" id="link-form-grafico" name="link-form-grafico" rel="modal:open">Visualizza attivit&agrave; di WBS (grafico)</a></li>' + --%>
+        				   	 '</ul>';
+          	}
  	   	  </c:otherwise>
  	    </c:choose>
             popupWindow('Funzioni','popup2', true, popupContent);
@@ -98,6 +106,22 @@
         }
       }
     </script>
+    <link href="<c:out value="${initParam.urlDirectoryStili}" />orgchart/orgchart.css" rel="stylesheet" type="text/css"/>
+      <style type="text/css">
+        .jOrgChart .left {
+            border-right: 1px solid black;
+        }
+        
+        .wbs {
+            background-color: #3399FF !important;
+            color: #e6e6e6;
+        }
+        
+        .jOrgChart .multi-tree span .content {
+            background-color: #ffff00 !important;
+        }
+      </style>
+      <script src="<c:out value="${initParam.urlDirectoryScript}" />orgchart/orgchart.js"></script>
     <span class="float-right">
       <a class="btn btnNav" href="${urlWbs}${p.id}">
         <i class="fas fa-undo"></i> WBS
@@ -147,6 +171,18 @@
         Non &egrave; possibile aggiungere una WBS figlia a questa WBS, in quanto &egrave; di tipo Workpackage.<br />
         Per eseguire l'operazione &egrave; necessario togliere il flag di Workpackage nella : <a href="#">pagina di modifica</a>.<br />
         In caso contrario, selezionare una WBS non di tipo Workpackage.
+      </div>
+    </div>
+    <div id="form-grafico" class="modal">
+      <hr class="separatore" />
+      <div style="overflow-x: scroll;">
+        <ul id="tree-data${p.id}" style="display:none;">
+          <li id="progetto${p.id}" class="wbs">
+            ${p.titolo}
+            <ul>
+            </ul>
+          </li>
+        </ul>
       </div>
     </div>
     <div id="popup2" class="popup1">
