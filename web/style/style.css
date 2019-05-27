@@ -89,7 +89,7 @@ a:hover.cc-link {
 	text-decoration: underline;
 }
 
-a:link:not(.btnNav):not(.btn-outline-danger).btn, a:visited:not(.btnNav):not(.btn-outline-danger).btn {
+a:link:not(.btnNav):not(.btn-outline-danger):not(.btn-warning).btn, a:visited:not(.btnNav):not(.btn-outline-danger):not(.btn-warning).btn {
 	color: white;
 }
 
