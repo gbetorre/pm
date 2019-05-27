@@ -1,0 +1,120 @@
+    <c:if test="${not empty sessionScope.usr.id}">
+    <script>
+ 	// Corregge la posizione e la larghezza dei megamenu per non far uscire la scrollbar orizzontale
+  	$('div.nav-panel').css({"width" : "calc(100vw - " + (window.width - document.body.scrollWidth) + "px)", "margin-left" : "calc(-1 * ((100vw - " + (window.width - document.body.scrollWidth) + "px - 100%) / 2))"});
+  	var numberOfSubmenu = 0;
+    $(document).ready(function(){
+    	// Over intent su link menu
+    	$('.nav-panel').hide();
+    	$('.menu-nav > li').hover(function () {
+    	  numberOfSubmenu = $(this).attr('id').substring(5);
+      	  if ($(document).find('#panel-'+numberOfSubmenu).length > 0) {
+      	      $(document).find('#panel-'+numberOfSubmenu).stop().delay(300).slideDown(300);
+          	$('#panel-'+numberOfSubmenu).hover(function () {
+      	      $(document).find('#panel-'+numberOfSubmenu).stop().fadeIn(300);
+      	      counter = 2;
+          	}, function() {
+          	  if ($(document).find('#panel-'+numberOfSubmenu).length > 0) {
+          		$(document).find('#panel-'+numberOfSubmenu).stop().slideUp(300);
+          	  }
+          	});
+      	  }
+    	},function () {
+    	  numberOfSubmenu = $(this).attr('id').substring(5);
+    	  if ($(document).find('#panel-'+numberOfSubmenu).length > 0) {
+  	        $(document).find('#panel-'+numberOfSubmenu).stop().slideUp(300);
+  	      }
+    	});
+    });
+    </script>
+    <div id="megamenu" class="hidden-xs">
+      <div id="menu-wrapper">
+        <ul class="menu-nav">
+          <!-- Home -->
+          <li id="backHome">
+            <a class="nav-main-link" href="#"><i class="fas fa-home"></i></a>
+          </li>
+          <!-- Menu Orizzontale -->
+          <li class="link-menu" id="link-1">
+            <a class="nav-main-link" href="#">Project Charter<span class="caret"></span></a>
+          </li>
+          <li class="link-menu" id="link-2">
+            <a class="nav-main-link" href="#">WBS<span class="caret"></span></a>
+          </li>
+          <li class="link-menu" id="link-3">
+            <a class="nav-main-link" href="#">Attivit&agrave;<span class="caret"></span></a>
+          </li>
+          <li class="link-menu" id="link-4">
+            <a class="nav-main-link" href="#">Status<span class="caret"></span></a>
+          </li>
+          <li class="link-menu" id="link-5">
+            <a class="nav-main-link" href="#">Report<span class="caret"></span></a>
+          </li>
+        </ul>
+      </div>
+      <div class="nav-panel" id="panel-1" style="display: none;">
+        <div class="row container-fluid">
+          <div class="col-md-3">
+            <img src="${initParam.urlDirectoryImmagini}segnapostoImmagine.png" height="256" width="256">
+          </div>
+          <div class="col-md-9">
+            <div class="row">
+              <div class="col">
+                <h3 class="orange">Il project charter &egrave; la carta d'identit&agrave; del progetto.</h3>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-4">
+                <ul class="mega-menu-list">
+                  <li>
+                    <a href="#" class="link-submenu">Vision</a>
+                  </li>
+                  <li>
+                    <a href="#" class="link-submenu">Stakeholder</a>
+                  </li>
+                  <li>
+                    <a href="#" class="link-submenu">Milestone</a>
+                  </li>
+                  <li>
+                    <a href="#" class="link-submenu">Risorse</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="nav-panel" id="panel-2" style="display: none;">
+        <div class="row container-fluid">
+          <div class="col-md-3">
+            <img src="${initParam.urlDirectoryImmagini}segnapostoImmagine.png" width="100%">
+          </div>
+          <div class="col-md-9">
+            <div class="row">
+              <div class="col">
+                <h3 class="orange">Le wbs sono work breakdown structure</h3>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-4">
+                <ul class="mega-menu-list">
+                  <li>
+                    <a href="#" class="link-submenu">Elenco</a>
+                  </li>
+                  <li>
+                    <a href="#" class="link-submenu">Grafico</a>
+                  </li>
+                  <li>
+                    <a href="#" class="link-submenu">Attivit&agrave;</a>
+                  </li>
+                  <li>
+                    <a href="#" class="link-submenu">Report</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </c:if>
