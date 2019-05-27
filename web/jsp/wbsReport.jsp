@@ -15,7 +15,7 @@
     <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${urlWbs}${prj.id}">WBS</a></li>
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${grafico}${prj.id}">Grafico</a></li>
-      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="javascript:alert('Per visualizzare le attivit&agrave; di un Workpackage cliccare sul link sotteso al nome dello stesso')" id="show_act">Attivit&agrave;</a></li>
+      <li class="nav-item"><a class="nav-link" data-toggle="tab" id="show_act">Attivit&agrave;</a></li>
       <li class="nav-item"><a class="nav-link active tabactive" data-toggle="tab" href="#">Report</a></li>
     </ul>
     <hr class="separatore" />
