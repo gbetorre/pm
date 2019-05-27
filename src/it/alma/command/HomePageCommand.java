@@ -288,6 +288,53 @@ public class HomePageCommand extends ItemBean implements Command {
         req.setAttribute("fileJsp", fileJspT);
     }
     
+    
+    /**
+     * <p>Restituisce l'utente loggato se lo trova, altrimenti lancia 
+     * un'eccezione.</p>
+     * 
+     * @param req HttpServletRequest contenente la sessione e i suoi attributi
+     * @return <code>PersonBean</code> - l'utente loggatosi correntemente
+     * @throws CommandException se si verifica un problema nel recupero della sessione o dei suoi attributi
+     */
+    public static PersonBean getLoggedUser(HttpServletRequest req) 
+                                    throws CommandException {
+        // Utente loggato
+        PersonBean user = null;
+        /* ******************************************************************** *
+         *                         Recupera la Sessione                         *
+         * ******************************************************************** */
+        try {
+            // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
+            HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
+            if (ses == null) {
+                throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
+            }
+            user = (PersonBean) ses.getAttribute("usr");
+            if (user == null) {
+                throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
+            }
+            return user;
+        } catch (IllegalStateException ise) {
+            String msg = FOR_NAME + "Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + ise.getMessage(), ise);
+        } catch (ClassCastException cce) {
+            String msg = FOR_NAME + ": Si e\' verificato un problema in una conversione di tipo.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + cce.getMessage(), cce);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null, probabilmente nel tentativo di recuperare l\'utente.\n";
+            LOG.severe(msg);
+            throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n" + npe.getMessage(), npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+    }
+    
+    
     /* ************************************************************************ *
      *                            Metodi di utilita'                            *
      * ************************************************************************ */
