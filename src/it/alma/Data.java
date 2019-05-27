@@ -1,58 +1,73 @@
 /*
- *   University on Line (uol), web application to publish the faculties, 
- *   departments and university informations.
- *   Copyright © 2002-2016 by Università degli Studi di Verona. Verona (I).
- *   All rights reserved.
+ *   Alma on Line: Applicazione WEB per la visualizzazione 
+ *   delle schede di indagine su popolazione dell'ateneo,
+ *   della gestione dei progetti on line (POL) 
+ *   e della preparazione e del monitoraggio delle informazioni riguardanti 
+ *   l'offerta formativa che hanno ricadute sulla valutazione della didattica 
+ *   (questionari on line - QOL).
+ *   
+ *   Copyright (C) 2018 Giovanroberto Torre<br />
+ *   Alma on Line (aol), Projects on Line (pol), Questionnaire on Line (qol);
+ *   web applications to publish, and manage, students evaluation,
+ *   projects, students and degrees information.
+ *   Copyright (C) renewed 2019 Universita' degli Studi di Verona, 
+ *   all right reserved
  *
- *   This program is free software; you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation; either version 2 of the License, or
- *   (at your option) any later version.
+ *   This program is free software; you can redistribute it and/or modify 
+ *   it under the terms of the GNU General Public License as published by 
+ *   the Free Software Foundation; either version 2 of the License, or 
+ *   (at your option) any later version. 
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful, 
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of 
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+ *   GNU General Public License for more details. 
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program; if not, write to the Free Software
- *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *   or see <http://www.gnu.org/licenses/>
- *
+ *   You should have received a copy of the GNU General Public License 
+ *   along with this program; if not, write to the Free Software 
+ *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA<br>
+ *   
  *   Giovanroberto Torre <giovanroberto.torre@univr.it>
- *   Direzione Servizi Informatici di Ateneo
+ *   Sistemi Informatici per il Reporting di Ateneo
  *   Universita' degli Studi di Verona
- *   Via Paradiso 6
+ *   Via Dell'Artigliere, 8
  *   37129 Verona (Italy)
  */
+
 package it.alma;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Locale;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
 import java.util.Vector;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.oreilly.servlet.ParameterParser;
+
+import it.alma.bean.ActivityBean;
 import it.alma.bean.ItemBean;
+import it.alma.bean.PersonBean;
+import it.alma.bean.ProjectBean;
+import it.alma.bean.WbsBean;
 import it.alma.command.Command;
+import it.alma.command.HomePageCommand;
+import it.alma.command.WbsCommand;
+import it.alma.exception.AttributoNonValorizzatoException;
 import it.alma.exception.CommandException;
 import it.alma.exception.WebStorageException;
 
 
 /**
- * <p><code>Data</code> &egrave; la servlet della web-application aol
+ * <p><code>Data</code> &egrave; la servlet della web-application pol
  * che viene utilizzata per produrre output con contentType differenti da 
  * 'text/html'.</p>
  * Questa servlet fa a meno, legittimamente, del design (View),
@@ -78,10 +93,10 @@ import it.alma.exception.WebStorageException;
  * sarà fatto un forward.
  * </p>
  * L'azione presente nell'URL deve avere il seguente formato:
- * <pre>ent=&lt;nome&gt;</pre>
- * dove 'nome' è il valore del parametro 'ent' che identifica 
+ * <pre>q=&lt;nome&gt;</pre>
+ * dove 'nome' è il valore del parametro 'q' che identifica 
  * l'azione da compiere al fine di generare i record.<br />
- * Oltre al parametro <code>'ent'</code> possono essere presenti anche
+ * Oltre al parametro <code>'q'</code> possono essere presenti anche
  * eventuali altri parametri, ma essi non hanno interesse nel contesto
  * della presente classe, venendo incapsulati nella HttpServletRequest
  * e quindi inoltrati alla classe Command che deve fare il lavoro di
@@ -94,14 +109,12 @@ import it.alma.exception.WebStorageException;
  * Altre modalit&agrave; di generazione di output differenti da 'text/html'
  * (chiamate a pagine .jsp che incorporano la logica di preparazione del CSV,
  * chiamate a pagina .jsp che si occupano di presentare il metadato...)
- * dovrebbero essere progressivamente abbandonate a partire da AOL 3.0 
- * <em>(data di rilascio: 27/06/2013)</em>
+ * non sono ammesse nell'applicazione POL 
+ * <em>(data del primo rilascio: 13/02/2019)</em>
  * in favore dell'uso di questa servlet.
  * </p>
  *
- * @version 1.7
  * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
- * 
  */
 public class Data extends HttpServlet {
     
@@ -160,7 +173,7 @@ public class Data extends HttpServlet {
      * </ul>
      * Inoltre, effettua il caricamento in una struttura &ndash; 
      * definita come variabile di istanza &ndash; 
-     * delle classi Command di <code>aol</code>
+     * delle classi Command di <code>pol</code>
      * abilitate all'output su file.
      * </p>
      * 
@@ -174,14 +187,20 @@ public class Data extends HttpServlet {
          */
         super.init(config);
         /*
+         * Nome del parametro che identifica la Command da interpellare
+         */
+        entToken = getServletContext().getInitParameter("entToken");
+        if (entToken == null) {
+            throw new ServletException(FOR_NAME + "\n\nManca il parametro di contesto 'entToken'!\n\n");
+        }
+        /*
          * Attiva la connessione al database
          */
         try {
             db = new DBWrapper();
-        }
-        catch (WebStorageException wse) {
+        } catch (WebStorageException wse) {
             String error = FOR_NAME + "Non e\' possibile avere una connessione al database: " + wse.getMessage();
-            log.severe(error);
+            log.severe("Problema grave in init!! Il server puo\' aver avuto problemi a partire!" + error);
             throw new ServletException(error, wse);
         }
         /*
@@ -200,29 +219,30 @@ public class Data extends HttpServlet {
         /*
          *  Caricamento degli 'ent' ammessi alla generazione di output su file
          */
-        entTokens.add("incarichi");
-        entTokens.add("gareavcp");    
+        entTokens.add("pol");
+        entTokens.add("wbs");
         ItemBean voceMenu = null;
         Command classCommand = null;
+        commands = new HashMap<String, Command>();
         for (int i = 0; i < classiCommand.size(); i++) {
             voceMenu = classiCommand.get(i);
             log.info(FOR_NAME + "Il nome della voce di menu vale: " + voceMenu.getNome());
             if (entTokens.contains(voceMenu.getNome())) {
                 try {
-                    log.info(FOR_NAME + "Valore di entTokens corrispondente al nome della voce di menu: " + voceMenu.getNome() + "\nTentativo di istanziare it.univr.di.uol.command." + voceMenu.getNomeClasse());
-                    classCommand = (Command) Class.forName("it.univr.di.uol.command." + voceMenu.getNomeClasse()).newInstance();
-                    log.info(FOR_NAME + "Tentativo di inizializzare it.univr.di.uol.command." + voceMenu.getNomeClasse());
+                    log.info(FOR_NAME + "Valore di entTokens corrispondente al nome della voce di menu: " + voceMenu.getNome() + "\nTentativo di istanziare it.alma.command." + voceMenu.getNomeClasse());
+                    classCommand = (Command) Class.forName("it.alma.command." + voceMenu.getNomeClasse()).newInstance();
+                    log.info(FOR_NAME + "Tentativo di inizializzare it.alma.command." + voceMenu.getNomeClasse());
                     classCommand.init(voceMenu);
-                    log.info(FOR_NAME + "Tentativo di aggiungere la classe comune alle command ammesse.");
+                    log.info(FOR_NAME + "Tentativo di aggiungere la classe di pol alle command ammesse.");
                     commands.put(voceMenu.getNome(), classCommand);
                     log.info(FOR_NAME + "La dimensione della tabella commands di Data al momento vale: " + commands.size());
-                } catch (ClassNotFoundException cnfe) {
+                } catch (ClassNotFoundException cnfe) { // Se non riesce a istanziare la Command in generali la cerca in un sottopackage
                     try {
-                        log.info(FOR_NAME + "Riprova: valore di entTokens corrispondente al nome della voce di menu: " + voceMenu.getNome() + "\nTentativo di istanziare it.univr.di.uol.aol.command." + voceMenu.getNomeClasse());
-                        classCommand = (Command) Class.forName("it.univr.di.uol.aol.command." + voceMenu.getNomeClasse()).newInstance();
-                        log.info(FOR_NAME + "Tentativo di inizializzare it.univr.di.uol.aol.command." + voceMenu.getNomeClasse());
+                        log.info(FOR_NAME + "Riprova: valore di entTokens corrispondente al nome della voce di menu: " + voceMenu.getNome() + "\nTentativo di istanziare it.alma.qol.command." + voceMenu.getNomeClasse());
+                        classCommand = (Command) Class.forName("it.alma.qol.command." + voceMenu.getNomeClasse()).newInstance();
+                        log.info(FOR_NAME + "Tentativo di inizializzare it.alma.qol.command." + voceMenu.getNomeClasse());
                         classCommand.init(voceMenu);
-                        log.info(FOR_NAME + "Tentativo di aggiungere la classe di aol alle command ammesse.");
+                        log.info(FOR_NAME + "Tentativo di aggiungere la classe di qol alle command ammesse.");
                         commands.put(voceMenu.getNome(), classCommand);
                         log.info(FOR_NAME + "La dimensione della tabella commands di Data al momento vale: " + commands.size());
                     } catch (ClassNotFoundException cnfex) {
@@ -295,11 +315,20 @@ public class Data extends HttpServlet {
      */
     protected void doGet(HttpServletRequest req, HttpServletResponse res)
                   throws ServletException, IOException {
+        // Utente loggato
+        PersonBean usr = null;
+        try {
+            usr = HomePageCommand.getLoggedUser(req);
+        } catch (CommandException ce) {
+            req.setAttribute("javax.servlet.jsp.jspException", ce);
+            log("Problema a livello di autenticazione: " + ce);
+            throw new ServletException(ce.fillInStackTrace());
+        }
         try {
             cmd = lookupCommand(req.getParameter(entToken));
         } catch (CommandException ce) {
            req.setAttribute("javax.servlet.jsp.jspException", ce);
-           log("Errore: " + ce);
+           log("Eccezione: " + ce);
         }
         try {
             // Crea un nome univoco per il file che andrà ad essere generato
@@ -313,7 +342,8 @@ public class Data extends HttpServlet {
                               String.format("%02d", now.get(Calendar.SECOND));
             // Configura il response per il browser
             res.setContentType("text/x-comma-separated-values");
-            /* Il db di WebIntegrato e' codificato in UTF-8; 
+            /* Il db di pol e' codificato in UTF-8:
+             * pol  | gtorre   | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =Tc/gtorre 
              * pertanto la prima idea nell'implementazione era che
              * il characterEncoding migliore da impostare fosse il medesimo:
              * //res.setCharacterEncoding("UTF-8");
@@ -333,7 +363,7 @@ public class Data extends HttpServlet {
              * non corrispondenti.                                              */
             res.setCharacterEncoding("ISO-8859-1");
             res.setHeader("Content-Disposition","attachment;filename=" + fileName + ".csv");
-            fprintf(req, res);
+            fprintf(req, res, usr);
         } catch (Exception e) {
             log.severe("Problema nella doGet di Data" + e.getMessage());
         }
@@ -343,27 +373,28 @@ public class Data extends HttpServlet {
     /**
      * <p>Genera il contenuto dello stream, che questa classe tratta 
      * sotto forma di file, che viene trasmesso sulla risposta in output,
-     * a seconda del valore di <code>'ent'</code> che riceve in input.</p>
+     * a seconda del valore di <code>'ent' (q)</code> che riceve in input.</p>
      * <p>
      * Storicamente, in programmazione <code> C, C++ </code> e affini, 
      * le funzioni che scrivono sull'outputstream si chiamano tutte 
      * <code>printf</code>, precedute da vari prefissi a seconda di
-     * quello che scrivono e dove lo scrivono.<br />
+     * quello che scrivono e di dove lo scrivono.<br />
      * <code>fprintf</code> &egrave; la funzione della libreria C che
      * invia output formattati allo stream, identificato con un puntatore
      * a un oggetto FILE passato come argomento 
      * (<small>per approfondire, 
      * <a href="http://www.tutorialspoint.com/c_standard_library/c_function_fprintf.htm">
      * v. p.es. qui</a></small>).<br />
-     * Qui per analogia, pi&uacute; che altro nella forma di una "dotta"
+     * Qui per analogia, pi&uacute; che altro nella forma di una "sfiziosa"
      * citazione (per l'ambito informatico) il metodo della Data che 
      * scrive il contenuto vero e proprio del file che viene passato
      * al client, viene chiamato allo stesso modo di questa "storica" funzione, 
-     * ma il contesto degli oggetti e degli argomenti 
+     * &ndash; ma il contesto degli oggetti e degli argomenti 
      * &egrave; ovviamente completamente diverso.</p>
      * 
      * @param req la HttpServletRequest contenente il valore di 'ent' e gli altri parametri necessari a formattare opportunamente l'output
      * @param res la HttpServletResponse utilizzata per ottenere il 'Writer' su cui stampare il contenuto, cioe' il file stesso
+     * @param usr PersonBean rappresentante l'utente loggato (per evitare che, conoscendo l'url, si possano scaricare report senza loggarsi!)
      * @return <code>int</code> - un valore intero restituito per motivi storici. 
      *                            Tradizionalmente, tutte le funzioni della famiglia x-printf restituiscono un intero, 
      *                            che vale il numero dei caratteri scritti - qui il numero delle righe scritte - in caso di successo 
@@ -371,16 +402,20 @@ public class Data extends HttpServlet {
      * @throws ServletException   java.lang.Throwable.Exception.ServletException che viene sollevata se manca un parametro di configurazione considerato obbligatorio o per via di qualche altro problema di puntamento
      * @throws IOException        java.io.IOException che viene sollevata se si verifica un puntamento a null o in genere nei casi in cui nella gestione del flusso informativo di questo metodo si verifica un problema
      */
-    private int fprintf(HttpServletRequest req, HttpServletResponse res)
+    private int fprintf(HttpServletRequest req, HttpServletResponse res, PersonBean usr)
                  throws ServletException, IOException {
         /*
          *  Genera l'oggetto per lo standard output
          */
         PrintWriter out = res.getWriter();
-        /*
-         *  Per ottimizzare
+        /* 
+         * Parser per la gestione assistita dei parametri di input
          */
-        ServletContext servletContext = getServletContext();
+        ParameterParser parser = new ParameterParser(req);
+        /* 
+         * Recupera o inizializza 'id progetto'
+         */
+        int idPrj = parser.getIntParameter("id", Utils.DEFAULT_ID);
         /*
          *  Tradizionalmente, ogni funzione della famiglia x-printf 
          *  restituisce un intero
@@ -389,52 +424,74 @@ public class Data extends HttpServlet {
         /* **************************************************************** *
          *          Contenuto files CSV per Report di WBS          *
          * **************************************************************** */
-        if (req.getParameter(entToken).equals("incarichi")) { /*
-            try {            
-                IncarichiPersonaleCommand ip = (IncarichiPersonaleCommand) cmd;
-                Vector<IncaricoBean> elencoIncarichi = ip.requestByContent(req);
-                HashMap<Integer, String> elencoTipiContratto = IncarichiPersonaleCommand.NOMI_TIPO_INCARICO;
+        if (req.getParameter(entToken).equals("wbs")) { 
+            try {
+                WbsCommand wbsc = (WbsCommand) cmd;
+                
+                ProjectBean p = db.getProject(idPrj, usr.getId());
+                Vector<WbsBean> listWP = WbsCommand.retrieveWorkPackages(idPrj, db);
                 // Scrittura file CSV
                 out.println("N." + SEPARATOR +
-                            "Persona" + SEPARATOR + 
-                            "Tipo Incarico" + SEPARATOR + 
-                            "Tipo Contratto" + SEPARATOR + 
-                            "Oggetto" + SEPARATOR + 
-                            "Estremi del provvedimento" + SEPARATOR +
-                            "Data provvedimento" + SEPARATOR + 
-                            "Data inizio" + SEPARATOR +
-                            "Data fine" + SEPARATOR +
-                            "Compenso" + SEPARATOR +
-                            "Struttura conferente");
-                if (elencoIncarichi.size() > 0) {
+                            "Workpackage" + SEPARATOR + 
+                            "Wbs padre" + SEPARATOR + 
+                            "Attivita" + SEPARATOR + 
+                            "Durata prevista" + SEPARATOR + 
+                            "Durata effettiva" + SEPARATOR + 
+                            "Data inizio prevista" + SEPARATOR +
+                            "Data fine prevista" + SEPARATOR + 
+                            "Data inizio effettiva" + SEPARATOR +
+                            "Data fine effettiva" + SEPARATOR +
+                            "Progetto" + SEPARATOR +
+                            "Stato");
+                if (listWP.size() > 0) {
                     int itCounts = 0, record = 0;
                     do {
-                        IncaricoBean incarico = elencoIncarichi.elementAt(itCounts);
-                        out.println(
+                        WbsBean wp = listWP.elementAt(itCounts);
+                        WbsBean wbsParent = db.getWbsParentByOffspring(idPrj, wp.getId());
+                        StringBuffer nomePadre = new StringBuffer();
+                        if (wbsParent != null) {
+                            nomePadre.append(wbsParent.getNome());
+                        }
+                        for (ActivityBean act : wp.getAttivita()) {
+                            String guPrevisti = (act.getGuPrevisti() > Query.NOTHING) ? Integer.toString(act.getGuPrevisti()) : Utils.VOID_STRING;
+                            String guEffettivi = (act.getGuEffettivi() > Query.NOTHING) ? Integer.toString(act.getGuEffettivi()) : Utils.VOID_STRING;
+                            String dataInizio = (act.getDataInizio() != null && act.getDataInizio().after(new Date(0))) ? act.getDataInizio().toString() : Utils.VOID_STRING;
+                            String dataFine = (act.getDataFine() != null && act.getDataFine().after(new Date(0))) ? act.getDataFine().toString() : Utils.VOID_STRING;
+                            String dataInizioEffettiva = (act.getDataInizioEffettiva() != null && act.getDataInizioEffettiva().after(new Date(0))) ? act.getDataInizioEffettiva().toString() : Utils.VOID_STRING;
+                            String dataFineEffettiva = (act.getDataFineEffettiva() != null && act.getDataFineEffettiva().after(new Date(0))) ? act.getDataFineEffettiva().toString() : Utils.VOID_STRING;
+                            out.println(
                                     ++record + SEPARATOR +
-                                    incarico.getCognomePersona().replace(';', ',') + " " +
-                                    incarico.getNomePersona().replace(';', ',') + SEPARATOR +
-                                    elencoTipiContratto.get(incarico.getTipoIncarico()).replace(';', ',') + SEPARATOR +
-                                    incarico.getTipoContratto() + SEPARATOR +
-                                    incarico.getOggetto().replace(';', ',') + SEPARATOR +
-                                    incarico.getProvvedimento().replace(';', ',') + SEPARATOR +
-                                    incarico.getDataProvvedimento() + SEPARATOR +
-                                    incarico.getDataInizio() + SEPARATOR +
-                                    incarico.getDataFine() + SEPARATOR +
-                                    Float.toString(incarico.getCompensoPrevisto()).replace('.', ',') + SEPARATOR +
-                                    incarico.getNomeStruttura().replace(';', ',')
+                                    wp.getNome().replace(';', ',') + SEPARATOR +
+                                    nomePadre + SEPARATOR +
+                                    act.getNome().replace(';', ',') + SEPARATOR +
+                                    guPrevisti + SEPARATOR +
+                                    guEffettivi + SEPARATOR +
+                                    dataInizio + SEPARATOR +
+                                    dataFine + SEPARATOR +
+                                    dataInizioEffettiva + SEPARATOR +
+                                    dataFineEffettiva + SEPARATOR +
+                                    p.getTitolo() + SEPARATOR +
+                                    act.getStato().getNome().replace(';', ',')
                                    );
+                        }
                         itCounts++;
-                    } while (itCounts < elencoIncarichi.size());
+                    } while (itCounts < listWP.size());
                     success = itCounts;
                 }
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Attributo obbligatorio di bean non valorizzato; problema nell\'accesso a valori ai fini della generazione del file.\n";
+                log.severe(msg); 
+                out.println(anve.getMessage());
             } catch (CommandException ce) {
-                log.severe(FOR_NAME + "Si e\' verificato un problema nel recupero di elenco incarichi" + ce.getMessage());
+                log.severe(FOR_NAME + "Si e\' verificato un problema nel recupero di elenco work packages" + ce.getMessage());
                 out.println(ce.getMessage());
+            } catch (NullPointerException npe) {
+                log.severe(FOR_NAME + "Si e\' verificato un problema di puntamento: applicazione terminata!" + npe.getMessage());
+                out.println(npe.getMessage());
             } catch (Exception e) {
                 log.severe(FOR_NAME + "Problema nella fprintf di Data" + e.getMessage());
                 out.println(e.getMessage());
-            }*/
+            }
         }
         /* **************************************************************** *
          *                Contenuto files CSV per Report di progetto             *
