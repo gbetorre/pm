@@ -88,7 +88,7 @@
             </span>
           </div>
           <div class="col-4 text-center">
-            <a href="javascript:alert('Funzionalit&agrave; in corso di implementazione')" class="btn btn-success" id="expReport"><i class="fas fa-file-export"></i> Esporta</a>
+            <a href="${initParam.appName}/data?q=wbs&id=${param['id']}" class="btn btn-warning" id="expReport"><i class="fas fa-file-export"></i> Esporta CSV</a>
           </div>
         </div>
       </div>
