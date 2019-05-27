@@ -52,12 +52,12 @@ body.loginbody {
 	background-image: radial-gradient(#ffffff, #ddeeff);
 }
 
-a:link:not(.btn):not(.cc-link):not(.linkFooter):not(.nav-link):not(.helpInfo):not(.page-link):not(.ico):not(.linkPopup):not(.linkWbsGrafico), 
-a:visited:not(.btn):not(.cc-link):not(.linkFooter):not(.nav-link):not(.btnNav):not(.helpInfo):not(.page-link):not(.ico):not(.linkPopup):not(.linkWbsGrafico) {
+a:link:not(.btn):not(.cc-link):not(.linkFooter):not(.nav-link):not(.helpInfo):not(.page-link):not(.ico):not(.linkPopup):not(.linkWbsGrafico):not(.nav-main-link):not(.link-submenu), 
+a:visited:not(.btn):not(.cc-link):not(.linkFooter):not(.nav-link):not(.btnNav):not(.helpInfo):not(.page-link):not(.ico):not(.linkPopup):not(.linkWbsGrafico):not(.nav-main-link):not(.link-submenu) {
 	color: #005c99; 
 }
 
-a:hover:not(.btn):not(.logoHeader):not(.cc-link):not(.ui-datepicker-prev):not(.ui-datepicker-next):not(.nav-link):not(.linkFooter):not(.cc-link):not(.helpInfo):not(.page-link):not(.ico):not(.linkHeader):not(.linkPopup):not(.linkWbsGrafico) {
+a:hover:not(.btn):not(.logoHeader):not(.cc-link):not(.ui-datepicker-prev):not(.ui-datepicker-next):not(.nav-link):not(.linkFooter):not(.cc-link):not(.helpInfo):not(.page-link):not(.ico):not(.linkHeader):not(.linkPopup):not(.linkWbsGrafico):not(.nav-main-link):not(.link-submenu) {
 	text-decoration: underline;
 	color: #002e4d;
 	background-color: #d7d9d9;
@@ -483,6 +483,7 @@ textarea {
 .page {
 	margin-right: 20px;
 	margin-left: 20px;
+	margin-top: 25px;
 }
 
 /*---------------------- Page header and footer styles ------------------------*/
@@ -493,8 +494,8 @@ textarea {
 }
 
 .header {
-	 background-image: linear-gradient(to bottom, #b2cfcd, #ffffff);
-	 height: 10%;
+	 background-color: #b2cfcd; /*linear-gradient(to bottom, #b2cfcd, #ffffff);*/
+	 height: 100px;
 }
 
 /*---------------------- Additional styles ------------------------*/
