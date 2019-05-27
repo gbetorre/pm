@@ -122,6 +122,14 @@ a:not([href]):not([tabindex]), a:hover:not([href]):not([tabindex]) {
 	color:white;
 }
 
+a:not([href]).nav-link {
+	color: #999999;
+}
+
+a:hover:not([href]).nav-link {
+	background-color: gray;
+}
+
 a.btn-disabled {
   background: #999999;
 }
