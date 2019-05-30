@@ -44,6 +44,13 @@ package it.alma.bean;
  * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
  */
 public class ItemBean implements Comparable<ItemBean> {
+    /**
+     *  Nome di questa classe
+     */
+    private final String FOR_NAME = "\n" + this.getClass().getName() + ": "; //$NON-NLS-1$
+    /* $NON-NLS-1$ silence a warning that Eclipse emits when it encounters string literals
+        The idea is that UI messages should not be embedded as string literals, 
+        but rather sourced from a resource file (so that they can be translated, proofed, etc).*/
     /** 
      * Suffisso per le Command                                     
      */
@@ -243,8 +250,11 @@ public class ItemBean implements Comparable<ItemBean> {
         this.urlInterno = true;
     }
     
+    /* **************************************************************** *
+     * Metodi Ovverride per ordinare oggetti di questo tipo nelle liste *
+     * **************************************************************** */
     
-    /**
+    /*
      * <p>Compara due oggetti ItemBean basandosi sull'id</p>
      * <p>
      * Questo permette di effettuare comparazioni direttamente 
@@ -259,11 +269,65 @@ public class ItemBean implements Comparable<ItemBean> {
      * Collections.sort(theVoicesOfTime);
      * </pre></p>
      */
+    /* (non-Javadoc)
+     * @see java.lang.Comparable#compareTo(java.lang.Object)
+     */
+    @SuppressWarnings("javadoc")
     @Override
     public int compareTo(ItemBean o) {
-        if (this.id == o.getId()) return 0;
-        else if (this.id < o.getId()) return -1;
-        else return 1;
+        if (this.id == o.getId()) 
+            return 0;
+        else if (this.id < o.getId()) 
+            return -1;
+        else 
+            return 1;
+    }
+    
+    /* **************************************************************** *
+     *  Metodi Ovverride per usare l'oggetto come  key di un dictionary *
+     * **************************************************************** */
+    
+    /* Compare only item ids */
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @SuppressWarnings("javadoc")
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null)
+            return false;
+        if (getClass() != o.getClass())
+            return false;
+        ItemBean other = (ItemBean) o;
+        if (this.id != other.getId())
+            return false;
+        return true;
+    }
+    
+    
+    /* Depends only on item id */
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @SuppressWarnings("javadoc")
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + this.id; 
+        return result;
+    }
+    
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @SuppressWarnings("javadoc")
+    @Override
+    public String toString() {
+        return FOR_NAME + "@" + this.nome + String.valueOf(this.id);
     }
     
     /* ************************************************************************ *  
@@ -287,7 +351,7 @@ public class ItemBean implements Comparable<ItemBean> {
     
     
     /**
-     * @return <code>nome</code> - il token usato per individuare questa entità nella query string
+     * @return <code>nome</code> - il token usato per individuare questa entita' nella query string
      */
     public String getNome() {
         return this.nome;
