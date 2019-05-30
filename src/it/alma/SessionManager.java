@@ -38,8 +38,11 @@ package it.alma;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import javax.servlet.RequestDispatcher;
@@ -54,10 +57,12 @@ import com.oreilly.servlet.ParameterParser;
 
 import it.alma.bean.ActivityBean;
 import it.alma.bean.DepartmentBean;
+import it.alma.bean.ItemBean;
 import it.alma.bean.PersonBean;
 import it.alma.bean.ProjectBean;
 import it.alma.bean.RiskBean;
 import it.alma.bean.SkillBean;
+import it.alma.command.HomePageCommand;
 import it.alma.exception.AttributoNonValorizzatoException;
 import it.alma.exception.CommandException;
 import it.alma.exception.WebStorageException;
@@ -218,26 +223,7 @@ public class SessionManager extends HttpServlet {
             }
             else {
                 // Logga anzitutto l'accesso
-                StringBuffer ip = new StringBuffer(req.getRemoteAddr());
-                StringBuffer remoteHost = new StringBuffer(req.getRemoteHost());
-                String server = req.getServerName();
-                // Recupera il browser
-                if (req.getHeader("user-agent") != null) {
-                    remoteHost = new StringBuffer(req.getHeader("user-agent"));
-                }
-                // Recupera il vero IPv4 dell'utente
-                if (req.getHeader("x-real-ip") != null) {
-                    ip = new StringBuffer(req.getHeader("x-real-ip"));
-                }
-                // Se non riesce a recuperare il vero IP verifica se è quello del NAT
-                else if (String.valueOf(ip).equalsIgnoreCase("0:0:0:0:0:0:0:1")) {
-                    // In tal caso tenta di recuperare l'IP dall'oggetto InetAddress
-                    InetAddress inetAddress = InetAddress.getLocalHost();
-                    remoteHost = new StringBuffer(inetAddress.getHostName());
-                    String ipAddress = inetAddress.getHostAddress();
-                    ip = new StringBuffer(ipAddress);
-                }
-                db.manageAccess(username, ip, remoteHost, server);
+                traceAccess(req, username, db);
                 // Prepara gli altri attributi 
                 Vector<DepartmentBean> userWritableDepts = db.getWritableDeparts(username);
                 Vector<ProjectBean> userWritableProjects = db.getWritableProjects(username);
@@ -254,11 +240,15 @@ public class SessionManager extends HttpServlet {
                     Vector<RiskBean> userWritableRisks = db.getRisks(idPrj);
                     userWritableARisksByProject.put(key, userWritableRisks);
                 }
+                // Prepara il menu
+                LinkedHashMap<ItemBean, ArrayList<ItemBean>> vO = HomePageCommand.makeMegaMenu((PersonBean) session.getAttribute("usr"), getServletContext().getInitParameter("appName"));
+                // Valorizza in sessione utente tutto ciò che ha preparato
                 session.setAttribute("writableDeparments", userWritableDepts);
                 session.setAttribute("writableProjects", userWritableProjects);
                 session.setAttribute("writableActivity", userWritableActivitiesByProject);
                 session.setAttribute("writableSkills", userWritableSkillsByProject);
                 session.setAttribute("writableRisks", userWritableARisksByProject);
+                session.setAttribute("menu", vO);
                 res.sendRedirect(res.encodeRedirectURL(getServletContext().getInitParameter("appName") + "/?q=pol"));
             }
         } catch (IllegalStateException e) {
@@ -332,6 +322,33 @@ public class SessionManager extends HttpServlet {
             }
         }
         return authenticated;
+    }
+    
+    
+    private static void traceAccess(HttpServletRequest req, 
+                                    String username, 
+                                    DBWrapper db) 
+                             throws WebStorageException, UnknownHostException {
+        StringBuffer ip = new StringBuffer(req.getRemoteAddr());
+        StringBuffer remoteHost = new StringBuffer(req.getRemoteHost());
+        String server = req.getServerName();
+        // Recupera il browser
+        if (req.getHeader("user-agent") != null) {
+            remoteHost = new StringBuffer(req.getHeader("user-agent"));
+        }
+        // Recupera il vero IPv4 dell'utente
+        if (req.getHeader("x-real-ip") != null) {
+            ip = new StringBuffer(req.getHeader("x-real-ip"));
+        }
+        // Se non riesce a recuperare il vero IP verifica se è quello del NAT
+        else if (String.valueOf(ip).equalsIgnoreCase("0:0:0:0:0:0:0:1")) {
+            // In tal caso tenta di recuperare l'IP dall'oggetto InetAddress
+            InetAddress inetAddress = InetAddress.getLocalHost();
+            remoteHost = new StringBuffer(inetAddress.getHostName());
+            String ipAddress = inetAddress.getHostAddress();
+            ip = new StringBuffer(ipAddress);
+        }
+        db.manageAccess(username, ip, remoteHost, server);
     }
     
 }
