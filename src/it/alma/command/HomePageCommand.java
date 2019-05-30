@@ -36,9 +36,12 @@
 
 package it.alma.command;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -53,6 +56,7 @@ import it.alma.Utils;
 import it.alma.bean.CodeBean;
 import it.alma.bean.ItemBean;
 import it.alma.bean.PersonBean;
+import it.alma.bean.ProjectBean;
 import it.alma.bean.StatusBean;
 import it.alma.exception.AttributoNonValorizzatoException;
 import it.alma.exception.CommandException;
@@ -78,6 +82,8 @@ public class HomePageCommand extends ItemBean implements Command {
      * Log per debug in produzione
      */
     protected static Logger LOG = Logger.getLogger(Main.class.getName());
+    
+    private static final int SUB_MENU = 1;
     /**
      * Pagina a cui la command reindirizza per mostrare la form di login
      */
@@ -89,7 +95,7 @@ public class HomePageCommand extends ItemBean implements Command {
     /**
      * DataBound.
      */
-    private DBWrapper db;
+    private static DBWrapper db;
     /**
      * Lista destinata a contenere i possibili valori per esprimere 
      * la complessi&agrave; di un elemento
@@ -190,29 +196,7 @@ public class HomePageCommand extends ItemBean implements Command {
         } catch (WebStorageException wse) {
             throw new CommandException(FOR_NAME + "Non e\' disponibile un collegamento al database\n." + wse.getMessage(), wse);
         }
-        /* ******************************************************************** *
-         *                         Recupera la Sessione                         *
-         * ******************************************************************** *
-        try {
-            // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
-            HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
-        } catch (IllegalStateException ise) {
-            String msg = FOR_NAME + "Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n";
-            LOG.severe(msg);
-            throw new CommandException(msg + ise.getMessage(), ise);
-        } catch (ClassCastException cce) {
-            String msg = FOR_NAME + ": Si e\' verificato un problema in una conversione di tipo.\n";
-            LOG.severe(msg);
-            throw new CommandException(msg + cce.getMessage(), cce);
-        } catch (NullPointerException npe) {
-            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null, probabilmente nel tentativo di recuperare l\'utente.\n";
-            LOG.severe(msg);
-            throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n" + npe.getMessage(), npe);
-        } catch (Exception e) {
-            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
-            LOG.severe(msg);
-            throw new CommandException(msg + e.getMessage(), e);
-        }
+        // NON controlla se l'utente è già loggato perché questa command deve rispondere sempre
         /* *************************************************** *
          *                 Corpo del programma                 *
          * *************************************************** */
@@ -327,6 +311,296 @@ public class HomePageCommand extends ItemBean implements Command {
             String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null, probabilmente nel tentativo di recuperare l\'utente.\n";
             LOG.severe(msg);
             throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n" + npe.getMessage(), npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+    }
+    
+    
+    private static LinkedList<ItemBean> makeMenuOrizzontale(String appName, 
+                                                            int projId)
+                                                     throws CommandException {
+        LinkedList<ItemBean> mO = new LinkedList<ItemBean>();
+        // PROJECT CHARTER
+        ItemBean vO = new ItemBean();
+        vO.setId(1);
+        vO.setNome("pol");
+        vO.setNomeReale("pcv");
+        vO.setLabelWeb("Project Charter");
+        vO.setInformativa("Il Project Charter rappresenta la visione statica del progetto");
+        vO.setUrl(appName + "/?q=" + vO.getNome() + "&p=" + vO.getNomeReale() + "&id=" + projId);
+        vO.setIcona("pc.png");
+        mO.add(vO);
+        // STATUS
+        vO = null;
+        vO = new ItemBean();
+        /*vO.setId(2);
+        vO.setNome("sts");
+        vO.setNomeReale("pol");
+        vO.setLabelWeb("Status");
+        vO.setInformativa("Lo status, o avanzamento di progetto, &egrave; il punto della situazione del progetto a un certo intervallo di tempo");
+        vO.setUrl(appName + "/?q=" + vO.getNomeReale() + "&p=" + vO.getNome() + "&ids=" + Query.NOTHING + "&id=" + projId);
+        vO.setIcona("sts.png");*/
+        vO.setId(2);
+        vO.setNome("pol");
+        vO.setNomeReale("prj");
+        vO.setLabelWeb("Status");
+        vO.setInformativa("Lo status, o avanzamento di progetto, &egrave; il punto della situazione del progetto a un certo intervallo di tempo");
+        vO.setUrl(makeUrl(appName, vO, "prj", projId));
+        vO.setIcona("sts.png");
+        mO.add(vO);
+        // WBS
+        vO = null;
+        vO = new ItemBean();
+        vO.setId(3);
+        vO.setNome("wbs");
+        vO.setLabelWeb("WBS");
+        vO.setInformativa("Le WBS rappresentano unit&agrave; di suddivisione degli ambiti del progetto"); 
+        vO.setUrl(makeUrl(appName, vO, null, projId));
+        vO.setIcona("wbs.png");
+        mO.add(vO);
+        // ATTIVITA'
+        vO = null;
+        vO = new ItemBean();
+        vO.setId(4);
+        vO.setNome("act");
+        vO.setLabelWeb("Attivit&agrave;");
+        vO.setInformativa("Le attivit&agrave; sono le operazioni effettuate e vengono aggregate da specifiche WBS"); 
+        vO.setUrl(makeUrl(appName, vO, null, projId));
+        vO.setIcona("act.png");
+        mO.add(vO);
+        // REPORT
+        vO = null;
+        vO = new ItemBean();
+        vO.setId(5);
+        vO.setNome("pol");
+        vO.setLabelWeb("Report");
+        vO.setInformativa("Il report di progetto &egrave; una rappresentazione sintetica del lavoro svolto"); 
+        vO.setUrl(appName + "/?q=" + vO.getNome() + "&p=rep&id=" + projId);
+        vO.setIcona("rep.png");
+        mO.add(vO);
+        return mO;
+    }
+    
+    /**
+     *TODO commento
+     * O il numero di progetti è = 1 (tipicamente ruoli TL, User - ma potrebbe essere anche un PM di un dipartimento con un solo progetto)
+     * // Oppure il numero di progetti è > 1 (ruoli PM, PMOx, ma potrebbe essere anche un TL o uno User su più progetti)
+     * diciamo che il numero di progetti dell'utente non permette di fare assunzioni
+     * sul ruolo dell'utente stesso: un utente potrebbe essere un semplice user su parecchi progetti
+     * così come un PM o un PMO di dipartimento potrebbe avere un solo progetto
+     * perché il suo dipartimento ne ha prodotto uno solo!
+     * Tuttavia, noi non facciamo assunzioni sul ruolo in base al numero di progetti
+     * ma solo sul menu, perché è evidente che possiamo generare il menu con le
+     * voci dirette alle varie pagine solo se siamo in presenza di un solo progetto;
+     * se l'utente ha parecchi progetti, dobbiamo generare la lista di progetti.
+     * Quanto alla presenza dei "tastini" speciali per il monitoraggio, lì è
+     * effettivamente una questione di ruolo, per cui il discrimine non è più
+     * il numero di progetti utente quanto il ruolo dell'utente stesso
+     * 
+     * @param usr
+     * @param appName
+     * @return
+     * @throws CommandException
+     */
+    public static LinkedHashMap<ItemBean, ArrayList<ItemBean>> makeMegaMenu(PersonBean usr, 
+                                                                            String appName) 
+                                                                     throws CommandException {
+        ItemBean title = null;
+        ItemBean item = null;
+        ArrayList<ItemBean> vV = null;
+        LinkedHashMap<ItemBean, ArrayList<ItemBean>> vO = null;
+        try {
+            vO = new LinkedHashMap<ItemBean, ArrayList<ItemBean>>(11);
+            Vector<ProjectBean> projects = db.getProjects(usr.getId(), Query.GET_ALL);
+            ProjectBean project = projects.elementAt(Query.NOTHING);
+            int projId = project.getId();
+            LinkedList<ItemBean> titles = makeMenuOrizzontale(appName, projId);
+            // Gestisce 2 casi: 
+            if (projects.size() == 1) { // O il numero di progetti è = 1 
+                //Collection<ProjectBean> values = projects.values();
+                //int projId = (ProjectBean) projects.get(key);
+                // PROJECT CHARTER
+                title = titles.getFirst();
+                vV = new ArrayList<ItemBean>();
+                // Vision
+                item = new ItemBean("pcv", "Vision", makeUrl(appName, title, "pcv", projId), SUB_MENU);
+                vV.add(item);
+                // Stakeholder
+                item = null;
+                item = new ItemBean("pcs", "Stakeholder", makeUrl(appName, title, "pcs", projId), SUB_MENU);
+                vV.add(item);
+                // Deliverable
+                item = null;
+                item = new ItemBean("pcd", "Deliverable", makeUrl(appName, title, "pcd", projId), SUB_MENU);
+                vV.add(item);
+                // Risorse
+                item = null;
+                item = new ItemBean("pcr", "Risorse", makeUrl(appName, title, "pcr", projId), SUB_MENU);
+                vV.add(item);
+                // Rischi
+                item = null;
+                item = new ItemBean();
+                item.setNome("ris");
+                item.setLabelWeb("Rischi");
+                item.setUrl(appName + "/?q=" + item.getNome() + "&id=" + projId);
+                item.setLivello(SUB_MENU);
+                vV.add(item);
+                // Vincoli
+                item = null;
+                item = new ItemBean("pcc", "Vincoli", makeUrl(appName, title, "pcc", projId), SUB_MENU);
+                vV.add(item);
+                // Milestone
+                item = null;
+                item = new ItemBean();
+                item.setNome("pcm");
+                item.setLabelWeb("Milestone");
+                item.setUrl(appName + "/?q=act&p=" + item.getNome() + "&id=" + projId);
+                item.setLivello(SUB_MENU);
+                vV.add(item);
+                vO.put(title, vV);
+                // STATUS
+                title = null;
+                title = titles.get(1);
+                vV = new ArrayList<ItemBean>();
+                item = null;
+                ArrayList<StatusBean> projectStatusList = db.getStatusList(projId);
+                for (StatusBean s : projectStatusList) {
+                    item = new ItemBean("sts", 
+                                        "Avanzamento dal " + Utils.format(s.getDataInizio()) + " al " + Utils.format(s.getDataFine()), 
+                                        appName + "/?q=" + title.getNomeReale() + "&p=" + title.getNome() + "&id=" + projId + "&ids=" + s.getId(),
+                                        SUB_MENU);
+                    vV.add(item);
+                }
+                vO.put(title, vV);
+                // WBS
+                title = null;
+                title = titles.get(2);
+                vV = new ArrayList<ItemBean>();
+                // Wbs
+                item = null;
+                item = new ItemBean("wbs", "WBS", title.getUrl(), SUB_MENU);
+                vV.add(item);
+                // Grafico
+                item = null;
+                item = new ItemBean("gra", "Rappresentazione grafica delle WBS", makeUrl(appName, title, "gra", projId), SUB_MENU);
+                vV.add(item);
+                // Report di WorkPackage
+                item = null;
+                item = new ItemBean("rep", "Report di Work Package", makeUrl(appName, title, "rep", projId), SUB_MENU);
+                vV.add(item);
+                vO.put(title, vV);
+                // ATTIVITA'
+                title = null;
+                title = titles.get(3);
+                vV = new ArrayList<ItemBean>();
+                // Attività
+                item = null;
+                item = new ItemBean("act", "Attivit&agrave;", title.getUrl(), SUB_MENU);
+                vV.add(item);
+                // Grafico
+                item = null;
+                item = new ItemBean("gra", "Rappresentazione grafica delle WBS", makeUrl(appName, title, "gra", projId), SUB_MENU);
+                vV.add(item);
+                // Cestino
+                item = null;
+                item = new ItemBean("bin", "Cestino attivit&agrave;", makeUrl(appName, title, "bin", projId), SUB_MENU);
+                vV.add(item);
+                vO.put(title, vV);
+                // REPORT
+                title = null;
+                title = titles.get(4);
+                vV = null;
+                vO.put(title, new ArrayList<ItemBean>());
+            } else if (projects.size() > 1) { // Oppure il numero di progetti è > 1 
+                // PROJECT CHARTER
+                title = titles.getFirst();
+                vV = new ArrayList<ItemBean>();
+                for (ProjectBean p : projects) {
+                    item = new ItemBean("pcv", p.getTitolo(), makeUrl(appName, title, "pcv", p.getId()), SUB_MENU);
+                    vV.add(item);
+                }
+                vO.put(title, vV);
+                // STATUS
+                title = null;
+                title = titles.get(1);
+                vV = new ArrayList<ItemBean>();
+                for (ProjectBean p : projects) {
+                    item = new ItemBean("pol", p.getTitolo(), makeUrl(appName, title, "prj", p.getId()), SUB_MENU);
+                    vV.add(item);
+                }
+                vO.put(title, vV);
+                // WBS
+                title = null;
+                title = titles.get(2);
+                vV = new ArrayList<ItemBean>();
+                for (ProjectBean p : projects) {
+                    item = new ItemBean("wbs", p.getTitolo(), makeUrl(appName, title, null, p.getId()), SUB_MENU);
+                    vV.add(item);
+                }
+                vO.put(title, vV);
+                // Attività
+                title = null;
+                title = titles.get(3);
+                vV = new ArrayList<ItemBean>();
+                for (ProjectBean p : projects) {
+                    item = new ItemBean("act", p.getTitolo(), makeUrl(appName, title, null, p.getId()), SUB_MENU);
+                    vV.add(item);
+                }
+                vO.put(title, vV);
+                // Report
+                title = null;
+                title = titles.get(4);
+                vV = new ArrayList<ItemBean>();
+                for (ProjectBean p : projects) {
+                    item = new ItemBean("rep", p.getTitolo(), makeUrl(appName, title, "rep", p.getId()), SUB_MENU);
+                    vV.add(item);
+                }
+                vO.put(title, vV);
+            } else { 
+                // No menu
+            }
+            return vO;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio di un bean.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + anve.getMessage(), anve);
+        } catch (WebStorageException wse) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di valori dal db.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + wse.getMessage(), wse);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + npe.getMessage(), npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+        
+    }
+    
+    
+    private static String makeUrl(String appName, 
+                                  ItemBean title, 
+                                  String p, 
+                                  int prjId) 
+                           throws CommandException {
+        try {
+            StringBuffer url = new StringBuffer(appName);
+            url.append("/?q=").append(title.getNome());
+            if (p != null) {
+                url.append("&p=").append(p);
+            }
+            url.append("&id=").append(prjId);
+            return String.valueOf(url);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + npe.getMessage(), npe);
         } catch (Exception e) {
             String msg = FOR_NAME + "Si e\' verificato un problema.\n";
             LOG.severe(msg);
