@@ -11708,7 +11708,7 @@
 			 *      } );
 			 *    } );
 			 */
-			"sSearch": "Cerca:",
+			"sSearch": "Filtra:",
 	
 	
 			/**
