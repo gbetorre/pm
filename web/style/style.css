@@ -52,12 +52,12 @@ body.loginbody {
 	background-image: radial-gradient(#ffffff, #ddeeff);
 }
 
-a:link:not(.btn):not(.cc-link):not(.linkFooter):not(.nav-link):not(.helpInfo):not(.page-link):not(.ico):not(.linkPopup):not(.linkWbsGrafico):not(.nav-main-link):not(.link-submenu), 
-a:visited:not(.btn):not(.cc-link):not(.linkFooter):not(.nav-link):not(.btnNav):not(.helpInfo):not(.page-link):not(.ico):not(.linkPopup):not(.linkWbsGrafico):not(.nav-main-link):not(.link-submenu) {
+a:link:not(.btn):not(.cc-link):not(.linkFooter):not(.nav-link):not(.helpInfo):not(.helpInfoTop):not(.page-link):not(.ico):not(.linkPopup):not(.linkWbsGrafico):not(.nav-main-link):not(.link-submenu), 
+a:visited:not(.btn):not(.cc-link):not(.linkFooter):not(.nav-link):not(.btnNav):not(.helpInfo):not(.helpInfoTop):not(.page-link):not(.ico):not(.linkPopup):not(.linkWbsGrafico):not(.nav-main-link):not(.link-submenu) {
 	color: #005c99; 
 }
 
-a:hover:not(.btn):not(.logoHeader):not(.cc-link):not(.ui-datepicker-prev):not(.ui-datepicker-next):not(.nav-link):not(.linkFooter):not(.cc-link):not(.helpInfo):not(.page-link):not(.ico):not(.linkHeader):not(.linkPopup):not(.linkWbsGrafico):not(.nav-main-link):not(.link-submenu) {
+a:hover:not(.btn):not(.logoHeader):not(.cc-link):not(.ui-datepicker-prev):not(.ui-datepicker-next):not(.nav-link):not(.linkFooter):not(.cc-link):not(.helpInfo):not(.helpInfoTop):not(.page-link):not(.ico):not(.linkHeader):not(.linkPopup):not(.linkWbsGrafico):not(.nav-main-link):not(.link-submenu) {
 	text-decoration: underline;
 	color: #002e4d;
 	background-color: #d7d9d9;
@@ -443,6 +443,7 @@ select:disabled.bgcolor3 {
 
 .btn-spacer {
   margin-bottom: 5px;
+  font-size: 11pt;
 }
 
 button[type="submit"]:disabled, #btnMod:disabled {
@@ -772,6 +773,7 @@ hr.riga       {
 	border-color: #d9d9d9;
 }
 
+
 /*---------------------- POP-UP ------------------------*/
 .popup {
 	font-size: 12px;
@@ -848,10 +850,17 @@ hr.riga       {
 	padding-bottom: 10px;
 }     
 
-a.helpInfo {
+.helpInfo {
 	background: transparent url("../img/ico-help.png") no-repeat right top;
 	background-size: 18px;
-	padding: 3px 30px 3px 0px;
+	padding: 3px 20px 3px 0px;
+	color: #484f51;
+}
+
+.helpInfoTop {
+	background: transparent url("../img/ico-help.png") no-repeat right top;
+	background-size: 18px;
+	padding: 20px 0px 3px 0px;
 	color: #484f51;
 }
 
