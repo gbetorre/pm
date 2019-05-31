@@ -142,11 +142,7 @@ public class ProjectCommand extends ItemBean implements Command {
         nomeFile.put(Query.PART_PROJECT_CHARTER_STAKEHOLDER, "/jsp/pcStakeholder.jsp");
         nomeFile.put(Query.PART_PROJECT_CHARTER_DELIVERABLE, "/jsp/pcDeliverable.jsp");
         nomeFile.put(Query.PART_PROJECT_CHARTER_RESOURCE, "/jsp/pcRisorse.jsp");
-        //nomeFile.put(Query.PART_PROJECT_CHARTER_RISK, "/jsp/pcRischi.jsp");
         nomeFile.put(Query.PART_PROJECT_CHARTER_CONSTRAINT, "/jsp/pcVincoli.jsp");
-        nomeFile.put(Query.PART_PROJECT_CHARTER_MILESTONE, "/jsp/pcMilestone.jsp");
-        //nomeFile.put(Query.PART_WBS, "/jsp/projWBS.jsp");
-        //nomeFile.put(Query.PART_ACTIVITY, "/jsp/projActivities.jsp");
         nomeFile.put(Query.PART_STATUS, "/jsp/projStatus.jsp");
         nomeFile.put(Query.CREDITS, "/jsp/credits.jsp");
         nomeFile.put(Query.PART_REPORT, nomeFileReport);
@@ -510,23 +506,6 @@ public class ProjectCommand extends ItemBean implements Command {
             params.put(Query.PART_PROJECT_CHARTER_RESOURCE, pcr);
         }
         /* **************************************************** *
-         *              Ramo di Project Charter - Rischi        *
-         * **************************************************** */
-        /*else if (part.equalsIgnoreCase(Query.PART_PROJECT_CHARTER_RISK)) {
-            // Recupero e caricamento parametri di project charter/rischi
-            int totRisks = Integer.parseInt(parser.getStringParameter("pck-loop-status", Utils.VOID_STRING));
-            HashMap<String, String> pck = new HashMap<String, String>();
-            for (int i = 0; i <= totRisks; i++) {
-                pck.put("pck-id" + String.valueOf(i), parser.getStringParameter("pck-id" + String.valueOf(i), Utils.VOID_STRING));
-                pck.put("pck-nome" + String.valueOf(i), parser.getStringParameter("pck-nome" + String.valueOf(i), Utils.VOID_STRING));
-                pck.put("pck-informativa" + String.valueOf(i), parser.getStringParameter("pck-informativa" + String.valueOf(i), Utils.VOID_STRING));
-                pck.put("pck-impatto" + String.valueOf(i), parser.getStringParameter("pck-impatto" + String.valueOf(i), Utils.VOID_STRING));
-                pck.put("pck-livello" + String.valueOf(i), parser.getStringParameter("pck-livello" + String.valueOf(i), Utils.VOID_STRING));
-                pck.put("pck-stato" + String.valueOf(i), parser.getStringParameter("pck-stato" + String.valueOf(i), Utils.VOID_STRING));
-            }
-            params.put(Query.PART_PROJECT_CHARTER_RISK, pck);
-        }*/
-        /* **************************************************** *
          *            Ramo di Project Charter - Vincoli         *
          * **************************************************** */
         else if (part.equalsIgnoreCase(Query.PART_PROJECT_CHARTER_CONSTRAINT)) {
@@ -535,25 +514,6 @@ public class ProjectCommand extends ItemBean implements Command {
             pcc.put("pcc-descrizione", parser.getStringParameter("pcc-descrizione", Utils.VOID_STRING));
             params.put(Query.PART_PROJECT_CHARTER_CONSTRAINT, pcc);
         }
-        /* **************************************************** *
-         *          Ramo di Project Charter - Milestone         *
-         * **************************************************** */
-        /*else if (part.equalsIgnoreCase(Query.PART_PROJECT_CHARTER_MILESTONE)) {
-            // Recupero e caricamento parametri di project charter/milestone
-            int totActivities = Integer.parseInt(parser.getStringParameter("pcm-loop-status", Utils.VOID_STRING));
-            HashMap<String, String> pcm = new HashMap<String, String>();
-            for (int i = 0; i <= totActivities; i++) {
-                String milestone = "false";
-                pcm.put("pcm-id" + String.valueOf(i), parser.getStringParameter("pcm-id" + String.valueOf(i), Utils.VOID_STRING));
-                pcm.put("pcm-nome" + String.valueOf(i), parser.getStringParameter("pcm-nome" + String.valueOf(i), Utils.VOID_STRING));
-                pcm.put("pcm-descrizione" + String.valueOf(i), parser.getStringParameter("pcm-descrizione" + String.valueOf(i), Utils.VOID_STRING));
-                if((parser.getStringParameter("pcm-milestone" + String.valueOf(i), Utils.VOID_STRING)) != "") {
-                    milestone = "true";
-                }
-                pcm.put("pcm-milestone" + String.valueOf(i), milestone);
-            }
-            params.put(Query.PART_PROJECT_CHARTER_MILESTONE, pcm);
-        }*/
         /* **************************************************** *
          *                Ramo di Status Progetto               *
          * **************************************************** */
@@ -646,9 +606,7 @@ public class ProjectCommand extends ItemBean implements Command {
                                                                           LinkedHashMap<Integer, Vector> risksByProject)
                                                                    throws CommandException {
         LinkedHashMap<String, HashMap<Integer, Vector>> map =  new LinkedHashMap<String, HashMap<Integer, Vector>>();
-        map.put(Query.PART_PROJECT_CHARTER_MILESTONE, activitiesByProject);
         map.put(Query.PART_PROJECT_CHARTER_RESOURCE, skillsByProject);
-        map.put(Query.PART_PROJECT_CHARTER_RISK, risksByProject);
         return map;
     }
     
