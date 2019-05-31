@@ -34,7 +34,7 @@
         <div class="panel-body">
           <%@ include file="subButton.jspf" %>
           <div class="row">
-            <div class="col-sm-5">
+            <div class="col-sm-5 mandatory">
               WBS padre (se &eacute; presente):
             </div>
             <div class="col-sm-5">
@@ -55,7 +55,7 @@
           </div>
           <br />
           <div class="row">
-            <div class="col-sm-5">Nome WBS</div>
+            <div class="col-sm-5 mandatory">Nome WBS</div>
             <div class="col-sm-5">
               <input type="text" class="form-control" id="wbs-name" name="wbs-name" value="${wbsNome}" placeholder="Inserisci nome WBS" readonly>
               <div class="charNum"></div> 
@@ -63,7 +63,7 @@
           </div>
           <br />
           <div class="row">
-            <div class="col-sm-5">Descrizione della WBS</div>
+            <div class="col-sm-5 mandatory">Descrizione della WBS</div>
             <div class="col-sm-5">
               <textarea class="form-control" name="wbs-descr" placeholder="Inserisci una descrizione per la WBS" readonly>${wbsDescr}</textarea>
               <div class="charNum"></div>
