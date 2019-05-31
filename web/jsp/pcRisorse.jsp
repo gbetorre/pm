@@ -1,4 +1,6 @@
 <%@ include file="pcURL.jspf" %>
+    <h4>Project Charter del sotto progetto <strong><c:out value="${p.titolo}" /></strong></h4>
+    <hr class="separatore" />
     <span class="float-right">
       <a class="btn btnNav" href="${project}">
         <i class="fas fa-home"></i>
@@ -15,19 +17,17 @@
         <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${vincoli}${p.id}">Vincoli</a></li>
         <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${milestone}${p.id}">Milestone</a></li>
       </ul>
-      <hr class="separatore" />
       <div class="tab-content responsive hidden-xs hidden-sm">
         <div role="tabpanel" class="tab-pane active" id="tab-pcrisorse">
-          <label for="pcr-chiaveesterni">Fornitori chiave esterni:</label>
-          <br>
+          <hr class="separatore" />
+          <h5><label for="pcr-chiaveesterni">Fornitori chiave esterni:</label></h5>
           <textarea name="pcr-chiaveesterni" class="form-control" aria-label="With textarea" maxlength="1024" readonly>${p.fornitoriChiaveEsterni}</textarea>
           <div class="charNum"></div>
-          <hr class="separatore" />
-          <label for="pcr-serviziateneo">Servizi di ateneo:</label>
-          <br>
+          <br><br>
+          <h5><label for="pcr-serviziateneo">Servizi di ateneo:</label></h5>
           <textarea name="pcr-serviziateneo" class="form-control" aria-label="With textarea" maxlength="1024" readonly>${p.serviziAteneo}</textarea>
           <div class="charNum"></div>
-          <hr class="separatore" />
+          <br><br>
           <div id="container-fluid">
             <div class="row">
               <div class="col-2"></div>
@@ -36,7 +36,6 @@
               </div>
               <div class="col-2"></div>
             </div>
-            <hr class="separatore" />
           </div>
         </div>
       </div>

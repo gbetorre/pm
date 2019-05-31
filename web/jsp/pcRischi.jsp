@@ -1,4 +1,6 @@
 <%@ include file="pcURL.jspf" %>
+    <h4>Project Charter del sotto progetto <strong><c:out value="${p.titolo}" /></strong></h4>
+    <hr class="separatore" />
     <span class="float-right">
       <a class="btn btnNav" href="${project}">
         <i class="fas fa-home"></i>
@@ -29,51 +31,51 @@
           <a class="nav-link" data-toggle="tab" href="${milestone}${p.id}">Milestone</a>
         </li>
       </ul>
-      <hr class="separatore" />
-      <div class="tab-content">
-        <div id="rischi">
-          <table class="table table-bordered table-hover">
-            <thead class="thead-light">
-              <tr>
-                <th>Descrizione</th>
-                <th>Dimensione</th>
-                <th>Tipologia</th>
-                <th>Urgente</th>
-              </tr>
-            </thead>
-            <tbody>
-            <c:set var="status" value="" scope="page" />
-            <c:forEach var="risk" items="${requestScope.rischi}" varStatus="loop">
-            <c:set var="status" value="${loop.index}" scope="page" />
-              <input type="hidden" id="pck-id${status}" name="pck-id${status}" value="<c:out value="${risk.id}"/>">
-              <tr>
-                <td scope="row"><c:out value="${risk.nome}" /></td>
-                <td scope="row"><c:out value="${risk.impatto}" /></td>
-                <td scope="row"><c:out value="${risk.informativa}" /></td>
-            <c:choose>
-              <c:when test="${risk.urgenza}">
-                <td scope="row" class="bgcolorred">
+      <div class="tab-content responsive hidden-xs hidden-sm">
+    	  <div role="tabpanel" class="tab-pane active" id="tab-pcrischi">
+          <hr class="separatore" />
+          <div id="rischi">
+            <table class="table table-bordered table-hover">
+              <thead class="thead-light">
+                <tr>
+                  <th>Descrizione</th>
+                  <th>Dimensione</th>
+                  <th>Tipologia</th>
+                  <th>Urgente</th>
+                </tr>
+              </thead>
+              <tbody>
+              <c:set var="status" value="" scope="page" />
+              <c:forEach var="risk" items="${requestScope.rischi}" varStatus="loop">
+              <c:set var="status" value="${loop.index}" scope="page" />
+                <input type="hidden" id="pck-id${status}" name="pck-id${status}" value="<c:out value="${risk.id}"/>">
+                <tr>
+                  <td scope="row"><c:out value="${risk.nome}" /></td>
+                  <td scope="row"><c:out value="${risk.impatto}" /></td>
+                  <td scope="row"><c:out value="${risk.informativa}" /></td>
+              <c:choose>
+                <c:when test="${risk.urgenza}">
+                  <td scope="row" class="bgcolorred">
+                    <div class="form-check text-center">
+                      <span>SI</span>
+                    </div>
+                  </td>
+                </c:when>
+                <c:otherwise>
+                <td scope="row" class="bgcolorgreen">
                   <div class="form-check text-center">
-                    <span>SI</span>
+                    <span>NO</span>
                   </div>
                 </td>
-              </c:when>
-              <c:otherwise>
-              <td scope="row" class="bgcolorgreen">
-                <div class="form-check text-center">
-                  <span>NO</span>
-                </div>
-              </td>
-              </c:otherwise>
-            </c:choose>          
-              </tr>
-            </c:forEach>
-            </tbody>
-          </table>
-          <input type="hidden" id="pck-loop-status" name="pck-loop-status" value="<c:out value="${status}"/>">
-          <div class="text-center">
+                </c:otherwise>
+              </c:choose>          
+                </tr>
+              </c:forEach>
+              </tbody>
+            </table>
+            <input type="hidden" id="pck-loop-status" name="pck-loop-status" value="<c:out value="${status}"/>">
           </div>
-          <hr class="separatore" />
+          <br>
           <div id="container-fluid">
             <div class="row">
               <div class="col-2">  
@@ -96,7 +98,6 @@
                 </span>
               </div>
             </div>
-            <hr class="separatore" />
           </div>
         </div>
       </div>

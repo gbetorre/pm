@@ -1,4 +1,6 @@
 <%@ include file="pcURL.jspf" %>
+    <h4>Project Charter del sotto progetto <strong><c:out value="${p.titolo}" /></strong></h4>
+    <hr class="separatore" />
     <span class="float-right">
       <a class="btn btnNav" href="${project}">
         <i class="fas fa-home"></i>
@@ -15,10 +17,11 @@
         <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${vincoli}${p.id}">Vincoli</a></li>
         <li class="nav-item"><a class="nav-link active tabactive" data-toggle="tab" href="#">Milestone</a></li>
       </ul>
-      <hr class="separatore" />
       <div class="tab-content responsive hidden-xs hidden-sm">
         <div role="tabpanel" class="tab-pane active" id="tab-pcvision">
-        <h4>Milestone del progetto</h4>
+          <hr class="separatore" />
+        <c:choose>
+          <c:when test="${not empty requestScope.attivita}">
           <table class="table table-bordered table-hover">
             <thead class="thead-light">
             <tr>
@@ -58,6 +61,15 @@
             </tbody>
           </table>
           <input type="hidden" id="pcm-loop-status" name="pcm-loop-status" value="<c:out value="${status}"/>">
+          </c:when>
+          <c:otherwise>
+            <div class="alert alert-danger">
+              <strong>Spiacente</strong>
+              <p>Non sono state trovate attivit&agrave; di tipo milestone nel progetto corrente.<br/>
+              Avendone i diritti &egrave; possibile <a href="${addAct}${p.id}">aggiungerne una</a>.</p>
+            </div>
+          </c:otherwise>        
+        </c:choose>
           <hr class="separatore" />
           <div id="container-fluid">
             <div class="row">
