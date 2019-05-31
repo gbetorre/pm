@@ -41,7 +41,6 @@ import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Vector;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -77,13 +76,27 @@ public class HomePageCommand extends ItemBean implements Command {
      *  Nome di questa classe 
      *  (utilizzato per contestualizzare i messaggi di errore)
      */
-    static final String FOR_NAME = "\n" + Logger.getLogger(new Throwable().getStackTrace()[0].getClassName()) + ": ";
+    /* friendly */ 
+    static final String FOR_NAME = "\n" + Logger.getLogger(new Throwable().getStackTrace()[0].getClassName()) + ": "; //$NON-NLS-1$
+    /* $NON-NLS-1$ silence a warning that Eclipse emits when it encounters 
+     * string literals.
+     * The idea is that UI messages should not be embedded as string literals,
+     * but rather sourced from a resource file 
+     * (so that they can be translated, proofed, etc).*/
     /**
      * Log per debug in produzione
      */
     protected static Logger LOG = Logger.getLogger(Main.class.getName());
-    
-    private static final int SUB_MENU = 1;
+    /**
+     * Costante parlante per impostare il livello di voci di menu
+     * che non hanno un livello superiore (sono padri di sottomenu)
+     */
+    public static final int MAIN_MENU = 0;
+    /**
+     * Costante parlante per impostare il livello di voci di sottomenu
+     * che hanno un solo livello superiore (padre di livello 0)
+     */
+    public static final int SUB_MENU = 1;
     /**
      * Pagina a cui la command reindirizza per mostrare la form di login
      */
@@ -255,9 +268,7 @@ public class HomePageCommand extends ItemBean implements Command {
         }
         /* ******************************************************************** *
          *                          Recupera i parametri                        *
-         * ******************************************************************** */
-        // Recupera o inizializza 'id progetto'
-        //int idPrj = parser.getIntParameter("id", -1);       
+         * ******************************************************************** */      
         // Imposta il testo del Titolo da visualizzare prima dell'elenco
         req.setAttribute("titoloE", "Progetti di eccellenza: login");
         // Imposta nella request i progetti dell'utente tramite il ruolo, nel caso in cui siano valorizzati
@@ -274,8 +285,8 @@ public class HomePageCommand extends ItemBean implements Command {
     
     
     /**
-     * <p>Restituisce l'utente loggato se lo trova, altrimenti lancia 
-     * un'eccezione.</p>
+     * <p>Restituisce l'utente loggato, se lo trova nella sessione utente, 
+     * altrimenti lancia un'eccezione.</p>
      * 
      * @param req HttpServletRequest contenente la sessione e i suoi attributi
      * @return <code>PersonBean</code> - l'utente loggatosi correntemente
@@ -319,6 +330,17 @@ public class HomePageCommand extends ItemBean implements Command {
     }
     
     
+    /**
+     * <p>Restituisce una struttura vettoriale <cite>(by the way: 
+     * with insertion order)</cite> contenente le voci principali
+     * del (mega)menu orizzontale del sito di gestione dei progetti 
+     * on-line <em>(pol)</em>.
+     *  
+     * @param appName nome della web application, seguente la root
+     * @param projId identificativo del progetto corrente oppure del progetto di default in caso di accesso utente a piu' di un progetto 
+     * @return <code>LinkedList&lt;ItemBean&gt;</code> - struttura vettoriale, rispettante l'ordine di inserimento, che contiene le voci di primo livello
+     * @throws CommandException nel caso in cui si verifichi un problema nel recupero di un attributo obbligatorio, o in qualche altro tipo di puntamento
+     */
     private static LinkedList<ItemBean> makeMenuOrizzontale(String appName, 
                                                             int projId)
                                                      throws CommandException {
@@ -332,17 +354,11 @@ public class HomePageCommand extends ItemBean implements Command {
         vO.setInformativa("Il Project Charter rappresenta la visione statica del progetto");
         vO.setUrl(appName + "/?q=" + vO.getNome() + "&p=" + vO.getNomeReale() + "&id=" + projId);
         vO.setIcona("pc.png");
+        vO.setLivello(MAIN_MENU);
         mO.add(vO);
         // STATUS
         vO = null;
         vO = new ItemBean();
-        /*vO.setId(2);
-        vO.setNome("sts");
-        vO.setNomeReale("pol");
-        vO.setLabelWeb("Status");
-        vO.setInformativa("Lo status, o avanzamento di progetto, &egrave; il punto della situazione del progetto a un certo intervallo di tempo");
-        vO.setUrl(appName + "/?q=" + vO.getNomeReale() + "&p=" + vO.getNome() + "&ids=" + Query.NOTHING + "&id=" + projId);
-        vO.setIcona("sts.png");*/
         vO.setId(2);
         vO.setNome("pol");
         vO.setNomeReale("prj");
@@ -350,6 +366,7 @@ public class HomePageCommand extends ItemBean implements Command {
         vO.setInformativa("Lo status, o avanzamento di progetto, &egrave; il punto della situazione del progetto a un certo intervallo di tempo");
         vO.setUrl(makeUrl(appName, vO, "prj", projId));
         vO.setIcona("sts.png");
+        vO.setLivello(MAIN_MENU);
         mO.add(vO);
         // WBS
         vO = null;
@@ -360,6 +377,7 @@ public class HomePageCommand extends ItemBean implements Command {
         vO.setInformativa("Le WBS rappresentano unit&agrave; di suddivisione degli ambiti del progetto"); 
         vO.setUrl(makeUrl(appName, vO, null, projId));
         vO.setIcona("wbs.png");
+        vO.setLivello(MAIN_MENU);
         mO.add(vO);
         // ATTIVITA'
         vO = null;
@@ -370,6 +388,7 @@ public class HomePageCommand extends ItemBean implements Command {
         vO.setInformativa("Le attivit&agrave; sono le operazioni effettuate e vengono aggregate da specifiche WBS"); 
         vO.setUrl(makeUrl(appName, vO, null, projId));
         vO.setIcona("act.png");
+        vO.setLivello(MAIN_MENU);
         mO.add(vO);
         // REPORT
         vO = null;
@@ -380,30 +399,65 @@ public class HomePageCommand extends ItemBean implements Command {
         vO.setInformativa("Il report di progetto &egrave; una rappresentazione sintetica del lavoro svolto"); 
         vO.setUrl(appName + "/?q=" + vO.getNome() + "&p=rep&id=" + projId);
         vO.setIcona("rep.png");
+        vO.setLivello(MAIN_MENU);
         mO.add(vO);
         return mO;
     }
     
+    
     /**
-     *TODO commento
-     * O il numero di progetti è = 1 (tipicamente ruoli TL, User - ma potrebbe essere anche un PM di un dipartimento con un solo progetto)
-     * // Oppure il numero di progetti è > 1 (ruoli PM, PMOx, ma potrebbe essere anche un TL o uno User su più progetti)
-     * diciamo che il numero di progetti dell'utente non permette di fare assunzioni
-     * sul ruolo dell'utente stesso: un utente potrebbe essere un semplice user su parecchi progetti
+     * <p>Restituisce una <code>tabella hash</code> contenente i sottomenu 
+     * di voci di livello superiore, le quali svolgono anche la funzione 
+     * di chiavi della tabella stessa.</p>
+     * <p>La <code>tabella hash</code> ha come chiave un oggetto 
+     * di tipo <code>ItemBean</code> che rappresenta la voce principale, e come valore una struttura vettoriale
+     * ordinata, contenente le voci del sottomenu che alla chiave 
+     * fa riferimento.<br />
+     * Naturalmente, l'oggetto che fa da chiave implementa <code>l'Override</code>
+     * dei metodi necessari all'impiego come chiave, appunto, di tabella hash: 
+     * <pre>equals(), hashCode()</pre> &ndash;
+     * oltre, a fare l'Override di altri metodi, utili per gli ordinamenti:
+     * <pre>compareTo(), toString()</pre></p>
+     * <p>La decisione circa il contenuto del menu da generare &egrave; presa
+     * in base al seguente ragionamento:
+     * <dl>
+     * <dt>O il numero di progetti &egrave; = 1</dt>
+     * <dd>(tipicamente ruoli TL, User - ma potrebbe essere anche il caso di 
+     * un PM di un dipartimento con un solo progetto) &ndash;
+     * in questo caso genera le voci di menu come link alle sottosezioni
+     * delle varie sezioni (quindi sottosezioni del project charter, delle wbs,
+     * etc.)
+     * <dt>Oppure il numero di progetti è > 1</dt>
+     * <dd>(tipicamente ruoli PM, PMOx, ma potrebbe essere anche il caso di 
+     * un TL o uno User su pi&uacute; progetti) &ndash;
+     * e in tal caso genera come label delle voci il nome di ogni progetto
+     * e come url il link alla prima pagina (landing di default) della
+     * sezione a cui la voce chiave fa riferimento (quindi, p.es., per 
+     * il project charter la sezione della vision, per le wbs la pagina
+     * di elenco delle wbs, e così via).</dd>
+     * </dl>
+     * Diciamo che il numero di progetti dell'utente non permette 
+     * di fare assunzioni sul ruolo dell'utente stesso: un utente 
+     * potrebbe essere un semplice User su parecchi progetti
      * così come un PM o un PMO di dipartimento potrebbe avere un solo progetto
-     * perché il suo dipartimento ne ha prodotto uno solo!
+     * semplicemente perch&eacute; il suo dipartimento ne ha prodotto uno solo!<br />
      * Tuttavia, noi non facciamo assunzioni sul ruolo in base al numero di progetti
-     * ma solo sul menu, perché è evidente che possiamo generare il menu con le
-     * voci dirette alle varie pagine solo se siamo in presenza di un solo progetto;
-     * se l'utente ha parecchi progetti, dobbiamo generare la lista di progetti.
-     * Quanto alla presenza dei "tastini" speciali per il monitoraggio, lì è
-     * effettivamente una questione di ruolo, per cui il discrimine non è più
-     * il numero di progetti utente quanto il ruolo dell'utente stesso
+     * ma solo sul menu, perch&eacute; &egrave; evidente che possiamo 
+     * generare il menu con le voci dirette alle varie pagine solo se 
+     * siamo in presenza di un solo progetto; se l'utente ha parecchi 
+     * progetti, dobbiamo generare la lista di progetti.<br />
+     * Quanto alla presenza dei "tastini" speciali per il monitoraggio, l&iacute;
+     * &egrave; effettivamente una questione di ruolo, per cui il discrimine 
+     * non &egrave; pi&uacute; il numero di progetti utente quanto il ruolo 
+     * dell'utente stesso; tuttavia potrebbe non aver senso generare una 
+     * voce di menu principale per le funzioni di monitoraggio, che sono 
+     * piuttosto &quot;di nicchia&quot; in quanto destinate ad utenti molto
+     * particolari, quali i PMO.</p>
      * 
-     * @param usr
-     * @param appName
-     * @return
-     * @throws CommandException
+     * @param usr utente loggato, in funzione del quale bisogna generare il menu
+     * @param appName nome della web application, seguente la root, per la corretta generazione dei link delle voci
+     * @return <code>LinkedHashMap&lt;ItemBean, ArrayList&lt;ItemBean&gt;&gt; - tabella hash contenente il menu completo, costituita da una chiave che contiene i dati della voce principale ed un valore che contiene la lista delle sue voci
+     * @throws CommandException se si verifica un problema 
      */
     public static LinkedHashMap<ItemBean, ArrayList<ItemBean>> makeMegaMenu(PersonBean usr, 
                                                                             String appName) 
@@ -420,8 +474,6 @@ public class HomePageCommand extends ItemBean implements Command {
             LinkedList<ItemBean> titles = makeMenuOrizzontale(appName, projId);
             // Gestisce 2 casi: 
             if (projects.size() == 1) { // O il numero di progetti è = 1 
-                //Collection<ProjectBean> values = projects.values();
-                //int projId = (ProjectBean) projects.get(key);
                 // PROJECT CHARTER
                 title = titles.getFirst();
                 vV = new ArrayList<ItemBean>();
@@ -559,9 +611,10 @@ public class HomePageCommand extends ItemBean implements Command {
                     vV.add(item);
                 }
                 vO.put(title, vV);
-            } else { 
+            } 
+            /*else { 
                 // No menu
-            }
+            }*/
             return vO;
         } catch (AttributoNonValorizzatoException anve) {
             String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio di un bean.\n";
@@ -584,6 +637,19 @@ public class HomePageCommand extends ItemBean implements Command {
     }
     
     
+    /**
+     * <p>Restituisce una String che rappresenta un url da impostare in una
+     * voce di menu, il cui padre viene passato come argomento, come 
+     * analogamente la web applicazion seguente la root ed un eventuale
+     * parametro aggiuntivo.</p>
+     * 
+     * @param appName nome della web application, seguente la root, per la corretta generazione dell'url
+     * @param title voce di livello immediatamente superiore alla voce per la quale si vuol generare l'url
+     * @param p eventuale valore del parametro 'p' della Querystring
+     * @param prjId identificativo del progetto entro il cui contesto si vuol generare l'url
+     * @return <code>String</code> - url ben formato e valido, da applicare a una voce di menu
+     * @throws CommandException se si verifica un problema nell'accesso a qualche parametro o in qualche altro puntamento
+     */
     private static String makeUrl(String appName, 
                                   ItemBean title, 
                                   String p, 
