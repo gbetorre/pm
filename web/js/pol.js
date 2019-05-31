@@ -1,4 +1,10 @@
-  var callerId = 'undefined';
+var callerId = 'undefined';
+
+$( function () {
+  $(document).tooltip( {
+    position: {my: "center top", at: "center bottom" }
+  });
+});
 
 $.datepicker.regional['it'] = {
 	closeText: "Chiudi",
