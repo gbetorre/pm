@@ -1,4 +1,6 @@
 <%@ include file="pcURL.jspf" %>
+    <h4>Project Charter del sotto progetto <strong><c:out value="${p.titolo}" /></strong></h4>
+    <hr class="separatore" />
     <span class="float-right">
       <a class="btn btnNav" href="${project}">
         <i class="fas fa-home"></i>
@@ -29,9 +31,9 @@
           <a class="nav-link" data-toggle="tab" href="${milestone}${p.id}">Milestone</a>
         </li>
       </ul>
-      <hr class="separatore" /> 
       <div class="tab-content responsive hidden-xs hidden-sm">
         <div role="tabpanel" class="tab-pane active" id="tab-pcdeliverable">
+          <hr class="separatore" />
           <textarea name="pcd-descrizione" class="form-control" aria-label="With textarea" maxlength="8104" readonly>${p.deliverable}</textarea>
           <div class="charNum"></div>
         </div>
@@ -59,7 +61,6 @@
             </span>
           </div>
         </div>
-        <hr class="separatore" />
       </div>
     </form>
     <script>
