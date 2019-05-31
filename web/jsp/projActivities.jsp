@@ -11,6 +11,7 @@
     <c:set var="isTrash" value="${false}" scope="page" />
   </c:otherwise>
 </c:choose>
+    <hr class="separatore" />
     <span class="float-right">
       <a class="btn btnNav" href="${project}">
         <i class="fas fa-home"></i>
@@ -72,10 +73,10 @@
             </a>
           </td>
           <td scope="row">
-            <fmt:formatDate value='${act.dataInizio}' pattern='dd/MM/yyyy' />
+            <fmt:formatDate value="${act.dataInizio}" pattern="dd/MM/yyyy" />
           </td>
           <td scope="row">
-            <fmt:formatDate value='${act.dataFine}' pattern='dd/MM/yyyy' />
+            <fmt:formatDate value="${act.dataFine}" pattern="dd/MM/yyyy" />
           </td>
           <td scope="row" id="stateActCell${act.id}">
             <a href="javascript:popupWindow('Note','popup1',true,'${act.stato.informativa}');" class="helpInfo" id="helpAct${act.id}">
