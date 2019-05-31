@@ -478,19 +478,19 @@ public class HomePageCommand extends ItemBean implements Command {
                 title = titles.getFirst();
                 vV = new ArrayList<ItemBean>();
                 // Vision
-                item = new ItemBean("pcv", "Vision", makeUrl(appName, title, "pcv", projId), SUB_MENU);
+                item = new ItemBean("pcv", "Vision", makeUrl(appName, title, "pcv", projId), Utils.VOID_STRING, "fas fa-file-invoice", SUB_MENU);
                 vV.add(item);
                 // Stakeholder
                 item = null;
-                item = new ItemBean("pcs", "Stakeholder", makeUrl(appName, title, "pcs", projId), SUB_MENU);
+                item = new ItemBean("pcs", "Stakeholder", makeUrl(appName, title, "pcs", projId), Utils.VOID_STRING, "far fa-handshake", SUB_MENU);
                 vV.add(item);
                 // Deliverable
                 item = null;
-                item = new ItemBean("pcd", "Deliverable", makeUrl(appName, title, "pcd", projId), SUB_MENU);
+                item = new ItemBean("pcd", "Deliverable", makeUrl(appName, title, "pcd", projId), Utils.VOID_STRING, "fas fa-shipping-fast", SUB_MENU);
                 vV.add(item);
                 // Risorse
                 item = null;
-                item = new ItemBean("pcr", "Risorse", makeUrl(appName, title, "pcr", projId), SUB_MENU);
+                item = new ItemBean("pcr", "Risorse", makeUrl(appName, title, "pcr", projId), Utils.VOID_STRING, "fas fa-user-friends", SUB_MENU);
                 vV.add(item);
                 // Rischi
                 item = null;
@@ -498,11 +498,12 @@ public class HomePageCommand extends ItemBean implements Command {
                 item.setNome("ris");
                 item.setLabelWeb("Rischi");
                 item.setUrl(appName + "/?q=" + item.getNome() + "&id=" + projId);
+                item.setIcona("fas fa-radiation-alt");
                 item.setLivello(SUB_MENU);
                 vV.add(item);
                 // Vincoli
                 item = null;
-                item = new ItemBean("pcc", "Vincoli", makeUrl(appName, title, "pcc", projId), SUB_MENU);
+                item = new ItemBean("pcc", "Vincoli", makeUrl(appName, title, "pcc", projId), Utils.VOID_STRING, "fas fa-link", SUB_MENU);
                 vV.add(item);
                 // Milestone
                 item = null;
@@ -511,6 +512,7 @@ public class HomePageCommand extends ItemBean implements Command {
                 item.setLabelWeb("Milestone");
                 item.setUrl(appName + "/?q=act&p=" + item.getNome() + "&id=" + projId);
                 item.setLivello(SUB_MENU);
+                item.setIcona("far fa-gem");
                 vV.add(item);
                 vO.put(title, vV);
                 // STATUS
@@ -523,6 +525,8 @@ public class HomePageCommand extends ItemBean implements Command {
                     item = new ItemBean("sts", 
                                         "Avanzamento dal " + Utils.format(s.getDataInizio()) + " al " + Utils.format(s.getDataFine()), 
                                         appName + "/?q=" + title.getNomeReale() + "&p=" + title.getNome() + "&id=" + projId + "&ids=" + s.getId(),
+                                        Utils.VOID_STRING,
+                                        "far fa-clock",
                                         SUB_MENU);
                     vV.add(item);
                 }
@@ -533,15 +537,15 @@ public class HomePageCommand extends ItemBean implements Command {
                 vV = new ArrayList<ItemBean>();
                 // Wbs
                 item = null;
-                item = new ItemBean("wbs", "WBS", title.getUrl(), SUB_MENU);
+                item = new ItemBean("wbs", "WBS", title.getUrl(), Utils.VOID_STRING, "fas fa-sitemap", SUB_MENU);
                 vV.add(item);
                 // Grafico
                 item = null;
-                item = new ItemBean("gra", "Rappresentazione grafica delle WBS", makeUrl(appName, title, "gra", projId), SUB_MENU);
+                item = new ItemBean("gra", "Rappresentazione grafica delle WBS", makeUrl(appName, title, "gra", projId), Utils.VOID_STRING, "fas fa-network-wired", SUB_MENU);
                 vV.add(item);
                 // Report di WorkPackage
                 item = null;
-                item = new ItemBean("rep", "Report di Work Package", makeUrl(appName, title, "rep", projId), SUB_MENU);
+                item = new ItemBean("rep", "Report di Work Package", makeUrl(appName, title, "rep", projId), Utils.VOID_STRING, "fas fa-chart-line", SUB_MENU);
                 vV.add(item);
                 vO.put(title, vV);
                 // ATTIVITA'
@@ -550,15 +554,15 @@ public class HomePageCommand extends ItemBean implements Command {
                 vV = new ArrayList<ItemBean>();
                 // Attività
                 item = null;
-                item = new ItemBean("act", "Attivit&agrave;", title.getUrl(), SUB_MENU);
+                item = new ItemBean("act", "Attivit&agrave;", title.getUrl(), Utils.VOID_STRING, "fas fa-bars", SUB_MENU);
                 vV.add(item);
                 // Grafico
                 item = null;
-                item = new ItemBean("gra", "Rappresentazione grafica delle WBS", makeUrl(appName, title, "gra", projId), SUB_MENU);
+                item = new ItemBean("gra", "Rappresentazione grafica delle attivit&agrave;", makeUrl(appName, title, "gra", projId), Utils.VOID_STRING, "fas fa-code-branch", SUB_MENU);
                 vV.add(item);
                 // Cestino
                 item = null;
-                item = new ItemBean("bin", "Cestino attivit&agrave;", makeUrl(appName, title, "bin", projId), SUB_MENU);
+                item = new ItemBean("bin", "Cestino attivit&agrave;", makeUrl(appName, title, "bin", projId), Utils.VOID_STRING, "far fa-trash-alt", SUB_MENU);
                 vV.add(item);
                 vO.put(title, vV);
                 // REPORT
