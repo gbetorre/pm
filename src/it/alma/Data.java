@@ -459,6 +459,7 @@ public class Data extends HttpServlet {
                             String dataFine = (act.getDataFine() != null && act.getDataFine().after(new Date(0))) ? act.getDataFine().toString() : Utils.VOID_STRING;
                             String dataInizioEffettiva = (act.getDataInizioEffettiva() != null && act.getDataInizioEffettiva().after(new Date(0))) ? act.getDataInizioEffettiva().toString() : Utils.VOID_STRING;
                             String dataFineEffettiva = (act.getDataFineEffettiva() != null && act.getDataFineEffettiva().after(new Date(0))) ? act.getDataFineEffettiva().toString() : Utils.VOID_STRING;
+                            String unEncodedState = act.getStato().getNome().replaceAll("&agrave;", "a\'");
                             out.println(
                                     ++record + SEPARATOR +
                                     wp.getNome().replace(';', ',') + SEPARATOR +
@@ -471,7 +472,7 @@ public class Data extends HttpServlet {
                                     dataInizioEffettiva + SEPARATOR +
                                     dataFineEffettiva + SEPARATOR +
                                     p.getTitolo() + SEPARATOR +
-                                    act.getStato().getNome().replace(';', ',')
+                                    unEncodedState.replace(';', ',')
                                    );
                         }
                         itCounts++;
