@@ -23,7 +23,6 @@
 /* Menu Container */
 #megamenu {
 	height: 50px;
-	z-index: 99;
 	position: relative;
 	box-shadow: 0 3px 0px rgba(0,0,0,0.3);
 	background-color: #72a7a3;
@@ -34,9 +33,8 @@ ul.menu-nav {
 	display: inline-block;
 	position: relative;
 	cursor: default;
-	z-index: 500;
 	width: 100%;
-	margin: 0px ;
+	margin-left: 20px ;
 	padding-left: 0px;
 }
 
@@ -51,7 +49,6 @@ ul.menu-nav {
 .menu-nav > li > a {
 	position: relative;
 	display: block;
-	z-index: 510;
 	height: 50px;
 	padding: 0 20px;
 	line-height: 50px;
@@ -159,38 +156,6 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#630103', end
 
 #backHome a {padding: 0 15px;}	
 
-/*------------------------------
-	MOTORE DI RICERCA
---------------------------------*/
-li#link-search {
-    float: right;
-}
-li#link-search span.glyphicon-search {
-    font-size: 20px;
-    line-height: 50px;
-}
-#link-search span.caret {
-    margin-top: -10px;
-}
-#form-box {
-	width: 620px;
-	margin: 30px auto 50px;
-	padding: 50px;
-	border-radius: 10px;
-	text-align: center;
-	min-height: 150px;
-	background: #333;
-	box-shadow: 0 0px 2px rgba(0,0,0,0.2);
-	 }
-	 
-#form-box form {
-	text-align: left;
-
-	}
-#form-box form input.form-control {height: 34px; font-size: 16px; padding: 4px; }
-
-#form-box .radio {margin: 10px;}
-#form-box ul li a {color: #666;}
 /*=====================================================
 =           		 MEDIA QUERIES            =
 =====================================================*/
@@ -227,92 +192,77 @@ li#link-search span.glyphicon-search {
 }
 .mega-nav > li > a.nav-main-link span.caret {margin-left: 6px;}
 
+.hidden-s {
+    display: none !important;
+}
+
+.marginLeftSmall {
+	margin-left: 20px;
+}
+
 }	
 
 /*=====================================================
 =            		> 768px              =
 =====================================================*/
 @media only screen and (min-width : 768px) {
-
+.visible-xs {
+    display: none!important;
+}
 
 .navbar {min-height: 0; height:35px; margin-bottom: 0px;}
 
 .navbar-inverse {
-	color: #333; 
+	color: #3b5e5b; 
 	border-radius: 0px;
 	margin-bottom: 0px;
-	background-color: #333333;
-	}
+	background-color: #3b5e5b;
+}
 	
 .navbar-form {margin-top: 5px;}	
-.form-control {
-padding: 4px;
-background-image: none;
-border: 1px solid #ccc;
-border-radius: 4px;
 
-}		
-#top-search button {padding:1px 5px; font-size:12px;line-height:1.6;border-radius:3px; }
-/*  LINGUA  */
-#lingua {
-  position: absolute;
-  top: -2px;
-  right: 0px;  
-}
-
-#lingua .btn {
-  font-family: Montserrat,sans-serif;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 0px 0px 3px 3px;
-    color: #fff;
-    background-color: rgba(0, 0, 0, 0.05);
-    padding-left: 40px;
-    background-repeat: no-repeat;
-    background-position: 10px center;
-}
-#lingua .btn:hover {
-  background-color:  rgba(0,0,0, 0.35); 
-color: #fff; 
-border: 1px solid rgba(255, 255, 255, 0.5);
-}
-#lingua ul.dropdown-menu {
-    right: 0px;
-    left: inherit;
-    width: 55px;
-    min-width: inherit;
-    text-transform: uppercase;
-}
-#lingua ul.dropdown-menu a {
-    font-size: 11px;
-    height: 1.5em;
-    text-align: center;
-    /* padding-left: 40px; */
-    background-repeat: no-repeat;
-    background-position: center center;
-    /* font-weight: bold; */
-}
-#en, .lang-en {background-image: url('../image/flag-en.gif');}
-#ita, .lang-it {background-image: url('../image/flag-ita.gif');}
 }
 
 /*=====================================================
 =            		< 768px     MOBILE         =
 =====================================================*/
 @media only screen and (max-width : 767px) {
-#main-nav-mobile li a { font-family:Montserrat; font-size: 16px; -font-weight:bold; padding-left: 30px;}
-h1#h1-xs {
-position: absolute;
-font-size: 12px;
-color: #ccc;
-text-transform: uppercase;
-left: 55px;
-/* top: 0px; */
+.hidden-xs {
+    display: none!important;
 }
-a#logo-xs {
-float:left;
-margin:0px;
-
+.navbar-inverse {
+	color: #3b5e5b; 
+	border-radius: 0px;
+	margin-bottom: 0px;
+	background-color: #3b5e5b;
 }
 
+.navbar-collapse {
+	margin-left: 40px;
+}
+	
+.navbar-form {margin-top: 5px;}
+
+.link-submenu {
+	 text-transform: uppercase;
+    display: block;
+    line-height: 1.35em;
+    color: #ccc;
+    padding: .13em 0px;
+    font-size: 12px;
+    --border-left: 2px solid rgba(222,222,222,0);
+    margin-bottom:5px;
+}	
+
+.link-submenu:hover {
+	 text-transform: uppercase;
+    display: block;
+    line-height: 1.35em;
+    color: #fff;
+    padding: .13em 0px;
+    font-size: 12px;
+    --border-left: 2px solid rgba(222,222,222,0);
+    margin-bottom:5px;
 }
 
+}
