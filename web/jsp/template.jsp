@@ -18,7 +18,7 @@
     <link rev="made" href="giovanroberto.torre@univr.it" />
     <meta http-equiv='cache-control' content='no-cache'>
     <!-- Include jQuery from CDN or from local hosted copy --> 
-    <script src="http://code.jquery.com/jquery-3.3.1.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
     <script>
       window.jQuery || document.write('<script src="${initParam.urlDirectoryScrypt}/jquery/jquery-3.3.1.js"><\/script>');
     </script>
