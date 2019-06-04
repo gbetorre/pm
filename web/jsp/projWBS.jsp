@@ -14,7 +14,7 @@
         Progetti
       </a>
     </span>
-    <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
+    <ul class="nav nav-tabs responsive" role="tablist" id="tabs-0">
       <li class="nav-item"><a class="nav-link active tabactive" data-toggle="tab" href="#">WBS</a></li>
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${grafico}${p.id}">Grafico</a></li>
       <li class="nav-item"><a class="nav-link" data-toggle="tab" id="show_act">Attivit&agrave;</a></li>
@@ -22,7 +22,7 @@
     </ul>
     <c:choose>
       <c:when test="${not empty requestScope.wbsHierarchy}">
-        <div class="tab-content responsive hidden-xs hidden-sm">
+        <div class="tab-content responsive">
           <div role="tabpanel" class="tab-pane active" id="tab-wbs">
             <br />
             <table class="table table-bordered table-hover">
@@ -202,7 +202,7 @@
                     <c:set var="duplicateHeaders" value="${true}" scope="page" />
                     <tr>
                       <td colspan="5">
-                        <table class="table table-condensed col-md-11" style="margin-left:10px;">
+                        <table class="table table-condensed col-md-11 marginLeft10">
                           <thead class="thead-light">
                             <tr>
                               <th scope="col" width="60%">Nome WBS figlia</th>

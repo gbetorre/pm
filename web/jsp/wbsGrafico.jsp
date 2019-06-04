@@ -131,7 +131,7 @@
         Progetti
       </a>
     </span>
-    <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
+    <ul class="nav nav-tabs responsive" role="tablist" id="tabs-0">
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${urlWbs}${p.id}">WBS</a></li>
       <li class="nav-item"><a class="nav-link active tabactive" data-toggle="tab" href="#">Grafico</a></li>
       <li class="nav-item"><a class="nav-link" data-toggle="tab" id="show_act">Attivit&agrave;</a></li>
@@ -175,8 +175,8 @@
     </div>
     <div id="form-grafico" class="modal">
       <hr class="separatore" />
-      <div style="overflow-x: scroll;">
-        <ul id="tree-data${p.id}" style="display:none;">
+      <div class="scrollX">
+        <ul id="tree-data${p.id}" class="noDisplay">
           <li id="progetto${p.id}" class="wbs">
             ${p.titolo}
             <ul>
