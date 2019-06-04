@@ -70,8 +70,6 @@ ul.menu-nav {
 	background-color: rgba(0,0,0,0.2);
 	text-decoration: underline;
 }
-
-
 /**********************************************
 		
 		PANNELLI MEGAMENU
@@ -196,10 +194,6 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#630103', end
     display: none !important;
 }
 
-.marginLeftSmall {
-	margin-left: 20px;
-}
-
 }	
 
 /*=====================================================
@@ -228,7 +222,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#630103', end
 =====================================================*/
 @media only screen and (max-width : 767px) {
 .hidden-xs {
-    display: none!important;
+    display: none !important;
 }
 .navbar-inverse {
 	color: #3b5e5b; 
