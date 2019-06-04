@@ -48,6 +48,18 @@ body {
 	overflow-x: hidden;
 }
 
+/*=====================================================
+=            		< 768px     MOBILE         =
+=====================================================*/
+@media only screen and (max-width : 767px) {
+body {
+	background-color: white;
+	font-size: medium;
+	width: 100%;
+	overflow-x: scroll;
+}
+}
+
 body.loginbody {
 	background-image: radial-gradient(#ffffff, #ddeeff);
 }
@@ -350,6 +362,10 @@ select:disabled.bgcolor3 {
 	background-image: linear-gradient(to right, white, #ff5232);
 }
 
+.textcolorred {
+	color: red;
+}
+
 .panel {
 	margin: auto;
 	margin-top: 5%;
@@ -481,10 +497,32 @@ textarea {
 	border-radius: 10px 10px 10px 10px;
 }
 
+.noDisplay {
+	display: none;
+}
+
 .page {
 	margin-right: 20px;
 	margin-left: 20px;
 	margin-top: 25px;
+}
+
+/* ----------------- Scroll bar ---------------- */
+.scrollX {
+	overflow-x: scroll; 
+}
+
+.scrollY {
+	overflow-y: scroll;
+}
+
+/* ------------------- Margini ----------------------- */
+.marginLeft10 {
+	margin-left: 10px;
+}
+
+.marginLeft25 {
+	margin-left: 25px;
 }
 
 /*---------------------- Page header and footer styles ------------------------*/
