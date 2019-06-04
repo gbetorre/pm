@@ -20,7 +20,7 @@
         Progetti
       </a>
     </span>
-    <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
+    <ul class="nav nav-tabs responsive" role="tablist" id="tabs-0">
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${urlWbs}${p.id}">WBS</a></li>
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${grafico}${p.id}">Grafico</a></li>
       <li class="nav-item"><a class="nav-link active tabactive" data-toggle="tab" href="#" id="show_act">Attivit&agrave;</a></li>

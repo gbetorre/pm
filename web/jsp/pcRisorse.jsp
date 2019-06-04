@@ -8,7 +8,7 @@
       </a>
     </span>
     <form id="pcrisorse_form" action="#" method="post">
-      <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
+      <ul class="nav nav-tabs responsive" role="tablist" id="tabs-0">
         <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${vision}${p.id}">Vision</a></li>
         <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${stakeholder}${p.id}">Stakeholder</a></li>
         <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${deliverable}${p.id}">Deliverable</a></li>
@@ -17,7 +17,7 @@
         <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${vincoli}${p.id}">Vincoli</a></li>
         <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${milestone}${p.id}">Milestone</a></li>
       </ul>
-      <div class="tab-content responsive hidden-xs hidden-sm">
+      <div class="tab-content responsive">
         <div role="tabpanel" class="tab-pane active" id="tab-pcrisorse">
           <hr class="separatore" />
           <h5><label for="pcr-chiaveesterni">Fornitori chiave esterni:</label></h5>

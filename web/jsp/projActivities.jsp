@@ -18,7 +18,7 @@
         Progetti
       </a>
     </span>
-    <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
+    <ul class="nav nav-tabs responsive" role="tablist" id="tabs-0">
   <c:choose>
     <c:when test="${isTrash}">
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${act}${p.id}">Attivit&agrave;</a></li>
