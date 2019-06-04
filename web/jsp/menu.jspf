@@ -67,7 +67,7 @@
     <%-- Menù versione desktop --%>
     <div id="megamenu" class="hidden-xs">
       <div id="menu-wrapper">
-        <ul class="menu-nav" style="margin-left:20px;">
+        <ul class="menu-nav">
           <!-- Home -->
           <li id="backHome">
             <a class="nav-main-link" href="${project}"><i class="fas fa-home"></i></a>
@@ -90,12 +90,12 @@
     <c:catch var= "exception">
     <c:forEach var="entry" items="${vO.entrySet()}">
       <c:set var="key" value="${entry.getKey()}"  scope="page" />
-      <div class="nav-panel" id="panel-${key.id}" style="display:none;">
+      <div class="nav-panel noDisplay" id="panel-${key.id}">
         <div class="row container-fluid">
           <div class="col-lg-3 hidden-s">
             <img src="${initParam.urlDirectoryImmagini}${key.icona}" height="256" width="256">
           </div>
-          <div class="col-lg-9 col-md-12 marginLeftSmall">
+          <div class="col-lg-9 col-md-12">
             <div class="row">
               <div class="col">
                 <h3 class="orange"><c:out value="${key.informativa}" escapeXml="false" /></h3>
@@ -143,7 +143,7 @@
             </c:otherwise>
             </c:choose>
             <div class="row">
-              <div class="col-lg-${colDim1} col-md-${colDim1} marginLeftSmall">
+              <div class="col-lg-${colDim1} col-md-${colDim1}">
                 <ul class="mega-menu-list">
                 <c:forEach var="voce" items="${vV}" begin="0" end="${colSize}">
                   <li>
