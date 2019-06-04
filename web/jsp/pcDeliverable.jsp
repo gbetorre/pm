@@ -8,7 +8,7 @@
       </a>
     </span>
     <form id="pcdeliverable_form" action="#" method="post">
-      <ul class="nav nav-tabs responsive hidden-xs hidden-sm" role="tablist" id="tabs-0">
+      <ul class="nav nav-tabs responsive" role="tablist" id="tabs-0">
         <li role="Vision" class="nav-item">
           <a data-toggle="tab" class="nav-link" href="${vision}${p.id}">Vision</a>
         </li>
@@ -31,7 +31,7 @@
           <a class="nav-link" data-toggle="tab" href="${milestone}${p.id}">Milestone</a>
         </li>
       </ul>
-      <div class="tab-content responsive hidden-xs hidden-sm">
+      <div class="tab-content responsive">
         <div role="tabpanel" class="tab-pane active" id="tab-pcdeliverable">
           <hr class="separatore" />
           <textarea name="pcd-descrizione" class="form-control" aria-label="With textarea" maxlength="8104" readonly>${p.deliverable}</textarea>
