@@ -52,8 +52,12 @@
         <c:catch var= "exception">
           <c:forEach var="entry" items="${vO.entrySet()}">
             <c:set var="key" value="${entry.getKey()}"  scope="page" />
+            <c:set var="vOLnk" value="${key.url}" scope="page" />
+            <c:if test="${not empty param['id']}">
+              <c:set var="vOLnk" value="${fn:substringBefore(key.url,'id=')}id=${param['id']}" scope="page" />
+            </c:if>
             <li id="link-${key.id}">
-              <a class="link-submenu" href="${key.url}">
+              <a class="link-submenu" href="${pageScope.vOLnk}">
                 <c:out value="${key.labelWeb}" escapeXml="false" />
               </a>
             </li>
@@ -77,8 +81,12 @@
         <c:catch var= "exception">
           <c:forEach var="entry" items="${vO.entrySet()}">
             <c:set var="key" value="${entry.getKey()}"  scope="page" />
+            <c:set var="vOLnk" value="${key.url}" scope="page" />
+            <c:if test="${not empty param['id']}">
+              <c:set var="vOLnk" value="${fn:substringBefore(key.url,'id=')}id=${param['id']}" scope="page" />
+            </c:if>
             <li class="link-menu" id="link-${key.id}">
-              <a class="nav-main-link" href="${key.url}">
+              <a class="nav-main-link" href="${pageScope.vOLnk}">
                 <c:out value="${key.labelWeb}" escapeXml="false" /> <i class="fas fa-caret-down"></i><span class="caret"></span>
               </a>
             </li>
