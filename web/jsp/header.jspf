@@ -13,7 +13,7 @@
               <c:if test="${sessionScope.usr.sesso eq 'F'}">
                 <c:set var="benve" value="BENVENUTA" scope="page" />
               </c:if>
-                <c:out value="${benve}" />
+                <label class="hidden-xs"><c:out value="${benve}" /></label>
                 <a href="${utente}" class="linkHeader" title="Clicca per dettagli e cambio password">
                   <c:out value="${sessionScope.usr.nome}" />
                   <c:out value="${sessionScope.usr.cognome}" />
