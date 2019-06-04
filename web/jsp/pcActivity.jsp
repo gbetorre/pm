@@ -131,7 +131,7 @@
       </c:if>
         <div class="row">
           <div class="col-sm-5"><strong>Milestone</strong></div>
-          <div class="col-sm-5" style="margin-left:25px;">
+          <div class="col-sm-5 marginLeft25">
             <input type="checkbox" class="form-check-input" id="act-milestone" name="act-milestone" <c:out value='${checked}' /> readonly disabled>
           </div>
         </div>
