@@ -13,6 +13,7 @@
     <meta charset="utf-8" />
     <meta name="language" content="Italian" />
     <meta name="description" content="${requestScope.advice}" />
+    <meta name="viewport" content="width=device-width, user-scalable=no,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
     <meta name="creator" content="Universita' degli studi di Verona" />
     <meta name="author" content="Giovanroberto Torre, giovanroberto.torre@univr.it" />
     <link rev="made" href="giovanroberto.torre@univr.it" />
@@ -74,7 +75,6 @@
   </head>
   <body class="${pageScope.bgbody}">
   <c:catch var="exception">
-    <c:if test="${not empty head and head}">
     <!-- Header -->
     <div id="idHeader">
       <%@ include file="header.jspf"%>
@@ -82,7 +82,6 @@
     <div id="divMenu">
       <%@ include file="menu.jspf"%>
     </div>
-    </c:if>
     <!-- Corpo pagina -->
     <div class="page">
       <a href="#top" id="goTop">
@@ -93,12 +92,10 @@
       <jsp:include page="${fileJsp}" />
     </div>
     <br /><br />
-    <c:if test="${not empty foot and foot}">    
-      <!-- Footer -->
-      <footer>
-        <%@ include file="footer.jspf" %>
-      </footer>    
-    </c:if>
+    <!-- Footer -->
+    <footer>
+      <%@ include file="footer.jspf" %>
+    </footer>
   </c:catch>
   <c:out value="${exception}" />
     <script src="<c:out value="${initParam.urlDirectoryScript}" />pol.js"></script>
