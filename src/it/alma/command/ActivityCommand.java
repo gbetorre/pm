@@ -306,7 +306,7 @@ public class ActivityCommand extends ItemBean implements Command {
                              *                 INSERT New Activity              *
                              * ************************************************ */
                             loadParams(part, parser, params);
-                            isHeader = isFooter = false;
+                            //isHeader = isFooter = false;
                             db.insertActivity(idPrj, user, writablePrj, params.get(Query.ADD_TO_PROJECT));
                             if (idWbs > Utils.DEFAULT_ID) {
                                 redirectAsStringBuffer.append("&idw=" + idWbs);
@@ -360,7 +360,7 @@ public class ActivityCommand extends ItemBean implements Command {
                              *        Effettua le selezioni che servono         * 
                              *      all'inserimento di una nuova attivita'      *
                              * ************************************************ */
-                            isHeader = isFooter = false;
+                            //isHeader = isFooter = false;
                             candidates = db.getPeople(runtimeProject.getId());
                             workPackage = db.getWbs(runtimeProject.getId(), Query.WBS_WP_ONLY);
                             for (WbsBean wp: workPackage) {
@@ -381,7 +381,7 @@ public class ActivityCommand extends ItemBean implements Command {
                                 LOG.severe(msg + "E\' presente il parametro \'p=mod\' ma non un valore \'ida\' - cioe\' id attivita\' - significativo!\n");
                                 throw new CommandException("Attenzione: indirizzo richiesto non valido!\n");
                             }
-                            isHeader = isFooter = false;
+                            //isHeader = isFooter = false;
                             activity = db.getActivity(idPrj, idAct, user);
                             candidates = db.getPeople(runtimeProject.getId());
                             workPackage = db.getWbs(runtimeProject.getId(), Query.WBS_WP_ONLY);
@@ -406,7 +406,7 @@ public class ActivityCommand extends ItemBean implements Command {
                                 throw new CommandException("Attenzione: indirizzo richiesto non valido!\n");
                             }
                             // Effettua le selezioni che servono all'eliminazione o alla sospensione di una data attività
-                            isHeader = isFooter = false;
+                            //isHeader = isFooter = false;
                             activity = db.getActivity(idPrj, idAct, user);
                             wbs = db.getWbsHierarchyByOffspring(idPrj, activity.getIdWbs());
                             states = HomePageCommand.getStatiAttivita();
