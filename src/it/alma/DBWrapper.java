@@ -461,7 +461,7 @@ public class DBWrapper implements Query {
      * <p>Restituisce un Vector di ProjectBean rappresentante i progetti dell'utente loggato .</p>
      * 
      * @param userId identificativo della persona di cui si vogliono recuperare i progetti
-     * @param getAll flag che definisce si devono recuperare tutti i progetti, oppure solo un sottoinsieme dei progetti che possono essere modificati
+     * @param getAll flag che definisce se si devono recuperare tutti i progetti, oppure solo un sottoinsieme dei progetti che possono essere modificati
      * @return <code>Vector&lt;ProjectBean&gt;</code> - ProjectBean rappresentante i progetti dell'utente loggato
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
@@ -1222,7 +1222,7 @@ public class DBWrapper implements Query {
         }
     }
     
-        
+    
     /**
      * <p>Restituisce un Vector di ActivityBean rappresentante tutte
      * le attivit&agrave; del progetto attuale.</p>
@@ -1281,6 +1281,81 @@ public class DBWrapper implements Query {
             String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + anve.getMessage(), anve);*/
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto ActivityBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+        
+    /**
+     * <p>Restituisce un Vector di ActivityBean contenenti ciascuno 
+     * gli estremi per il calcolo dello stato.</p>
+     * <p><ul><li>Se si vuole che l'identificativo di progetto passato come 
+     * argomento non abbia influenza sul risultato, perch&eacute; 
+     * si desidera effettuare un'estrazione di tutte le attivit&agrave; 
+     * e non solo di quelle di uno specifico progetto, allora si deve mettere 
+     * un valore qualsiasi sul primo parametro (es. 0) 
+     * e sul secondo si metter&agrave; -1.</li>
+     *  <li>Se invece si vuole che il parametro opzionale abbia effetto, 
+     *  si mette il valore corretto sul primo parametro e 0 sul secondo.</li>
+     *  </ul>
+     *  Infatti:
+     *  <pre>
+     *  SELECT count(*) FROM attivita WHERE id_progetto = 1;</pre>
+     *  retituisce (p.es.) 333
+     *  <pre>
+     *  SELECT count(*) FROM attivita WHERE id_progetto = 1 OR -1 = -1;
+     *  SELECT count(*) FROM attivita WHERE id_progetto = 0 OR -1 = -1;</pre>
+     *  retituiscono sempre (p.es.) 1399<br /> 
+     *  (se il secondo argomento vale -1  il primo argomento 
+     *  non ha pi&uacute; alcun effetto).
+     *  <pre>
+     *  SELECT count(*) FROM attivita WHERE id_progetto = 1 OR -1 = 0;</pre>
+     *  retituisce (p.es.) 333<br />
+     *  (se il secondo argomento non vale -1, la condizione complessiva
+     *  equivale a quella senza la seconda clausola, cio&egrave; il secondo
+     *  argomento non ha alcun effetto).
+     *  </p>
+     * 
+     * @param projId  id del progetto di cui estrarre le attivit&agrave; (se il secondo argomento non vale -1)
+     * @param getAll  valore intero che se vale -1 genera l'estrazione di tutte le attivita' presenti in tabella indipendentemente dal valore del primo argomento
+     * @return <code>Vector&lt;AttvitaBean&gt;</code> - ActivityBean rappresentante l'elenco delle attivita' del progetto - oppure di tutte le attivita'.
+     * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public Vector<ActivityBean> getActivities(int projId, 
+                                              int getAll) 
+                                       throws WebStorageException {
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        ActivityBean attivita = null;
+        Vector<ActivityBean> activities = new Vector<ActivityBean>();
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_ACTIVITIES_WITH_DATES);
+            pst.clearParameters();
+            pst.setInt(1, projId);
+            pst.setInt(2, getAll);
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                attivita = new ActivityBean();
+                BeanUtil.populate(attivita, rs);
+                activities.add(attivita);
+            }
+            return activities;
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto ActivityBean non valorizzato; problema nella query dell\'utente.\n";
             LOG.severe(msg); 
@@ -2253,7 +2328,7 @@ public class DBWrapper implements Query {
      * restituisce tutta la gerarchia degli ascendenti della WBS di dato id.</p>
      * 
      * @param idProj identificativo del progetto a cui la WBS di cui si vuol cercare l'ascendenza deve appartenere
-     * @param idWbs  identificativo della WBS di cui si vuol cercare l'ascendenza
+     * @param idWbs  identificativo della WBS (offspring) di cui si vuol cercare l'ascendenza
      * @return <code>WbsBean</code> - una WBS contenente al proprio interno la gerarchia completa da scorrere per mostrare l'albero genealogico della WBS di dato id
      * @throws WebStorageException se si verifica qualche problema nell'esecuzione di query o in qualche tipo di puntamento
      */
@@ -3625,6 +3700,88 @@ public class DBWrapper implements Query {
             con.commit();
         } catch (AttributoNonValorizzatoException anve) {
             String msg = FOR_NAME + "Probabile problema nel recupero dei dati dell\'autore ultima modifica.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna lo stato dell\'attivita\'.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } catch (NumberFormatException nfe) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna lo stato dell\'attivita\'.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + nfe.getMessage(), nfe);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna lo stato dell\'attivita\'.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + npe.getMessage(), npe);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Aggiorna lo stato di tutte le attivit&agrave; che trova, salvo
+     * che lo stesso abbia valore &quot;Sospeso&quot; o &quot;Eliminato&quot;
+     * &ndash; nel qual caso lo lascia invariato.</p>
+     * <p>Siccome questo metodo &egrave; pensato per essere richiamato da un
+     * thread che prescinde dall'autenticazione, viene passato un utente 
+     * convenzionale, al solo scopo di tracciare nel database l'avvenuto
+     * aggiornamento.</p>
+     * 
+     * @param anonymous utente di convenzione
+     * @return <code>int</code> - il numero di attivita' aggiornate - oppure zero in caso non vi sia stato l'aggiornamento
+     * @throws WebStorageException se si verifica un problema nel recupero di un attributo di bean, o in qualche tipo di puntamento
+     */
+    @SuppressWarnings("null")
+    public int updateActivitiesState(PersonBean anonymous) 
+                              throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        int idState = NOTHING;
+        int results = NOTHING; 
+        try {
+            // Ottiene la connessione
+            con = pol_manager.getConnection();
+            /*  Siamo qui perche', siccome questo metodo e' di aggiornamento
+             *  massivo e destinato ad essere lanciato dall'applicazione 
+             *  stessa, possiamo risparmiarci tutto il "cappello" dei
+             *  controlli di autenticazione: l'applicazione pol E' autenticata! */
+            Vector<ActivityBean> activities = getActivities(NOTHING, GET_ALL_BY_CLAUSE);
+            for (ActivityBean actToUpdate : activities) {
+                // Controlla: se l'attività è sospesa o eliminata, lascia invariato
+                if (actToUpdate.getIdStato() != SOSPESA && actToUpdate.getIdStato() != ELIMINATA) {
+                    CodeBean stateToCompute = null;
+                    stateToCompute = computeActivityState(actToUpdate.getDataInizio(), actToUpdate.getDataFine(), actToUpdate.getDataInizioEffettiva(), actToUpdate.getDataFineEffettiva(), Utils.convert(Utils.getCurrentDate()));
+                    idState = stateToCompute.getId();
+                    // Begin: ==>
+                    con.setAutoCommit(false);
+                    pst = con.prepareStatement(UPDATE_ACTIVITY_STATE);
+                    pst.clearParameters();
+                    pst.setInt(1, idState);
+                    // Campi automatici: id utente, ora ultima modifica, data ultima modifica
+                    pst.setDate(2, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+                    pst.setTime(3, Utils.getCurrentTime());   // non accetta una String, ma un oggetto java.sql.Time
+                    pst.setString(4, anonymous.getCognome() + String.valueOf(Utils.BLANK_SPACE) + anonymous.getNome());
+                    // Identificativo attività da aggiornare
+                    pst.setInt(5, actToUpdate.getId());
+                    pst.executeUpdate();
+                    con.commit();
+                    // <== :End
+                    ++results;
+                }
+            }
+            return results;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Probabile problema nel recupero dei dati dell\'attivita\'.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + anve.getMessage(), anve);
         } catch (SQLException sqle) {
@@ -5508,7 +5665,7 @@ public class DBWrapper implements Query {
      * nell'argomento, valorizzandolo per riferimento.</p>
      * 
      * @param awl       activity without last
-     * @param rightNow  today
+     * @param rightNow  today (for now, unused)
      * @return <code>CodeBean</code> - oggetto rappresentante lo stato calcolato per l'attivita' passata come argomento
      * @throws WebStorageException se si verfica un problema nel recupero di qualche attributo obbligatorio o in qualche altro tipo di puntamento
      */
