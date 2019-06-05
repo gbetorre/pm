@@ -37,8 +37,10 @@
 package it.alma;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -50,6 +52,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import it.alma.bean.ItemBean;
+import it.alma.bean.PersonBean;
 import it.alma.command.Command;
 import it.alma.exception.CommandException;
 import it.alma.exception.WebStorageException;
@@ -92,13 +95,42 @@ public class Main extends HttpServlet {
      */
     static final String FOR_NAME = "\n" + Logger.getLogger(new Throwable().getStackTrace()[0].getClassName()) + ": ";
     /**
-     * DataBound.
+     * <p>DataBound.</p>
+     * <p>Viene definito come:<dl>
+     * <dt>variabile statica</dt>
+     * <dd>per poterla utilizzare nei blocchi statici
+     * (p.es. blocco statico di inizializzazione)</dd>
+     * <dt>variabile di classe</dt>
+     * <dd>per poterla valorizzare in inizializzazione e poterla utilizzare 
+     * poi in tutto il codice</dd>
+     * <dt>variabile inizializzata</dt>
+     * <dd>per agevolare l'applicazione del <code>pattern Singleton</code>, 
+     * che deve essere utilizzato ad ogni possibile istanziazione, 
+     * evitando in tal modo la generazione di istanziazioni multiple.</dd></dl>
+     * <small>NOTA: Le variabili locali, sia di metodo sia di blocco, 
+     * <cite id="horton">vanno sempre inizializzate, all'atto 
+     * della loro definizione. Tuttavia ci&ograve; non vale per 
+     * le variabili di classe e di istanza, che possono essere soltanto
+     * dichiarate nel contesto della definizione della classe e di cui va
+     * curata l'inizializzazione successiva.</cite> 
+     * In questo caso, per prudenza, si deroga a questa regola 
+     * per i motivi dianzi detti.</small> 
+     * <p>La variabile non &egrave; privata ma Default per gli stessi motivi 
+     * per i quali la visibilit&agrave; dell'istanza di Logger non &egrave; 
+     * privata; lasciarla privata provocherebbe un:
+     * <pre>Write access to enclosing field Main.db is emulated by a synthetic accessor method</pre>
+     * cio&egrave; a dire che &quot;lui&quot; farebbe un metodo 
+     * <code>getDb()</code> dietro le quinte per garantire l'accesso al campo
+     * privato; preferibile, quindi, aprire direttamente la visibilit&agrave; 
+     * a livello di package, come peraltro &quot;lui&quot; stesso suggerisce:<br />
+     * <code>Quick fix:</code>
+     * <pre>Change visiblility of 'db' to 'package'</pre></p>
      */
-    private DBWrapper db;
+    /* default */ static DBWrapper db = null;
     /**
      * Tabella hash (dictionary) contenente le command predefinite.
      */
-    private HashMap<String, Command> commands;
+    private ConcurrentHashMap<String, Command> commands;
     /**
      * Nome e percorso della pagina di errore cui ridirigere in caso
      * di eccezioni rilevate.
@@ -130,7 +162,86 @@ public class Main extends HttpServlet {
      * che compongono l'output html finale.</p>
      */
     private static String templateJsp;
+    /**
+     * <p>Fatto un nanosecondo pari a 1, la stessa quantit&agrave; di tempo
+     * espressa in altre unit&agrave; pu&ograve; essere ricavata 
+     * adottando opportuni divisori, come nello schema seguente:
+     * <dl>
+     * <dt>microsecondi</dt>
+     * <dd>10<sup>-3</sup></dd>
+     * <dt>millisecondi</dt>
+     * <dd>10<sup>-6</sup></dd>
+     * <dt>secondi</dt>
+     * <dd>10<sup>-9</sup></dd>
+     * <dt>minuti</dt>
+     * <dd>1,67 × 10<sup>-11</sup></dd>
+     * <dt>ore</dt>
+     * <dd>2,78 × 10<sup>-13</sup></dd>
+     * <dt>giorni</dt>
+     * <dd>1,16 × 10<sup>-14</sup></dd>
+     * </dl>
+     * Pertanto, per convertire un tempo espresso in millisecondi, 
+     * quale quello fornito ad esempio dalla classe System, 
+     * basta definire numeri aventi la grandezza dei divisori, 
+     * e porli al denominatore.</p>
+     */
+    public static final double SECOND_DIVISOR = 1E9D;
+    /**
+     * <p>Tempo, in millisecondi, in cui si vuole effettuare il refresh</p>
+     * <p>Dalla tabella precedente, si evince che tra secondi e millisecondi
+     * ci sono 3 zeri da aggiungere all'esponente, per cui i millisecondi
+     * sono separati dai secondi da "soli" 3 ordini di grandezza; 
+     * d'altro canto, un secondo &egrave; composto per definizione
+     * da 1 x 10<sup>3</sup> ms.</p>
+     * <p>Perci&ograve;, per ottenere il tempo schedulato per il refresh
+     * in millisecondi, moltiplichiamo tale tempo in minuti (p.es. 30)
+     * per 60 (ottenendo i secondi), ancora per 1000 
+     * (ottenendo quindi i millisecondi).</p>
+     */
+    static final long SCHEDULED_TIME = 1000 * 60 * 60;
+    /** 
+     * Timer per schedulare l'aggiornamento dello stato calcolato 
+     * per le attivit&agrave;
+     */
+    private static Timer updateTimer = new Timer();
     
+    
+    /**
+     * Blocco statico di inizializzazione per lanciare il ricalcolo e 
+     * l'aggiornamento degli stati delle attivit&agrave;, calcolati all'atto
+     * del salvataggio delle attivit&agrave; stesse, ma da aggiornare 
+     * ogni <em>tot</em> time, perch&egrave; lo stato cambia in funzione 
+     * del tempo che scorre (p.es. un'attivit&agrave; che ieri doveva essere
+     * chiusa, ieri era <cite>&quot;in regola&quot;</cite> ma da oggi, 
+     * se non ha ancora data fine effettiva, diventa 
+     * <cite>&quot;in ritardo&quot;</cite>.
+     */
+    static {
+        log.info(FOR_NAME + "Blocco statico di inizializzazione. ");
+        // Delay: 0 millisecondi
+        // Repeat: ogni 30 minuti
+        updateTimer.scheduleAtFixedRate(new TimerTask() {
+            public void run() {
+                long startTime = System.nanoTime();
+                if (db == null) {
+                    try {
+                        db = new DBWrapper();
+                    } catch (WebStorageException wse) {
+                        log.severe(FOR_NAME + "Problema nell\'accesso al database.\n" + wse.getMessage());
+                    }
+                }
+                try {
+                    log.info(FOR_NAME + "N. tuple aggiornate: " + refresh(db));
+                } catch (CommandException ce) {
+                    log.severe(FOR_NAME + "Problema nell\'aggiornamento degli stati attivita\'.\n" + ce.getMessage());
+                }
+                long elapsedTime = System.nanoTime() - startTime;
+                log.config(FOR_NAME + "Stati attivita\' aggiornati in " + elapsedTime / SECOND_DIVISOR + "\"");
+                log.info(FOR_NAME + "End run()");
+            }
+        }, 0, SCHEDULED_TIME); // Refresh in SCHEDULED_TIME milliseconds
+    }
+
     
     /**
      * Inizializza (staticamente) le variabili globali 
@@ -151,7 +262,7 @@ public class Main extends HttpServlet {
          */
         super.init(config);
         /* ******************************************************************** *
-         *    Lettura dei parametri di configurazione dell'applicazione AOL     *
+         *    Lettura dei parametri di configurazione dell'applicazione POL     *
          * ******************************************************************** */
         /*
          * Nome della pagina di errore
@@ -206,7 +317,7 @@ public class Main extends HttpServlet {
         }
         ItemBean voceMenu = null;
         Command classCommand = null;
-        commands = new HashMap<String, Command>();
+        commands = new ConcurrentHashMap<String, Command>();
         for (int i = 0; i < classiCommand.size(); i++) {
             voceMenu = classiCommand.get(i);
             try {
@@ -562,6 +673,68 @@ public class Main extends HttpServlet {
             return;
         }
         res.sendRedirect(getServletContext().getInitParameter("appName") + "/?" + (String) req.getAttribute("redirect"));
+    }
+    
+    
+    /**
+     * <p>Ricalcola gli stati di ogni attivit&agrave; e li aggiorna.</p>
+     * <p>Lo stato di ciascuna attivit&agrave; originariamente viene valorizzato 
+     * all'atto del salvataggio (inserimento o aggiornamento dell'attivit&agrave;).
+     * Siccome, per&ograve;, al variare del tempo pu&ograve; cambiare anche
+     * lo stato, bisogna periodicamente lanciare un ricalcolo (refresh)
+     * dello stato stesso.<br /> 
+     * Tale ricalcolo viene implementato dal presente metodo, che deve
+     * essere richiamato da una routine schedulata, che lo invoca trascorso
+     * ogni determinato periodo di tempo.</p>
+     * <p>
+     * Questo metodo &egrave; sincronizzato, cio&egrave; vogliamo che
+     * che non sia possibile che due o pi&uacute; <code>thread</code> 
+     * vi accedano contemporaneamente: la scrittura sul db, implementata
+     * da questo metodo, deve essere effettuata da un thread per volta,
+     * per evitare sovrapposizioni; quantunque, infatti, le transazioni
+     * siano comunque gestite dal Model nel contesto degli aggiornamenti,
+     * tuttavia &egrave; sempre buona norma evitare accessi concorrenti,
+     * che risulterebbero quanto meno <code>idle</code>, se non vi deve essere 
+     * elaborazione parallela.<br /> 
+     * In generale, noi non gestiamo nell'applicazione web
+     * direttamente i thread, ma questi sono gestiti a monte dal web server
+     * per distribuire il carico tra tutti i client che fanno le loro varie
+     * richieste.</p>
+     * <p> 
+     * La sincronizzazione impedisce la scrittura contemporanea
+     * da parte di due o pi&uacute; thread
+     * contemporaneamente; nel caso di questo metodo, 
+     * se esso non fosse un metodo statico, ci&ograve; 
+     * non rappresenterebbe tuttavia una garanzia, perch&eacute; 
+     * la sincronizzazione 
+     * impedisce l'accesso a un metodo istanza sincronizzato 
+     * da parte di due o pi&uacute; thread contemporaneamente 
+     * <strong>solo sulla stessa istanza</strong>, nel senso che un altro
+     * thread pu&ograve; tranquillamente accedere contemporaneamente 
+     * allo stesso metodo da un'altra istanza dell'oggetto: <em>visto
+     * che  si tratta di un metodo istanza!</em> 
+     * Solo se il metodo &egrave; statico, vi &egrave; 
+     * la garanzia che uno e un solo thread per volta 
+     * potr&agrave; modificare il valore del db: 
+     * che, in genere, &egrave; <em>il risultato pi&uacute; desiderabile 
+     * da ottenere.</em> nel momento in cui si effettua una sincronizzazione.</p>
+     * 
+     * @param db        istanza di Model per l'accesso al database da aggiornare
+     * @return <code>int</code> - il numero di tuple aggiornate dal Model
+     * @throws CommandException una it.univr.di.uol.CommandException che incapsula una RuntimeException di qualche genere, che potrebbe essere generata nell'accedere ad attributi o in qualche altro tipo di puntamento a null 
+     */
+    synchronized public static int refresh(DBWrapper db) 
+                                    throws CommandException {
+        try {
+            PersonBean bot = new PersonBean();
+            bot.setNome("Automatico");
+            bot.setCognome("Aggiornamento");
+            return db.updateActivitiesState(bot);
+        } catch (WebStorageException wse) {
+            throw new CommandException(FOR_NAME + "Si e\' verificato un problema nel metodo che effettua l\'aggiornamento massivo dei valori degli stati delle attivita\'.\n" + wse.getMessage(), wse);
+        } catch (RuntimeException re) {
+            throw new CommandException(FOR_NAME + "Si e\' verificato un problema nel refresh dei valori degli stati attivita\', probabilmente un puntamento a null.\n" + re.getMessage(), re);
+        }
     }
     
 }
