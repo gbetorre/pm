@@ -28,7 +28,7 @@
             <th width="5%" id="last_header">Durata prevista</th>
             <th width="5%" id="realLast_header">Durata effettiva</th>
             <th id="start_header">Data inizio</th>
-            <th id="end_header"><a href="javascript:popupWindow('Note','popup1',true,'Le durate vengono calcolate escludendo gli estremi dell\'intervallo');" class="helpInfo" id="helpAct">Data fine</a></th>
+            <th id="end_header">Data fine</th>
             <th id="realStart_header">Inizio effettivo</th>
             <th id="realEnd_header">Fine effettiva</th>
           </tr>
