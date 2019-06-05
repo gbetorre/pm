@@ -61,6 +61,13 @@ public interface Query extends Serializable {
      * abbiano un valore significativo.</p> 
      */
     public static final byte NOTHING = 0;
+    /**
+     * <p>Costante parlante per valore da passare sul secondo argomento
+     * in query strutturate in modo da considerare il primo se il secondo
+     * vale NOTHING oppure il secondo se il primo vale NOTHING e il secondo
+     * vale GET_ALL_BY_CLAUSE.</p>
+     */
+    public static final int GET_ALL_BY_CLAUSE = -1;
     /* ************************************************************************ *
      *                  Costanti parlanti per valori boolean                    *
      * ************************************************************************ */
@@ -148,7 +155,7 @@ public interface Query extends Serializable {
     /**
      * <p>Costante per il parametro identificante la pagina del grafico di WBS di un progetto.</p>
      */
-    public static final String PART_GRAPHIC                      = "gra";
+    public static final String PART_GRAPHIC                     = "gra";
     /**
      * <p>Costante per il parametro identificante la pagina di inserimento di uno status di un progetto.</p>
      */
@@ -195,15 +202,15 @@ public interface Query extends Serializable {
     /**
      * <p>Costante identificante la query che estrae tutte le WBS compresi i Workpackage</p>
      */
-    public static final int WBS_GET_ALL = 1;
+    public static final int WBS_GET_ALL     = 1;
     /**
      * <p>Costante identificante la query che estrae tutte le WBS esclusi i Workpackage</p>
      */
-    public static final int WBS_BUT_WP = 2;
+    public static final int WBS_BUT_WP      = 2;
     /**
      * <p>Costante identificante la query che estrae tutte le WBS che sono Workpackage</p>
      */
-    public static final int WBS_WP_ONLY = 3;
+    public static final int WBS_WP_ONLY     = 3;
     /**
      * <p>Costante identificante la query che estrae la WBS padre della WBS data</p>
      */
@@ -211,19 +218,19 @@ public interface Query extends Serializable {
     /**
      * <p>Costante identificante la query che estrae le WBS figlie della WBS data</p>
      */
-    public static final int WBS_CHILDREN_ONLY = 5;
+    public static final int WBS_CHILDREN_ONLY           = 5;
     /**
      * <p>Costante identificante la query che estrae le attivit&agrave; correnti nel periodo corrente di avanzamento progetto.</p>
      */
-    public static final int ACT_GET_CURRENT_STATUS = 6;
+    public static final int ACT_GET_CURRENT_STATUS      = 6;
     /**
      * <p>Costante identificante la query che estrae le attivit&agrave; correnti nel periodo prossimo di avanzamento progetto.</p>
      */
-    public static final int ACT_GET_NEXT_STATUS = 7;
+    public static final int ACT_GET_NEXT_STATUS         = 7;
     /**
      * <p>Costante identificante la query che estrae le attivit&agrave; future rispetto al periodo corrente di avanzamento progetto.</p>
      */
-    public static final int ACT_GET_FUTURE_ACTIVITIES = 8;
+    public static final int ACT_GET_FUTURE_ACTIVITIES   = 8;
     /* ************************************************************************ *
      *              Costanti parlanti per identificativi di stato               *
      * ************************************************************************ */
@@ -381,7 +388,7 @@ public interface Query extends Serializable {
      * gi&agrave; in ritardo (quindi in ritardo rispetto al previsto,
      * non all'effettivo)
      */
-    public static final String APERTA_IN_RITARDO_APERTURA_HELP = APERTA_HELP + "Quelle <cite>IN RITARDO RISPETTO L\\'APERTURA</cite> hanno:<dl><dt>&ndash; DATA INIZIO PREVISTA</dt> <dd> nel passato</dd></dl>";
+    public static final String APERTA_IN_RITARDO_APERTURA_HELP = APERTA_HELP + "Quelle <cite>IN RITARDO RISPETTO ALL\\'APERTURA</cite> hanno:<dl><dt>&ndash; DATA INIZIO PREVISTA</dt> <dd> nel passato</dd></dl>";
     /**
      * Identificativo di stato attivit&agrave; non ancora lavorata ma 
      * gi&agrave; in ritardo (quindi in ritardo rispetto al previsto,
@@ -438,7 +445,7 @@ public interface Query extends Serializable {
      * Identificativo di stato attivit&agrave; inconsistente, che 
      * pu&ograve; dipendere da varie incongruenze
      */
-    public static final String ELIMINATA_HELP = "Le Attivit&agrave; <cite>ELIMINATE</cite> sono quelle che non vengono pi&uacute; sviluppate.";
+    public static final String ELIMINATA_HELP = "Le Attivit&agrave; <cite>ELIMINATE</cite> sono quelle che non vengono pi&uacute; sviluppate.<br /> In caso di necessit&agrave; pu&ograve; esserne chiesto il recupero scrivendo al PMO di Ateneo.";
     /* ************************************************************************ *
      *   Enumerativi statici per incapsulare i valori di enumerativi dinamici   *
      * ************************************************************************ */
@@ -854,7 +861,7 @@ public interface Query extends Serializable {
             "   FROM wbs W" + 
             "   WHERE W.id_progetto = ?" +
             "       AND W.id_wbs = ?" + 
-            "   ORDER BY W.dataultimamodifica DESC"; 
+            "   ORDER BY W.nome, W.dataultimamodifica DESC"; 
     
     /**
      * <p>Estrae le wbs che non sono workpackage di un progetto,
@@ -911,7 +918,7 @@ public interface Query extends Serializable {
             "   FROM wbs W" +
             "   WHERE W.id_progetto = ?" + 
             "       AND W.id_wbs IS NULL" +
-            "   ORDER BY W.dataultimamodifica ASC";
+            "   ORDER BY W.nome, W.dataultimamodifica ASC";
     
     /**
      * <p>Estrae i workpackage relative ad un progetto, identificato tramite id, passato come parametro</p>
@@ -1072,7 +1079,9 @@ public interface Query extends Serializable {
             "       AND P.id = ?";
     
     /**
-     * Estrae un dipartimento dato il suo id, passato come parametro
+     * Estrae un dipartimento dato il suo id, passato come parametro 
+     * &ndash; <strong>oppure</strong> tutti i dipartimenti, 
+     * nel caso in cui la seconda clausola risulti <code>true</code>.
      */
     public static final String GET_DIPART = 
             "SELECT " +
@@ -1105,6 +1114,25 @@ public interface Query extends Serializable {
             "   ,   A.id_stato              AS  \"idStato\"" +
             "   FROM attivita A" + 
             "   WHERE A.id_progetto = ?";
+    
+    /**
+     * <p>Estrae tutti i campi necessari al calcolo dello stato 
+     * per tutte le attivit&agrave; relative ad un progetto, individuato 
+     * tramite l'id, passato come parametro
+     * &ndash; <strong>oppure</strong> tutte le attivi&agrave; 
+     * indipendentemente dal progetto di appartenenza, 
+     * nel caso in cui la seconda clausola risulti <code>true</code>..</p>
+     */
+    public static final String  GET_ACTIVITIES_WITH_DATES = 
+            "SELECT " +
+            "       A.id                    AS  \"id\"" +
+            "   ,   A.datainizio            AS  \"dataInizio\"" +
+            "   ,   A.datafine              AS  \"dataFine\"" +
+            "   ,   A.datainizioeffettiva   AS  \"dataInizioEffettiva\"" +
+            "   ,   A.datafineeffettiva     AS  \"dataFineEffettiva\"" +
+            "   ,   A.id_stato              AS  \"idStato\"" +
+            "   FROM attivita A" + 
+            "   WHERE A.id_progetto = ? OR -1 = ?";
     
     /**
      * <p>Estrae le attivit&agrave; relative ad un progetto, identificato 
