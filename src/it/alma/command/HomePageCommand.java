@@ -363,7 +363,7 @@ public class HomePageCommand extends ItemBean implements Command {
         vO.setNome("pol");
         vO.setNomeReale("prj");
         vO.setLabelWeb("Status");
-        vO.setInformativa("Lo status, o avanzamento di progetto, &egrave; il punto della situazione del progetto a un certo intervallo di tempo");
+        vO.setInformativa("Lo status, o avanzamento di progetto, &egrave; il punto della situazione del progetto a un dato intervallo di tempo");
         vO.setUrl(makeUrl(appName, vO, "prj", projId));
         vO.setIcona("sts.png");
         vO.setLivello(MAIN_MENU);
@@ -396,7 +396,7 @@ public class HomePageCommand extends ItemBean implements Command {
         vO.setId(5);
         vO.setNome("pol");
         vO.setLabelWeb("Report");
-        vO.setInformativa("Il report di progetto &egrave; una rappresentazione sintetica del lavoro svolto"); 
+        vO.setInformativa("Il report di progetto &egrave; una rappresentazione sintetica del lavoro svolto a una certa data"); 
         vO.setUrl(appName + "/?q=" + vO.getNome() + "&p=rep&id=" + projId);
         vO.setIcona("rep.png");
         vO.setLivello(MAIN_MENU);
@@ -524,7 +524,7 @@ public class HomePageCommand extends ItemBean implements Command {
                 for (StatusBean s : projectStatusList) {
                     item = new ItemBean("sts", 
                                         "Avanzamento dal " + Utils.format(s.getDataInizio()) + " al " + Utils.format(s.getDataFine()), 
-                                        appName + "/?q=" + title.getNomeReale() + "&p=" + title.getNome() + "&id=" + projId + "&ids=" + s.getId(),
+                                        appName + "/?q=" + title.getNome() + "&p=" + "sts" + "&id=" + projId + "&ids=" + s.getId(),
                                         Utils.VOID_STRING,
                                         "far fa-clock",
                                         SUB_MENU);
