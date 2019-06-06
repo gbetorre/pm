@@ -42,7 +42,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Vector;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import javax.servlet.RequestDispatcher;
@@ -251,10 +250,10 @@ public class SessionManager extends HttpServlet {
                 session.setAttribute("menu", vO);
                 res.sendRedirect(res.encodeRedirectURL(getServletContext().getInitParameter("appName") + "/?q=pol"));
             }
-        } catch (IllegalStateException e) {
-            throw new ServletException("Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n" + e.getMessage(), e);
-        } catch (NullPointerException e) {
-            throw new ServletException("Errore nell'estrazione dei dipartimenti che gestiscono il corso.\n" + e.getMessage(), e);
+        } catch (IllegalStateException ise) {
+            throw new ServletException("Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n" + ise.getMessage(), ise);
+        } catch (NullPointerException npe) {
+            throw new ServletException("Errore nell'estrazione dei dipartimenti che gestiscono il corso.\n" + npe.getMessage(), npe);
         } catch (Exception e) {
             //session.setAttribute("error", true);
             //session.setAttribute("msg", msg);
@@ -325,10 +324,27 @@ public class SessionManager extends HttpServlet {
     }
     
     
+    /**
+     * <p>Prepara le informazioni da registrare nel database per tracciare
+     * l'evento di login di un determinato utente, passato come argomento.<br />
+     * Chiama il metodo del model, un cui riferimento viene passato come
+     * argomento, che scriver&agrave; nel database i dati  dell'accesso 
+     * &ndash; o ne aggiorner&agrave; gli estremi nel caso in cui 
+     * l'utente si fosse precedentemente gi&agrave; loggato.</p>
+     * 
+     * @param req HttpServletRequest contenente la richiesta fatta dal client, i cui estremi devono essere riportati nel database
+     * @param username nome utente loggato
+     * @param db riferimento al model
+     * @throws WebStorageException nel caso in cui, per un qualunque motivo, l'operazione di inserimento o aggiornamento non vada a buon fine
+     * @throws UnknownHostException nel caso in cui il tentativo di risolvere l'host nel contesto della creazione di un InetAddress non vada a buon fine
+     * @throws RuntimeException nel caso in cui si verifichi un problema in qualche tipo di puntamento (p.es. un puntamento a null)
+     */
     private static void traceAccess(HttpServletRequest req, 
                                     String username, 
                                     DBWrapper db) 
-                             throws WebStorageException, UnknownHostException {
+                             throws WebStorageException, 
+                                    UnknownHostException, 
+                                    RuntimeException {
         StringBuffer ip = new StringBuffer(req.getRemoteAddr());
         StringBuffer remoteHost = new StringBuffer(req.getRemoteHost());
         String server = req.getServerName();
