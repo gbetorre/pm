@@ -881,11 +881,13 @@ public class DBWrapper implements Query {
      * <p>Restituisce un Vector di StatusBean rappresentante tutti gli status del progetto attuale</p>
      * 
      * @param projId  id del progetto di cui estrarre gli status
+     * @param user    utente loggato
      * @return <code>ArrayList&lt;StatusBean&gt;</code> - ArrayList&lt;StatusBean&gt; rappresentante gli status del progetto.
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
      */
     @SuppressWarnings({ "null", "static-method" })
-    public ArrayList<StatusBean> getStatusList(int projId) 
+    public ArrayList<StatusBean> getStatusList(int projId,
+                                               PersonBean user) 
                                         throws WebStorageException {
         ResultSet rs = null;
         Connection con = null;
@@ -894,6 +896,12 @@ public class DBWrapper implements Query {
         ArrayList<StatusBean> statusList = new ArrayList<StatusBean>();
         try {
             con = pol_manager.getConnection();
+            // Per prima cosa verifica che l'utente abbia i diritti di accesso al progetto
+            if (!userCanRead(projId, user.getId())) {
+                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id progetto non valido!.\n";
+                LOG.severe(msg + "E\' presente il parametro \"q=act\" ma non un valore \"id\" - cioe\' id progetto - significativo!\n");
+                throw new WebStorageException("Attenzione: indirizzo richiesto non valido!\n");
+            }
             pst = con.prepareStatement(GET_PROJECT_STATUS_LIST);
             pst.clearParameters();
             pst.setInt(1, projId);
@@ -904,6 +912,10 @@ public class DBWrapper implements Query {
                 statusList.add(status);
             }
             return statusList;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto VectorStatusBean non valorizzato; problema nella query dell\'utente.\n";
             LOG.severe(msg); 
@@ -926,12 +938,16 @@ public class DBWrapper implements Query {
      * <p>Restituisce un StatusBean rappresentante uno status richiesto del progetto,
      * a partire dal suo ID, passato come argomento.</p>
      * 
+     * @param projId   id del progetto di cui estrarre lo status
      * @param idStatus id dello status da restituire
+     * @param user     utente loggato
      * @return <code>StatusBean</code> - StatusBean rappresentante lo status di dato identificativo passato come argomento
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento
      */
     @SuppressWarnings("null")
-    public StatusBean getStatus(int idStatus) 
+    public StatusBean getStatus(int projId,
+                                int idStatus,
+                                PersonBean user) 
                          throws WebStorageException {
         ResultSet rs = null;
         Connection con = null;
@@ -944,6 +960,12 @@ public class DBWrapper implements Query {
         Vector<FileDocBean> attachments = null;
         try {
             con = pol_manager.getConnection();
+            // Per prima cosa verifica che l'utente abbia i diritti di accesso al progetto
+            if (!userCanRead(projId, user.getId())) {
+                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id progetto non valido!.\n";
+                LOG.severe(msg + "E\' presente il parametro \"q=act\" ma non un valore \"id\" - cioe\' id progetto - significativo!\n");
+                throw new WebStorageException("Attenzione: indirizzo richiesto non valido!\n");
+            }
             pst = con.prepareStatement(GET_STATUS);
             pst.clearParameters();
             pst.setInt(1, idStatus);
@@ -1026,6 +1048,10 @@ public class DBWrapper implements Query {
                 }
             }
             return status;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto StatusBean non valorizzato; problema nella query dello status.\n";
             LOG.severe(msg); 
@@ -1052,12 +1078,14 @@ public class DBWrapper implements Query {
      * 
      * @param idProj id del progetto del quale ricavare lo status
      * @param statusDate data di inizio dello status da ricavare
+     * @param user utente loggato
      * @return <code>StatusBean</code> - StatusBean rappresentante lo status corrente
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento
      */
     @SuppressWarnings("null")
     public StatusBean getStatus(int idProj, 
-                                Date statusDate) 
+                                Date statusDate,
+                                PersonBean user) 
                          throws WebStorageException {
         ResultSet rs = null;
         Connection con = null;
@@ -1070,6 +1098,12 @@ public class DBWrapper implements Query {
         Vector<FileDocBean> attachments = null;
         try {
             con = pol_manager.getConnection();
+            // Per prima cosa verifica che l'utente abbia i diritti di accesso al progetto
+            if (!userCanRead(idProj, user.getId())) {
+                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id progetto non valido!.\n";
+                LOG.severe(msg + "E\' presente il parametro \"q=act\" ma non un valore \"id\" - cioe\' id progetto - significativo!\n");
+                throw new WebStorageException("Attenzione: indirizzo richiesto non valido!\n");
+            }
             pst = con.prepareStatement(GET_PROJECT_STATUS);
             pst.clearParameters();
             pst.setInt(1, idProj);
@@ -1153,14 +1187,14 @@ public class DBWrapper implements Query {
                 }
             }
             return status;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto StatusBean non valorizzato; problema nella query dello status piu\' prossimo alla data passata come argomento.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        } catch (AttributoNonValorizzatoException anve) {
-            String msg = FOR_NAME + "Oggetto StatusBean non valorizzato; problema nella query dello status piu\' prossimo alla data passata come argomento.\n";
-            LOG.severe(msg); 
-            throw new WebStorageException(msg + anve.getMessage(), anve);
         } finally {
             try {
                 con.close();
@@ -1181,12 +1215,14 @@ public class DBWrapper implements Query {
      * 
      * @param idProj progetto richiesto dall'utente
      * @param dataInizio data dopo la quale trovare lo status successivo
+     * @param user utente loggato
      * @return StatusBean - contenente lo status successivo in ordine di dataInizio
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
      */
     @SuppressWarnings({ "null", "static-method" })
     public StatusBean getNextStatus(int idProj, 
-                                    Date dataInizio) 
+                                    Date dataInizio,
+                                    PersonBean user) 
                              throws WebStorageException {
         Connection con = null;
         PreparedStatement pst = null;
@@ -1195,6 +1231,12 @@ public class DBWrapper implements Query {
         int nextParam = 0;
         try {
             con = pol_manager.getConnection();
+            // Per prima cosa verifica che l'utente abbia i diritti di accesso al progetto
+            if (!userCanRead(idProj, user.getId())) {
+                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id progetto non valido!.\n";
+                LOG.severe(msg + "E\' presente il parametro \"q=act\" ma non un valore \"id\" - cioe\' id progetto - significativo!\n");
+                throw new WebStorageException("Attenzione: indirizzo richiesto non valido!\n");
+            }
             pst = con.prepareStatement(GET_NEXT_STATUS);
             pst.clearParameters();
             pst.setInt(++nextParam, idProj);
@@ -1205,6 +1247,10 @@ public class DBWrapper implements Query {
                 BeanUtil.populate(nextStatus, rs);
             }
             return nextStatus;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto ActivityBean non valorizzato; problema nella query dell\'utente.\n";
             LOG.severe(msg); 
@@ -1241,11 +1287,13 @@ public class DBWrapper implements Query {
      * </pre></p>
      * 
      * @param projId  id del progetto di cui estrarre le attivit&agrave;
+     * @param user utente loggato
      * @return <code>Vector&lt;AttvitaBean&gt;</code> - ActivityBean rappresentante l'attivit&agrave; del progetto.
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
      */
     @SuppressWarnings({ "null", "static-method" })
-    public Vector<ActivityBean> getActivities(int projId) 
+    public Vector<ActivityBean> getActivities(int projId,
+                                              PersonBean user) 
                                        throws WebStorageException {
         ResultSet rs = null;
         Connection con = null;
@@ -1256,6 +1304,12 @@ public class DBWrapper implements Query {
         Vector<ActivityBean> activities = new Vector<ActivityBean>();
         try {
             con = pol_manager.getConnection();
+            // Per prima cosa verifica che l'utente abbia i diritti di accesso al progetto
+            if (!userCanRead(projId, user.getId())) {
+                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id progetto non valido!.\n";
+                LOG.severe(msg + "E\' presente il parametro \"q=act\" ma non un valore \"id\" - cioe\' id progetto - significativo!\n");
+                throw new WebStorageException("Attenzione: indirizzo richiesto non valido!\n");
+            }
             pst = con.prepareStatement(GET_ACTIVITIES);
             pst.clearParameters();
             pst.setInt(1, projId);
@@ -1277,10 +1331,10 @@ public class DBWrapper implements Query {
                 activities.add(attivita);
             }
             return activities;
-        /*} catch (AttributoNonValorizzatoException anve) {
+        } catch (AttributoNonValorizzatoException anve) {
             String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
             LOG.severe(msg); 
-            throw new WebStorageException(msg + anve.getMessage(), anve);*/
+            throw new WebStorageException(msg + anve.getMessage(), anve);
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto ActivityBean non valorizzato; problema nella query dell\'utente.\n";
             LOG.severe(msg); 
@@ -1452,7 +1506,7 @@ public class DBWrapper implements Query {
                 attivita = new ActivityBean();
                 BeanUtil.populate(attivita, rs);
                 computeActivityState(attivita, Utils.convert(Utils.getCurrentDate()));
-                WbsBean wp = getWbsInstance(projId, attivita.getIdWbs());
+                WbsBean wp = getWbsInstance(projId, attivita.getIdWbs(), user);
                 /*pst = null;
                 pst = con.prepareStatement(GET_PEOPLE_ON_ACTIVITY);
                 pst.clearParameters();
@@ -1536,7 +1590,7 @@ public class DBWrapper implements Query {
                 attivita = new ActivityBean();
                 BeanUtil.populate(attivita, rs);
                 computeActivityState(attivita, Utils.convert(Utils.getCurrentDate()));
-                WbsBean wp = getWbsInstance(projId, attivita.getIdWbs());
+                WbsBean wp = getWbsInstance(projId, attivita.getIdWbs(), user);
                 attivita.setWbs(wp);
                 activities.add(attivita);
             }
@@ -1570,12 +1624,14 @@ public class DBWrapper implements Query {
      * 
      * @param idWbs identificativo della WBS 
      * @param idProj identificativo del progetto corrente
+     * @param user utente loggato
      * @return <code>Vector&lt;AttivitaBean&gt;</code> - Vector contenente la lista delle attivit&agrave; della WBS
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
      */
     @SuppressWarnings({ "null", "static-method" })
     public Vector<ActivityBean> getActivitiesByWbs(int idWbs,
-                                                   int idProj)
+                                                   int idProj, 
+                                                   PersonBean user)
                                             throws WebStorageException {
         ResultSet rs = null;
         Connection con = null;
@@ -1585,6 +1641,12 @@ public class DBWrapper implements Query {
         int nextParam = 0;
         try {
             con = pol_manager.getConnection();
+            // Per prima cosa verifica che l'utente abbia i diritti di accesso al progetto
+            if (!userCanRead(idProj, user.getId())) {
+                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id progetto non valido!.\n";
+                LOG.severe(msg + "E\' presente il parametro \"q=act\" ma non un valore \"id\" - cioe\' id progetto - significativo!\n");
+                throw new WebStorageException("Attenzione: indirizzo richiesto non valido!\n");
+            }
             pst = con.prepareStatement(GET_ACTIVITIES_BY_WBS);
             pst.clearParameters();
             pst.setInt(++nextParam, idProj);
@@ -1603,6 +1665,10 @@ public class DBWrapper implements Query {
                 activities.add(activity);
             }
             return activities;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Attributo non valorizzato; problema nella query delle attivita\'.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto ActivityBean non valorizzato; problema nella query dell\'attivita\'.\n";
             LOG.severe(msg); 
@@ -1627,12 +1693,14 @@ public class DBWrapper implements Query {
      * 
      * @param idProj               id del progetto a cui appartengono la wbs e le attivit&agrave;
      * @param idWbs                id della wbs a cui appartengono le attivit&agrave;
+     * @param user                 utente loggato
      * @return <code>int</code> - intero che rappresenta il numero di istanze di attivit&agrave; sottostanti alla wbs data
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento
      */
     @SuppressWarnings({ "static-method", "null" })
     public int getActivitiesAmountByWbs (int idProj, 
-                                         int idWbs) 
+                                         int idWbs, 
+                                         PersonBean user) 
                                   throws WebStorageException {
         Connection con = null;
         PreparedStatement pst = null;
@@ -1641,6 +1709,12 @@ public class DBWrapper implements Query {
         int nextParam = 0;
         try {
             con = pol_manager.getConnection();
+            // Per prima cosa verifica che l'utente abbia i diritti di accesso al progetto
+            if (!userCanRead(idProj, user.getId())) {
+                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id progetto non valido!.\n";
+                LOG.severe(msg + "E\' presente il parametro \"q=act\" ma non un valore \"id\" - cioe\' id progetto - significativo!\n");
+                throw new WebStorageException("Attenzione: indirizzo richiesto non valido!\n");
+            }
             pst = con.prepareStatement(GET_ACTIVITIES_COUNT_BY_WBS);
             pst.setInt(++nextParam, idProj);
             pst.setInt(++nextParam, idWbs);
@@ -1649,6 +1723,10 @@ public class DBWrapper implements Query {
                 amountActivities = rs.getInt(1);
             }
             return amountActivities;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Attributo non valorizzato; problema nella query delle attivita\'.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Errore nella query che estrae il numero di attivit&agrave; presenti in una data wbs.\n";
             LOG.severe(msg); 
@@ -1672,6 +1750,7 @@ public class DBWrapper implements Query {
      * a qualunque titolo intersecano un range di date passate come argomento.</p>
      * 
      * @param idProj                id del progetto a cui appartiene lo status
+     * @param user                  utente loggato
      * @param dataInizio            data di inizio dello status progetto
      * @param dataFine              data di fine dello status progetto
      * @return Vector$lt;ActivityBean&gt; - contenente la lista di attivit&agrave; richiesta
@@ -1679,6 +1758,7 @@ public class DBWrapper implements Query {
      */
     @SuppressWarnings({ "null", "static-method" })
     public Vector<ActivityBean> getActivitiesByRange(int idProj,
+                                                     PersonBean user,
                                                      Date dataInizio, 
                                                      Date dataFine) 
                                               throws WebStorageException {
@@ -1690,6 +1770,12 @@ public class DBWrapper implements Query {
         int nextParam = 0;
         try {
             con = pol_manager.getConnection();
+            // Per prima cosa verifica che l'utente abbia i diritti di accesso al progetto
+            if (!userCanRead(idProj, user.getId())) {
+                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id progetto non valido!.\n";
+                LOG.severe(msg + "E\' presente il parametro \"q=act\" ma non un valore \"id\" - cioe\' id progetto - significativo!\n");
+                throw new WebStorageException("Attenzione: indirizzo richiesto non valido!\n");
+            }
             pst = con.prepareStatement(GET_CURRENT_ACTIVITIES);
             pst.clearParameters();
             pst.setInt(++nextParam, idProj);
@@ -1705,6 +1791,10 @@ public class DBWrapper implements Query {
                 vectorActivity.add(activity);
             }
             return vectorActivity;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Attributo non valorizzato; problema nella query delle attivita\'.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto ActivityBean non valorizzato; problema nella query dell\'utente.\n";
             LOG.severe(msg); 
@@ -1728,6 +1818,7 @@ public class DBWrapper implements Query {
      * che hanno data di inizio compresa tra due date, passate come argomento.</p>
      * 
      * @param idProj                id del progetto a cui appartiene lo status
+     * @param user                  utente loggato
      * @param dataInizio            data di inizio dello status progetto
      * @param dataFine              data di fine dello status progetto
      * @return Vector$lt;ActivityBean&gt; - contenente la lista di attivit&agrave; richiesta
@@ -1735,6 +1826,7 @@ public class DBWrapper implements Query {
      */
     @SuppressWarnings({ "null", "static-method" })
     public Vector<ActivityBean> getActivitiesByDate(int idProj,
+                                                    PersonBean user,
                                                     Date dataInizio, 
                                                     Date dataFine) 
                                              throws WebStorageException {
@@ -1746,6 +1838,12 @@ public class DBWrapper implements Query {
         int nextParam = 0;
         try {
             con = pol_manager.getConnection();
+            // Per prima cosa verifica che l'utente abbia i diritti di accesso al progetto
+            if (!userCanRead(idProj, user.getId())) {
+                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id progetto non valido!.\n";
+                LOG.severe(msg + "E\' presente il parametro \"q=act\" ma non un valore \"id\" - cioe\' id progetto - significativo!\n");
+                throw new WebStorageException("Attenzione: indirizzo richiesto non valido!\n");
+            }
             pst = con.prepareStatement(GET_ACTIVITIES_OF_NEXT_STATUS);
             pst.clearParameters();
             pst.setInt(++nextParam, idProj);
@@ -1759,6 +1857,10 @@ public class DBWrapper implements Query {
                 vectorActivity.add(activity);
             }
             return vectorActivity;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Attributo non valorizzato; problema nella query delle attivita\'.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto ActivityBean non valorizzato; problema nella query dell\'utente.\n";
             LOG.severe(msg); 
@@ -1803,6 +1905,12 @@ public class DBWrapper implements Query {
         Vector<SkillBean> skills = null;
         try {
             con = pol_manager.getConnection();
+            // Per prima cosa verifica che l'utente abbia i diritti di accesso al progetto
+            if (!userCanRead(projId, user.getId())) {
+                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id progetto non valido!.\n";
+                LOG.severe(msg + "E\' presente il parametro \"q=act\" ma non un valore \"id\" - cioe\' id progetto - significativo!\n");
+                throw new WebStorageException("Attenzione: indirizzo richiesto non valido!\n");
+            }
             pst = con.prepareStatement(GET_ACTIVITY);
             pst.clearParameters();
             pst.setInt(1, projId);
@@ -1866,11 +1974,13 @@ public class DBWrapper implements Query {
      * rappresentante le competenze del progetto corrente.</p>
      * 
      * @param projId id del progetto di cui estrarre le competenze
+     * @param user utente loggato
      * @return <code>Vector&lt;SkillBean&gt;</code> - SkillBean rappresentante le competenze del progetto.
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
     @SuppressWarnings({ "null", "static-method" })
-    public Vector<SkillBean> getSkills(int projId)
+    public Vector<SkillBean> getSkills(int projId,
+                                       PersonBean user)
                                 throws WebStorageException {
         ResultSet rs = null;
         Connection con = null;
@@ -1879,6 +1989,12 @@ public class DBWrapper implements Query {
         Vector<SkillBean> skills = new Vector<SkillBean>();
         try {
             con = pol_manager.getConnection();
+            // Per prima cosa verifica che l'utente abbia i diritti di accesso al progetto
+            if (!userCanRead(projId, user.getId())) {
+                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id progetto non valido!.\n";
+                LOG.severe(msg + "E\' presente il parametro \"q=act\" ma non un valore \"id\" - cioe\' id progetto - significativo!\n");
+                throw new WebStorageException("Attenzione: indirizzo richiesto non valido!\n");
+            }
             pst = con.prepareStatement(GET_SKILLS);
             pst.clearParameters();
             pst.setInt(1, projId);
@@ -1889,6 +2005,10 @@ public class DBWrapper implements Query {
                 skills.add(competenza);
             }
             return skills;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'attivita\'.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto SkillBean non valorizzato; problema nella query dell\'utente.\n";
             LOG.severe(msg); 
@@ -1912,11 +2032,13 @@ public class DBWrapper implements Query {
      * rappresentante i rischi del progetto corrente.</p>
      * 
      * @param projId id del progetto di cui estrarre i rischi
+     * @param user utente loggato
      * @return <code>Vector&lt;RiskBean&gt;</code> - RiskBean rappresentante i rischi del progetto.
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
     @SuppressWarnings({ "null", "static-method" })
-    public Vector<RiskBean> getRisks(int projId)
+    public Vector<RiskBean> getRisks(int projId, 
+                                     PersonBean user)
                               throws WebStorageException {
         ResultSet rs = null;
         Connection con = null;
@@ -1925,6 +2047,12 @@ public class DBWrapper implements Query {
         Vector<RiskBean> risks = new Vector<RiskBean>();
         try {
             con = pol_manager.getConnection();
+            // Per prima cosa verifica che l'utente abbia i diritti di accesso al progetto
+            if (!userCanRead(projId, user.getId())) {
+                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id progetto non valido!.\n";
+                LOG.severe(msg + "E\' presente il parametro \"q=act\" ma non un valore \"id\" - cioe\' id progetto - significativo!\n");
+                throw new WebStorageException("Attenzione: indirizzo richiesto non valido!\n");
+            }
             pst = con.prepareStatement(GET_RISKS);
             pst.clearParameters();
             pst.setInt(1, projId);
@@ -1935,6 +2063,10 @@ public class DBWrapper implements Query {
                 risks.add(rischio);
             }
             return risks;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'attivita\'.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto RiskBean non valorizzato; problema nella query dell\'utente.\n";
             LOG.severe(msg); 
@@ -1957,14 +2089,16 @@ public class DBWrapper implements Query {
      * <p>Restituisce una specifica WBS del progetto, con identificativo progetto
      * e identificativo WBS passati come parametri.</p>
      * 
-     * @param idProj - id del progetto di cui caricare le wbs
-     * @param idWbs - id della wbs da estrarre
+     * @param idProj   id del progetto di cui caricare le wbs
+     * @param idWbs    id della wbs da estrarre
+     * @param user     utente loggato
      * @return WbsBean - bean contenente la wbs richiesta
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
     @SuppressWarnings({ "null", "static-method" })
     public WbsBean getWbsInstance(int idProj, 
-                                  int idWbs) 
+                                  int idWbs, 
+                                  PersonBean user) 
                            throws WebStorageException {
         ResultSet rs, rs1 = null;
         Connection con = null;
@@ -1976,6 +2110,12 @@ public class DBWrapper implements Query {
             Integer keyPrj = new Integer(idProj);
             Integer keyWbs = new Integer(idWbs);
             con = pol_manager.getConnection();
+            // Per prima cosa verifica che l'utente abbia i diritti di accesso al progetto
+            if (!userCanRead(idProj, user.getId())) {
+                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id progetto non valido!.\n";
+                LOG.severe(msg + "E\' presente il parametro \"q=act\" ma non un valore \"id\" - cioe\' id progetto - significativo!\n");
+                throw new WebStorageException("Attenzione: indirizzo richiesto non valido!\n");
+            }
             pst = con.prepareStatement(GET_WBS);
             pst.clearParameters();
             pst.setInt(1, keyPrj);
@@ -1996,14 +2136,14 @@ public class DBWrapper implements Query {
                 }
             }
             return wbs;
-        }  catch (SQLException sqle) {
-            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
-            LOG.severe(msg); 
-            throw new WebStorageException(msg + sqle.getMessage(), sqle);
         } catch (AttributoNonValorizzatoException anve) {
             String msg = FOR_NAME + "Oggetto WbsBean non valorizzato; problema nella query della wbs del figlio.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + anve.getMessage(), anve);
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
         } finally {
             try {
                 con.close();
@@ -2022,12 +2162,14 @@ public class DBWrapper implements Query {
      * <p>Restituisce un vector contenente tutte le Wbs di un dato progetto.</p>
      * 
      * @param idProj    id del progetto di cui caricare le wbs
+     * @param user      utente loggato
      * @param getPartOfWbs flag specificante se bisogna recuperare solo i WorkPackage, solo le WBS oppure le WBS e i Workpackage
      * @return <code>Vector&lt;WbsBean&gt;</code> - vettore contenente tutte le Wbs di un progetto
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
     @SuppressWarnings({ "null", "static-method" })
-    public Vector<WbsBean> getWbs(int idProj, 
+    public Vector<WbsBean> getWbs(int idProj,
+                                  PersonBean user,
                                   int getPartOfWbs) 
                            throws WebStorageException {
         ResultSet rs = null;
@@ -2054,6 +2196,12 @@ public class DBWrapper implements Query {
             // Ottiene il progetto precaricato quando l'utente si è loggato corrispondente al progetto sul quale aggiungere un'attività
             Integer key = new Integer(idProj);
             con = pol_manager.getConnection();
+            // Per prima cosa verifica che l'utente abbia i diritti di accesso al progetto
+            if (!userCanRead(idProj, user.getId())) {
+                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id progetto non valido!.\n";
+                LOG.severe(msg + "E\' presente il parametro \"q=act\" ma non un valore \"id\" - cioe\' id progetto - significativo!\n");
+                throw new WebStorageException("Attenzione: indirizzo richiesto non valido!\n");
+            }
             pst = con.prepareStatement(query);
             pst.clearParameters();
             pst.setInt(1, key);
@@ -2064,7 +2212,11 @@ public class DBWrapper implements Query {
                 vWbs.add(wbs);
             }
             return vWbs;
-        }  catch (SQLException sqle) {
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Oggetto WbsBean non valorizzato; problema nella query della wbs del figlio.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
@@ -2086,12 +2238,14 @@ public class DBWrapper implements Query {
      * <p>Restituisce un vector contenente tutte le Wbs padri di un dato progetto,
      * ciascuna contenente tutte le proprie wbs figlie.</p>
      * 
-     * @param idProj - id del progetto di cui caricare le wbs
+     * @param idProj   id del progetto di cui caricare le wbs
+     * @param user     utente loggato
      * @return vectorWbs - vettore contenente tutte la gerarchia di Wbs di un progetto
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
     @SuppressWarnings({ "null" })
-    public Vector<WbsBean> getWbsHierarchy(int idProj) 
+    public Vector<WbsBean> getWbsHierarchy(int idProj,
+                                           PersonBean user) 
                            throws WebStorageException {
         ResultSet rs, rs1, rs2, rs3, rs4 = null;
         Connection con = null;
@@ -2104,6 +2258,12 @@ public class DBWrapper implements Query {
         Vector<WbsBean> vWbsPPN = null;
         try {
             con = pol_manager.getConnection();
+            // Per prima cosa verifica che l'utente abbia i diritti di accesso al progetto
+            if (!userCanRead(idProj, user.getId())) {
+                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id progetto non valido!.\n";
+                LOG.severe(msg + "E\' presente il parametro \"q=act\" ma non un valore \"id\" - cioe\' id progetto - significativo!\n");
+                throw new WebStorageException("Attenzione: indirizzo richiesto non valido!\n");
+            }
             pst = con.prepareStatement(GET_TOP_WBS_BY_PROJECT);
             pst.clearParameters();
             pst.setInt(1, idProj);
@@ -2160,27 +2320,27 @@ public class DBWrapper implements Query {
                                 wbsPPN = new WbsBean();
                                 BeanUtil.populate(wbsPPN, rs4);
                                 wbsPPN.setWbsPadre(wbsPN);
-                                Vector<ActivityBean> wbsAct = new Vector<ActivityBean>(getActivitiesAmountByWbs(idProj, wbsPPN.getId()));
+                                Vector<ActivityBean> wbsAct = new Vector<ActivityBean>(getActivitiesAmountByWbs(idProj, wbsPPN.getId(), user));
                                 wbsPPN.setAttivita(wbsAct);
                                 vWbsPPN.add(wbsPPN);
                             }
                             wbsPN.setWbsFiglie(vWbsPPN);
-                            Vector<ActivityBean> wbsAct = new Vector<ActivityBean>(getActivitiesAmountByWbs(idProj, wbsPN.getId()));
+                            Vector<ActivityBean> wbsAct = new Vector<ActivityBean>(getActivitiesAmountByWbs(idProj, wbsPN.getId(), user));
                             wbsPN.setAttivita(wbsAct);
                             vWbsPN.add(wbsPN);
                         }
                         wbsN.setWbsFiglie(vWbsPN);
-                        Vector<ActivityBean> wbsAct = new Vector<ActivityBean>(getActivitiesAmountByWbs(idProj, wbsN.getId()));
+                        Vector<ActivityBean> wbsAct = new Vector<ActivityBean>(getActivitiesAmountByWbs(idProj, wbsN.getId(), user));
                         wbsN.setAttivita(wbsAct);
                         vWbsN.add(wbsN);
                     }
                     wbsF.setWbsFiglie(vWbsN);
-                    Vector<ActivityBean> wbsAct = new Vector<ActivityBean>(getActivitiesAmountByWbs(idProj, wbsF.getId()));
+                    Vector<ActivityBean> wbsAct = new Vector<ActivityBean>(getActivitiesAmountByWbs(idProj, wbsF.getId(), user));
                     wbsF.setAttivita(wbsAct);
                     vWbsF.add(wbsF);
                 }
                 wbsP.setWbsFiglie(vWbsF);
-                Vector<ActivityBean> wbsAct = new Vector<ActivityBean>(getActivitiesAmountByWbs(idProj, wbsP.getId()));
+                Vector<ActivityBean> wbsAct = new Vector<ActivityBean>(getActivitiesAmountByWbs(idProj, wbsP.getId(), user));
                 wbsP.setAttivita(wbsAct);
                 vWbsP.add(wbsP);
             }
@@ -2212,12 +2372,14 @@ public class DBWrapper implements Query {
      * in gerarchia.</p>
      * 
      * @param idProj id del progetto di cui caricare le wbs
+     * @param user utente loggato
      * @param idWbs  id della wbs di cui si vuol caricare tutta la gerarchia
      * @return <code>WbsBean</code> - oggetto contenente tutte la gerarchia di Wbs di un progetto
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
     @SuppressWarnings({ "null", "static-method" })
     public WbsBean getWbsHierarchyByWbs(int idProj,
+                                        PersonBean user,
                                         int idWbs)
                                  throws WebStorageException {
         ResultSet rs, rs1, rs2, rs3, rs4 = null;
@@ -2230,6 +2392,12 @@ public class DBWrapper implements Query {
         Vector<WbsBean> vWbsPPN = null;
         try {
             con = pol_manager.getConnection();
+            // Per prima cosa verifica che l'utente abbia i diritti di accesso al progetto
+            if (!userCanRead(idProj, user.getId())) {
+                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id progetto non valido!.\n";
+                LOG.severe(msg + "E\' presente il parametro \"q=act\" ma non un valore \"id\" - cioe\' id progetto - significativo!\n");
+                throw new WebStorageException("Attenzione: indirizzo richiesto non valido!\n");
+            }
             pst = con.prepareStatement(GET_WBS);
             pst.clearParameters();
             pst.setInt(1, idProj);
@@ -2328,12 +2496,14 @@ public class DBWrapper implements Query {
      * restituisce tutta la gerarchia degli ascendenti della WBS di dato id.</p>
      * 
      * @param idProj identificativo del progetto a cui la WBS di cui si vuol cercare l'ascendenza deve appartenere
+     * @param user utente loggato
      * @param idWbs  identificativo della WBS (offspring) di cui si vuol cercare l'ascendenza
      * @return <code>WbsBean</code> - una WBS contenente al proprio interno la gerarchia completa da scorrere per mostrare l'albero genealogico della WBS di dato id
      * @throws WebStorageException se si verifica qualche problema nell'esecuzione di query o in qualche tipo di puntamento
      */
     @SuppressWarnings("null")
     public WbsBean getWbsHierarchyByOffspring(int idProj,
+                                              PersonBean user,
                                               int idWbs) 
                                        throws WebStorageException {
         Connection con = null;
@@ -2343,9 +2513,15 @@ public class DBWrapper implements Query {
         Vector<WbsBean> wbsFiglie = null;
         try {
             // Valorizza WBS di partenza (livello 0)
-            wbsPPN = getWbsInstance(idProj, idWbs);
+            wbsPPN = getWbsInstance(idProj, idWbs, user);
             // Ne cerca il padre
             con = pol_manager.getConnection();
+            // Per prima cosa verifica che l'utente abbia i diritti di accesso al progetto
+            if (!userCanRead(idProj, user.getId())) {
+                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id progetto non valido!.\n";
+                LOG.severe(msg + "E\' presente il parametro \"q=act\" ma non un valore \"id\" - cioe\' id progetto - significativo!\n");
+                throw new WebStorageException("Attenzione: indirizzo richiesto non valido!\n");
+            }
             pst = con.prepareStatement(GET_WBS_PADRE);
             pst.clearParameters();
             pst.setInt(1, wbsPPN.getId());
@@ -2469,12 +2645,14 @@ public class DBWrapper implements Query {
      * restituisce solo il padre della WBS di dato id.</p>
      * 
      * @param idProj identificativo del progetto a cui la WBS di cui si vuol cercare l'ascendenza deve appartenere
+     * @param user utente loggato
      * @param idWbs  identificativo della WBS di cui si vuol cercare l'ascendenza
      * @return <code>WbsBean</code> - una WBS contenente al proprio interno la gerarchia completa da scorrere per mostrare l'albero genealogico della WBS di dato id
      * @throws WebStorageException se si verifica qualche problema nell'esecuzione di query o in qualche tipo di puntamento
      */
     @SuppressWarnings("null")
     public WbsBean getWbsParentByOffspring(int idProj,
+                                           PersonBean user,
                                            int idWbs) 
                                     throws WebStorageException {
         Connection con = null;
@@ -2482,9 +2660,15 @@ public class DBWrapper implements Query {
         ResultSet rs = null;
         WbsBean wbsInstance, wbsP = null;
         try {
-            wbsInstance = getWbsInstance(idProj, idWbs);
+            wbsInstance = getWbsInstance(idProj, idWbs, user);
             // Ne cerca il padre
             con = pol_manager.getConnection();
+            // Per prima cosa verifica che l'utente abbia i diritti di accesso al progetto
+            if (!userCanRead(idProj, user.getId())) {
+                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id progetto non valido!.\n";
+                LOG.severe(msg + "E\' presente il parametro \"q=act\" ma non un valore \"id\" - cioe\' id progetto - significativo!\n");
+                throw new WebStorageException("Attenzione: indirizzo richiesto non valido!\n");
+            }
             pst = con.prepareStatement(GET_WBS_PADRE);
             pst.clearParameters();
             pst.setInt(1, wbsInstance.getId());
@@ -2499,7 +2683,7 @@ public class DBWrapper implements Query {
             String msg = FOR_NAME + "id WBS padre non valorizzato; problema nella query delle WBS figlie.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + anve.getMessage(), anve);
-        }  catch (SQLException sqle) {
+        } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
@@ -2522,12 +2706,14 @@ public class DBWrapper implements Query {
     * che hanno come padre la WBS identificata tramite id, passato come parametro.</p>
     * 
     * @param idProj  id del progetto di cui caricare le wbs
+    * @param user    utente loggato
     * @param idWbs id della wbs padre
     * @return Vector&lt;WbsBean&gt; - vector contenente tutte le WBS figlie
     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
     */
     @SuppressWarnings({ "null", "static-method" })
-    public Vector<WbsBean> getWbsFiglie(int idProj, 
+    public Vector<WbsBean> getWbsFiglie(int idProj,
+                                        PersonBean user,
                                         int idWbs) 
                                  throws WebStorageException {
         Connection con = null;
@@ -2538,6 +2724,12 @@ public class DBWrapper implements Query {
         int nextParam = 0;
         try {
             con = pol_manager.getConnection();
+            // Per prima cosa verifica che l'utente abbia i diritti di accesso al progetto
+            if (!userCanRead(idProj, user.getId())) {
+                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id progetto non valido!.\n";
+                LOG.severe(msg + "E\' presente il parametro \"q=act\" ma non un valore \"id\" - cioe\' id progetto - significativo!\n");
+                throw new WebStorageException("Attenzione: indirizzo richiesto non valido!\n");
+            }
             pst = con.prepareStatement(GET_WBS_FIGLIE);
             pst.clearParameters();
             pst.setInt(++nextParam, idProj);
@@ -2549,6 +2741,10 @@ public class DBWrapper implements Query {
                 vectorWbs.add(wbs);
             }
             return vectorWbs;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "id WBS padre non valorizzato; problema nella query delle WBS figlie.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
             LOG.severe(msg); 
@@ -2941,7 +3137,8 @@ public class DBWrapper implements Query {
      * reuqesttime non sar&agrave; mai uguale al progetto a runtime,
      * per definizione!</p>
      * 
-     * @param idProj    id del progetto da aggiornare 
+     * @param idProj    id del progetto da aggiornare
+     * @param projectsWritableByUser Vector contenente la lista dei progetti su cui l'utente corrente e' abilitato alla modifica
      * @param userId    id dell'utente che ha eseguito il login
      * @param projects  Map contenente la lista dei progetti su cui l'utente corrente e' abilitato alla modifica
      * @param objectsRelatedToProject  Map contenente le hashmap che contengono le attività, i rischi e le competenze su cui l'utente e' abilitato alla modifica
@@ -2950,6 +3147,7 @@ public class DBWrapper implements Query {
      */
     @SuppressWarnings({ "null", "rawtypes" })
     public void updateProjectPart(int idProj,
+                                  Vector<ProjectBean> projectsWritableByUser,
                                   int userId,
                                   HashMap<Integer, ProjectBean> projects, 
                                   HashMap<String, HashMap<Integer, Vector>> objectsRelatedToProject,
@@ -2969,6 +3167,19 @@ public class DBWrapper implements Query {
             Vector<ActivityBean> activities = (Vector<ActivityBean>) activitiesOfProject.get(key);*/
             // Ottiene la connessione
             con = pol_manager.getConnection();
+            /* ===  Controlla anzitutto che l'id progetto sulla querystring === *
+             * ===  corrisponda a un id dei progetti scrivibili dall'utente === */
+            try {
+                if (!userCanWrite(idProj, projectsWritableByUser)) {
+                    String msg = FOR_NAME + "Attenzione: l'utente ha tentato di modificare un\'attivita\' legata ad un progetto su cui non ha i diritti di scrittura!\n";
+                    LOG.severe(msg + "Problema durante il tentativo di inserire una nuova attivita\'.\n");
+                    throw new WebStorageException(msg);
+                }
+            } catch (WebStorageException wse) {
+                String msg = FOR_NAME + "Problema nel tentativo di capire se l\'utente ha o non ha i diritti di scrittura!\n";
+                LOG.severe(msg + "Problema durante il tentativo di inserire una nuova attivita\'.\n");
+                throw new WebStorageException(msg);
+            }
             /* **************************************************************** *
              * Gestisce gli update delle varie funzionalita' del ProjectCharter *
              * **************************************************************** */
@@ -3265,6 +3476,7 @@ public class DBWrapper implements Query {
     /** <p>Metodo che aggiorna le attivit&agrave; di progetto..</p>
      * 
      * @param idProj    id del progetto da aggiornare 
+     * @param projectsWritableByUser Vector contenente la lista dei progetti su cui l'utente corrente e' abilitato alla modifica
      * @param userId    id dell'utente che ha eseguito il login
      * @param projects  Map contenente la lista dei progetti su cui l'utente corrente e' abilitato alla modifica
      * @param activitiesRelatedToProject    HashMap contenente le attività su cui l'utente e' abilitato alla modifica
@@ -3273,6 +3485,7 @@ public class DBWrapper implements Query {
      */
     @SuppressWarnings({ "null", "static-method" })
     public void updateActivityPart(int idProj,
+                                   Vector<ProjectBean> projectsWritableByUser,
                                    int userId,
                                    HashMap<Integer, ProjectBean> projects, 
                                    HashMap<Integer, Vector<ActivityBean>> activitiesRelatedToProject,
@@ -3289,6 +3502,19 @@ public class DBWrapper implements Query {
             Vector<ActivityBean> activities = activitiesRelatedToProject.get(key);*/
             // Ottiene la connessione
             con = pol_manager.getConnection();
+            /* ===  Controlla anzitutto che l'id progetto sulla querystring === *
+             * ===  corrisponda a un id dei progetti scrivibili dall'utente === */
+            try {
+                if (!userCanWrite(idProj, projectsWritableByUser)) {
+                    String msg = FOR_NAME + "Attenzione: l'utente ha tentato di modificare un\'attivita\' legata ad un progetto su cui non ha i diritti di scrittura!\n";
+                    LOG.severe(msg + "Problema durante il tentativo di inserire una nuova attivita\'.\n");
+                    throw new WebStorageException(msg);
+                }
+            } catch (WebStorageException wse) {
+                String msg = FOR_NAME + "Problema nel tentativo di capire se l\'utente ha o non ha i diritti di scrittura!\n";
+                LOG.severe(msg + "Problema durante il tentativo di inserire una nuova attivita\'.\n");
+                throw new WebStorageException(msg);
+            }
             /* **************************************************************** *
              *   Gestisce gli update delle varie funzionalita' delle attivita'  *
              * **************************************************************** */
@@ -3819,6 +4045,7 @@ public class DBWrapper implements Query {
      * @param user utente che ha eseguito il login
      * @param projects Map contenente la lista dei progetti su cui l'utente corrente e' abilitato alla modifica
      * @param wbsRelatedToProject HashMap contenente le wbs su cui l'utente e' abilitato alla modifica
+     * @param projectsWritableByUser lista di progetti su cui l'utente corrente ha il diritto di scrivere
      * @param params hashmap che contiene i parametri che si vogliono aggiornare del progetto
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
      */
@@ -3827,6 +4054,7 @@ public class DBWrapper implements Query {
                               PersonBean user,
                               HashMap<Integer, ProjectBean> projects, 
                               HashMap<Integer, Vector<WbsBean>> wbsRelatedToProject,
+                              Vector<ProjectBean> projectsWritableByUser,
                               HashMap<String, HashMap<String, String>>params) 
                        throws WebStorageException {
         Connection con = null;
@@ -3834,6 +4062,19 @@ public class DBWrapper implements Query {
         try {
             // Ottiene la connessione
             con = pol_manager.getConnection();
+            /* ===  Controlla anzitutto che l'id progetto sulla querystring === *
+             * ===  corrisponda a un id dei progetti scrivibili dall'utente === */
+            try {
+                if (!userCanWrite(idProj, projectsWritableByUser)) {
+                    String msg = FOR_NAME + "Attenzione: l'utente ha tentato di modificare un\'attivita\' legata ad un progetto su cui non ha i diritti di scrittura!\n";
+                    LOG.severe(msg + "Problema durante il tentativo di inserire una nuova attivita\'.\n");
+                    throw new WebStorageException(msg);
+                }
+            } catch (WebStorageException wse) {
+                String msg = FOR_NAME + "Problema nel tentativo di capire se l\'utente ha o non ha i diritti di scrittura!\n";
+                LOG.severe(msg + "Problema durante il tentativo di inserire una nuova attivita\'.\n");
+                throw new WebStorageException(msg);
+            }
             HashMap<String, String> paramsWbs = null;
             int nextParam = 0;
             con.setAutoCommit(false);
@@ -4612,15 +4853,30 @@ public class DBWrapper implements Query {
      * 
      * @param idProj    identificativo del progetto, al quale l'attivit&agrave; fa riferimento
      * @param user      utente loggato
+     * @param projectsWritableByUser lista di progetti su cui l'utente corrente ha il diritto di scrivere
      * @param params    hashmap contenente i valori inseriti dall'utente per inserimento nuova wbs
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
     @SuppressWarnings("null")
     public void insertWbs(int idProj,
                           PersonBean user,
+                          Vector<ProjectBean> projectsWritableByUser,
                           HashMap<String, String> params)
                    throws WebStorageException {
         Connection con = null;
+        /* ===  Controlla anzitutto che l'id progetto sulla querystring === *
+         * ===  corrisponda a un id dei progetti scrivibili dall'utente === */
+        try {
+            if (!userCanWrite(idProj, projectsWritableByUser)) {
+                String msg = FOR_NAME + "Attenzione: l'utente ha tentato di modificare un\'attivita\' legata ad un progetto su cui non ha i diritti di scrittura!\n";
+                LOG.severe(msg + "Problema durante il tentativo di inserire una nuova attivita\'.\n");
+                throw new WebStorageException(msg);
+            }
+        } catch (WebStorageException wse) {
+            String msg = FOR_NAME + "Problema nel tentativo di capire se l\'utente ha o non ha i diritti di scrittura!\n";
+            LOG.severe(msg + "Problema durante il tentativo di inserire una nuova attivita\'.\n");
+            throw new WebStorageException(msg);
+        }
         PreparedStatement pst = null;
         try {
             // Ottiene il progetto precaricato quando l'utente si è loggato corrispondente al progetto sul quale aggiungere un'attività
