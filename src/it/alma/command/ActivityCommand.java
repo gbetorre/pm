@@ -300,7 +300,7 @@ public class ActivityCommand extends ItemBean implements Command {
                              * ************************************************ */
                             loadParams(part, parser, params);
                             //Vector<ProjectBean> userWritableProjects = db.getProjects(user.getId(), Query.GET_WRITABLE_PROJECTS_ONLY);
-                            db.updateActivityPart(idPrj, user.getId(), writableProjects, userWritableActivitiesByProjectId, params);
+                            db.updateActivityPart(idPrj, writablePrj, user.getId(), writableProjects, userWritableActivitiesByProjectId, params);
                         } else if (part.equalsIgnoreCase(Query.ADD_TO_PROJECT)) {
                             /* ************************************************ *
                              *                 INSERT New Activity              *
@@ -340,7 +340,7 @@ public class ActivityCommand extends ItemBean implements Command {
                          *   Aggiorna le attività dell'utente in sessione   *
                          * ************************************************ */
                         // Rifà la query
-                        Vector<ActivityBean> userWritableActivitiesByCurrentPrj = db.getActivities(idPrj);
+                        Vector<ActivityBean> userWritableActivitiesByCurrentPrj = db.getActivities(idPrj, user);
                         // Aggiorna la HashMap delle attività indicizzate per identificativo di progetto (wrapped)
                         userWritableActivitiesByProjectId.put(new Integer(idPrj), userWritableActivitiesByCurrentPrj);
                         // Aggiorna la sessione
@@ -362,9 +362,9 @@ public class ActivityCommand extends ItemBean implements Command {
                              * ************************************************ */
                             //isHeader = isFooter = false;
                             candidates = db.getPeople(runtimeProject.getId());
-                            workPackage = db.getWbs(runtimeProject.getId(), Query.WBS_WP_ONLY);
+                            workPackage = db.getWbs(runtimeProject.getId(), user, Query.WBS_WP_ONLY);
                             for (WbsBean wp: workPackage) {
-                                wp.setWbsPadre(db.getWbsParentByOffspring(idPrj, wp.getId()));
+                                wp.setWbsPadre(db.getWbsParentByOffspring(idPrj, user, wp.getId()));
                             }
                             complexity = HomePageCommand.getComplessita();
                             states = HomePageCommand.getStatiAttivita();
@@ -384,9 +384,9 @@ public class ActivityCommand extends ItemBean implements Command {
                             //isHeader = isFooter = false;
                             activity = db.getActivity(idPrj, idAct, user);
                             candidates = db.getPeople(runtimeProject.getId());
-                            workPackage = db.getWbs(runtimeProject.getId(), Query.WBS_WP_ONLY);
+                            workPackage = db.getWbs(runtimeProject.getId(), user, Query.WBS_WP_ONLY);
                             for (WbsBean wp: workPackage) {
-                                wp.setWbsPadre(db.getWbsParentByOffspring(idPrj, wp.getId()));
+                                wp.setWbsPadre(db.getWbsParentByOffspring(idPrj, user, wp.getId()));
                             }
                             complexity = HomePageCommand.getComplessita();
                             states = HomePageCommand.getStatiAttivita();
@@ -408,7 +408,7 @@ public class ActivityCommand extends ItemBean implements Command {
                             // Effettua le selezioni che servono all'eliminazione o alla sospensione di una data attività
                             //isHeader = isFooter = false;
                             activity = db.getActivity(idPrj, idAct, user);
-                            wbs = db.getWbsHierarchyByOffspring(idPrj, activity.getIdWbs());
+                            wbs = db.getWbsHierarchyByOffspring(idPrj, user, activity.getIdWbs());
                             states = HomePageCommand.getStatiAttivita();
                          // Effettua le selezioni che servono alla visualizzazione del grafico
                         } else if (part.equalsIgnoreCase(Query.PART_GRAPHIC)) {
@@ -417,12 +417,12 @@ public class ActivityCommand extends ItemBean implements Command {
                              *         per la visualizzazione grafica           *
                              * ************************************************ */
                             // Costruisco la gerarchia di wbs e attività
-                            vWbsAncestors = db.getWbsHierarchy(idPrj);
+                            vWbsAncestors = db.getWbsHierarchy(idPrj, user);
                             for (WbsBean wbsAvo: vWbsAncestors) {
                                 if (wbsAvo.getWbsFiglie().isEmpty()) {
                                     // Se la wbs corrente non ha wbs figlie, significa che potrebbe avere attività
                                     // dunque, se ci sono, posso settare nella wbs corrente le sue attività 
-                                    vActivities = db.getActivitiesByWbs(wbsAvo.getId(), idPrj);
+                                    vActivities = db.getActivitiesByWbs(wbsAvo.getId(), idPrj, user);
                                     wbsAvo.setAttivita(vActivities);
                                 } else {
                                     // Significa che wbsAvo ha figlie, dunque controllo le figlie
@@ -430,7 +430,7 @@ public class ActivityCommand extends ItemBean implements Command {
                                         if (wbsFiglia.getWbsFiglie().isEmpty()) {
                                             // Se la wbs corrente non ha wbs figlie, significa che potrebbe avere attività
                                             // dunque, se ci sono, posso settare nella wbs corrente le sue attività 
-                                            vActivities = db.getActivitiesByWbs(wbsFiglia.getId(), idPrj);
+                                            vActivities = db.getActivitiesByWbs(wbsFiglia.getId(), idPrj, user);
                                             wbsFiglia.setAttivita(vActivities);
                                         } else {
                                             // Significa che wbsFiglia ha figlie, dunque controllo le figlie
@@ -438,7 +438,7 @@ public class ActivityCommand extends ItemBean implements Command {
                                                 if (wbsNipote.getWbsFiglie().isEmpty()) {
                                                     // Se la wbs corrente non ha wbs figlie, significa che potrebbe avere attività
                                                     // dunque, se ci sono, posso settare nella wbs corrente le sue attività 
-                                                    vActivities = db.getActivitiesByWbs(wbsNipote.getId(), idPrj);
+                                                    vActivities = db.getActivitiesByWbs(wbsNipote.getId(), idPrj, user);
                                                     wbsNipote.setAttivita(vActivities);
                                                 } else {
                                                     // Significa che wbsNipote ha figlie, dunque controllo le figlie
@@ -446,7 +446,7 @@ public class ActivityCommand extends ItemBean implements Command {
                                                         if (wbsProNipote.getWbsFiglie().isEmpty()) {
                                                             // Se la wbs corrente non ha wbs figlie, significa che potrebbe avere attività
                                                             // dunque, se ci sono, posso settare nella wbs corrente le sue attività 
-                                                            vActivities = db.getActivitiesByWbs(wbsProNipote.getId(), idPrj);
+                                                            vActivities = db.getActivitiesByWbs(wbsProNipote.getId(), idPrj, user);
                                                             wbsProNipote.setAttivita(vActivities);
                                                         } else {
                                                             // Significa che wbsProNipote ha figlie, dunque controllo le figlie
@@ -454,7 +454,7 @@ public class ActivityCommand extends ItemBean implements Command {
                                                                 if (wbsProProNipote.getWbsFiglie() == null ||wbsProProNipote.getWbsFiglie().isEmpty()) {
                                                                     // Se la wbs corrente non ha wbs figlie, significa che potrebbe avere attività
                                                                     // dunque, se ci sono, posso settare nella wbs corrente le sue attività 
-                                                                    vActivities = db.getActivitiesByWbs(wbsProProNipote.getId(), idPrj);
+                                                                    vActivities = db.getActivitiesByWbs(wbsProProNipote.getId(), idPrj, user);
                                                                     wbsProProNipote.setAttivita(vActivities);
                                                                 }
                                                             }
@@ -482,9 +482,9 @@ public class ActivityCommand extends ItemBean implements Command {
                     // Se il parametro 'p' non è presente, controlla se c'è il parametro 'idw', ovvero "id wbs"
                     if (idWbs > Utils.DEFAULT_ID) {
                         // Se c'è idWBS deve recuperare le attività di quella wbs
-                        vActivities = db.getActivitiesByWbs(idWbs, idPrj);
+                        vActivities = db.getActivitiesByWbs(idWbs, idPrj, user);
                         // Recupera anche la wbs stessa a fini etichette etc.
-                        WbsBean wP = db.getWbsInstance(idPrj, idWbs);
+                        WbsBean wP = db.getWbsInstance(idPrj, idWbs, user);
                         workPackage = new Vector<WbsBean>(1);
                         workPackage.add(wP);
                         fileJspT = nomeFileActivityByWbs;
