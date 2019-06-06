@@ -306,6 +306,18 @@ table.thin {
     line-height: 4px;
 }
 
+@media only screen and (max-width : 1220px) {
+table.thin {
+    border-width: thin;
+    border-spacing: 2px;
+    border-style: ridge;
+    border-color: black;
+    border-collapse: collapse;
+    vertical-align: middle;
+    line-height: normal;
+}
+}
+
 tr.thin {
     line-height: 16px;
     border: 1px solid black;
