@@ -278,7 +278,7 @@ public class ProjectCommand extends ItemBean implements Command {
                                 /* **************************************************** *
                                  *                  UPDATE Project Part                 *
                                  * **************************************************** */
-                                db.updateProjectPart(idPrj, user.getId(), writableProjects, objectsMap, params);
+                                db.updateProjectPart(idPrj, writablePrj, user.getId(), writableProjects, objectsMap, params);
                                 Vector<ProjectBean> userWritableProjects = db.getProjects(user.getId(), Query.GET_WRITABLE_PROJECTS_ONLY);
                                 // Aggiorna i progetti, le attivita dell'utente in sessione
                                 ses.removeAttribute("writableProjects");
@@ -315,7 +315,7 @@ public class ProjectCommand extends ItemBean implements Command {
                     runtimeProject = db.getProject(idPrj, user.getId());
                     newStatusId = db.getMax("avanzamentoprogetto") + 1;
                     // Recupera tutta la lista degli Status
-                    projectStatusList = db.getStatusList(idPrj);
+                    projectStatusList = db.getStatusList(idPrj, user);
                     // Per ottimizzare il caricamento di dati nella request separa i rami della richiesta
                     if (part.equals(Query.PART_PROJECT)) {
                         ; // Codice per mostrare dati aggregati sul progetto, o relazioni o altro
@@ -329,7 +329,7 @@ public class ProjectCommand extends ItemBean implements Command {
                         // Testa se l'id dello status è significativo
                         if (idStatus > Query.NOTHING) {
                             // Recupera uno specifico status di progetto di dato id
-                            projectStatus = db.getStatus(idStatus);
+                            projectStatus = db.getStatus(idPrj, idStatus, user);
                         } else if (idStatus == Query.NOTHING) { // Valore fittizio (nessuno status può avere id = 0!)
                             // Recupera l'ultimo Status, cioè quello avente datainizio più prossima alla data odierna
                             Date dateProjectStatus = new Date(0);
@@ -346,15 +346,15 @@ public class ProjectCommand extends ItemBean implements Command {
                                 }
                             }
                             // Recupera uno specifico status di progetto a partire dalla sua data - assume UNIQUE(data, idProgetto)
-                            projectStatus = db.getStatus(idPrj, dateProjectStatus);
+                            projectStatus = db.getStatus(idPrj, dateProjectStatus, user);
                         }
                         if (projectStatus != null) {
                             // Recupera la lista di attività presenti in un range di date
-                            activitiesByRange = db.getActivitiesByRange(idPrj, projectStatus.getDataInizio(), projectStatus.getDataFine());
-                            nextStatus = db.getNextStatus(idPrj, projectStatus.getDataFine());
+                            activitiesByRange = db.getActivitiesByRange(idPrj, user, projectStatus.getDataInizio(), projectStatus.getDataFine());
+                            nextStatus = db.getNextStatus(idPrj, projectStatus.getDataFine(), user);
                             if (nextStatus != null) {
                                 // Recupera la lista di attività con data inizio compresa tra due date
-                                activitiesByDate = db.getActivitiesByDate(idPrj, nextStatus.getDataInizio(), nextStatus.getDataFine());
+                                activitiesByDate = db.getActivitiesByDate(idPrj, user, nextStatus.getDataInizio(), nextStatus.getDataFine());
                             } else {
                                 // Recupera la lista di attività con data inizio nel futuro rispetto alla data di fine dello status attuale
                                 activitiesByDate = db.getActivities(idPrj, user, projectStatus.getDataFine(), false, true);
@@ -365,7 +365,7 @@ public class ProjectCommand extends ItemBean implements Command {
                      *      Implementazione della parte specifica per la visualizzazione del report di progetto     *
                      * ******************************************************************************************** */
                     else if (part.equals(Query.PART_REPORT)) {
-                        workPackagesOfProj = WbsCommand.retrieveWorkPackages(idPrj, db);
+                        workPackagesOfProj = WbsCommand.retrieveWorkPackages(idPrj, db, user);
                         // Chiamata al metodo per la valorizzazione dello stato dell'attività da visualizzare
                         if (selectionDate.equals(Utils.format(Utils.getCurrentDate()))) {
                             convertDate = Utils.format(Utils.format(Utils.getCurrentDate()), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
@@ -376,7 +376,7 @@ public class ProjectCommand extends ItemBean implements Command {
                     } 
                     // Parte specifica di risorse
                     else if (part.equals(Query.PART_PROJECT_CHARTER_RESOURCE)) {
-                        vSkills = db.getSkills(idPrj);
+                        vSkills = db.getSkills(idPrj, user);
                     }
                 }                
                 fileJspT = nomeFile.get(part);

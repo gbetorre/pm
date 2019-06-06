@@ -221,7 +221,7 @@ public class RiskCommand extends ItemBean implements Command {
                 // Recupera in ogni caso il progetto richiesto dalla navigazione utente
                 runtimeProject = db.getProject(idPrj, user.getId());
                 // Recupera in ogni caso i rischi associati al progetto richiesto dalla navigazione utente
-                riskOfRuntimeProject = db.getRisks(idPrj);
+                riskOfRuntimeProject = db.getRisks(idPrj, user);
                 // Verifica se deve eseguire un'operazione di scrittura
                 if (write) {
                     // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
@@ -253,7 +253,7 @@ public class RiskCommand extends ItemBean implements Command {
                              *                  INSERT Risk Part                *
                              * ************************************************ */
                             loadParams(part, parser, params);
-                            db.insertWbs(idPrj, user, params.get(Query.ADD_TO_PROJECT));
+                            db.insertWbs(idPrj, user, writablePrj, params.get(Query.ADD_TO_PROJECT));
                             redirect = "q=" + Query.PART_RISK + "&id=" + idPrj;
                         }
                     } else {
@@ -266,7 +266,7 @@ public class RiskCommand extends ItemBean implements Command {
                     if (nomeFile.containsKey(part)) {
                         fileJspT = nomeFile.get(part);
                     } else {
-                        riskOfRuntimeProject = db.getRisks(idPrj);
+                        riskOfRuntimeProject = db.getRisks(idPrj, user);
                         fileJspT = nomeFileElenco;
                     }
                 }

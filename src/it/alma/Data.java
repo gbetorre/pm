@@ -427,9 +427,8 @@ public class Data extends HttpServlet {
         if (req.getParameter(entToken).equals("wbs")) { 
             try {
                 WbsCommand wbsc = (WbsCommand) cmd;
-                
                 ProjectBean p = db.getProject(idPrj, usr.getId());
-                Vector<WbsBean> listWP = WbsCommand.retrieveWorkPackages(idPrj, db);
+                Vector<WbsBean> listWP = WbsCommand.retrieveWorkPackages(idPrj, db, usr);
                 // Scrittura file CSV
                 out.println("N." + SEPARATOR +
                             "Workpackage" + SEPARATOR + 
@@ -447,7 +446,7 @@ public class Data extends HttpServlet {
                     int itCounts = 0, record = 0;
                     do {
                         WbsBean wp = listWP.elementAt(itCounts);
-                        WbsBean wbsParent = db.getWbsParentByOffspring(idPrj, wp.getId());
+                        WbsBean wbsParent = db.getWbsParentByOffspring(idPrj, usr, wp.getId());
                         StringBuffer nomePadre = new StringBuffer();
                         if (wbsParent != null) {
                             nomePadre.append(wbsParent.getNome());

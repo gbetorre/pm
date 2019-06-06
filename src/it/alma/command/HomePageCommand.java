@@ -520,7 +520,7 @@ public class HomePageCommand extends ItemBean implements Command {
                 title = titles.get(1);
                 vV = new ArrayList<ItemBean>();
                 item = null;
-                ArrayList<StatusBean> projectStatusList = db.getStatusList(projId);
+                ArrayList<StatusBean> projectStatusList = db.getStatusList(projId, usr);
                 for (StatusBean s : projectStatusList) {
                     item = new ItemBean("sts", 
                                         "Avanzamento dal " + Utils.format(s.getDataInizio()) + " al " + Utils.format(s.getDataFine()), 

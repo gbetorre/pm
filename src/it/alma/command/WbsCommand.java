@@ -255,6 +255,7 @@ public class WbsCommand extends ItemBean implements Command {
                     Vector<ProjectBean> writablePrj = (Vector<ProjectBean>) ses.getAttribute("writableProjects");
                     // Se non ci sono progetti scrivibili e il flag "write" è true c'è qualcosa che non va...
                     if (writablePrj == null) {
+                        ses.invalidate();
                         String msg = FOR_NAME + "Il flag di scrittura e\' true pero\' non sono stati trovati progetti scrivibili: problema!.\n";
                         LOG.severe(msg);
                         throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
@@ -274,22 +275,22 @@ public class WbsCommand extends ItemBean implements Command {
                              *                  UPDATE Wbs Part                 *
                              * ************************************************ */
                             loadParams(part, parser, params);
-                            db.updateWbsPart(idPrj, user, writableProjects, userWritableWbsByProjectId, params);
+                            db.updateWbsPart(idPrj, user, writableProjects, userWritableWbsByProjectId, writablePrj, params);
                             redirect = "q=" + Query.PART_WBS + "&id=" + idPrj;
                         } else if (part.equalsIgnoreCase(Query.ADD_TO_PROJECT)) {
                             /* ************************************************ *
                              *                  INSERT Wbs Part                 *
                              * ************************************************ */
                             loadParams(part, parser, params);
-                            db.insertWbs(idPrj, user, params.get(Query.ADD_TO_PROJECT));
+                            db.insertWbs(idPrj, user, writablePrj, params.get(Query.ADD_TO_PROJECT));
                             redirect = "q=" + Query.PART_WBS + "&id=" + idPrj;
                         } else if (part.equalsIgnoreCase(Query.DELETE_PART)) {
                             /* ************************************************ *
                              *                  DELETE Wbs Part                 *
                              * ************************************************ */
                             Integer idWbsToDel = idWbs;
-                            wbsOfWbs = db.getWbsFiglie(idPrj, idWbsToDel);
-                            wbsActivities = db.getActivitiesByWbs(idWbsToDel, idPrj);
+                            wbsOfWbs = db.getWbsFiglie(idPrj, user, idWbsToDel);
+                            wbsActivities = db.getActivitiesByWbs(idWbsToDel, idPrj, user);
                             if (wbsActivities.isEmpty() && wbsOfWbs.isEmpty()) {
                                 db.deleteWbs(user, runtimeProject.getIdDipart(), idWbsToDel);
                                 redirect = "q=" + Query.PART_WBS + "&id=" + idPrj;
@@ -299,9 +300,9 @@ public class WbsCommand extends ItemBean implements Command {
                              *                  UPDATE Wbs padre                *
                              * ************************************************ */
                             loadParams(part, parser, params);
-                            db.updateWbsPart(idPrj, user, writableProjects, userWritableWbsByProjectId, params);
-                            vWbsAncestors = db.getWbsHierarchy(idPrj);
-                            wbsPutativeFather = db.getWbs(idPrj, Query.WBS_BUT_WP);
+                            db.updateWbsPart(idPrj, user, writableProjects, userWritableWbsByProjectId, writablePrj, params);
+                            vWbsAncestors = db.getWbsHierarchy(idPrj, user);
+                            wbsPutativeFather = db.getWbs(idPrj, user, Query.WBS_BUT_WP);
                             fileJspT = nomeFile.get(part);
                         }
                     }
@@ -311,18 +312,18 @@ public class WbsCommand extends ItemBean implements Command {
                      * ************************************************ */
                     if (nomeFile.containsKey(part)) { 
                         if (part.equalsIgnoreCase(Query.PART_REPORT)) {
-                            workPackages = retrieveWorkPackages(idPrj, db);
+                            workPackages = retrieveWorkPackages(idPrj, db, user);
                         } else if (part.equalsIgnoreCase(Query.PART_GRAPHIC)) {
-                            vWbsAncestors = db.getWbsHierarchy(idPrj);
-                            wbsPutativeFather = db.getWbs(idPrj, Query.WBS_BUT_WP);
+                            vWbsAncestors = db.getWbsHierarchy(idPrj, user);
+                            wbsPutativeFather = db.getWbs(idPrj, user, Query.WBS_BUT_WP);
                         } else {
                             // Selezioni per visualizzazione, aggiunta e modifica wbs
                             // Seleziona tutte le WBS non workpackage per mostrare i possibili padri nella pagina di dettaglio
                             // isHeader = isFooter = false;
-                            wbsPutativeFather = db.getWbs(idPrj, Query.WBS_BUT_WP);
+                            wbsPutativeFather = db.getWbs(idPrj, user, Query.WBS_BUT_WP);
                             if (idWbs != Utils.DEFAULT_ID) {
-                                wbsInstance = db.getWbsInstance(idPrj, idWbs);
-                                wbsActivities = db.getActivitiesByWbs(idWbs, idPrj);
+                                wbsInstance = db.getWbsInstance(idPrj, idWbs, user);
+                                wbsActivities = db.getActivitiesByWbs(idWbs, idPrj, user);
                                 wbsInstance.setAttivita(wbsActivities);
                             }
                         }
@@ -330,7 +331,7 @@ public class WbsCommand extends ItemBean implements Command {
                     } else {
                         // Se il parametro 'p' non è presente, deve solo selezionare tutte le wbs
                         // vWbs = db.getWbs(idPrj, Query.WBS_GET_ALL);
-                        vWbsAncestors = db.getWbsHierarchy(idPrj);
+                        vWbsAncestors = db.getWbsHierarchy(idPrj, user);
                         fileJspT = nomeFileElenco;
                     }
                 }
@@ -480,19 +481,21 @@ public class WbsCommand extends ItemBean implements Command {
      * 
      * @param idPrj identificativo del progetto corrente
      * @param db    WebStorage per l'accesso ai dati
+     * @param user  utente loggato
      * @return <code>Vector&lt;WbsBean&gt;</code> - lista di work packages recuperati 
      * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
      */
     public static Vector<WbsBean> retrieveWorkPackages(int idPrj,
-                                                       DBWrapper db)
+                                                       DBWrapper db,
+                                                       PersonBean user)
                                                 throws CommandException {
         Vector<WbsBean> workPackages = null;
         try {
             // Recupera solo i work packages (l'obiettivo finale è mostrare le attività...)
-            workPackages = db.getWbs(idPrj, Query.WBS_WP_ONLY);
+            workPackages = db.getWbs(idPrj, user, Query.WBS_WP_ONLY);
             // Per ogni work package ne recupera le attività
             for (WbsBean wp : workPackages) {
-                Vector<ActivityBean> activitiesByWP = db.getActivitiesByWbs(wp.getId(), idPrj);
+                Vector<ActivityBean> activitiesByWP = db.getActivitiesByWbs(wp.getId(), idPrj, user);
                 wp.setAttivita(activitiesByWP);
             }
         } catch (WebStorageException wse) {

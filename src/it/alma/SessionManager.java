@@ -224,6 +224,7 @@ public class SessionManager extends HttpServlet {
                 // Logga anzitutto l'accesso
                 traceAccess(req, username, db);
                 // Prepara gli altri attributi 
+                PersonBean user = (PersonBean) session.getAttribute("usr");
                 Vector<DepartmentBean> userWritableDepts = db.getWritableDeparts(username);
                 Vector<ProjectBean> userWritableProjects = db.getWritableProjects(username);
                 LinkedHashMap<Integer, Vector<ActivityBean>> userWritableActivitiesByProject = new LinkedHashMap<Integer, Vector<ActivityBean>>();
@@ -232,11 +233,11 @@ public class SessionManager extends HttpServlet {
                 for (ProjectBean writablePrj : userWritableProjects) {
                     int idPrj = writablePrj.getId();
                     Integer key = new Integer(idPrj);
-                    Vector<ActivityBean> userWritableActivities = db.getActivities(idPrj);
+                    Vector<ActivityBean> userWritableActivities = db.getActivities(idPrj, user);
                     userWritableActivitiesByProject.put(key, userWritableActivities);
-                    Vector<SkillBean> userWritableSkills = db.getSkills(idPrj);
+                    Vector<SkillBean> userWritableSkills = db.getSkills(idPrj, user);
                     userWritableSkillsByProject.put(key, userWritableSkills);
-                    Vector<RiskBean> userWritableRisks = db.getRisks(idPrj);
+                    Vector<RiskBean> userWritableRisks = db.getRisks(idPrj, user);
                     userWritableARisksByProject.put(key, userWritableRisks);
                 }
                 // Prepara il menu
