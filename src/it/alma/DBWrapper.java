@@ -3762,21 +3762,24 @@ public class DBWrapper implements Query {
                     CodeBean stateToCompute = null;
                     stateToCompute = computeActivityState(actToUpdate.getDataInizio(), actToUpdate.getDataFine(), actToUpdate.getDataInizioEffettiva(), actToUpdate.getDataFineEffettiva(), Utils.convert(Utils.getCurrentDate()));
                     idState = stateToCompute.getId();
-                    // Begin: ==>
-                    con.setAutoCommit(false);
-                    pst = con.prepareStatement(UPDATE_ACTIVITY_STATE);
-                    pst.clearParameters();
-                    pst.setInt(1, idState);
-                    // Campi automatici: id utente, ora ultima modifica, data ultima modifica
-                    pst.setDate(2, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
-                    pst.setTime(3, Utils.getCurrentTime());   // non accetta una String, ma un oggetto java.sql.Time
-                    pst.setString(4, anonymous.getCognome() + String.valueOf(Utils.BLANK_SPACE) + anonymous.getNome());
-                    // Identificativo attività da aggiornare
-                    pst.setInt(5, actToUpdate.getId());
-                    pst.executeUpdate();
-                    con.commit();
-                    // <== :End
-                    ++results;
+                    // Se lo stato attività ha lo stesso valore dello stato calcolato, salta la riga
+                    if (actToUpdate.getIdStato() != idState) {
+                        // Begin: ==>
+                        con.setAutoCommit(false);
+                        pst = con.prepareStatement(UPDATE_ACTIVITY_STATE);
+                        pst.clearParameters();
+                        pst.setInt(1, idState);
+                        // Campi automatici: id utente, ora ultima modifica, data ultima modifica
+                        pst.setDate(2, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+                        pst.setTime(3, Utils.getCurrentTime());   // non accetta una String, ma un oggetto java.sql.Time
+                        pst.setString(4, anonymous.getCognome() + String.valueOf(Utils.BLANK_SPACE) + anonymous.getNome());
+                        // Identificativo attività da aggiornare
+                        pst.setInt(5, actToUpdate.getId());
+                        pst.executeUpdate();
+                        con.commit();
+                        // <== :End
+                        ++results;
+                    }
                 }
             }
             return results;
