@@ -65,6 +65,15 @@
       <url-pattern>/documenti/upload/monitoraggio_d8/*</url-pattern>
    </servlet-mapping>
 
+    <error-page>
+      <error-code>404</error-code>
+      <location>/web/html/noResourceFound.html</location>
+    </error-page>
+    <error-page>
+      <error-code>500</error-code>
+      <location>/web/html/internalServerError.html</location>
+    </error-page>
+
     <context-param>
         <description>Pagina di errore a cui redirigere in caso venga sollevata un'eccezione</description>
         <param-name>errorJsp</param-name>
