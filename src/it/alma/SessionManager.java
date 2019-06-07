@@ -40,9 +40,19 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.LinkedHashMap;
+import java.util.Optional;
 import java.util.Vector;
 import java.util.logging.Logger;
+
+import java.security.SecureRandom;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
@@ -55,13 +65,16 @@ import javax.servlet.http.HttpSession;
 import com.oreilly.servlet.ParameterParser;
 
 import it.alma.bean.ActivityBean;
+import it.alma.bean.CodeBean;
 import it.alma.bean.DepartmentBean;
 import it.alma.bean.ItemBean;
 import it.alma.bean.PersonBean;
 import it.alma.bean.ProjectBean;
 import it.alma.bean.RiskBean;
 import it.alma.bean.SkillBean;
+
 import it.alma.command.HomePageCommand;
+
 import it.alma.exception.AttributoNonValorizzatoException;
 import it.alma.exception.CommandException;
 import it.alma.exception.WebStorageException;
@@ -107,6 +120,27 @@ public class SessionManager extends HttpServlet {
      * che compongono l'output html finale.</p>
      */
     private static String templateJsp;
+    /**
+     * <p>Iterazioni per il costruttore PBEKeySpec.</p>
+     */
+    private static final int ITERATIONS = 65536;
+    /**
+     * <p>Lunghezza della chiave derivata dal costruttore PBEKeySpec.</p>
+     */
+    private static final int KEY_LENGTH = 128;
+    /**
+     * <p>Algoritmo utilizzato per il criptaggio della password.</p>
+     */
+    private static final String ALGORITHM = "PBKDF2WithHmacSHA512";
+    /**
+     * <p>Costante random definita da un generatore di numeri casuali sicuro.</p>
+     */
+    private static final SecureRandom RAND = new SecureRandom();
+    /**
+     * <p>Costante indicante la lunghezza in termini di caratteri del seme,
+     * usato per la criptazione della password.</p>
+     */
+    public static final int SALT_LENGTH = 128;
     
     
     /** 
@@ -209,7 +243,14 @@ public class SessionManager extends HttpServlet {
         boolean authenticated = false;
         // Crea la sessione stessa, se non c'è già, altrimenti la recupera
         try {
-            authenticated = authenticate(username, password, req, db, msg);
+            authenticated = authenticateEncrypted(username, password, req, db, msg);
+            if (!authenticated) {
+                authenticated = authenticate(username, password, req, db, msg);
+            }
+        } catch (InvalidKeySpecException ikse) {
+            throw new ServletException(FOR_NAME + "Chiave specificata non valida.\n" + ikse.getMessage(), ikse);
+        } catch (NoSuchAlgorithmException nsae) {
+            throw new ServletException(FOR_NAME + "Algoritmo specificato non disponibile nell'ambiente.\n" + nsae.getMessage(), nsae);
         } catch (CommandException ce) {
             throw new ServletException(FOR_NAME + "Non riesco ad identificare l\'utente.\n" + ce.getMessage(), ce);
         }
@@ -218,6 +259,7 @@ public class SessionManager extends HttpServlet {
             HttpSession session = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
             if (!authenticated) {
                 req.setAttribute("msg", msg);
+                req.setAttribute("auth", authenticated);
                 req.getRequestDispatcher("/jsp/login.jsp").include(req, res);
             }
             else {
@@ -326,6 +368,70 @@ public class SessionManager extends HttpServlet {
     
     
     /**
+     * <p>Crea la sessione utente.<br />
+     * Inserisce la sessione creata nella HttpServletRequest, modificandola
+     * per riferimento <code>ByRef</code>.</p>
+     * 
+     * @param username nome utente inserito ai fini di login
+     * @param password password inserita ai fini di login
+     * @param req   HttpServletRequest per la creazione della sessione
+     * @param db    DataBound per la query riguardo le credenziali
+     * @param message messaggio per l'output circa l'esito della login 
+     * @return <code>boolean</code> - true se l'autenticazione e' andata a buon fine, false in caso contrario
+     * @throws CommandException se si verifica un problema nel recupero dell'utente in base alle credenziali fornite
+     * @throws InvalidKeySpecException   se la chiave non &egrave; valida (codifica non valida, lunghezza non valida, non inizializzata, ...)
+     * @throws NoSuchAlgorithmException  se non &egrave; disponibile l'algoritmo di criptaggio nell'ambiente
+     */
+    public static boolean authenticateEncrypted(String username, 
+                                                String password, 
+                                                HttpServletRequest req, 
+                                                DBWrapper db, 
+                                                StringBuffer message) 
+                                         throws CommandException, 
+                                                NoSuchAlgorithmException, 
+                                                InvalidKeySpecException {
+        boolean authenticated = false;
+        HttpSession session = req.getSession();
+        // Se la sessione non è nuova ci sono già dentro dei valori
+        if (session.getAttribute("usr") != null) {
+            authenticated = true;
+        }
+        else {  
+            // Interroga il database a proposito dell'utente
+            try {
+                CodeBean encryptedPassword = db.getEncryptedPassword(username);
+                PersonBean user = null;
+                if (verifyPassword(password, encryptedPassword)) {
+                    user = db.getUser(username, encryptedPassword.getNome());
+                }
+                if (user != null) {                         
+                    message.append("Benvenuto" + user.getNome());
+                    session.setAttribute("msg", message);
+                    session.setAttribute("error", false);
+                    session.setAttribute("usr", user);
+                    authenticated = true;
+                } else {
+                    authenticated = false;
+                }
+            } catch (WebStorageException wse) {    
+                String msg = FOR_NAME + "Non riesco a determinare l\'utente";
+                LOG.severe(msg);
+                throw new CommandException(msg + wse.getMessage(), wse);
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Attributo della persona non valorizzato.\n";
+                LOG.severe(msg);
+                throw new CommandException(msg + anve.getMessage(), anve);
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Oggetto persona non valorizzato.\n";
+                LOG.severe(msg);
+                throw new CommandException(msg + npe.getMessage(), npe);
+            }
+        }
+        return authenticated;
+    }
+    
+    
+    /**
      * <p>Prepara le informazioni da registrare nel database per tracciare
      * l'evento di login di un determinato utente, passato come argomento.<br />
      * Chiama il metodo del model, un cui riferimento viene passato come
@@ -366,6 +472,82 @@ public class SessionManager extends HttpServlet {
             ip = new StringBuffer(ipAddress);
         }
         db.manageAccess(username, ip, remoteHost, server);
+    }
+    
+    
+    /**
+     * <p>Genera il seme necessario per la password criptata ad ogni cambio password dell'utente loggato.</p>
+     * 
+     * @param length  lunghezza del seme
+     * @return <code>Optional&lt;String&gt;</code> - stringa contenente il seme generato
+     */
+    public static Optional<String> generateSalt (final int length) {
+        if (length < 1) {
+          System.err.println("Error in generateSalt: length must be > 0");
+          return Optional.empty();
+        }
+        byte[] salt = new byte[length];
+        RAND.nextBytes(salt);
+        return Optional.of(Base64.getEncoder().encodeToString(salt));
+    }
+    
+    
+    /**
+     * <p>Esegue il criptaggio della password dell'utente.</p>
+     * 
+     * @param password    password inserita dall'utente
+     * @param salt        seme univoco per ogni utente in base al quale la password viene criptata
+     * @return <code>Optional&lt;String&gt;</code> - ritorna una stringa contenente la password criptata
+     * @throws NoSuchAlgorithmException  se non &egrave; disponibile l'algoritmo di criptaggio nell'ambiente
+     * @throws InvalidKeySpecException   se la chiave non &egrave; valida (codifica non valida, lunghezza non valida, non inizializzata, ...)
+     */
+    public static Optional<String> hashPassword (String password, 
+                                                 String salt)
+                                          throws NoSuchAlgorithmException, 
+                                                 InvalidKeySpecException {
+
+        char[] chars = password.toCharArray();
+        byte[] bytes = salt.getBytes();
+        PBEKeySpec spec = new PBEKeySpec(chars, bytes, ITERATIONS, KEY_LENGTH);
+        Arrays.fill(chars, Character.MIN_VALUE);
+        try {
+          SecretKeyFactory fac = SecretKeyFactory.getInstance(ALGORITHM);
+          byte[] securePassword = fac.generateSecret(spec).getEncoded();
+          return Optional.of(Base64.getEncoder().encodeToString(securePassword));
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException ex) {
+          System.err.println("Exception encountered in hashPassword()");
+          return Optional.empty();
+        } finally {
+          spec.clearPassword();
+        }
+      }
+    
+    
+    /**
+     * <p>Verifica che la password inserita dall'utente e la password criptata nel 
+     * database corrispondano.</p>
+     * 
+     * @param password             password inserita dall'utente
+     * @param encryptedPassword    password e seme corrispondenti all'utente che ha richiesto l'accesso presenti sul database
+     * @return <code>boolean</code> - true se la password corrisponde a quella presente nel database. False altrimenti.
+     * @throws AttributoNonValorizzatoException se un campo obbligatorio del bean &egrave; stato trovato non valorizzato
+     * @throws InvalidKeySpecException se la chiave non &egrave; valida (codifica non valida, lunghezza non valida, non inizializzata, ...)
+     * @throws NoSuchAlgorithmException se non &egrave; disponibile l'algoritmo di criptaggio nell'ambiente
+     */
+    public static boolean verifyPassword (String password,
+                                          CodeBean encryptedPassword) 
+                                   throws NoSuchAlgorithmException, 
+                                          InvalidKeySpecException,
+                                          AttributoNonValorizzatoException {
+        String salt = encryptedPassword.getInformativa();
+        if (salt.equals(Utils.VOID_STRING)) {
+            return false;
+        }
+        Optional<String> optEncrypted = hashPassword(password, encryptedPassword.getInformativa());
+        if (!optEncrypted.isPresent()) {
+            return false;
+        }
+        return optEncrypted.get().equals(encryptedPassword.getNome());
     }
     
 }
