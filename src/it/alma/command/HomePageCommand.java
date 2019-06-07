@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.Optional;
 import java.util.Vector;
 import java.util.logging.Logger;
 
@@ -51,6 +52,7 @@ import com.oreilly.servlet.ParameterParser;
 import it.alma.DBWrapper;
 import it.alma.Main;
 import it.alma.Query;
+import it.alma.SessionManager;
 import it.alma.Utils;
 import it.alma.bean.CodeBean;
 import it.alma.bean.ItemBean;
@@ -227,9 +229,11 @@ public class HomePageCommand extends ItemBean implements Command {
                      *          UPDATE Profile User             *
                      * **************************************** */
                     String passwd = parser.getStringParameter("txtPwd", Utils.VOID_STRING);
-                    String passwdform = parser.getStringParameter("txtConfPwd", Utils.VOID_STRING);
-                    if (passwd != Utils.VOID_STRING || passwdform != Utils.VOID_STRING) {
-                        db.updatePassword(user.getId(), passwd, passwdform);
+                    String passwdConf = parser.getStringParameter("txtConfPwd", Utils.VOID_STRING);
+                    if (passwd != Utils.VOID_STRING && passwdConf != Utils.VOID_STRING && passwd.equals(passwdConf)) {
+                        Optional<String> salt = SessionManager.generateSalt(SessionManager.SALT_LENGTH);
+                        Optional<String> encryptedPassword = SessionManager.hashPassword(passwd, salt.get());
+                        db.updatePassword(user, encryptedPassword.get(), salt.get());
                     }
                 }
                 /* **************************************************** *
@@ -468,11 +472,16 @@ public class HomePageCommand extends ItemBean implements Command {
         LinkedHashMap<ItemBean, ArrayList<ItemBean>> vO = null;
         try {
             vO = new LinkedHashMap<ItemBean, ArrayList<ItemBean>>(11);
+            ProjectBean project = null;
+            int projId = Utils.DEFAULT_ID;
+            LinkedList<ItemBean> titles = null;
             Vector<ProjectBean> projects = db.getProjects(usr.getId(), Query.GET_ALL);
-            ProjectBean project = projects.elementAt(Query.NOTHING);
-            int projId = project.getId();
-            LinkedList<ItemBean> titles = makeMenuOrizzontale(appName, projId);
-            // Gestisce 2 casi: 
+            if (!projects.isEmpty()) {
+                project = projects.elementAt(Query.NOTHING);
+                projId = project.getId();
+                titles = makeMenuOrizzontale(appName, projId);
+            }
+            // Gestisce tutti casi: 
             if (projects.size() == 1) { // O il numero di progetti è = 1 
                 // PROJECT CHARTER
                 title = titles.getFirst();
@@ -615,10 +624,9 @@ public class HomePageCommand extends ItemBean implements Command {
                     vV.add(item);
                 }
                 vO.put(title, vV);
-            } 
-            /*else { 
-                // No menu
-            }*/
+            } else { 
+                /*;*/ // Il caso in cui non ci siano progetti viene gestito passando il menù vuoto
+            }
             return vO;
         } catch (AttributoNonValorizzatoException anve) {
             String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio di un bean.\n";
