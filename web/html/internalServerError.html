@@ -1,317 +1,439 @@
-<!--
-/*
- *   University on Line (uol), web application to publish the faculties and
- *   departments information
- *
- *   Copyright © 2002-2005 by Università degli Studi di Verona. Verona (I).
- *   All rights reserved.
- *
- *   Autori: 
- *   Roberto Posenato <roberto.posenato _at_ univr.it>
- */
--->
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-	  "http://www.w3.org/TR/REC-html40/loose.dtd">
+<!DOCTYPE html>
 <html>
-<head>
-  <title>
-    Informazioni sul sito
-  </title>
-  <link rel="stylesheet" href="../style/Globalstyle.css" type="text/css">
-  <link rel="stylesheet" href="../style/Localstyle.css" type="text/css">
-  <link rel="SHORTCUT ICON" href="../image/logoUnivr.ico">
-  <script language="JavaScript" type="text/javascript" src="../js/utils.js"></script>
-</head>
-
-<body>
-<table border="0" cellpadding="1" cellspacing="1" width="100%">
-   <tr> 
-      <th class="Content_Scuro"><a NAME="statistiche"></a>Statistiche</th>
-   </tr>
-    <tr> 
-        <td class="Content_Smalltext">Per maggiori dettagli, &egrave; possibile consultare 
-            le <a href="/Stats" class="LinkContent" target="_top">statistiche ufficiali</a>.
-        </td>
-    </tr>
-</table>
-<br>
-<table border="0" cellpadding="1" cellspacing="1" width="100%">
-    <tr> 
-        <th class="Content_Scuro"><a NAME="descrizione"></a>Descrizione</th>
-    </tr>
-    <tr> 
-        <td class="Content_Chiaro"> Questo sito &egrave; realizzato da un'applicazione 
-        in grado di gestire pi&ugrave; siti dipartimentali. Questa applicazione 
-        &egrave; stata realizzata per la pubblicazione delle informazioni relative 
-        a:</td>
-    </tr>
-    <tr> 
-        <td class="Content_SmallText" align="left"> 
-        <ul>
-            <li>organi collegiali (sedute e verbali) dei dipartimenti;</li>
-            <li>ricerca: aree, progetti, prodotti</li>
-            <li>iniziative, convegni e seminari</li>
-            <li>personale afferente</li>
-            <li>strutture di servizio (segreterie, supporto informatico, ecc.);</li>
-            <li>laboratori, gruppi, centri di ricerca, centri di documentazione;</li>
-            <li>offerta didattica del dipartimento e Dottoranti</li>
-            <li>bacheca virtuale degli avvisi.</li>
-          </ul>
-        </td>
-    </tr>
-    <tr> 
-        <td class="Content_SmallText"> Le informazioni pubblicate vengono estratte 
-        da una base di dati relazionale al cui aggiornamento contribuiscono tutti 
-        i soggetti presenti nel dipartimento. Gli aggiornamenti della base di dati 
-        si realizzano attraverso delle pagine amministrative del sito, accessibili 
-        solo tramite un codice di accesso.</td>
-    </tr>
-    <tr> 
-        <td class="Content_SmallText"> Questo permette a tutte le persone di gestire 
-          direttamente le informazioni di propria pertinenza.</td>
-    </tr>
-    <tr> 
-        <td class="Content_SmallText"> Ulteriori informazioni ed elenco nuovi rilasci ed aggiornamenti alle pagine:
-        <ul><li>
-        <a href="http://www.univr.it/main?ent=progettoaol&dir=1&idProgetto=1830" class="LinkContent" target="_top">
-        Webintegrato</a></li>
-        <li>
-        <a href="http://www.univr.it/main?ent=progettoaol&dir=1&idProgetto=2063" class="LinkContent" target="_top">
-        WebIntegrato: Nuovi siti di dipartimento</a>
-        </li>
-        </ul>
-        </td>
-    </tr>    
-</table>
-<br>
-<!--
-  <tr> 
-    <td class="Content_Scuro" colspan="3"><a NAME="doc">Documentazione del progetto</a></td>
-  </tr>
-  <tr> 
-    <td class="Content_Chiaro" colspan="3">
-    Questo sito &egrave; stato realizzato nell'ambito di un progetto del Dipartimento di Informatica a cui hanno collaborato
-    docenti e studenti del corso di Laurea di Informatica.
-    La realizzazione &egrave; stata motivata da alcune ragioni che possono essere cos&igrave; riassunte:</td>
-  </tr>
-  <tr> 
-    <td width="3%">&nbsp;</td>
-    <td class="Content_Chiaro" width="1%" valign="top"> 1.</td>
-	<td class="Content_Chiaro" width="96%">
-	sperimentare la possibilit&agrave; di realizzare un sito il cui contenuto fosse gestito in modo
-	distribuito fra tutti i soggetti che "generano" le informazioni e NON in modo centralizzato da un
-	addetto o ufficio, al fine di minimizzare il costo di gestione delle informazioni;</td>
-  </tr>
-  <tr> 
-    <td width="3%">&nbsp;</td>
-    <td class="Content_Chiaro" width="1%" valign="top"> 2.</td>
-	<td class="Content_Chiaro" width="96%">
-	sperimentare la possibilit&agrave; di realizzare un sito web di un certa dimensione e complessit&agrave;
-	utilizzando solo tecnologie <a href="http://www.opensource.org/" class="LinkContent" target=blank>open source</a>, in quanto
-	riteniamo che spesso queste forniscano garanzie di affidabilit&agrave; e di qualit&agrave; superiori;</td>
-  </tr>
-  <tr> 
-    <td width="3%">&nbsp;</td>
-    <td class="Content_Chiaro" width="1%" valign="top"> 3.</td>
-	<td class="Content_Chiaro" width="96%">
-	sperimentare la possibilit&agrave; di realizzare pagine web utilizzando il linguaggio <a
-	href="http://validator.w3.org/check/referer" class="LinkContent" target=blank>HTML versione 4.01</a> e fogli di stile <a
-	href="http://jigsaw.w3.org/css-validator/check/referer" class="LinkContent" target=blank>CSS versione 1</a> in modo tale che
-	la loro visualizzazione fosse il pi&ugrave; indipendente possibile dai browser.</td>
-  </tr>
-  <tr> 
-    <td class="Content_Chiaro" colspan="3">
-    Per quanto riguarda il primo punto, abbiamo ritenuto conveniente realizzare il progetto sviluppando un
-    database relazionale (<a href="main?ent=null&amp;url=/html/schemaConcettuale.html&amp;tP=Schema+concettuale+sito"
-    class="LinkContent">schema concettuale</a>) per la rappresentazione delle informazioni e due applicazioni web per la
-    consultazione e per la gestione guidata delle informazioni nel database.</td>
-  </tr>
-  <tr> 
-    <td class="Content_Chiaro" colspan="3">
-	Come database management system (DBMS) abbiamo adottato <a href="http://www.postgresql.org/"
-	class="LinkContent" target=blank>PostgreSQL</a>, prodotto open sorce tra i pi&ugrave; avanzati e conforme allo standard ANSI
-	92 SQL. PostgreSQL dispone delle pi&ugrave; importanti caratteristiche tipiche dei DBMS commerciali, come la
-	gestione delle transazioni e l'integrit&agrave; referenziale, oltre ad essere disponibile per numerosi
-	sistemi operativi. Inoltre, esso si integra correttamente con la maggior parte dei linguaggi di
-	programmazione per il web, tra cui Java.</td>
-  </tr>
-  <tr> 
-    <td class="Content_Chiaro" colspan="3">
-	La scelta degli strumenti software per la realizzazione delle due applicazioni web &egrave; stata
-	orientata, oltre dall'obiettivo 2, anche dalla volont&agrave; di non rimanere legati ad una particolare
-	architettura hardware o sistema operativo. Per questo abbiamo scelto di utilizzare il linguaggio <a
-	href="http://www.javasoft.com/" class="LinkContent" target=blank>Java</a> che garantisce, specialmente per le applicazioni
-	server-side, un ottimo grado di portabilit&agrave;. In particolare sono state impiegate le estensioni <a
-	href="http://java.sun.com/products/servlet/" class="LinkContent" target=blank>Servlet 2.3</a> e <a
-	href="http://java.sun.com/products/jsp/" class="LinkContent" target=blank>JSP 1.2</a>
-        al fine di realizzare la separazione tra la logica e la 
-        presentazione all'interno delle applicazioni secondo il cosiddetto 
-        <em>Modello 2 delle JSP</em>, che pu?ò essere visto come 
-        l'implementazione server-side del pi?ù noto <em>Model-View-Controller
-	(MVC) design pattern</em>.
-    </td>
-  </tr>
-  <tr> 
-    <td class="Content_Chiaro" colspan="3">
-	Per l'interfacciamento tra le applicazioni web e il WWW abbiamo scelto il web server <a
-	href="http://www.apache.org/httpd.html" class="LinkContent" target=blank>Apache</a> con il modulo software <a
-	href="http://www.caucho.com/" class="LinkContent" target=blank>Resin</a>, per il supporto delle servlet e JSP. Consideriamo
-	Apache uno dei migliori server web di tipo open source e multi piattaforma sia per le prestazioni che per la
-	sua stabilit?à. Per quanto riguarda il <em>JSP container</em> Resin, abbiamo verificato che a tutt'oggi esso
-	rappresenta una delle migliori implementazioni open source delle JSP per correttezza, robustezza ed
-	efficienza.</td>
-  </tr>
-  <tr> 
-    <td class="Content_Chiaro" colspan="3">
-        Il sistema ?è stato svilluppato ed ?è attualmente in funzione
-        su un server con sistema operativo <a href="http://www.linux.org/" class="LinkContent" target=blank>Linux</a>.
-    </td>
-  </tr>
-  <tr> 
-    <td class="Content_Chiaro" colspan="3">
-    Nella primavera del 2002 &egrave; stato affidato ad una societ&agrave;
-    esterna l'incarico di realizzare una nuova veste grafica al sito che
-    &egrave; messa in linea il 23 maggio 2002.Con tale
-    aggiornamento si ?è perso la certificazione
-    W3C allo standard HTML 4.01.
-    </td>
-  </tr>
-  <tr> 
-    <td class="Content_Chiaro" colspan="3">
-     A settembre 2002 &egrave; stata attivata una nuova versione del
-    sito Web in seguito ad una profonda riorganizzazione ed estensione
-    della base dati.
-    </td>
-  </tr>
-  <tr  class="Content_Scuro"> 
-    <td  height="1" colspan="3" class="Content_Scuro"><img src="image/riga.gif" width="8" height="1" alt="_"></td>
-  </tr>
-  <tr> 
-    <td colspan="3" class="Content_Chiaro" align="right"> <a href="main?<%=request.getQueryString()%>#top"> 
-      <img src="image/top.gif" border="0" title="Top" alt="Top"></a> </td>
-  </tr>
-</table>
-<table border="0" width="100%" cellpadding="1" cellspacing="1">
-  <tr> 
-    <td class="Content_Scuro" colspan="2"><a NAME="faq">FAQ (Frequently Asked Questions)</a></td>
-  </tr>
-  <tr> 
-    <td class="Content_Medio" colspan="2" >1.&nbsp; Perch&eacute; i font sono cos&igrave; piccoli?</td>
-  </tr>
-  <tr> 
-    <td class="Content_Chiaro" width="3%">&nbsp;</td>
-    <td class="Content_Chiaro" width="97%">
-	Il corpo dei font utilizzati non &egrave; fisso ma relativo alla dimensione fissata nelle preferenze del
-	browser. In questo modo ogni utente pu&ograve; aumentare e diminuire le dimensioni dei font a piacere. Se i
-	font risultano troppo piccol&igrave; &egrave; sufficiente modificare la dimensione del font nel menu di
-	configurazione del proprio browser.</td>
-  </tr>
-  <tr> 
-    <td class="Content_Medio" colspan="2">2.&nbsp;Per quale browser &egrave; ottimizzato il sito?</td>
-  </tr>
-  <tr> 
-    <td class="Content_Chiaro" width="3%">&nbsp; </td>
-    <td class="Content_Chiaro" width="97%">
-	Questo sito web aderisce alla campagna <a href="http://www.anybrowser.org/campaign" class="LinkContent" target=blank>Viewable
-	With Any Browser</a>. Questo significa che tutte le informazioni sono fruibili con qualsiasi browser, sia
-	testuale che grafico, indipendentemente dal sistema operativo. Le pagine sono conformi alle specifiche HTML
-	4.01 ed utilizzano i fogli di stile CSS, entrambi standard del consorzio <a href="http://www.w3.org/"
-	class="LinkContent" target=blank>W3C</a>.  Quindi maggiore &egrave; l'aderenza del browser a tali standard, migliore
-	sar&agrave; la resa ottenibile.</td>
-  </tr>
-   <tr  class="Content_Scuro"> 
-    <td  height="1" colspan="2" class="Content_Scuro"><img src="image/riga.gif" width="8" height="1" alt="_"></td>
-  </tr>
-  <tr> 
-    <td colspan="2" class="Content_Chiaro" align="right"> <a href="main?<%=request.getQueryString()%>#top"> 
-      <img src="image/top.gif"  border="0" title="Top" alt="Top"></a> </td>
-  </tr>
-  <tr> 
-    <td class="Content_Chiaro" colspan="2">&nbsp;</td>
-  </tr>
-  <tr> 
-    <td class="Content_Scuro" colspan="2"><a NAME="ringraziamenti">Ringraziamenti</a></td>
-  </tr>
-  <tr> 
-    <td class="Content_Chiaro" colspan="2">Vogliamo ringraziare gli autori del 
-      sito del <a href="http://www.dsi.unimi.it" class="LinkContent" target="blanck">Dipartimento 
-      di Scienze dell'Informazione di Milano</a> per i suggerimenti e le discussioni 
-      che hanno contribuito alla realizzazione di questo progetto.</td>
-  </tr>
-  <tr> 
-    <td class="Content_Chiaro" colspan="2">
-      Inoltre vogliamo ringraziare <a href="http://www.sci.univr.it/fol/main?ent=persona&amp;id=68" class="LinkContent">Franco 
-      Fummi</a>, <a href="http://www.sci.univr.it/fol/main?ent=persona&amp;id=109" class="LinkContent">Aurora 
-      Miorelli</a>, <a href="http://www.sci.univr.it/fol/main?ent=persona&amp;id=113" class="LinkContent">Chiara 
-      Ghini</a>, <a href="http://www.sci.univr.it/fol/main?ent=persona&amp;id=67" class="LinkContent">Agostino 
-      Dovier</a> <a href="http://www.sci.univr.it/fol/main?ent=persona&amp;id=79" class="LinkContent">Ugo 
-      Solitro</a> e <a href="http://www.sci.univr.it/fol/main?ent=persona&amp;id=24" class="LinkContent">Davide 
-      Rocchesso</a> per l'aiuto nella fase di test della versione anno 2000-2001.</td>
-  </tr>
-  <tr  class="Content_Scuro"> 
-    <td colspan="2"  height="1" class="Content_Scuro"><img src="image/riga.gif" width="8" height="1" alt="_"></td>
-  </tr>
-  <tr> 
-    <td colspan="2" class="Content_Chiaro" align="right"> <a href="main?<%=request.getQueryString()%>#top"> 
-      <img src="image/top.gif" width="42" height="18" border="0" alt="Top"></a> 
-    </td>
-  </tr>
-  <tr> 
-    <td class="Content_Chiaro" colspan="2">&nbsp;</td>
-  </tr>
--->
-
-<table border="0" cellpadding="1" cellspacing="1" width="100%">
-  <tr> 
-    <th class="Content_Scuro" colspan="2"><a NAME="autori"></a>Autori</th>
-  </tr>
-  <tr> 
-    <td class="Content_Medio" colspan="2">Analisi dei requisiti e analisi concettuale</td>
-  </tr>
-  <tr> 
-    <td class="Content_Chiaro" colspan="2"> <a href="http://www.di.univr.it/dol/main?ent=persona&amp;id=57" class="LinkContent"
-target="_top">Alberto 
-      Belussi</a>, Mirko 
-      Manea (per la versione anno 2001) e <a href="http://www.di.univr.it/dol/main?ent=persona&amp;id=102" class="LinkContent"
-target="_top">Roberto 
-      Posenato.</a></td>
-  </tr>
-  <tr> 
-    <td class="Content_Medio" colspan="2">Progettazione, ingegnerizzazione, implementazione e tutto il resto...</td>
-  </tr>
-  <tr> 
-    <td class="Content_Chiaro" colspan="2"> Mirko 
-      Manea (per la versione anno 2001) e <a href="http://www.di.univr.it/dol/main?ent=persona&amp;id=102" class="LinkContent"
-target="_top">Roberto 
-      Posenato</a>.</td>
-  </tr>
-  <tr> 
-    <td class="Content_Medio" colspan="2">Modifiche ed estensioni</td>
-  </tr>
-  <tr>
-    <td class="Content_Chiaro" colspan="2">
-      Omar Colombari,
-      Filippo Manganotto e
-      Marco Zampieri per le estensioni versione anno 2001 e anno 2002,
-      Adriano Gugole  e
-      Luca Adami per le estensioni versione anno 2002.
-    </td>
-  </tr>
-  <tr> 
-    <td class="Content_Medio" colspan="2">Manutenzione e estensioni dal 2002 in poi ad opera della Direzione Informatica di Ateneo</td>
-  </tr>  
-  <tr>
-    <td class="Content_Chiaro" colspan="2">
-      <a href="http://www.univr.it/main?ent=personaaol&id=2700" class="LinkContent" target="_top">Sara Ceglie</a>,
-      <a href="http://www.univr.it/main?ent=personaaol&id=3234" class="LinkContent" target="_top">Giovanroberto Torre</a>, 
-      <a href="http://www.univr.it/main?ent=personaaol&id=4743" class="LinkContent" target="_top">Diego Vicentini</a> con la collaborazione di 
-      <a href="http://www.di.univr.it/dol/main?ent=persona&amp;id=57" class="LinkContent" target="_top">Alberto Belussi</a>
-      e <a href="http://www.di.univr.it/dol/main?ent=persona&amp;id=102" class="LinkContent" target="_top">Roberto Posenato</a>.
-      Veste grafica e stili (per la versione anno 2010) <a href="http://www.univr.it/main?ent=personaaol&id=3448" class="LinkContent" target="_top">Paolo Rucci</a>.
-      <br/>Ultima versione Marzo 2010. 
-    </td>
-  </tr>
-  
-</table>
-<p class="Content_SmallText">Verona, 30 aprile 2010</p>
-</body>
+  <head>
+    <title>
+      Informazioni sul sito
+    </title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.css">
+    <!-- Latest compiled CSS, just in case -->
+    <link rel="stylesheet" href="web/style/bootstrap/bootstrap.css" type="text/css" />
+    <style type="text/css">
+    body,
+    html {
+        padding: 0;
+        margin: 0;
+        font-family: 'Quicksand', sans-serif;
+        font-weight: 400;
+        overflow: hidden;
+    }
+    
+    .writing {
+        width: 320px;
+        height: 200px;
+        background-color: #3f3f3f;
+        border: 1px solid #bbbbbb;
+        border-radius: 6px 6px 4px 4px;
+        position: relative;
+    }
+    
+    .writing .topbar{
+        position: absolute;
+        width: 100%;
+        height: 12px;
+        background-color: #f1f1f1;
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+    }
+    
+    .writing .topbar div{
+        height: 6px;
+        width: 6px;
+        border-radius: 50%;
+        margin: 3px;
+        float: left;
+    }
+    
+    .writing .topbar div.green{
+        background-color: #60d060;
+    }
+    .writing .topbar div.red{
+        background-color: red;
+    }
+    .writing .topbar div.yellow{
+        background-color: #e6c015;
+    }
+    
+    .writing .code {
+        padding: 15px;
+    }
+    
+    .writing .code ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .writing .code ul li {
+        background-color: #9e9e9e;
+        width: 0;
+        height: 7px;
+        border-radius: 6px;
+        margin: 10px 0;
+    }
+    
+    .container {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-align: center;
+            -ms-flex-align: center;
+                align-items: center;
+        -webkit-box-pack: center;
+            -ms-flex-pack: center;
+                justify-content: center;
+        height: 50vh;
+        width: 100%;
+        -webkit-transition: -webkit-transform .5s;
+        transition: -webkit-transform .5s;
+        transition: transform .5s;
+        transition: transform .5s, -webkit-transform .5s;
+    }
+    
+    .stack-container {
+        position: relative;
+        width: 420px;
+        height: 210px;
+        -webkit-transition: width 1s, height 1s;
+        transition: width 1s, height 1s;
+    }
+    
+    .pokeup {
+        -webkit-transition: all .3s ease;
+        transition: all .3s ease;
+    }
+    
+    .pokeup:hover {
+        -webkit-transform: translateY(-10px);
+                transform: translateY(-10px);
+        -webkit-transition: .3s ease;
+        transition: .3s ease;
+    }
+    
+    
+    .error {
+        width: 400px;
+        padding: 40px;
+        text-align: center;
+    }
+    
+    .error h1 {
+        font-size: 125px;
+        padding: 0;
+        margin: 0;
+        font-weight: 700;
+    }
+    
+    .error h2 {
+        margin: -30px 0 0 0;
+        padding: 0px;
+        font-size: 47px;
+        letter-spacing: 12px;
+    }
+    
+    .perspec {
+        -webkit-perspective: 1000px;
+                perspective: 1000px;
+    }
+    
+    .writeLine{
+        -webkit-animation: writeLine .4s linear forwards;
+                animation: writeLine .4s linear forwards;
+    }
+    
+    .explode{
+        -webkit-animation: explode .5s ease-in-out forwards;
+                animation: explode .5s ease-in-out forwards;
+    }
+    
+    .card {
+        -webkit-animation: tiltcard .5s ease-in-out 1s forwards;
+                animation: tiltcard .5s ease-in-out 1s forwards;
+        position: absolute;
+    }
+    
+    @-webkit-keyframes tiltcard {
+        0% {
+            -webkit-transform: rotateY(0deg);
+                    transform: rotateY(0deg);
+        }
+    
+        100% {
+            -webkit-transform: rotateY(-30deg);
+                    transform: rotateY(-30deg);
+        }
+    }
+    
+    @keyframes tiltcard {
+        0% {
+            -webkit-transform: rotateY(0deg);
+                    transform: rotateY(0deg);
+        }
+    
+        100% {
+            -webkit-transform: rotateY(-30deg);
+                    transform: rotateY(-30deg);
+        }
+    }
+    
+    @-webkit-keyframes explode {
+        0% {
+            -webkit-transform: translate(0, 0) scale(1);
+                    transform: translate(0, 0) scale(1);
+        }
+    
+        100% {
+            -webkit-transform: translate(var(--spreaddist), var(--vertdist)) scale(var(--scaledist));
+                    transform: translate(var(--spreaddist), var(--vertdist)) scale(var(--scaledist));
+        }
+    }
+    
+    @keyframes explode {
+        0% {
+            -webkit-transform: translate(0, 0) scale(1);
+                    transform: translate(0, 0) scale(1);
+        }
+    
+        100% {
+            -webkit-transform: translate(var(--spreaddist), var(--vertdist)) scale(var(--scaledist));
+                    transform: translate(var(--spreaddist), var(--vertdist)) scale(var(--scaledist));
+        }
+    }
+    
+    @-webkit-keyframes writeLine {
+        0% {
+            width:0;
+        }
+    
+        100% {
+            width: var(--linelength);
+        }
+    }
+    
+    @keyframes writeLine {
+        0% {
+            width:0;
+        }
+    
+        100% {
+            width: var(--linelength);
+        }
+    }
+    
+    @media screen and (max-width: 1000px) {
+        .container {
+          -webkit-transform: scale(.85);
+                  transform: scale(.85);
+        }
+      }
+    
+      @media screen and (max-width: 850px) {
+        .container {
+          -webkit-transform: scale(.75);
+                  transform: scale(.75);
+        }
+      }
+    
+      @media screen and (max-width: 775px) {
+        .container {
+          -ms-flex-wrap: wrap-reverse;
+              flex-wrap: wrap-reverse;
+          -webkit-box-align: inherit;
+              -ms-flex-align: inherit;
+                  align-items: inherit;
+        }
+      }
+    
+      @media screen and (max-width: 370px) {
+        .container {
+            -webkit-transform: scale(.6);
+                    transform: scale(.6);
+          }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="error">
+        <h2>Errore</h2>
+        <h1>500</h1>
+        <p>Il server non &egrave; stato in grado di rispondere alla richiesta effettuata.</p>
+      </div>
+      <div class="stack-container">
+        <div class="card-container">
+          <div class="perspec" style="--spreaddist: 125px; --scaledist: .75; --vertdist: -25px;">
+            <div class="card">
+              <div class="writing">
+                <div class="topbar">
+                  <div class="red"></div>
+                  <div class="yellow"></div>
+                  <div class="green"></div>
+                </div>
+                <div class="code">
+                  <ul>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-container">
+          <div class="perspec" style="--spreaddist: 100px; --scaledist: .8; --vertdist: -20px;">
+            <div class="card">
+              <div class="writing">
+                <div class="topbar">
+                  <div class="red"></div>
+                  <div class="yellow"></div>
+                  <div class="green"></div>
+                </div>
+                <div class="code">
+                  <ul>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-container">
+          <div class="perspec" style="--spreaddist:75px; --scaledist: .85; --vertdist: -15px;">
+            <div class="card">
+              <div class="writing">
+                <div class="topbar">
+                  <div class="red"></div>
+                  <div class="yellow"></div>
+                  <div class="green"></div>
+                </div>
+                <div class="code">
+                  <ul>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-container">
+          <div class="perspec" style="--spreaddist: 50px; --scaledist: .9; --vertdist: -10px;">
+            <div class="card">
+              <div class="writing">
+                <div class="topbar">
+                  <div class="red"></div>
+                  <div class="yellow"></div>
+                  <div class="green"></div>
+                </div>
+                <div class="code">
+                  <ul>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-container">
+          <div class="perspec" style="--spreaddist: 25px; --scaledist: .95; --vertdist: -5px;">
+            <div class="card">
+              <div class="writing">
+                <div class="topbar">
+                  <div class="red"></div>
+                  <div class="yellow"></div>
+                  <div class="green"></div>
+                </div>
+                <div class="code">
+                  <ul>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-container">
+          <div class="perspec" style="--spreaddist: 0px; --scaledist: 1; --vertdist: 0px;">
+            <div class="card">
+              <div class="writing">
+                <div class="topbar">
+                  <div class="red"></div>
+                  <div class="yellow"></div>
+                  <div class="green"></div>
+                </div>
+                <div class="code">
+                  <ul>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="alert alert-danger">
+      <strong>Attenzione!</strong>
+      <p>L'errore potrebbe essere stato causato da un inserimento errato delle credenziali. &Egrave; possibile ritentare l'accesso <a href="/almalaurea/">cliccando qui</a>.</p>
+    </div>
+  </body>
+  <script type="text/javascript">
+      const stackContainer = document.querySelector('.stack-container');
+      const cardNodes = document.querySelectorAll('.card-container');
+      const perspecNodes = document.querySelectorAll('.perspec');
+      const perspec = document.querySelector('.perspec');
+      const card = document.querySelector('.card');
+    
+      let counter = stackContainer.children.length;
+    
+      //function to generate random number
+      function randomIntFromInterval(min, max) {
+          return Math.floor(Math.random() * (max - min + 1) + min);
+      }
+    
+      //after tilt animation, fire the explode animation
+      card.addEventListener('animationend', function () {
+          perspecNodes.forEach(function (elem, index) {
+              elem.classList.add('explode');
+          });
+      });
+    
+      //after explode animation do a bunch of stuff
+      perspec.addEventListener('animationend', function (e) {
+          if (e.animationName === 'explode') {
+              cardNodes.forEach(function (elem, index) {
+    
+                  //add hover animation class
+                  elem.classList.add('pokeup');
+    
+                  //add event listner to throw card on click
+                  elem.addEventListener('click', function () {
+                      let updown = [800, -800]
+                      let randomY = updown[Math.floor(Math.random() * updown.length)];
+                      let randomX = Math.floor(Math.random() * 1000) - 1000;
+                      elem.style.transform = `translate(${randomX}px, ${randomY}px) rotate(-540deg)`
+                      elem.style.transition = "transform 1s ease, opacity 2s";
+                      elem.style.opacity = "0";
+                      counter--;
+                      if (counter === 0) {
+                          stackContainer.style.width = "0";
+                          stackContainer.style.height = "0";
+                      }
+                  });
+    
+                  //generate random number of lines of code between 4 and 10 and add to each card
+                  let numLines = randomIntFromInterval(5, 10);
+    
+                  //loop through the lines and add them to the DOM
+                  for (let index = 0; index < numLines; index++) {
+                      let lineLength = randomIntFromInterval(25, 97);
+                      var node = document.createElement("li");
+                      node.classList.add('node-' + index);
+                      elem.querySelector('.code ul').appendChild(node).setAttribute('style', '--linelength: ' + lineLength + '%;');
+    
+                      //draw lines of code 1 by 1
+                      if (index == 0) {
+                          elem.querySelector('.code ul .node-' + index).classList.add('writeLine');
+                      } else {
+                          elem.querySelector('.code ul .node-' + (index - 1)).addEventListener('animationend', function (e) {
+                              elem.querySelector('.code ul .node-' + index).classList.add('writeLine');
+                          });
+                      }
+                  }
+              });
+          }
+      });
+    </script>
+</html>
