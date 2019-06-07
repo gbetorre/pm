@@ -285,6 +285,49 @@ public class DBWrapper implements Query {
     
     
     /**
+     * <p>Restituisce un CodeBean contenente la password criptata e il seme
+     * per poter verificare le credenziali inserite dall'utente.</p>
+     * 
+     * @param username   username della persona che ha richiesto il login
+     * @return <code>CodeBean</code> - CodeBean contenente la password criptata e il seme
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    public CodeBean getEncryptedPassword(String username) 
+                                   throws WebStorageException {
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        CodeBean password = null;
+        int nextInt = 0;
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_ENCRYPTEDPASSWORD);
+            pst.clearParameters();
+            pst.setString(++nextInt, username);
+            rs = pst.executeQuery();
+            if (rs.next()) {
+                password = new CodeBean();
+                BeanUtil.populate(password, rs);
+            }
+            return password;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    /**
      * <p>Restituisce un PersonBean rappresentante un utente loggato.</p>
      * 
      * @param username  username della persona che ha eseguito il login
@@ -301,13 +344,15 @@ public class DBWrapper implements Query {
         Connection con = null;
         PreparedStatement pst = null;
         PersonBean usr = null;
+        int nextInt = 0;
         Vector<CodeBean> vRuoli = new Vector<CodeBean>();
         try {
             con = pol_manager.getConnection();
             pst = con.prepareStatement(GET_USR);
             pst.clearParameters();
-            pst.setString(1, username);
-            pst.setString(2, password);
+            pst.setString(++nextInt, username);
+            pst.setString(++nextInt, password);
+            pst.setString(++nextInt, password);
             rs = pst.executeQuery();
             if (rs.next()) {
                 usr = new PersonBean();
@@ -3065,30 +3110,38 @@ public class DBWrapper implements Query {
      * <p>Metodo per aggiornamento della password dell'utente.</p>
      * <p>Effettua il controlllo sulla login dell'utente.</p>
      * 
-     * @param userId        id dell'utente sul quale cambiare la password
+     * @param user          utente sul quale cambiare la password
      * @param passwd        password inserita dall'utente
-     * @param passwdform    password criptata
+     * @param salt          seme generato per l'utente corrente
      * @throws WebStorageException  se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
      */
     @SuppressWarnings({ "null", "static-method" })
-    public void updatePassword (int userId,
+    public void updatePassword (PersonBean user,
                                 String passwd,
-                                String passwdform)
+                                String salt)
                          throws WebStorageException {
         Connection con = null;
         PreparedStatement pst = null;
-        int nextInt = 0;
+        int nextParam = 0;
         try {
             // Ottiene la connessione
             con = pol_manager.getConnection();
             con.setAutoCommit(false);
             pst = con.prepareStatement(UPDATE_PWD);
             pst.clearParameters();
-            pst.setString(++nextInt, passwd);
-            pst.setString(++nextInt, passwdform);
-            pst.setInt(++nextInt, userId);
+            pst.setString(++nextParam, passwd);
+            pst.setString(++nextParam, salt);
+            pst.setNull(++nextParam, Types.NULL);
+            pst.setString(++nextParam,  user.getCognome() + " " + user.getNome());;
+            pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate())));
+            pst.setTime(++nextParam, Utils.getCurrentTime());
+            pst.setInt(++nextParam, user.getId());
             pst.executeUpdate();
             con.commit();
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Si e\' tentato di accedere a un attributo di un bean obbligatorio ma non valorizzato.\n" + anve.getMessage();
+            LOG.severe(msg + "Probabile problema nel tentativo di recuperare un parametro obbligatorio del PersonBean.\n");
+            throw new WebStorageException(msg, anve);
         } catch (NumberFormatException nfe) {
             String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna la password.\n";
             LOG.severe(msg); 
