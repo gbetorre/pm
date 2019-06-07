@@ -564,13 +564,12 @@ public interface Query extends Serializable {
             "   ,   P.sesso         AS \"sesso\"" +
             "   ,   P.datanascita   AS \"dataNascita\"" +
             "   ,   P.codicefiscale AS \"codiceFiscale\"" +
-            //"   ,   informativa AS \"informativa\"" + 
             "   FROM usr U" +
             "       INNER JOIN identita I ON U.id = I.id0_usr" + 
             "       INNER JOIN persona P ON P.id = I.id1_persona" + 
             "   WHERE   login = ?" +
-            "       AND passwd = ?"
-            ;
+            "       AND (( passwd IS NULL OR passwd = ? ) " +
+            "           AND ( passwdform IS NULL OR passwdform = ? ))";
     
     /**
      * <p>Estrae l'username dell'utente tramite l'id, passato come parametro.</p>
@@ -580,7 +579,18 @@ public interface Query extends Serializable {
             "       U.login      AS \"login\"" +
             "   FROM usr U" + 
             "   WHERE U.id = ?";
-        
+    
+    /**
+     * <p>Estrae la password criptata e il seme dell'utente, identificato tramite username, passato come parametro.</p>
+     */
+    public static final String GET_ENCRYPTEDPASSWORD =
+            "SELECT " +
+            "       U.passwdform    AS \"nome\"" +
+            "   ,   U.salt          AS \"informativa\"" +
+            "   FROM usr U" + 
+            "   WHERE U.login = ?";
+    
+    
     /**
      * <p>Estrae i ruoli di una persona  
      * avente identificativo passato come parametro.</p>
@@ -1666,8 +1676,12 @@ public interface Query extends Serializable {
      */
     public static final String UPDATE_PWD =
             "UPDATE usr" +
-            "   SET     passwd = ?" +
-            "   ,       passwdform = ?" +
+            "   SET     passwdform = ?" +
+            "   ,       salt = ?" +
+            "   ,       passwd = ?" +
+            "   ,       autoreultimamodifica = ?" +
+            "   ,       dataultimamodifica = ?" +
+            "   ,       oraultimamodifica = ?" +
             "   WHERE id = ?";
     
     
