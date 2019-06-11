@@ -40,7 +40,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
-import java.util.Optional;
 import java.util.Vector;
 import java.util.logging.Logger;
 
@@ -51,6 +50,7 @@ import com.oreilly.servlet.ParameterParser;
 
 import it.alma.DBWrapper;
 import it.alma.Main;
+import it.alma.PasswordGenerator;
 import it.alma.Query;
 import it.alma.SessionManager;
 import it.alma.Utils;
@@ -107,6 +107,10 @@ public class HomePageCommand extends ItemBean implements Command {
      * Pagina a cui la command reindirizza per mostrare la form dell'utenza
      */
     private static final String nomeFileProfilo = "/jsp/profile.jsp";
+    /**
+     * Pagina a cui la command reindirizza per mostrare la password resettata
+     */
+    private static final String nomeFileReset = "/jsp/profileReset.jsp";
     /**
      * DataBound.
      */
@@ -203,6 +207,14 @@ public class HomePageCommand extends ItemBean implements Command {
         Vector<ItemBean> projectsByRole = null;
         // Dichiara l'elenco degli accessi degli utenti, da mostrare solo a root
         Vector<StatusBean> accessList = null;
+        // Recupera o inizializza 'tipo pagina'   
+        String whichPw = parser.getStringParameter("pwd", "-");
+        // Recupera o inizializza 'tipo pagina'   
+        boolean userCanReset = false;
+        ArrayList<PersonBean> userList = null;
+        String password = null;
+        // Variabile contenente l'indirizzo alla pagina di reindirizzamento
+        String redirect = null;
         /* ******************************************************************** *
          *      Instanzia nuova classe WebStorage per il recupero dei dati      *
          * ******************************************************************** */
@@ -221,6 +233,7 @@ public class HomePageCommand extends ItemBean implements Command {
                 // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
                 HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
                 user = (PersonBean) ses.getAttribute("usr");
+                Vector<CodeBean> ruoliUsr = user.getRuoli();
                 if (user == null) {
                     throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
                 }
@@ -228,20 +241,50 @@ public class HomePageCommand extends ItemBean implements Command {
                     /* **************************************** *
                      *          UPDATE Profile User             *
                      * **************************************** */
-                    String passwd = parser.getStringParameter("txtPwd", Utils.VOID_STRING);
-                    String passwdConf = parser.getStringParameter("txtConfPwd", Utils.VOID_STRING);
-                    if (passwd != Utils.VOID_STRING && passwdConf != Utils.VOID_STRING && passwd.equals(passwdConf)) {
-                        Optional<String> salt = SessionManager.generateSalt(SessionManager.SALT_LENGTH);
-                        Optional<String> encryptedPassword = SessionManager.hashPassword(passwd, salt.get());
-                        db.updatePassword(user, encryptedPassword.get(), salt.get());
+                    if (whichPw.equals("-")) {
+                        String passwd = parser.getStringParameter("txtPwd", Utils.VOID_STRING);
+                        String passwdConf = parser.getStringParameter("txtConfPwd", Utils.VOID_STRING);
+                        if (passwd != Utils.VOID_STRING && passwdConf != Utils.VOID_STRING && passwd.equals(passwdConf)) {
+                            String salt = SessionManager.generateSalt(SessionManager.SALT_LENGTH);
+                            String encryptedPassword = SessionManager.hashPassword(passwd, salt);
+                            db.updatePassword(user, encryptedPassword, salt);
+                        }
+                    }
+                    /* **************************************** *
+                     *          RESET password user             *
+                     * **************************************** */
+                    else {
+                        for (CodeBean ruoloUsr: ruoliUsr) {
+                            if (ruoloUsr.getOrdinale() == 1 || ruoloUsr.getOrdinale() == 2) {
+                                PasswordGenerator passwordGenerator = new PasswordGenerator.PasswordGeneratorBuilder()
+                                        .useDigits(true)
+                                        .useLower(true)
+                                        .useUpper(true)
+                                        .usePunctuation(true)
+                                        .build();
+                                password = passwordGenerator.generate(8);
+                                int userModified = parser.getIntParameter("pwd-usr");
+                                db.updatePassword(userModified, user, password);
+                            }
+                        }
                     }
                 }
                 /* **************************************************** *
                  *                  SELECT Profile Part                 *
                  * **************************************************** */
-                projectsByRole = db.getProjectsByRole(user.getId());
-                accessList = db.getAccessLog(user.getId());
-                fileJspT = nomeFileProfilo;
+                if (whichPw.equals("-")) {
+                    projectsByRole = db.getProjectsByRole(user.getId());
+                    accessList = db.getAccessLog(user.getId());
+                    for (CodeBean ruoloUsr: ruoliUsr) {
+                        if (ruoloUsr.getOrdinale() == 1 || ruoloUsr.getOrdinale() == 2) {
+                            userCanReset = true;
+                            userList = db.getUsrByGrp(user);
+                        }
+                    }
+                    fileJspT = nomeFileProfilo;
+                } else {
+                    fileJspT = nomeFileReset;
+                }
             } else {
                 fileJspT = nomeFileElenco;
             }
@@ -275,6 +318,16 @@ public class HomePageCommand extends ItemBean implements Command {
          * ******************************************************************** */      
         // Imposta il testo del Titolo da visualizzare prima dell'elenco
         req.setAttribute("titoloE", "Progetti di eccellenza: login");
+        // Imposta nella request il permesso di reset password dell'utente loggato
+        req.setAttribute("resetPwd", userCanReset);
+        // Imposta nella request la password modificata in chiaro
+        if (password != null) {
+            req.setAttribute("password", password);
+        }
+        // Imposta nella request la lista di utenti per ogni PMO, nel caso in cui siano valorizzati
+        if (userList != null) {
+            req.setAttribute("userList", userList);
+        }
         // Imposta nella request i progetti dell'utente tramite il ruolo, nel caso in cui siano valorizzati
         if (projectsByRole != null) {
             req.setAttribute("projectsByRole", projectsByRole);
@@ -282,6 +335,9 @@ public class HomePageCommand extends ItemBean implements Command {
         // Imposta nella request il log degli accessi se l'utente ne ha i privilegi
         if (accessList != null) {   // Se l'utente non ne ha il privilegio, la lista è nulla
             req.setAttribute("accesslog", accessList);
+        }
+        if (redirect != null) {
+            req.setAttribute("redirect", redirect);
         }
         // Imposta la Pagina JSP di forwarding
         req.setAttribute("fileJsp", fileJspT);
