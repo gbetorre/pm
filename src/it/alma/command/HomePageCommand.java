@@ -276,7 +276,11 @@ public class HomePageCommand extends ItemBean implements Command {
                     projectsByRole = db.getProjectsByRole(user.getId());
                     accessList = db.getAccessLog(user.getId());
                     for (CodeBean ruoloUsr: ruoliUsr) {
-                        if (ruoloUsr.getOrdinale() == 1 || ruoloUsr.getOrdinale() == 2) {
+                        if (ruoloUsr.getOrdinale() == 1) {
+                            userCanReset = true;
+                            userList = db.getUsrByGrp(user);
+                            break;
+                        } else if (ruoloUsr.getOrdinale() == 2) {
                             userCanReset = true;
                             userList = db.getUsrByGrp(user);
                         }
