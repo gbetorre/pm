@@ -392,6 +392,73 @@ public class DBWrapper implements Query {
     
     
     /**
+     * <p>Restituisce un Vector&lt;PersonBean&gt; contenente tutti
+     * gli utenti che appartengono ad un certo gruppo.</p>
+     * <p>Il gruppo si riferisce al dipartimento di appartenenza.
+     * Se l'utente loggato &egrave; il PMO di ateneo, il metodo restituisce
+     * la lista di tutti gli utenti inseriti nel sistema.</p>
+     * 
+     * @param admin PersonBean della persona che ha richiesto la lista di utenti
+     * @return ArrayList&lt;PersonBean&gt; - Vector contenente la lista di utenti 
+     * @throws WebStorageException se si verifica un problema SQL o in qualsiasi puntamento
+     */
+    public ArrayList<PersonBean> getUsrByGrp (PersonBean admin) 
+                                    throws WebStorageException{
+        ResultSet rs, rs1 = null;
+        Connection con = null;
+        PreparedStatement pst, pst1 = null;
+        int nextInt = 0;
+        int nextInt1 = 0;
+        PersonBean user = null;
+        ArrayList<PersonBean> vUser = new ArrayList<PersonBean>();
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_GROUP);
+            pst.clearParameters();
+            pst.setInt(++nextInt, admin.getId());
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                nextInt1 = 0;
+                String depart = rs.getString("nome");
+                pst1 = con.prepareStatement(GET_BELONGS_USR);
+                pst1.clearParameters();
+                pst1.setString(++nextInt1, "%" + depart.substring(depart.lastIndexOf("-"), depart.length()));
+                pst1.setInt(++nextInt1, 0);
+                if(admin.isPmoAteneo()) {
+                    nextInt1 = 0;
+                    pst1.setString(++nextInt1, Utils.VOID_STRING);
+                    pst1.setInt(++nextInt1, -1);
+                }
+                rs1 = pst1.executeQuery();
+                while (rs1.next()) {
+                    user = new PersonBean();
+                    BeanUtil.populate(user, rs1);
+                    vUser.add(user);
+                }
+            }
+            return vUser;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query di estrazione utenti appartenenti ad un gruppo.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    /**
      * <p>Restituisce un Vector&lt;ItemBean&gt; contenente ciascuno
      * i riferimenti al progetto, all'utente e ai suoi ruoli all'interno
      * del progetto stesso.</p>
@@ -3164,7 +3231,65 @@ public class DBWrapper implements Query {
      * ********************************************************** */
     /**
      * <p>Metodo per aggiornamento della password dell'utente.</p>
-     * <p>Effettua il controlllo sulla login dell'utente.</p>
+     * <p>Esegue l'update sulla password dell'utente in chiaro.</p>
+     * 
+     * @param userId        utente sul quale cambiare la password
+     * @param userLogged    utente incaricato di cambiare la password
+     * @param passwd        password inserita dall'utente
+     * @throws WebStorageException  se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public void updatePassword (int userId,
+                                PersonBean userLogged,
+                                String passwd) 
+                         throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        int nextParam = 0;
+        try {
+            // Ottiene la connessione
+            con = pol_manager.getConnection();
+            con.setAutoCommit(false);
+            pst = con.prepareStatement(UPDATE_PWD);
+            pst.clearParameters();
+            pst.setNull(++nextParam, Types.NULL);
+            pst.setNull(++nextParam, Types.NULL);
+            pst.setString(++nextParam, passwd);
+            pst.setString(++nextParam,  userLogged.getCognome() + " " + userLogged.getNome());;
+            pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate())));
+            pst.setTime(++nextParam, Utils.getCurrentTime());
+            pst.setInt(++nextParam, userId);
+            pst.executeUpdate();
+            con.commit();
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Si e\' tentato di accedere a un attributo di un bean obbligatorio ma non valorizzato.\n" + anve.getMessage();
+            LOG.severe(msg + "Probabile problema nel tentativo di recuperare un parametro obbligatorio del PersonBean.\n");
+            throw new WebStorageException(msg, anve);
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna la password.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna la password.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + npe.getMessage(), npe);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Metodo per aggiornamento della password dell'utente.</p>
+     * <p>Utilizza la password criptata, ovvero quella modificata dall'utente stesso.</p>
      * 
      * @param user          utente sul quale cambiare la password
      * @param passwd        password inserita dall'utente
@@ -3198,10 +3323,6 @@ public class DBWrapper implements Query {
             String msg = FOR_NAME + "Si e\' tentato di accedere a un attributo di un bean obbligatorio ma non valorizzato.\n" + anve.getMessage();
             LOG.severe(msg + "Probabile problema nel tentativo di recuperare un parametro obbligatorio del PersonBean.\n");
             throw new WebStorageException(msg, anve);
-        } catch (NumberFormatException nfe) {
-            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna la password.\n";
-            LOG.severe(msg); 
-            throw new WebStorageException(msg + nfe.getMessage(), nfe);
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna la password.\n";
             LOG.severe(msg); 
