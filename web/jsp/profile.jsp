@@ -9,25 +9,28 @@
     <h3>Profilo di ${sessionScope.usr.nome} ${sessionScope.usr.cognome}</h3>
     <br />
     <div class="row">
-      <div class="col-sm-7">
+      <div class="col-sm-9">
         <div class="row">
-          <div class="col-sm-6"><label class="profileLabel">Cognome utente</label></div>
-          <div class="col-sm-6"><p class="profileInfo"><c:out value="${sessionScope.usr.cognome}" /></p></div>
+          <div class="col-sm-4"><label class="profileLabel">Cognome utente</label></div>
+          <div class="col-sm-4"><p class="profileInfo"><c:out value="${sessionScope.usr.cognome}" /></p></div>
         </div>
         <div class="row">
-          <div class="col-sm-6"><label class="profileLabel">Nome utente</label></div>
-          <div class="col-sm-6"><p class="profileInfo"><c:out value="${sessionScope.usr.nome}" /></p></div>
+          <div class="col-sm-4"><label class="profileLabel">Nome utente</label></div>
+          <div class="col-sm-4"><p class="profileInfo"><c:out value="${sessionScope.usr.nome}" /></p></div>
         </div>
         <div class="row">
-          <div class="col-sm-6"><label class="profileLabel">Data di nascita</label></div>
-          <div class="col-sm-6"><p class="profileInfo"><fmt:formatDate value='${sessionScope.usr.dataNascita}' pattern='dd/MM/yyyy'/></p></div>
+          <div class="col-sm-4"><label class="profileLabel">Data di nascita</label></div>
+          <div class="col-sm-4"><p class="profileInfo"><fmt:formatDate value='${sessionScope.usr.dataNascita}' pattern='dd/MM/yyyy'/></p></div>
         </div>
         <br />
         <div class="row">
           <div class="col">
-            <a href="#form-changePwd" class="btn btn-success marginLeft marginBottom" id="btn-changePwd" name="btn-changePwd" rel="modal:open"><i class="fas fa-lock"></i> Cambia password</a>
+            <a href="#form-changePwd" class="btn btn-success marginLeftLarge marginBottom" id="btn-changePwd" rel="modal:open"><i class="fas fa-lock"></i> Cambia password</a>
           <c:if test="${not empty requestScope.accesslog}">
-            <a href="#accessLog" class="btn btn-success marginLeft marginBottom" id="btn-accessLog" name="btn-accessLog" rel="modal:open"><i class="fas fa-user-check"></i> Log degli accessi</a>
+            <a href="#accessLog" class="btn btn-success marginLeftLarge marginBottom" id="btn-accessLog" rel="modal:open"><i class="fas fa-user-check"></i> Log degli accessi</a>
+          </c:if>
+          <c:if test="${requestScope.resetPwd}">
+            <a href="#resetPwd" class="btn btn-success marginLeftLarge marginBottom" id="btn-resetPwd" rel="modal:open"><i class="fas fa-users-cog"></i> Reset password</a>
           </c:if>
           </div>
         </div>
@@ -67,7 +70,7 @@
   </c:if>
 </c:if>
     <div id="form-changePwd" class="modal">
-      <form id="changePwd" action="#" method="post" onsubmit="return checkForm(this);">
+      <form id="changePwd" action="${utente}" method="post" onsubmit="return checkForm(this);">
         <div id="error" class="row"></div>
         <hr class="separatore" />
         <div class="row">
@@ -121,6 +124,26 @@
         </c:forEach>
       </div>
     </div>
+    <div id="resetPwd" class="modal">
+      <form id="resetPwd" action="${utente}&pwd=rst" method="post" onsubmit="return confirmReset();">
+        <hr class="separatore" />
+        <div class="row">
+          <div class="col-sm-4"><label for="txt-pwd"><strong>Seleziona l'utente sul quale resettare la password: </strong></label></div>
+          <div class="col-sm-4">
+            <select class="form-control" id="pwd-usr" name="pwd-usr">
+              <c:forEach var="usr" items="${requestScope.userList}">
+                <option value="${usr.id}"><c:out value="${usr.cognome} ${usr.nome}" /></option>
+              </c:forEach>
+            </select>
+          </div>
+        </div>
+        <hr class="separatore" />
+        <button type="submit" class="btn btn-success" id="btn-resetPwd" name="btn-resetPwd">
+          <i class="fas fa-user-edit"></i>
+          Reset
+        </button>
+      </form>
+    </div>
     <script type="text/javascript">
       function checkForm(form) {
         if ($('#txtPwd').val().length < 1 || $('#txtConfPwd').val().length < 1 || $('#txtPwd').val() != $('#txtConfPwd').val()) {
@@ -129,5 +152,14 @@
           $('#error').append('<div id="errorMessage"><i class="far fa-times-circle"></i> Le due password devono essere uguali e non devono essere vuote.</div>');
           return false;
         }
+      }
+      var utente = "";
+      $(document).ready(function(){
+        $("select#pwd-usr").change(function(){
+            utente = $(this).children("option:selected").text();
+        });
+      });
+      function confirmReset() {
+        return confirm('Sei sicuro di voler resettare la password per l\'utente ' + utente + '?\nQuesta operazione impedira\' l\'accesso all\'utente con la password vecchia.');
       }
     </script>
