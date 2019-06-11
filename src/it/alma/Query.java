@@ -576,6 +576,38 @@ public interface Query extends Serializable {
             "           AND ( passwdform IS NULL OR passwdform = ? ))";
     
     /**
+     * <p>Estrae la lista di utenti appartenenti ad un certo dipartimento oppure la
+     * lista di tutti gli utenti del sistema.</p>
+     */
+    public static final String GET_BELONGS_USR = 
+            "SELECT DISTINCT" +
+            "   U.id            AS \"id\"" +
+            "   ,   P.nome      AS \"nome\"" +
+            "   ,   P.cognome   AS \"cognome\"" +
+            "   FROM usr U "  + 
+            "       INNER JOIN identita I ON U.id = I.id0_usr" + 
+            "       INNER JOIN persona P ON P.id = I.id1_persona" +
+            "       INNER JOIN belongs B ON B.id0_usr = U.id" +
+            "       INNER JOIN grp G ON G.id = B.id1_grp" +
+            "   WHERE G.name ILIKE ? OR -1 = ?" +
+            "   ORDER BY P.cognome, P.nome";
+    
+    /**
+     * <p>Estrae il gruppo di appartenenza dell'utente che ha eseguito la login.</p>
+     */
+    public static final String GET_GROUP = 
+            "SELECT " +
+            "   G.id        AS \"id\"" +
+            "   ,   G.name  AS \"nome\"" +
+            "   FROM grp G " +
+            "       INNER JOIN belongs B ON B.id1_grp = G.id" +
+            "       INNER JOIN usr U ON U.id = B.id0_usr" +
+            "       INNER JOIN identita I ON U.id = I.id0_usr" + 
+            "       INNER JOIN persona P ON P.id = I.id1_persona" +
+            "   WHERE P.id = ?";
+            
+    
+    /**
      * <p>Estrae l'username dell'utente tramite l'id, passato come parametro.</p>
      */
     public static final String GET_USERNAME = 
