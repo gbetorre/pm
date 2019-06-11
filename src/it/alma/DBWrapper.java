@@ -410,6 +410,7 @@ public class DBWrapper implements Query {
         int nextInt = 0;
         int nextInt1 = 0;
         PersonBean user = null;
+        boolean isPmoAte = false;
         ArrayList<PersonBean> vUser = new ArrayList<PersonBean>();
         try {
             con = pol_manager.getConnection();
@@ -417,7 +418,7 @@ public class DBWrapper implements Query {
             pst.clearParameters();
             pst.setInt(++nextInt, admin.getId());
             rs = pst.executeQuery();
-            while (rs.next()) {
+            while (rs.next() && !isPmoAte) {
                 nextInt1 = 0;
                 String depart = rs.getString("nome");
                 pst1 = con.prepareStatement(GET_BELONGS_USR);
@@ -428,6 +429,7 @@ public class DBWrapper implements Query {
                     nextInt1 = 0;
                     pst1.setString(++nextInt1, Utils.VOID_STRING);
                     pst1.setInt(++nextInt1, -1);
+                    isPmoAte = true;
                 }
                 rs1 = pst1.executeQuery();
                 while (rs1.next()) {
