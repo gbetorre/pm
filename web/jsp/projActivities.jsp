@@ -39,7 +39,7 @@
       <thead class="thead-light">
         <tr>
           <th scope="col" width="20%">WBS</th>
-          <th scope="col" width="*">Nome</th>
+          <th scope="col" width="*">Nome Attivit&agrave;</th>
           <th scope="col" width="10%">Data inizio</th>
           <th scope="col" width="10%">Data fine</th>
           <th scope="col" width="20%">Stato effettivo</th>
@@ -55,12 +55,12 @@
         <c:set var="status" value="${loop.index}" scope="page" />
         <input type="hidden" id="act-id${status}" name="act-id${status}" value="<c:out value="${act.id}"/>">
         <tr>
-          <td scope="row" class="success bgAct${act.stato.id} bgFade">
+          <td scope="row">
             <a href="${modWbs}${p.id}&idw=${act.wbs.id}">
               <c:out value="${act.wbs.nome}"/>
             </a>
           </td>
-          <td scope="row" id="nameColumn">
+          <td scope="row" id="nameColumn" class="success bgAct${act.stato.id} bgFade">
         <c:choose>
           <c:when test="${isTrash}">
             <c:out value="${act.nome}"/>
