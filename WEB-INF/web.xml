@@ -63,16 +63,45 @@
       <url-pattern>/documenti/upload/monitoraggio_d6/*</url-pattern>
       <url-pattern>/documenti/upload/monitoraggio_d7/*</url-pattern>
       <url-pattern>/documenti/upload/monitoraggio_d8/*</url-pattern>
+      <url-pattern>/documenti/upload/monitoraggio_all/*</url-pattern>
    </servlet-mapping>
 
+   <!-- Note: Custom Error Pages -->
+
+    <error-page>
+      <error-code>400</error-code>
+      <location>/web/html/badRequest.html</location>
+    </error-page>
+    <error-page>
+      <error-code>401</error-code>
+      <location>/web/html/unauthorized.html</location>
+    </error-page>
+    <error-page>
+      <error-code>403</error-code>
+      <location>/web/html/forbidden.html</location>
+    </error-page>
     <error-page>
       <error-code>404</error-code>
       <location>/web/html/noResourceFound.html</location>
     </error-page>
     <error-page>
+      <error-code>405</error-code>
+      <location>/web/html/methodNotAllowed.html</location>
+    </error-page>
+    <error-page>
+      <error-code>406</error-code>
+      <location>/web/html/notAcceptable.html</location>
+    </error-page>
+    <error-page>
+      <error-code>408</error-code>
+      <location>/web/html/requestTimeout.html</location>
+    </error-page>
+    <error-page>
       <error-code>500</error-code>
       <location>/web/html/internalServerError.html</location>
     </error-page>
+
+   <!-- Note: Contex Params -->
 
     <context-param>
         <description>Pagina di errore a cui redirigere in caso venga sollevata un'eccezione</description>
