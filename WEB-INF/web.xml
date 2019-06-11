@@ -97,8 +97,48 @@
       <location>/web/html/requestTimeout.html</location>
     </error-page>
     <error-page>
+      <error-code>414</error-code>
+      <location>/web/html/requestURITooLong.html</location>
+    </error-page>
+    <error-page>
+      <error-code>415</error-code>
+      <location>/web/html/unsupportedMediaType.html</location>
+    </error-page>
+    <error-page>
+      <error-code>422</error-code>
+      <location>/web/html/unprocessableEntity.html</location>
+    </error-page>
+    <error-page>
+      <error-code>429</error-code>
+      <location>/web/html/tooManyRequests.html</location>
+    </error-page>
+    <error-page>
       <error-code>500</error-code>
       <location>/web/html/internalServerError.html</location>
+    </error-page>
+    <error-page>
+      <error-code>501</error-code>
+      <location>/web/html/notImplemented.html</location>
+    </error-page>
+    <error-page>
+      <error-code>502</error-code>
+      <location>/web/html/badGateway.html</location>
+    </error-page>
+    <error-page>
+      <error-code>503</error-code>
+      <location>/web/html/serviceUnavailable.html</location>
+    </error-page>
+    <error-page>
+      <error-code>504</error-code>
+      <location>/web/html/gatewayTimeout.html</location>
+    </error-page>
+    <error-page>
+      <error-code>505</error-code>
+      <location>/web/html/HTTPVersionNotSupported.html</location>
+    </error-page>
+    <error-page>
+      <error-code>509</error-code>
+      <location>/web/html/bandwidthLimitExceeded.html</location>
     </error-page>
 
    <!-- Note: Contex Params -->
