@@ -65,7 +65,6 @@ import com.oreilly.servlet.ParameterParser;
 import it.alma.bean.DepartmentBean;
 import it.alma.bean.PersonBean;
 import it.alma.bean.ProjectBean;
-import it.alma.command.Command;
 import it.alma.exception.CommandException;
 import it.alma.exception.WebStorageException;
 
@@ -128,10 +127,6 @@ public class FileManager extends HttpServlet {
      * Attributo per il valore del parametro obbligatorio 'q'
      */
     private static String entToken;
-    /**
-     * Command che gestisce la pagina da cui &egrave; partita la richiesta
-     */
-    private Command cmd = null; 
     /**
      * Lista contenente tutti i token di interesse, ovvero ammesi a generare files
      */
@@ -274,6 +269,8 @@ public class FileManager extends HttpServlet {
         int idPrj = parser.getIntParameter("prj-id", Utils.DEFAULT_ID);
         // Recupera o inizializza 'id dipartimento'     (upload da Monitor)
         int idDip = parser.getIntParameter("dip-id", Utils.DEFAULT_ID);
+        // Recupera o inizializza 'p'     (upload da Monitor Ateneo)
+        String part = parser.getStringParameter("p", Utils.VOID_STRING);
         /* ******************************************************************** *
          *           I - Control :: the user Session MUST BE valid              *
          *              to avoid the "garden gate situation"                    *
@@ -306,8 +303,10 @@ public class FileManager extends HttpServlet {
          *  II - Control :: user MUST HAVE writable project(s) or writable dept *
          * ******************************************************************** */
         // Recupera i progetti su cui l'utente ha diritti di scrittura
-        Vector<ProjectBean> writablePrj = (Vector<ProjectBean>) ses.getAttribute("writableProjects"); // I'm confident about the types...
+        @SuppressWarnings("unchecked")  // I'm confident about the types...
+        Vector<ProjectBean> writablePrj = (Vector<ProjectBean>) ses.getAttribute("writableProjects"); 
         // Recupera i dipartimenti in cui l'utente ha un ruolo superiore a TL
+        @SuppressWarnings("unchecked")
         Vector<DepartmentBean> writableDepts = (Vector<DepartmentBean>) ses.getAttribute("writableDeparments");
         // Se non ci sono progetti scrivibili ed è stata inviata una form post multipart c'è qualcosa che non va!!!
         if (writablePrj == null) {
@@ -339,15 +338,56 @@ public class FileManager extends HttpServlet {
             uploadStatus(req, res, parser, user, writablePrj);
         } else if (idDip > Utils.DEFAULT_ID) {
             uploadMonitor(req, res, parser, user, writableDepts);
+        } else if (part.equalsIgnoreCase("ate")) {
+            uploadMonitorAte(req, res, parser, user);
         } else {    // Se non riesce a recuperare né 'id progetto' né 'id dipartimento' qualcosa non va, ed esce
             String msg = "Problemi nel recupero di un identificativo necessario.\n";
             log.severe(msg);
             throw new ServletException(msg);
         }
-
     }
 
     
+    /**
+     * <p>Inoltra la richiesta ad una pagina passata come argomento.</p>
+     * 
+     * @param req  HttpServletRequest contenente i parametri sulla QueryString
+     * @param res  HttpServletResponse per inoltrare la chiamata
+     * @param fileJspT pagina JSP a cui puntare nell'inoltro per forward
+     * @param q parametro della querystring a cui puntare nell'inoltro per redirect
+     * @throws ServletException se si verifica un'eccezione nella redirezione
+     * @throws IOException se si verifica un problema di input/output
+     * @throws IllegalStateException se la Response era committata o se un URL parziale e' fornito e non puo' essere convertito in un URL valido (v. {@link HttpServletResponse#sendRedirect(String)})
+     */
+    private void flush(HttpServletRequest req,
+                       HttpServletResponse res,
+                       String fileJspT,
+                       String q) 
+                throws ServletException, 
+                       IOException,
+                       IllegalStateException {
+        if (q == null || q.isEmpty()) {
+            final RequestDispatcher rd = getServletContext().getRequestDispatcher(fileJspT + "?" + req.getQueryString());
+            rd.forward(req, res);
+            return;
+        }
+        res.sendRedirect(getServletContext().getInitParameter("appName") + q);
+    }
+    
+    
+    /**
+     * <p>Gestisce il caricamento di file allegati a un determinato status
+     * di progetto e li rappresenta con altrettanti fileset i cui estremi
+     * memorizza anche nel db, in una tabella degli allegati di status.</p>  
+     * 
+     * @param req la HttpServletRequest contenente il valore di 'q' e gli altri parametri necessari a gestire il caricamento e la memorizzazione
+     * @param res la HttpServletResponse utilizzata per indirizzare le risposte
+     * @param parser ParameterParser contenente i parametri provenienti dalla pagina
+     * @param user  utente loggato, per la memorizzazione dell'autore del caricamento
+     * @param writablePrj   elenco di progetti scribili dall'utente loggato, per controlli di autorizzazione
+     * @throws ServletException java.lang.Throwable.Exception.ServletException che viene sollevata se manca un parametro di configurazione considerato obbligatorio o per via di qualche altro problema di puntamento
+     * @throws IOException      java.io.IOException che viene sollevata se si verifica un puntamento a null o in genere nei casi in cui nella gestione del flusso informativo di questo metodo si verifica un problema
+     */
     private void uploadStatus(HttpServletRequest req, 
                               HttpServletResponse res, 
                               ParameterParser parser,
@@ -551,7 +591,19 @@ public class FileManager extends HttpServlet {
     }
     
 
-    
+    /**
+     * <p>Gestisce il caricamento di file allegati a un determinato monitoraggio
+     * di dipartimento e li rappresenta con altrettanti fileset i cui estremi
+     * memorizza anche nel db, in una tabella degli allegati di monitoraggio.</p>  
+     * 
+     * @param req la HttpServletRequest contenente il valore di 'q' e gli altri parametri necessari a gestire il caricamento e la memorizzazione
+     * @param res la HttpServletResponse utilizzata per indirizzare le risposte
+     * @param parser ParameterParser contenente i parametri provenienti dalla pagina
+     * @param user  utente loggato, per la memorizzazione dell'autore del caricamento
+     * @param writableDepts   elenco di progetti scribili dall'utente loggato, per controlli di autorizzazione
+     * @throws ServletException java.lang.Throwable.Exception.ServletException che viene sollevata se manca un parametro di configurazione considerato obbligatorio o per via di qualche altro problema di puntamento
+     * @throws IOException      java.io.IOException che viene sollevata se si verifica un puntamento a null o in genere nei casi in cui nella gestione del flusso informativo di questo metodo si verifica un problema
+     */
     private void uploadMonitor(HttpServletRequest req, 
                                HttpServletResponse res, 
                                ParameterParser parser,
@@ -760,37 +812,217 @@ public class FileManager extends HttpServlet {
     }
     
     
-    
     /**
-     * <p>Inoltra la richiesta ad una pagina passata come argomento.</p>
+     * <p>Gestisce il caricamento di file allegati a un determinato monitoraggio
+     * di ateneo e li rappresenta con altrettanti fileset i cui estremi
+     * memorizza anche nel db, in una tabella degli allegati di monitoraggio
+     * di ateneo.</p>  
      * 
-     * @param req  HttpServletRequest contenente i parametri sulla QueryString
-     * @param res  HttpServletResponse per inoltrare la chiamata
-     * @param fileJspT pagina JSP a cui puntare nell'inoltro
-     * @throws ServletException se si verifica un'eccezione nella redirezione
-     * @throws IOException se si verifica un problema di input/output
-     * @throws IllegalStateException se la Response era committata o se un URL parziale e' fornito e non puo' essere convertito in un URL valido (v. {@link HttpServletResponse#sendRedirect(String)})
+     * @param req la HttpServletRequest contenente il valore di 'q' e gli altri parametri necessari a gestire il caricamento e la memorizzazione
+     * @param res la HttpServletResponse utilizzata per indirizzare le risposte
+     * @param parser ParameterParser contenente i parametri provenienti dalla pagina
+     * @param user  utente loggato, per la memorizzazione dell'autore del caricamento
+     * @throws ServletException java.lang.Throwable.Exception.ServletException che viene sollevata se manca un parametro di configurazione considerato obbligatorio o per via di qualche altro problema di puntamento
+     * @throws IOException      java.io.IOException che viene sollevata se si verifica un puntamento a null o in genere nei casi in cui nella gestione del flusso informativo di questo metodo si verifica un problema
      */
-    private void flush(HttpServletRequest req,
-                       HttpServletResponse res,
-                       String fileJspT,
-                       String q) 
-                throws ServletException, 
-                       IOException,
-                       IllegalStateException {
-        if (q == null || q.isEmpty()) {
-            final RequestDispatcher rd = getServletContext().getRequestDispatcher(fileJspT + "?" + req.getQueryString());
-            rd.forward(req, res);
+    private void uploadMonitorAte(HttpServletRequest req, 
+                                  HttpServletResponse res, 
+                                  ParameterParser parser,
+                                  PersonBean user)
+                           throws ServletException, IOException {
+        DBWrapper db = null;                                // DataBound
+        String entityName = null;
+        String attributeName = null;
+        // Struttura contenente gli estremi di ogni allegato
+        HashMap<String, Object> params = new HashMap<String, Object>(13);
+        // Recupera o inizializza 'q' 
+        entToken = parser.getStringParameter("q", Utils.VOID_STRING);
+        /* ******************************************************************** *
+         *              Variabili per gestione upload da pagina                 *
+         * ******************************************************************** */
+        // Recupera o inizializza 'p'     (upload da Monitor Ateneo)
+        String ate = parser.getStringParameter("p", Utils.VOID_STRING);
+        // Recupera o inizializza 'id monitoraggio'     (upload da Monitor)
+        int idMon = parser.getIntParameter("mon-id", Utils.DEFAULT_ID);
+        // Recupera o inizializza 'anno monitoragigo'
+        int year = parser.getIntParameter("y", Utils.DEFAULT_ID);
+        /* ******************************************************************** *
+         *                      Effettua la connessione                         *
+         * ******************************************************************** */
+        // Effettua la connessione al databound
+        try {
+            db = new DBWrapper();
+        } catch (WebStorageException wse) {
+            throw new ServletException(FOR_NAME + "Non riesco ad instanziare databound.\n" + wse.getMessage(), wse);
+        }
+        /* ******************************************************************** *
+         *                           IV - Control                               * 
+         *      if the upload is about a dept, the id of current department     * 
+         *             ad it MUST BE among those writable by user               *
+         * ******************************************************************** */
+        // Controllo per upload da monitor
+        try {
+            // Se non riesce a trovare i diritti dell'utente pari a quelli di pmo ate c'è qualcosa che non va
+            if (!user.isPmoAteneo()) {
+                String msg = FOR_NAME + "Si e\' verificato un problema: l\'utente non dispone dei permessi per allegare un file del monitoraggio ateneo.\n";
+                log.severe(msg);
+                throw new ServletException(msg);
+            }
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel puntamento all'oggetto utente.\n" + npe.getMessage();
+            log.severe(msg);
+            throw new ServletException(msg, npe);
+        }
+        /* ******************************************************************** *
+         *              ONLY IF previous controls are ok, go on                 * 
+         *        (Se i controlli vanno a buon fine gestisce l'upload)          *
+         * ******************************************************************** */
+        // Nome della sottodirectory che conterrà gli allegati specifici
+        String ALL_DIR = null;
+        // Controlla che il token corrente sia abilitato all'upload
+        if (entTokens.contains(entToken)) {
+           if (entToken.equals(Query.MONITOR_PART)) {
+               entityName = "monitoraggio";
+               attributeName = "all";
+               ALL_DIR = entityName + STANDARD_DIR_SUFFIX;
+            }
+        } else {
+            String msg = FOR_NAME + "Hai chiamato il FileManager per gestire l'upload da monitor ma non sei nel token ammesso: allora: che vuoi??\n";
+            log.severe(msg + "Non sei piu\' rock? Non sei piu\' metal?\n");
+            throw new ServletException(msg);
+        }
+        try {
+            /* **************************************************************** *
+             *     Checks if the directories do exist; if not, it makes them    *
+             * **************************************************************** */
+            // Gets absolute path of the web application (/)
+            String appPath = req.getServletContext().getRealPath(Utils.VOID_STRING);
+            log.info(FOR_NAME + "appPath vale: " + appPath);
+            // Creates the documents root directory (/documents) if it does not exists
+            String documentsRootName = appPath + getServletContext().getInitParameter("urlDirectoryDocumenti");
+            File documentsRoot = new File(documentsRootName);
+            if (!documentsRoot.exists()) {
+                documentsRoot.mkdir();
+                log.info(FOR_NAME + documentsRootName + " created.\n");
+            }
+            // Constructs path of the directory to save uploaded file 
+            String uploadPath =  documentsRootName + File.separator + SAVE_DIR;
+            // Creates the save directory (/documents/upload) if it does not exists
+            File uploadDir = new File(uploadPath);
+            if (!uploadDir.exists()) {
+                uploadDir.mkdir();
+                log.info(FOR_NAME + uploadPath + " created.\n");
+            }
+            // Constructs path of the directory to save attached file(s) 
+            String attachPath =  uploadPath + File.separator + ALL_DIR;
+            // Creates the save directory (/documents/upload/monitoraggio_all) if it does not exists
+            File attachDir = new File(attachPath);
+            if (!attachDir.exists()) {
+                attachDir.mkdir();
+                log.info(FOR_NAME + attachPath + " created.\n");
+            }
+            /* **************************************************************** *
+             *              Finally it may manage streams as files!             *
+             * **************************************************************** */
+            // Retrieve and manage the document title
+            String title = parser.getStringParameter("doc-name", Utils.VOID_STRING);
+            // Recupera e scrive tutti gli allegati
+            for (Part part : req.getParts()) {
+                String fileName = extractFileName(part);
+                if (fileName.equals(Utils.VOID_STRING)) {
+                    continue;
+                }
+                // Creates the file object
+                File file = new File(fileName);
+                // Refines the fileName in case it is an absolute path
+                fileName = null;
+                fileName = file.getName();
+                /* ************************************************************ *
+                 *                     Resolves MIME type(s)                    *
+                 * ************************************************************ */
+                // Get the default library (JRE_HOME/lib/content-types.properties)               
+                FileNameMap fileNameMap = URLConnection.getFileNameMap();
+                // Tries to get the MIME type from default library
+                String mimeType = fileNameMap.getContentTypeFor(file.getName());
+                // If not, tries to get the MIME type guessing that from a 
+                // service-provider loading facility - see {@link Files.probeContentType}
+                if (mimeType == null) {
+                    Path path = new File(fileName).toPath();
+                    mimeType = Files.probeContentType(path);
+                }
+                /* ************************************************************ *
+                 *                Retrieve and manage file extension            *
+                 * ************************************************************ */
+                String extension = fileName.substring(fileName.lastIndexOf("."));
+                if (forbiddenExt.contains(extension)) {
+                    String msg = FOR_NAME + "Si e\' verificato un problema di estensione non ammessa; l\'utente ha tentato di caricare un file non consentito.\n";
+                    log.severe(msg);
+                    throw new ServletException("Attenzione: il formato del file caricato non e\' consentito.\n");
+                }
+                /* ************************************************************ *
+                 *                          Given name                          *
+                 * ************************************************************ */
+                String givenName = this.makeName(entityName + "ate", attributeName, db);
+                log.info(FOR_NAME + "Nome autogenerato per il file: " + givenName);
+                /* ************************************************************ *
+                 *      Prepares the table hash with parameters to insert       *
+                 * ************************************************************ */
+                log.info(FOR_NAME + "Salvataggio previsto in tabella relativa all\'entita\': " + givenName);
+                // Entity name
+                params.put("nomeEntita", entityName + "ate");
+                // Attribute name
+                params.put("nomeAttributo", attributeName);
+                // Real name of the uploaded file in the file system
+                params.put("file", givenName);
+                // Extension of the original file
+                params.put("ext", extension);
+                // Name of the original file chosen by user (named user file)
+                params.put("nome", fileName);
+                // Which one entity instance
+                params.put("belongs", idMon);
+                // The title chosen by user for the attachment
+                params.put("titolo", checkPrime(title));              
+                // Calculated size for now is zero
+                params.put("dimensione", getFileSizeBytes(file));
+                // Calculated mime
+                params.put("mime", mimeType);
+                // Logged user
+                params.put("usr", user);
+                // Write to the database
+                db.setFileDoc(params);
+                // Write to the filesystem
+                part.write(attachPath + File.separator + givenName + extension);
+                log.info(FOR_NAME + "Salvataggio in file system effettuato.\n");
+                // Read the file just written
+                File fileVolume = new File(attachPath + File.separator + givenName + extension);
+                // Calculated size from file system
+                params.put("dimensione", getFileSizeBytes(fileVolume));
+                // Post Update FileDoc
+                db.postUpdateFileDoc(params);
+            }
+            req.setAttribute("message", "Upload has been done successfully!");
+            flush(req, res, templateJsp, "?q=mon&p=" + ate + "&y=" + year);
+        } catch (IllegalStateException e) {
+            throw new ServletException("Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n" + e.getMessage(), e);
+        } catch (NullPointerException e) {
+            throw new ServletException("Errore nell'estrazione dei dipartimenti che gestiscono il corso.\n" + e.getMessage(), e);
+        } catch (Exception e) {
+            req.setAttribute("javax.servlet.jsp.jspException", e);
+            req.setAttribute("message", e.getMessage());
+            // Log dell'evento
+            log.severe("Problema: " + e);
+            e.printStackTrace();
+            // Flusso
+            flush(req, res, errorJsp, Utils.VOID_STRING);
             return;
         }
-        res.sendRedirect(getServletContext().getInitParameter("appName") + q);
     }
     
 
     /**
      * <p>Extracts file name from HTTP header content-disposition.</p>
      * 
-     * @param part the {@link javax.mail.Part Part} of the {@link javax.servlet.httpHttpServletRequest Request}
+     * @param part : the {@link javax.servlet.http.Part Part} of the {@link javax.servlet.http.HttpServletRequest Request}
      * @return <code>String</code> - the name of the file which might be in Request
      */
     private static String extractFileName(Part part) {
@@ -806,15 +1038,21 @@ public class FileManager extends HttpServlet {
     
     
     /**
+     * <p>Genera un nome univoco da inserire come chiave (di fatto)
+     * nella tabella degli allegati a una entit&agrave;.</p>
+     * <p>Per avere la certezza di evitare duplicazioni, eventualit&agrave;
+     * scongiurata peraltro dai vincoli inseriti sulla tabella (nome dell'allegato
+     * <code>UNIQUE NOT NULL</code>, quindi di fatto quasi una chiave primaria...)  
+     * viene effettuata una query di selezione per controllare che quel nome non 
+     * sia gi&agrave; presente nella tabella degli allegati.</p>
      * 
-     * 
-     * @param tableName
-     * @param attributeName
-     * @param db
-     * @return
-     * @throws ServletException
-     * @throws IOException
-     * @throws IllegalStateException
+     * @param tableName     radice dell'entit&agrave; relativamente alla quale si vuol generare un nome univoco dell'allegato 
+     * @param attributeName suffisso dell'entit&agrave; relativamente alla quale si vuol generare un nome univoco dell'allegato
+     * @param db    databound, per effettuare il controllo di esistenza del nome e avere la certezza di evitare duplicazioni
+     * @return <code>String</code> - il generato per il file da inserire come allegato logico riferimento all'allegato fisico
+     * @throws ServletException se si verifica tipicamente un problema SQL
+     * @throws IOException se si verifica un problema in qualche sorta di input/output
+     * @throws IllegalStateException se si verifica un problema di chiamata di metodo fuori contesto di flusso appropriato
      */
     private String makeName(String tableName, 
                             String attributeName, 
@@ -876,7 +1114,14 @@ public class FileManager extends HttpServlet {
     }
     
     
-    private static String checkPrime(String toCheck) {
+    /**
+     * <p>Returns a String replacing all the sequence of characters 
+     * matching regex and replacement String.</p>
+     * 
+     * @param toCheck the String to check
+     * @return <code>String</code> - the String replaced
+     */
+    public static String checkPrime(String toCheck) {
         String pattern = toCheck.replaceAll("(?<!')'(?!')", "''");
         return pattern;
     }
@@ -889,7 +1134,7 @@ public class FileManager extends HttpServlet {
      * @param file File di cui bisogna restituire il peso in B
      * @return <code>long</code> - il peso del file in B
      */
-    private static long getFileSizeBytes(File file) {
+    public static long getFileSizeBytes(File file) {
         return file.length();
     }    
     
@@ -901,7 +1146,7 @@ public class FileManager extends HttpServlet {
      * @param file File di cui bisogna restituire il peso in KB
      * @return <code>double</code> - il peso del file in Kappa
      */
-    private static double getFileSizeKiloBytes(File file) {
+    public static double getFileSizeKiloBytes(File file) {
         return (double) file.length() / 1024;
     }    
     
@@ -913,8 +1158,49 @@ public class FileManager extends HttpServlet {
      * @param file File di cui bisogna restituire il peso in MB
      * @return <code>double</code> - il peso del file in Mega
      */
-    private static double getFileSizeMegaBytes(File file) {
+    public static double getFileSizeMegaBytes(File file) {
         return (double) file.length() / (1024 * 1024);
     }
+
+    
+    /*
+     * Legge un file (di configurazione)
+     * 
+     * @param path
+     * @return
+     *
+    public static String getContent(String path)
+                             throws NotFoundException, CommandException {
+        StringBuffer content = new StringBuffer();
+        Scanner sc = null;
+        try {
+            URL file = new URL(path);
+            try {
+                sc = new Scanner(file.openStream());
+                while (sc.hasNext()) {
+                    // Unnecessary Cast: Already returns a String
+                    content.append(/*(String)*//* sc.next());
+                }
+            } catch (IOException ioe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nel puntamento al file remoto.\n";
+                log.severe(msg);
+                throw new NotFoundException(msg, ioe);
+            } finally {
+                try {
+                    if (sc != null)
+                        sc.close();
+                } catch (IllegalStateException ise) {
+                    String msg = FOR_NAME + "Probabile problema nel tentare di eseguire l\'operazione dopo che lo scanner e\' stato chiuso.\n";
+                    log.severe(msg); 
+                    throw new CommandException(msg, ise);
+                }
+            }
+        } catch (MalformedURLException mue) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento all\'url, probabilmente il percorso e\' errato o il browsing non abilitato.\n";
+            log.severe(msg);
+            throw new NotFoundException("Attenzione: controllare che la risorsa sia raggiungibile!\n" + mue.getMessage(), mue);
+        }        
+        return new String(content);
+    }*/
     
 }
