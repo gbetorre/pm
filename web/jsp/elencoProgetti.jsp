@@ -37,7 +37,11 @@
             </c:forEach>
             <c:if test="${not empty sessionScope.writableDeparments}">
             <tr>
-              <td colspan="4" align="left"><a href="${mon}${d.id}"  class="btn btn-success btn-spacer"><i class="fas fa-tv"></i> Monitoraggio MIUR</a></td>
+              <td colspan="3" align="left">
+                <a href="${mon}${d.id}"  class="btn btn-success btn-spacer"><i class="fas fa-tv"></i> Monitoraggio MIUR</a>
+                &nbsp;
+                <a href="${monAte}" class="btn btn-success btn-spacer"><i class="fas fa-desktop"></i> Monitoraggio Ateneo</a>
+              </td>
             </tr>
             </c:if>
           </tbody>
