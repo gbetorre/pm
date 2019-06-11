@@ -2926,6 +2926,62 @@ public class DBWrapper implements Query {
     
     
     /**
+    * <p>Restituisce un MonitorBean contenente tutti i campi del monitoraggio
+    * relativo all'ateneo, identificato tramite l'anno solare di interesse, 
+    * passato come parametro.</p>
+    * 
+    * @param anno   anno di cui si vuol recuperare il monitoraggio di ateneo
+    * @return MonitorBean - oggetto contenente tutti i campi del monitoraggio 
+    * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
+    */
+    @SuppressWarnings({ "null" })
+    public MonitorBean getMonitorAteneo(int anno) 
+                           throws WebStorageException {
+        Connection con = null;
+        ResultSet rs = null;
+        PreparedStatement pst = null;
+        MonitorBean mon = null;
+        Vector<FileDocBean> attachments = null;
+        int nextParam = 0;
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_MONITOR_ATENEO);
+            pst.clearParameters();
+            pst.setInt(++nextParam, anno);
+            rs = pst.executeQuery();
+            if (rs.next()) {
+                mon = new MonitorBean();
+                BeanUtil.populate(mon, rs);
+                // Recupero e settaggio degli allegati
+                try {
+                    attachments = getFileDoc("monitoraggioate", "all", mon.getId(), NOTHING);
+                    mon.setAllegati(attachments);
+                } catch (AttributoNonValorizzatoException anve) {
+                    String msg = FOR_NAME + "Attributo obbligatorio di bean non valorizzato.\n";
+                    LOG.severe(msg); 
+                    throw new WebStorageException(msg + anve.getMessage(), anve);
+                }
+            }
+            return mon;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto MonitorBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
     * <p>Restituisce un Vector&lt;ActivityBean&gt; contenente tutto il log 
     * degli accessi disponibile, purch&eacute; l'utente loggato abbia 
     * privilegi di livello massimo.</p>
