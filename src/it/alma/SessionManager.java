@@ -41,9 +41,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.LinkedHashMap;
-import java.util.Optional;
 import java.util.Vector;
 import java.util.logging.Logger;
 
@@ -61,6 +59,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.xml.bind.DatatypeConverter;
 
 import com.oreilly.servlet.ParameterParser;
 
@@ -479,16 +478,16 @@ public class SessionManager extends HttpServlet {
      * <p>Genera il seme necessario per la password criptata ad ogni cambio password dell'utente loggato.</p>
      * 
      * @param length  lunghezza del seme
-     * @return <code>Optional&lt;String&gt;</code> - stringa contenente il seme generato
+     * @return <code>String</code> - stringa contenente il seme generato
      */
-    public static Optional<String> generateSalt (final int length) {
+    public static String generateSalt (final int length) {
         if (length < 1) {
           System.err.println("Error in generateSalt: length must be > 0");
-          return Optional.empty();
+          return Utils.VOID_STRING;
         }
         byte[] salt = new byte[length];
         RAND.nextBytes(salt);
-        return Optional.of(Base64.getEncoder().encodeToString(salt));
+        return DatatypeConverter.printBase64Binary(salt);
     }
     
     
@@ -497,14 +496,14 @@ public class SessionManager extends HttpServlet {
      * 
      * @param password    password inserita dall'utente
      * @param salt        seme univoco per ogni utente in base al quale la password viene criptata
-     * @return <code>Optional&lt;String&gt;</code> - ritorna una stringa contenente la password criptata
+     * @return <code>String</code> - ritorna una stringa contenente la password criptata
      * @throws NoSuchAlgorithmException  se non &egrave; disponibile l'algoritmo di criptaggio nell'ambiente
      * @throws InvalidKeySpecException   se la chiave non &egrave; valida (codifica non valida, lunghezza non valida, non inizializzata, ...)
      */
-    public static Optional<String> hashPassword (String password, 
-                                                 String salt)
-                                          throws NoSuchAlgorithmException, 
-                                                 InvalidKeySpecException {
+    public static String hashPassword (String password, 
+                                       String salt)
+                                throws NoSuchAlgorithmException, 
+                                       InvalidKeySpecException {
 
         char[] chars = password.toCharArray();
         byte[] bytes = salt.getBytes();
@@ -513,10 +512,10 @@ public class SessionManager extends HttpServlet {
         try {
           SecretKeyFactory fac = SecretKeyFactory.getInstance(ALGORITHM);
           byte[] securePassword = fac.generateSecret(spec).getEncoded();
-          return Optional.of(Base64.getEncoder().encodeToString(securePassword));
+          return DatatypeConverter.printBase64Binary(securePassword);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException ex) {
           System.err.println("Exception encountered in hashPassword()");
-          return Optional.empty();
+          return Utils.VOID_STRING;
         } finally {
           spec.clearPassword();
         }
@@ -543,11 +542,7 @@ public class SessionManager extends HttpServlet {
         if (salt.equals(Utils.VOID_STRING)) {
             return false;
         }
-        Optional<String> optEncrypted = hashPassword(password, encryptedPassword.getInformativa());
-        if (!optEncrypted.isPresent()) {
-            return false;
-        }
-        return optEncrypted.get().equals(encryptedPassword.getNome());
+        String optEncrypted = hashPassword(password, encryptedPassword.getInformativa());
+        return optEncrypted.equals(encryptedPassword.getNome());
     }
-    
 }
