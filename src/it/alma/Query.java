@@ -604,7 +604,8 @@ public interface Query extends Serializable {
             "       INNER JOIN usr U ON U.id = B.id0_usr" +
             "       INNER JOIN identita I ON U.id = I.id0_usr" + 
             "       INNER JOIN persona P ON P.id = I.id1_persona" +
-            "   WHERE P.id = ?";
+            "       INNER JOIN ruologestione RG ON RG.id_persona = P.id" + 
+            "   WHERE P.id = ? AND RG.id_ruolo <= 2";
             
     
     /**
