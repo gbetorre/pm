@@ -189,6 +189,10 @@ public interface Query extends Serializable {
      */
     public static final String MONITOR_PART                     = "mon";
     /**
+     * <p>Costante per il parametro identificante la sezione identificante il monitoraggio ateneo.</p>
+     */
+    public static final String MONITOR_ATE                      = "ate";
+    /**
      * <p>Costante per il parametro identificante la pagina dei monitoraggio.</p>
      */
     public static final String PROJECT_PART                     = "pol";
@@ -944,7 +948,7 @@ public interface Query extends Serializable {
             "   FROM wbs W" +
             "   WHERE id_progetto = ?" +
             "     AND W.workpackage = true" +
-            "   ORDER BY W.dataultimamodifica ASC";
+            "   ORDER BY W.nome, W.dataultimamodifica ASC";
     
     /**
      * <p>Estrae tutte le persone che hanno un (qualsivoglia) ruolo 
@@ -1235,7 +1239,7 @@ public interface Query extends Serializable {
             "   WHERE A.id_progetto = ?" + 
             "     AND A.id_wbs = ?" +
             "     AND A.id_stato <> 12" +
-            "   ORDER BY A.dataultimamodifica ASC";
+            "   ORDER BY A.nome, A.dataultimamodifica";
     
     /**
      * <p>Estrae il numero di tuple presenti nella tabella attivit&agrave;
@@ -1623,7 +1627,21 @@ public interface Query extends Serializable {
             "   ,   M.d8_modalitafasi       AS  \"quadroD8\"" +
             "   FROM monitoraggio M " + 
             "   WHERE M.anno = ? " +
-            "      AND M.id_dipart = ?";    
+            "      AND M.id_dipart = ?";
+    
+    /**
+     * <p>Estrae tutti i monitoraggi di dato anno e dato dipartimento
+     * il cui identificativo viene passato come parametro.</p>
+     */
+    public static final String GET_MONITOR_ATENEO = 
+            "SELECT DISTINCT " +
+            "       MA.id                   AS  \"id\"" +
+            "   ,   MA.anno                 AS  \"anno\"" +  
+            "   ,   MA.descrizione          AS  \"descrizione\"" +
+            "   ,   MA.informativa          AS  \"informativa\"" +
+            "   ,   MA.aperto               AS  \"open\"" +
+            "   FROM monitoraggioate MA " + 
+            "   WHERE MA.anno = ?";
     
     /**
      * <p>Estrae identificativo tupla ultimo accesso, se esiste 
