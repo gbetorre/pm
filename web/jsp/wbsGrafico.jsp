@@ -21,7 +21,7 @@
     <script type="text/javascript">
       google.charts.load('current', {packages:["orgchart"]});
       google.charts.setOnLoadCallback(drawChart);
-	  var vWbsPadreOfWbs = new Array();
+	    var vWbsPadreOfWbs = new Array();
 	  
       function drawChart() {
         var data = new google.visualization.DataTable();
@@ -50,9 +50,11 @@
         var chart = new google.visualization.OrgChart(document.getElementById('chart_div'));
         // Draw the chart, setting the allowHtml option to true for the tooltips.
         chart.draw(data, {allowHtml:true});
+        // Custom title of element
+        $(".google-visualization-orgchart-node").prop("title", "Clicca per ulteriori funzionalita'");
         // Intercetto la selezione di un elemento del chart
         google.visualization.events.addListener(chart, 'select', selectHandler);
-		// Funzione collegata alla selezione dell'elemento
+		    // Funzione collegata alla selezione dell'elemento
         function selectHandler(e) {
           var selectedItem = chart.getSelection()[0];
           if (selectedItem) {
@@ -62,11 +64,12 @@
             var valueIdPadre = valuesId[1];
             var isWorkPackage = valuesId[2];
             var popupContent = null;
+            var nameSelected = data.getValue(selectedItem.row, 0).split("_");
             $("#wbs-padre option[value=" + valueIdPadre + "]").attr('selected', 'selected');
             $("#wbs-id").attr('value', valueIdWbs);
         <c:choose>
           <c:when test="${superuser}">
-         	document.getElementById("nameWbs").innerHTML = data.getValue(selectedItem.row, 0);
+         	document.getElementById("nameWbs").innerHTML = nameSelected[0];
           	popupContent = '<ul class="popupMenu">'+
 		   				   '<li class="popupMenuContent"><a href="${modWbs}${p.id}&idw=' + valueIdWbs + '" class="linkPopup">Visualizza WBS</a></li>' +
         				   '<li class="popupMenuContent"><a href="#form-moveWbs" class="linkPopup" id="link-moveWbs" name="link-moveWbs" rel="modal:open" onclick>Sposta WBS</a></li>' +
