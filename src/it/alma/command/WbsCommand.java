@@ -481,7 +481,6 @@ public class WbsCommand extends ItemBean implements Command {
      * 
      * @param idPrj identificativo del progetto corrente
      * @param db    WebStorage per l'accesso ai dati
-     * @param user  utente loggato
      * @return <code>Vector&lt;WbsBean&gt;</code> - lista di work packages recuperati 
      * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
      */
@@ -489,14 +488,51 @@ public class WbsCommand extends ItemBean implements Command {
                                                        DBWrapper db,
                                                        PersonBean user)
                                                 throws CommandException {
-        Vector<WbsBean> workPackages = null;
+        Vector<WbsBean> workPackages = new Vector<WbsBean>();
         try {
+            //workPackages = db.getWbs(idPrj, Query.WBS_WP_ONLY);
+            // Fa la stessa query usata dal grafico delle WBS e dall'elenco
+            Vector<WbsBean> vWbsAncestors = db.getWbsHierarchy(idPrj, user);
             // Recupera solo i work packages (l'obiettivo finale è mostrare le attività...)
-            workPackages = db.getWbs(idPrj, user, Query.WBS_WP_ONLY);
-            // Per ogni work package ne recupera le attività
-            for (WbsBean wp : workPackages) {
-                Vector<ActivityBean> activitiesByWP = db.getActivitiesByWbs(wp.getId(), idPrj, user);
-                wp.setAttivita(activitiesByWP);
+            for (WbsBean wbs : vWbsAncestors) {
+                if (wbs.isWorkPackage()) {
+                    Vector<ActivityBean> activitiesByWP = db.getActivitiesByWbs(wbs.getId(), idPrj, user);
+                    // Per ogni work package ne recupera le attività
+                    wbs.setAttivita(activitiesByWP);
+                    workPackages.add(wbs);
+                }
+                for (WbsBean wbsChild : wbs.getWbsFiglie()) {
+                    if (wbsChild.isWorkPackage()) {
+                        Vector<ActivityBean> activitiesByWP = db.getActivitiesByWbs(wbsChild.getId(), idPrj, user);
+                        // Per ogni work package ne recupera le attività
+                        wbsChild.setAttivita(activitiesByWP);
+                        workPackages.add(wbsChild);
+                    }
+                    for (WbsBean wbsGrandChild : wbsChild.getWbsFiglie()) {
+                        if (wbsGrandChild.isWorkPackage()) {
+                            Vector<ActivityBean> activitiesByWP = db.getActivitiesByWbs(wbsGrandChild.getId(), idPrj, user);
+                            // Per ogni work package ne recupera le attività
+                            wbsGrandChild.setAttivita(activitiesByWP);
+                            workPackages.add(wbsGrandChild);
+                        }
+                        for (WbsBean wbsGreatGrandChild : wbsGrandChild.getWbsFiglie()) {
+                            if (wbsGreatGrandChild.isWorkPackage()) {
+                                Vector<ActivityBean> activitiesByWP = db.getActivitiesByWbs(wbsGreatGrandChild.getId(), idPrj, user);
+                                // Per ogni work package ne recupera le attività
+                                wbsGreatGrandChild.setAttivita(activitiesByWP);
+                                workPackages.add(wbsGreatGrandChild);
+                            }
+                            for (WbsBean wbsProgeny  : wbsGreatGrandChild.getWbsFiglie()) {
+                                if (wbsProgeny.isWorkPackage()) {
+                                    Vector<ActivityBean> activitiesByWP = db.getActivitiesByWbs(wbsProgeny.getId(), idPrj, user);
+                                    // Per ogni work package ne recupera le attività
+                                    wbsProgeny.setAttivita(activitiesByWP);
+                                    workPackages.add(wbsProgeny);
+                                }
+                            }
+                        }
+                    }    
+                }
             }
         } catch (WebStorageException wse) {
             String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di work packages.\n";
