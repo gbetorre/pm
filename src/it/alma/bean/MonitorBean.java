@@ -88,6 +88,8 @@ public class MonitorBean extends CodeBean implements Serializable {
      *        Vector di fileset, ciascuno rappresentante        * 
      *        un riferimento logico ad un allegato fisico       *
      * ******************************************************** */
+    /** Allegati di ateneo */
+    private Vector<FileDocBean> allegati;    
     /** Allegati al quadro 4 */
     private Vector<FileDocBean> allegatiD4;
     /** Allegati al quadro 5  */
@@ -322,6 +324,25 @@ public class MonitorBean extends CodeBean implements Serializable {
     /* ************************************************************* *
      *             Metodi getter e setter per allegati               *
      * ************************************************************* */
+    /**
+     * Restituisce gli allegati di un'attivit&agrave; di monitoraggio
+     * 
+     * @return <code>Vector&lt;FileDocBean&gt;</code> - ciascuno rappresentante un riferimento logico ad un allegato fisico all'attivita' di monitoraggio
+     */
+    public Vector<FileDocBean> getAllegati() {
+        return allegati;
+    }
+
+    /**
+     * Imposta gli allegati di un'attivit&agrave; di monitoraggio
+     * 
+     * @param allegati - allegati da settare
+     */
+    public void setAllegati(Vector<FileDocBean> allegati) {
+        this.allegati = allegati;
+    }
+    
+    
     /**
      * Restituisce gli allegati di un'attivit&agrave; di monitoraggio
      * 
