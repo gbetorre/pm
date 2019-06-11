@@ -49,6 +49,7 @@ import it.alma.DBWrapper;
 import it.alma.Main;
 import it.alma.Query;
 import it.alma.Utils;
+import it.alma.bean.CodeBean;
 import it.alma.bean.DepartmentBean;
 import it.alma.bean.ItemBean;
 import it.alma.bean.MonitorBean;
@@ -77,6 +78,10 @@ public class MonitorCommand extends ItemBean implements Command {
      * Log per debug in produzione
      */
     protected static Logger LOG = Logger.getLogger(Main.class.getName());
+    /**
+     * Pagina a cui la command fa riferimento per mostrare il monitor di ateneo
+     */
+    private static final String nomeFileMonitoraggioAteneo = "/jsp/monitorAte.jsp";
     
     
     /** 
@@ -142,6 +147,8 @@ public class MonitorCommand extends ItemBean implements Command {
         int idDip = parser.getIntParameter("dip", Utils.DEFAULT_ID);
         // Recupera o inizializza 'id attività' (da modificare)
         int yMon = parser.getIntParameter("y", Utils.DEFAULT_ID);
+        // Recupera o inizializza parte monitoraggio 
+        String part = parser.getStringParameter("p", Utils.DASH);
         // Flag di scrittura
         boolean write = (boolean) req.getAttribute("w");
         /* ******************************************************************** *
@@ -155,32 +162,14 @@ public class MonitorCommand extends ItemBean implements Command {
         /* ******************************************************************** *
          *                         Recupera la Sessione                         *
          * ******************************************************************** */
+        // Utente loggato
+        PersonBean usr = null;
         try {
-            // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
-            HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
-            if (ses == null) {
-                throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
-            }
-            user = (PersonBean) ses.getAttribute("usr");
-            if (user == null) {
-                throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
-            }
-        } catch (IllegalStateException ise) {
-            String msg = FOR_NAME + "Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n";
+            usr = HomePageCommand.getLoggedUser(req);
+        } catch (CommandException ce) {
+            String msg = "Problema a livello di autenticazione: " + ce;
             LOG.severe(msg);
-            throw new CommandException(msg + ise.getMessage(), ise);
-        } catch (ClassCastException cce) {
-            String msg = FOR_NAME + ": Si e\' verificato un problema in una conversione di tipo.\n";
-            LOG.severe(msg);
-            throw new CommandException(msg + cce.getMessage(), cce);
-        } catch (NullPointerException npe) {
-            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null, probabilmente nel tentativo di recuperare l\'utente.\n";
-            LOG.severe(msg);
-            throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n" + npe.getMessage(), npe);
-        } catch (Exception e) {
-            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
-            LOG.severe(msg);
-            throw new CommandException(msg + e.getMessage(), e);
+            throw (ce);
         }
         /* ******************************************************************** *
          *                          Corpo del programma                         *
@@ -224,18 +213,29 @@ public class MonitorCommand extends ItemBean implements Command {
                     }
                 }
                 /* **************************************************** *
-                 *                  SELECT Monitor Part                 *
+                 *                  SELECT Monitor MIUR Part                 *
                  * **************************************************** */
-                 // Recupera il Monitoraggio MIUR
-                monitor = db.getMonitor(idDip, yMon);
-                fileJspT = this.getPaginaJsp();
+                    // Recupera il Monitoraggio MIUR
+                    monitor = db.getMonitor(idDip, yMon);
+                    fileJspT = this.getPaginaJsp();
+            } else if (part.equalsIgnoreCase(Query.MONITOR_ATE)) {
+                /* **************************************************** *
+                 *                  SELECT Monitor ATE Part                 *
+                 * **************************************************** */
+                // Recupera il monitoraggio Ateneo
+                monitor = db.getMonitorAteneo(yMon);
+                fileJspT = nomeFileMonitoraggioAteneo;
             } else {
-                    // Se siamo qui vuol dire che l'id del dipartimento non è > zero, il che è un guaio
-                    HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
-                    ses.invalidate();
-                    String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id progetto non valido!.\n";
-                    LOG.severe(msg);
-                    throw new CommandException("Attenzione: indirizzo richiesto non valido!\n");
+                    /* Se siamo qui vuol dire che l'id del dipartimento non è > zero
+                     * L'unico caso del genere ammesso e' se si vuol visualizzare
+                     * il monitoraggio ateneo                                   */
+                    
+                        // Non vogliamo il monitoraggio ateneo e l'id dipartimento non è > 0: il che è un guaio
+                        HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
+                        ses.invalidate();
+                        String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id progetto non valido!.\n";
+                        LOG.severe(msg);
+                        throw new CommandException("Attenzione: indirizzo richiesto non valido!\n");
             }
         } catch (IllegalStateException ise) {
             String msg = FOR_NAME + "Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n";
