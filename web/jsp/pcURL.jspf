@@ -141,6 +141,11 @@
   <c:param name="y" value="${requestScope.theCurrentYear}" />
   <c:param name="dip" value="" />
 </c:url>
+<c:url var="monAte" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="mon" />
+  <c:param name="p" value="ate" />
+  <c:param name="y" value="${requestScope.theCurrentYear}" />
+</c:url>
 <c:url var="credits" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="pol" />
   <c:param name="p" value="credits" />
