@@ -184,6 +184,12 @@ a:hover.linkWbsGrafico {
 	background-color: #b3b3b3;
 }
 
+.fixedTop {
+	position: fixed;
+	top: 0;
+	width: 100%;
+}
+
 label.linkStatus {
 	background-color: #ccccff;
 }
@@ -198,10 +204,6 @@ label.error {
 
 label.profileLabel {
 	font-weight: bold;
-	margin-left: 50px;
-}
-
-.marginLeft {
 	margin-left: 50px;
 }
 
@@ -239,6 +241,14 @@ div.errorPwd {
 	padding: 10px;
 	border: 1px solid red;
 	background-color: #ffcccc;
+	width: 100%;
+}
+
+div.successPwd {
+	color: #004d00;
+	padding: 10px;
+	border: 1px solid #2eb82e;
+	background-color: #adebad;
 	width: 100%;
 }
 
@@ -529,12 +539,21 @@ textarea {
 }
 
 /* ------------------- Margini ----------------------- */
-.marginLeft10 {
+.marginLeftSmall {
 	margin-left: 10px;
 }
 
-.marginLeft25 {
+.marginLeft {
 	margin-left: 25px;
+}
+
+.marginLeftLarge {
+	margin-left: 50px;
+}
+
+.marginBoth {
+	margin-left: 20px;
+	margin-right: 20px;
 }
 
 /*---------------------- Page header and footer styles ------------------------*/
