@@ -202,7 +202,7 @@
                     <c:set var="duplicateHeaders" value="${true}" scope="page" />
                     <tr>
                       <td colspan="5">
-                        <table class="table table-condensed col-md-11 marginLeft10">
+                        <table class="table table-condensed col-md-11 marginLeftSmall">
                           <thead class="thead-light">
                             <tr>
                               <th scope="col" width="60%">Nome WBS figlia</th>
