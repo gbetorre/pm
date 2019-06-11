@@ -36,10 +36,8 @@
 
 package it.alma;
 
-//import java.io.IOException;
-//import java.net.MalformedURLException;
-//import java.net.URL;
 import java.sql.Time;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -47,10 +45,8 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.MissingResourceException;
-//import java.util.Scanner;
 import java.util.logging.Logger;
 
-import java.text.ParseException;
 import it.alma.exception.CommandException;
 import it.alma.exception.NotFoundException;
 
@@ -87,15 +83,22 @@ public class Utils {
     /**
      * <p>Costante da utilizzare quando serve un valore per inizializzazione
      * o da utilizzare come argomento.</p>
-     * <p>Maggiormente visibile e chiara della stringa vuota 
-     * (doppi apici aperti chiusi) utilizzata direttamente nel codice, 
-     * e pi&uacute; ottimizzata rispetto al puntamento a una nuova stringa 
-     * attraverso il richiamo del costruttore &nbsp;<code>new String("");</code><br />
+     * <p>Graficamente maggiormente visibile e chiara della stringa vuota 
+     * che contiene (doppi apici aperti chiusi) &ndash; 
+     * se quest'ultima &egrave; utilizzata direttamente nel codice &ndash; 
+     * &egrave; pi&uacute; ottimizzata rispetto al puntamento 
+     * a una nuova stringa attraverso 
+     * il richiamo del costruttore &nbsp;<code>new String("");</code><br />
      * (si veda, ad esempio: 
      * <a href="http://www.precisejava.com/javaperf/j2se/StringAndStringBuffer.htm">
      * questa discussione</a>).
      */
     public static final String VOID_STRING = "";
+    /**
+     * <p>Costante da utilizzare quando serve un valore per inizializzazione
+     * di default di un parametro mancante sulla querystring.</p>
+     */
+    public static final String DASH = "-"; 
     /**
      * <p>Costante da utilizzare quando serve un valore per inizializzazione
      * o da utilizzare come argomento.</p>
@@ -194,47 +197,6 @@ public class Utils {
         // Only got here if we didn't return false
         return true;
     }
-    
-
-    /*
-     * TODO: COMMENTO
-     * 
-     * @param path
-     * @return
-     *
-    public static String getContent(String path)
-                             throws NotFoundException, CommandException {
-        StringBuffer content = new StringBuffer();
-        Scanner sc = null;
-        try {
-            URL file = new URL(path);
-            try {
-                sc = new Scanner(file.openStream());
-                while (sc.hasNext()) {
-                    // Unnecessary Cast: Already returns a String
-                    content.append(/*(String)*//* sc.next());
-                }
-            } catch (IOException ioe) {
-                String msg = FOR_NAME + "Si e\' verificato un problema nel puntamento al file remoto.\n";
-                log.severe(msg);
-                throw new NotFoundException(msg, ioe);
-            } finally {
-                try {
-                    if (sc != null)
-                        sc.close();
-                } catch (IllegalStateException ise) {
-                    String msg = FOR_NAME + "Probabile problema nel tentare di eseguire l\'operazione dopo che lo scanner e\' stato chiuso.\n";
-                    log.severe(msg); 
-                    throw new CommandException(msg, ise);
-                }
-            }
-        } catch (MalformedURLException mue) {
-            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento all\'url, probabilmente il percorso e\' errato o il browsing non abilitato.\n";
-            log.severe(msg);
-            throw new NotFoundException("Attenzione: controllare che la risorsa sia raggiungibile!\n" + mue.getMessage(), mue);
-        }        
-        return new String(content);
-    }*/
     
     /* ************************************************************************ *
      *   Metodi di utilita' per la definizione e la manipolazione delle date    *
@@ -803,4 +765,15 @@ public class Utils {
         return new GregorianCalendar(1970, 0, 1);
     }
     
+    /*
+    public static long length(Date start, Date end) {
+        GregorianCalendar startAsCalendar = new GregorianCalendar();
+        startAsCalendar.setTime(start);
+        GregorianCalendar endAsCalendar = new GregorianCalendar();
+        endAsCalendar.setTime(end);
+        long diff = endAsCalendar.getTimeInMillis() - startAsCalendar.getTimeInMillis();
+        long days = diff / 1000 / 60 / 60 / 24;
+        return days;
+    }
+    */
 }
