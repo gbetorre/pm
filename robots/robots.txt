@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: /documenti/upload/avanzamento_all/
+Disallow: /documenti/upload/monitoraggio_d4/
+Disallow: /documenti/upload/monitoraggio_d5/
+Disallow: /documenti/upload/monitoraggio_d6/
+Disallow: /documenti/upload/monitoraggio_d7/
+Disallow: /documenti/upload/monitoraggio_d8/
+Disallow: /etc/
