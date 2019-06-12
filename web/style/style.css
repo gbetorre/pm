@@ -192,6 +192,18 @@ a:hover.linkWbsGrafico {
 	box-shadow: 0 3px 0px rgba(0,0,0,0);
 }
 
+.fixedTopTable {
+	position: sticky;
+	top: 50px;
+	z-index: 1000;
+}
+
+.fixedTopState {
+	position: sticky;
+	top: 80px;
+	z-index: 1000;
+}
+
 label.linkStatus {
 	background-color: #ccccff;
 }
@@ -442,10 +454,6 @@ select:disabled.bgcolor3 {
 
 .reportWp {
 	background-image: linear-gradient(to right, #cccccc, #ffffff);
-}
-
-.reportHead {
-  font-weight: bold;
 }
 
 .reportRow {
