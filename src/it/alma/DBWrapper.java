@@ -292,8 +292,9 @@ public class DBWrapper implements Query {
      * @return <code>CodeBean</code> - CodeBean contenente la password criptata e il seme
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
+    @SuppressWarnings({ "null", "static-method" })
     public CodeBean getEncryptedPassword(String username) 
-                                   throws WebStorageException {
+                                  throws WebStorageException {
         ResultSet rs = null;
         Connection con = null;
         PreparedStatement pst = null;
@@ -326,6 +327,7 @@ public class DBWrapper implements Query {
             }
         }
     }
+    
     
     /**
      * <p>Restituisce un PersonBean rappresentante un utente loggato.</p>
@@ -402,8 +404,9 @@ public class DBWrapper implements Query {
      * @return ArrayList&lt;PersonBean&gt; - Vector contenente la lista di utenti 
      * @throws WebStorageException se si verifica un problema SQL o in qualsiasi puntamento
      */
+    @SuppressWarnings({ "null", "static-method" })
     public ArrayList<PersonBean> getUsrByGrp (PersonBean admin) 
-                                    throws WebStorageException{
+                                       throws WebStorageException{
         ResultSet rs, rs1 = null;
         Connection con = null;
         PreparedStatement pst, pst1 = null;
@@ -999,7 +1002,7 @@ public class DBWrapper implements Query {
      * @return <code>ArrayList&lt;StatusBean&gt;</code> - ArrayList&lt;StatusBean&gt; rappresentante gli status del progetto.
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
      */
-    @SuppressWarnings({ "null", "static-method" })
+    @SuppressWarnings({ "null" })
     public ArrayList<StatusBean> getStatusList(int projId,
                                                PersonBean user) 
                                         throws WebStorageException {
@@ -1333,7 +1336,7 @@ public class DBWrapper implements Query {
      * @return StatusBean - contenente lo status successivo in ordine di dataInizio
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
      */
-    @SuppressWarnings({ "null", "static-method" })
+    @SuppressWarnings({ "null" })
     public StatusBean getNextStatus(int idProj, 
                                     Date dataInizio,
                                     PersonBean user) 
@@ -1405,7 +1408,7 @@ public class DBWrapper implements Query {
      * @return <code>Vector&lt;AttvitaBean&gt;</code> - ActivityBean rappresentante l'attivit&agrave; del progetto.
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
      */
-    @SuppressWarnings({ "null", "static-method" })
+    @SuppressWarnings({ "null" })
     public Vector<ActivityBean> getActivities(int projId,
                                               PersonBean user) 
                                        throws WebStorageException {
@@ -3310,12 +3313,12 @@ public class DBWrapper implements Query {
             // Ottiene la connessione
             con = pol_manager.getConnection();
             con.setAutoCommit(false);
-            pst = con.prepareStatement(UPDATE_PWD);
+            pst = con.prepareStatement(UPDATE_PWD_BY_PERSON);
             pst.clearParameters();
             pst.setString(++nextParam, passwd);
             pst.setString(++nextParam, salt);
             pst.setNull(++nextParam, Types.NULL);
-            pst.setString(++nextParam,  user.getCognome() + " " + user.getNome());;
+            pst.setString(++nextParam,  user.getCognome() + " " + user.getNome());
             pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate())));
             pst.setTime(++nextParam, Utils.getCurrentTime());
             pst.setInt(++nextParam, user.getId());
