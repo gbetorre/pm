@@ -233,10 +233,10 @@ public class HomePageCommand extends ItemBean implements Command {
                 // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
                 HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
                 user = (PersonBean) ses.getAttribute("usr");
-                Vector<CodeBean> ruoliUsr = user.getRuoli();
                 if (user == null) {
                     throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
                 }
+                Vector<CodeBean> ruoliUsr = user.getRuoli();
                 if (write) {
                     /* **************************************** *
                      *          UPDATE Profile User             *
@@ -257,11 +257,11 @@ public class HomePageCommand extends ItemBean implements Command {
                         for (CodeBean ruoloUsr: ruoliUsr) {
                             if (ruoloUsr.getOrdinale() == 1 || ruoloUsr.getOrdinale() == 2) {
                                 PasswordGenerator passwordGenerator = new PasswordGenerator.PasswordGeneratorBuilder()
-                                        .useDigits(true)
-                                        .useLower(true)
-                                        .useUpper(true)
-                                        .usePunctuation(true)
-                                        .build();
+                                                                                           .useDigits(true)
+                                                                                           .useLower(true)
+                                                                                           .useUpper(true)
+                                                                                           .usePunctuation(true)
+                                                                                           .build();
                                 password = passwordGenerator.generate(8);
                                 int userModified = parser.getIntParameter("pwd-usr");
                                 db.updatePassword(userModified, user, password);
@@ -415,7 +415,7 @@ public class HomePageCommand extends ItemBean implements Command {
         vO.setNome("pol");
         vO.setNomeReale("pcv");
         vO.setLabelWeb("Project Charter");
-        vO.setInformativa("Il Project Charter rappresenta la visione statica del progetto");
+        vO.setInformativa("Il Project Charter rappresenta la &quot;carta d\'identut&agrave;&quot; del progetto");
         vO.setUrl(appName + "/?q=" + vO.getNome() + "&p=" + vO.getNomeReale() + "&id=" + projId);
         vO.setIcona("pc.png");
         vO.setLivello(MAIN_MENU);
