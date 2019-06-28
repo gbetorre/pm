@@ -188,17 +188,19 @@ public class Main extends HttpServlet {
     public static final double SECOND_DIVISOR = 1E9D;
     /**
      * <p>Tempo, in millisecondi, in cui si vuole effettuare il refresh</p>
-     * <p>Dalla tabella precedente, si evince che tra secondi e millisecondi
+     * <p>Dalla documentazione della costante per il divisore del tempo trascorso
+     * per l'esecuzione del thread, si evince che tra secondi e millisecondi
      * ci sono 3 zeri da aggiungere all'esponente, per cui i millisecondi
      * sono separati dai secondi da "soli" 3 ordini di grandezza; 
      * d'altro canto, un secondo &egrave; composto per definizione
      * da 1 x 10<sup>3</sup> ms.</p>
      * <p>Perci&ograve;, per ottenere il tempo schedulato per il refresh
-     * in millisecondi, moltiplichiamo tale tempo in minuti (p.es. 30)
+     * in millisecondi, moltiplichiamo tale tempo in minuti (p.es. 60)
      * per 60 (ottenendo i secondi), ancora per 1000 
-     * (ottenendo quindi i millisecondi).</p>
+     * (ottenendo quindi i millisecondi). Aggiungendo ulteriori fattori
+     * possono essere incrementati i tempi di schedulazione.</p>
      */
-    static final long SCHEDULED_TIME = 1000 * 60 * 60;
+    static final long SCHEDULED_TIME = 1000 * 60 * 60 * 6;
     /** 
      * Timer per schedulare l'aggiornamento dello stato calcolato 
      * per le attivit&agrave;
@@ -219,7 +221,7 @@ public class Main extends HttpServlet {
     static {
         log.info(FOR_NAME + "Blocco statico di inizializzazione. ");
         // Delay: 0 millisecondi
-        // Repeat: ogni 30 minuti
+        // Repeat: ogni 6 ore
         updateTimer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
                 long startTime = System.nanoTime();
@@ -723,6 +725,7 @@ public class Main extends HttpServlet {
      * @return <code>int</code> - il numero di tuple aggiornate dal Model
      * @throws CommandException una it.univr.di.uol.CommandException che incapsula una RuntimeException di qualche genere, che potrebbe essere generata nell'accedere ad attributi o in qualche altro tipo di puntamento a null 
      */
+    @SuppressWarnings("hiding")
     synchronized public static int refresh(DBWrapper db) 
                                     throws CommandException {
         try {
