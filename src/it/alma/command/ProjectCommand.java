@@ -102,6 +102,10 @@ public class ProjectCommand extends ItemBean implements Command {
      */
     private static final String nomeFileReport = "/jsp/projReport.jsp";
     /**
+     * Pagina a cui la command fa riferimento per mostrare il timelines dei workpackage
+     */
+    private static final String nomeFileTimelines = "/jsp/wpTimelines.jsp";
+    /**
      * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutti gli attributi del progetto
      */    
     private static final HashMap<String, String> nomeFile = new HashMap<String, String>();
@@ -146,6 +150,7 @@ public class ProjectCommand extends ItemBean implements Command {
         nomeFile.put(Query.PART_STATUS, "/jsp/projStatus.jsp");
         nomeFile.put(Query.CREDITS, "/jsp/credits.jsp");
         nomeFile.put(Query.PART_REPORT, nomeFileReport);
+        nomeFile.put(Query.PART_TIMELINES, nomeFileTimelines);
         nomeFile.put(Query.PART_PROJECT, this.getPaginaJsp());
     }  
   
