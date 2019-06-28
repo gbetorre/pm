@@ -153,6 +153,10 @@ public interface Query extends Serializable {
      */
     public static final String PART_REPORT                      = "rep";
     /**
+     * <p>Costante per il parametro identificante la pagina del Report di un progetto.</p>
+     */
+    public static final String PART_TIMELINES                      = "tml";
+    /**
      * <p>Costante per il parametro identificante la pagina del grafico di WBS di un progetto.</p>
      */
     public static final String PART_GRAPHIC                     = "gra";
