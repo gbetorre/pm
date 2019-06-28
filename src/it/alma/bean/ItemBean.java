@@ -40,6 +40,9 @@ package it.alma.bean;
 /**
  * <p>Classe che serve a rappresentare oggetti generici (p.es. link in un menu,
  * righe di un log, etc.)</p>
+ * <p>Sovrascrive i metodi necessari a permettere sia l'ordinamento in strutture
+ * vettoriali, sia l'utilizzo di questo tipo di oggetto come chiave di
+ * tabelle hash (dictionaries).</p>
  * 
  * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
  */
