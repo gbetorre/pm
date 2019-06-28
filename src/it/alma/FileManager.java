@@ -79,7 +79,7 @@ import it.alma.exception.WebStorageException;
  * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
  */
 @MultipartConfig(fileSizeThreshold=1024*1024*2, // 2MB
-                 maxFileSize=1024*1024*10,      // 10MB
+                 maxFileSize=1024*1024*50,      // 50MB
                  maxRequestSize=1024*1024*50)   // 50MB
 
 public class FileManager extends HttpServlet {
