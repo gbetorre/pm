@@ -36,7 +36,7 @@
         <hr class="separatore" />
         <h4 class="avvisiTot">&nbsp;Allegati</h4>
         <div class="row">
-          <div class="col-12 substatus avvisiTot marginBoth">
+          <div class="col substatus avvisiTot marginBoth">
           <c:choose>
             <c:when test="${not empty m.allegati}">
               <br />
@@ -84,10 +84,7 @@
         </a>
       </div>
     </c:if>
-    <form id="all-form" method="post" action="file" enctype="multipart/form-data" class="modal">
-      <input type="hidden" id="q" name="q" value="${param['q']}" />
-      <input type="hidden" id="p" name="p" value="${param['p']}" />
-      <input type="hidden" id="y" name="y" value="${param['y']}" />
+    <form id="all-form" method="post" action="file?q=mon&p=ate&y=${param['y']}" enctype="multipart/form-data" class="modal">
       <input type="hidden" id="mon-id" name="mon-id" value="${m.id}" />
       <h3 class="heading">Aggiungi un allegato</h3>
       <br />
