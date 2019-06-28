@@ -1735,6 +1735,29 @@ public interface Query extends Serializable {
             "   ,       oraultimamodifica = ?" +
             "   WHERE id = ?";
     
+    /**
+     * <p>Query per modifica della password dell'utente loggato</p>
+     * <p>I parametri da passare sono: 
+     * <ul>
+     * <li>passwd - password inserita dall'utente</li>
+     * <li>passwdform - password criptata</li>
+     * <li>id - id della persona da cui ricavare l'utente sul quale cambiare la password</li>
+     * </ul>
+     * </p>
+     */
+    public static final String UPDATE_PWD_BY_PERSON =
+            "UPDATE usr" +
+            "   SET     passwdform = ?" +
+            "   ,       salt = ?" +
+            "   ,       passwd = ?" +
+            "   ,       autoreultimamodifica = ?" +
+            "   ,       dataultimamodifica = ?" +
+            "   ,       oraultimamodifica = ?" +
+            "   WHERE id = " +
+            "               (SELECT U.id " +
+            "                   FROM usr U " +
+            "                       INNER JOIN identita I ON U.id = I.id " +
+            "                       WHERE I.id1_persona = ?)";
     
     /**
      * <p>Modifica la tupla della tabella attivit&agrave; identificata dall'id, 
