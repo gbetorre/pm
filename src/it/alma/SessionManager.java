@@ -48,6 +48,7 @@ import java.util.logging.Logger;
 import java.security.SecureRandom;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -486,6 +487,7 @@ public class SessionManager extends HttpServlet {
           return Utils.VOID_STRING;
         }
         byte[] salt = new byte[length];
+        //SecureRandom RAND = new SecureRandom();
         RAND.nextBytes(salt);
         return DatatypeConverter.printBase64Binary(salt);
     }
@@ -507,17 +509,17 @@ public class SessionManager extends HttpServlet {
 
         char[] chars = password.toCharArray();
         byte[] bytes = salt.getBytes();
-        PBEKeySpec spec = new PBEKeySpec(chars, bytes, ITERATIONS, KEY_LENGTH);
+        KeySpec spec = new PBEKeySpec(chars, bytes, ITERATIONS, KEY_LENGTH);
         Arrays.fill(chars, Character.MIN_VALUE);
         try {
           SecretKeyFactory fac = SecretKeyFactory.getInstance(ALGORITHM);
           byte[] securePassword = fac.generateSecret(spec).getEncoded();
           return DatatypeConverter.printBase64Binary(securePassword);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException ex) {
-          System.err.println("Exception encountered in hashPassword()");
+          System.err.println("Exception encountered in hashPassword()" + ex.getMessage() + "\nCause: " + ex.getCause());
           return Utils.VOID_STRING;
         } finally {
-          spec.clearPassword();
+          ((PBEKeySpec) spec).clearPassword();
         }
       }
     
