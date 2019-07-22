@@ -25,6 +25,7 @@
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${grafico}${p.id}">Grafico</a></li>
       <li class="nav-item"><a class="nav-link active tabactive" data-toggle="tab" href="#" id="show_act">Attivit&agrave;</a></li>
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${rep}${p.id}">Report</a></li>
+      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${timelines}${p.id}">Timelines workpackage</a></li>
     </ul>
     <hr class="separatore" />
     <form id="editWbsAct_form" action="#" method="post">
