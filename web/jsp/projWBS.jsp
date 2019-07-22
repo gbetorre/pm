@@ -19,6 +19,7 @@
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${grafico}${p.id}">Grafico</a></li>
       <li class="nav-item"><a class="nav-link" data-toggle="tab" id="show_act">Attivit&agrave;</a></li>
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${rep}${p.id}">Report</a></li>
+      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${timelines}${p.id}">Timelines workpackage</a></li>
     </ul>
     <c:choose>
       <c:when test="${not empty requestScope.wbsHierarchy}">
