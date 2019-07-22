@@ -383,6 +383,12 @@ public class ProjectCommand extends ItemBean implements Command {
                     else if (part.equals(Query.PART_PROJECT_CHARTER_RESOURCE)) {
                         vSkills = db.getSkills(idPrj, user);
                     }
+                    /* ************************************************************* *
+                     *         Implementazione per grafico timelines di wp           *
+                     * ************************************************************* */
+                    else if (part.equals(Query.PART_TIMELINES)) {
+                        workPackagesOfProj = WbsCommand.retrieveWorkPackages(idPrj, db, user);
+                    }
                 }                
                 fileJspT = nomeFile.get(part);
             } else {
