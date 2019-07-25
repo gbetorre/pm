@@ -1284,9 +1284,10 @@ public interface Query extends Serializable {
      */
     public static final String GET_ACTIVITIES_COUNT_BY_WBS =
             "SELECT count(*)" +
-            "   FROM attivita" +
+            "   FROM attivita A" +
             "   WHERE id_progetto = ?" +
-            "     AND id_wbs = ?";
+            "     AND id_wbs = ?" +
+            "     AND A.id_stato <> " + ELIMINATA;
     
     /**
      * <p>Estrae l'attivit&agrave; specificata tramite id 
