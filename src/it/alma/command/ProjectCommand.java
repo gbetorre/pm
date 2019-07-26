@@ -104,7 +104,7 @@ public class ProjectCommand extends ItemBean implements Command {
     /**
      * Pagina a cui la command fa riferimento per mostrare il timelines dei workpackage
      */
-    private static final String nomeFileTimelines = "/jsp/wpTimelines.jsp";
+    private static final String nomeFileTimelines = "/jsp/wbsTimelines.jsp";
     /**
      * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutti gli attributi del progetto
      */    
