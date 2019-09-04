@@ -36,8 +36,11 @@
 
 package it.alma.command;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Vector;
@@ -46,6 +49,7 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import com.oreilly.servlet.ParameterNotFoundException;
 import com.oreilly.servlet.ParameterParser;
 
 import it.alma.DBWrapper;
@@ -111,6 +115,12 @@ public class HomePageCommand extends ItemBean implements Command {
      * Pagina a cui la command reindirizza per mostrare la password resettata
      */
     private static final String nomeFileReset = "/jsp/profileReset.jsp";
+    /**
+     * Pagina a cui la command reindirizza per mostrare i permessi 
+     * di un utente scelto a piacere sui vari progetti sui quali &egrave;
+     * eventualmente configurato
+     */
+    private static final String nomeFileGrant = "/jsp/profileRoles.jsp";
     /**
      * DataBound.
      */
@@ -193,28 +203,36 @@ public class HomePageCommand extends ItemBean implements Command {
      */
     public void execute(HttpServletRequest req) 
                  throws CommandException {
-        // Parser per la gestione assistita dei parametri di input
-        ParameterParser parser = new ParameterParser(req);
+        /* ******************************************************************** *
+         *                    Dichiarazioni e inizializzazioni                  *
+         * ******************************************************************** */
         // Utente loggato
         PersonBean user = null;
-        // Recupera o inizializza 'tipo pagina'   
-        String part = parser.getStringParameter("p", "-");
-        // Flag di scrittura
-        boolean write = (boolean) req.getAttribute("w");
+        // Utente esaminato
+        PersonBean guest = null;
+        // Variabile che conterrà la password autogenerata
+        StringBuffer password = new StringBuffer();
+        // Flag di reset password  
+        boolean userCanReset = false;
+        // Elenco degli utenti
+        ArrayList<PersonBean> userList = null;
+        // Dichiara l'elenco dei progetti estratti dell'utente, partendo dal ruolo
+        Vector<ItemBean> projectsByRole = new Vector<ItemBean>();
+        // Dichiara l'elenco degli accessi degli utenti, da mostrare solo a root
+        Vector<StatusBean> accessList = new Vector<StatusBean>();
         // Dichiara la pagina a cui reindirizzare
         String fileJspT = null;
-        // Dichiara l'elenco dei progetti estratti dell'utente, partendo dal ruolo
-        Vector<ItemBean> projectsByRole = null;
-        // Dichiara l'elenco degli accessi degli utenti, da mostrare solo a root
-        Vector<StatusBean> accessList = null;
-        // Recupera o inizializza 'tipo pagina'   
-        String whichPw = parser.getStringParameter("pwd", "-");
-        // Recupera o inizializza 'tipo pagina'   
-        boolean userCanReset = false;
-        ArrayList<PersonBean> userList = null;
-        String password = null;
-        // Variabile contenente l'indirizzo alla pagina di reindirizzamento
-        String redirect = null;
+        /* ******************************************************************** *
+         *                 Recupero dei parametri di navigazione                *
+         * ******************************************************************** */
+        // Parser per la gestione assistita dei parametri di input
+        ParameterParser parser = new ParameterParser(req);
+        // Recupera o inizializza 'tipo pagina'
+        String part = parser.getStringParameter("p", Utils.DASH);
+        // Identificativo della persona di cui mostrare i progetti e i ruoli
+        int idGuest = parser.getIntParameter("idp", Utils.DEFAULT_ID);
+        // Flag di scrittura
+        boolean write = (boolean) req.getAttribute("w");
         /* ******************************************************************** *
          *      Instanzia nuova classe WebStorage per il recupero dei dati      *
          * ******************************************************************** */
@@ -223,83 +241,47 @@ public class HomePageCommand extends ItemBean implements Command {
         } catch (WebStorageException wse) {
             throw new CommandException(FOR_NAME + "Non e\' disponibile un collegamento al database\n." + wse.getMessage(), wse);
         }
-        // NON controlla se l'utente è già loggato perché questa command deve rispondere sempre
-        /* *************************************************** *
-         *                 Corpo del programma                 *
-         * *************************************************** */
-        // Selezione profilo utente
+        // NON controlla qui se l'utente è già loggato perché questa command deve rispondere anche PRIMA del login
+        /* ******************************************************************** *
+         *             Rami in cui occorre che l'utente sia loggato             *
+         * ******************************************************************** */
         try {
-            if (part.equals(Query.PART_USR)) {
-                // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
-                HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
-                user = (PersonBean) ses.getAttribute("usr");
-                if (user == null) {
-                    throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
+            if (part.equals(Query.PART_USR) || part.equals(Query.PART_PERMISSION)) {
+                // In questo punto la sessione deve esistere e l'utente deve esserne loggato 
+                try {
+                    user = getLoggedUser(req);
+                } catch (CommandException ce) {
+                    LOG.severe("Problema a livello di autenticazione: " + ce);
+                    throw (ce);
                 }
+                // Recupera i ruoli dell'utente
                 Vector<CodeBean> ruoliUsr = user.getRuoli();
-                if (write) {
-                    /* **************************************** *
-                     *          UPDATE Profile User             *
-                     * **************************************** */
-                    if (whichPw.equals("-")) {
-                        String passwd = parser.getStringParameter("txtPwd", Utils.VOID_STRING);
-                        String passwdConf = parser.getStringParameter("txtConfPwd", Utils.VOID_STRING);
-                        if (passwd != Utils.VOID_STRING && passwdConf != Utils.VOID_STRING && passwd.equals(passwdConf)) {
-                            String salt = SessionManager.generateSalt(SessionManager.SALT_LENGTH);
-                            String encryptedPassword = SessionManager.hashPassword(passwd, salt);
-                            db.updatePassword(user, encryptedPassword, salt);
-                        }
-                    }
-                    /* **************************************** *
-                     *          RESET password user             *
-                     * **************************************** */
-                    else {
-                        for (CodeBean ruoloUsr: ruoliUsr) {
-                            if (ruoloUsr.getOrdinale() == 1 || ruoloUsr.getOrdinale() == 2) {
-                                PasswordGenerator passwordGenerator = new PasswordGenerator.PasswordGeneratorBuilder()
-                                                                                           .useDigits(true)
-                                                                                           .useLower(true)
-                                                                                           .useUpper(true)
-                                                                                           .usePunctuation(true)
-                                                                                           .build();
-                                password = passwordGenerator.generate(8);
-                                int userModified = parser.getIntParameter("pwd-usr");
-                                db.updatePassword(userModified, user, password);
-                            }
-                        }
+                // Se l'utente è di tipo PMO carica gli utenti su cui può agire
+                for (CodeBean ruoloUsr : ruoliUsr) {
+                    if (ruoloUsr.getOrdinale() == 1 || ruoloUsr.getOrdinale() == 2) {
+                        userCanReset = true;
+                        userList = db.getUsrByGrp(user);
+                        break;
                     }
                 }
-                /* **************************************************** *
-                 *                  SELECT Profile Part                 *
-                 * **************************************************** */
-                if (whichPw.equals("-")) {
-                    projectsByRole = db.getProjectsByRole(user.getId());
-                    accessList = db.getAccessLog(user.getId());
-                    for (CodeBean ruoloUsr: ruoliUsr) {
-                        if (ruoloUsr.getOrdinale() == 1) {
-                            userCanReset = true;
-                            userList = db.getUsrByGrp(user);
-                            break;
-                        } else if (ruoloUsr.getOrdinale() == 2) {
-                            userCanReset = true;
-                            userList = db.getUsrByGrp(user);
-                        }
-                    }
-                    fileJspT = nomeFileProfilo;
-                } else {
-                    fileJspT = nomeFileReset;
+                /* **************************************** *
+                 *          Ramo gestione utente            *
+                 * **************************************** */
+                if (part.equals(Query.PART_USR)) { 
+                    fileJspT = requestByUsr(parser, ruoliUsr, projectsByRole, accessList, user, password, write);
                 }
-            } else {
+                /* **************************************** *
+                 *         Ramo gestione permessi           *
+                 * **************************************** */
+                else if (part.equals(Query.PART_PERMISSION)) {
+                    guest = db.getUser(idGuest);
+                    fileJspT = requestByPerson(parser, userCanReset, projectsByRole, user, guest, part, write);
+                }
+            }
+            // Login page
+            else {
                 fileJspT = nomeFileElenco;
             }
-        } catch (AttributoNonValorizzatoException anve) {
-            String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio del bean.\n";
-            LOG.severe(msg);
-            throw new CommandException(msg + anve.getMessage(), anve);
-        } catch (WebStorageException wse) {
-            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di valori dal db.\n";
-            LOG.severe(msg);
-            throw new CommandException(msg + wse.getMessage(), wse);
         } catch (IllegalStateException ise) {
             String msg = FOR_NAME + "Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n";
             LOG.severe(msg);
@@ -325,7 +307,7 @@ public class HomePageCommand extends ItemBean implements Command {
         // Imposta nella request il permesso di reset password dell'utente loggato
         req.setAttribute("resetPwd", userCanReset);
         // Imposta nella request la password modificata in chiaro
-        if (password != null) {
+        if (password.length() > Query.NOTHING) {
             req.setAttribute("password", password);
         }
         // Imposta nella request la lista di utenti per ogni PMO, nel caso in cui siano valorizzati
@@ -333,18 +315,314 @@ public class HomePageCommand extends ItemBean implements Command {
             req.setAttribute("userList", userList);
         }
         // Imposta nella request i progetti dell'utente tramite il ruolo, nel caso in cui siano valorizzati
-        if (projectsByRole != null) {
+        if (!projectsByRole.isEmpty()) {
             req.setAttribute("projectsByRole", projectsByRole);
         }
         // Imposta nella request il log degli accessi se l'utente ne ha i privilegi
-        if (accessList != null) {   // Se l'utente non ne ha il privilegio, la lista è nulla
+        if (!accessList.isEmpty()) {   // Se l'utente non ne ha il privilegio, la lista è vuota
             req.setAttribute("accesslog", accessList);
         }
-        if (redirect != null) {
-            req.setAttribute("redirect", redirect);
+        if (guest != null) {
+            req.setAttribute("guest", guest);
         }
         // Imposta la Pagina JSP di forwarding
         req.setAttribute("fileJsp", fileJspT);
+    }
+    
+    
+    /* ************************************************************************ *
+     *                              Subroutines                                 *
+     * ************************************************************************ */
+    
+    /**
+     * <p>Valorizza per riferimento (ByRef)&ast; alcuni oggetti passati come argomento,
+     * che a loro volta verranno passati come attributi in HttpServletRequest.<p>
+     * <p>Inoltre, in determinate condizioni, effettua un aggiornamento della
+     * password.</p>
+     * <p>&ast;&nbsp;<small>In Java esiste in linea di principio solo il passaggio per valore 
+     * (ByVal) per&ograve; in realt&agrave; questo &egrave; completamente
+     * vero solo per i tipi primitivi; quando si passa un oggetto, infatti,
+     * non si sta passando il valore di una copia dell'oggetto 
+     * ma un puntatore (un riferimento) all'oggetto stesso; 
+     * alcuni dicono che il passaggio avviene sempre per valore perch&eacute; 
+     * quando si passa un oggetto, in realt&agrave; tramite il riferimento 
+     * l'oggetto &egrave; modificabile, ma quello che viene passato &egrave; 
+     * &quot;il valore del riferimento&quot; (cio&egrave; in pratica
+     * il puntatore), che a sua volta non pu&ograve; 
+     * essere modificato.<br /> 
+     * Comunque, quello che a noi interessa in questo punto del codice 
+     * &egrave; ricevere degli oggetti come argomenti che si possono 
+     * arricchire con le informazioni ricavate nel contesto 
+     * del presente metodo.<br /> 
+     * &Egrave; anche chiaro che bisogna stare attenti ad aggiungere 
+     * informazione all'oggetto passato come argomento e a non a una nuova
+     * copia dell'oggetto, che in questo senso non avrebbe pi&uacute; nulla
+     * a che fare con l'argomento. Cio&egrave; in pratica, se si vuol usare 
+     * il riferimento per aggiungere informazione, bisogna stare attenti a
+     * non dereferenziare mai il parametro facendolo puntare 
+     * a un nuovo oggetto, altrimenti il passaggio per riferimento 
+     * non funzioner&agrave;. P.es., se 
+     * dato il parametro <code>Vector<ItemBean> projectsByRole</code> 
+     * scrivessi:
+     * <pre>projectsByRole = db.getProjectsByRole(user.getId());</pre>
+     * de-referenzierei il parametro, cio&egrave; &egrave; come se scrivessi:
+     * <pre>projectsByRole = new Vector&lt;ItemBean&gt;();</pre>
+     * ed &egrave; chiaro che in questo caso la modifica per riferimento
+     * non pu&ograve; avvenire perch&egrave; il codice sta agendo su una
+     * nuova istanza dell'oggetto, non sull'oggetto puntato dal riferimento
+     * passato come argomento.<br />
+     * Per contro, quindi, se voglio nel metodo aggiungere informazione
+     * agli oggetti puntati dai riferimenti passati come argomenti,
+     * devo procedere sempre aggiungendo informazione all'oggetto referenziato:
+     * <pre>projectsByRole.addAll(db.getProjectsByRole(user.getId()));</pre>
+     * <cite>This works fine!</cite></small></p>
+     * 
+     * @param parser    oggetto ParameterParser contente tutti i parametri passati sulla HttpServletRequest
+     * @param usrRoles  elenco dei ruoli dell'utente; scorrendolo si verifica se c'e' il ruolo di gestore
+     * @param projectsByRole  elenco dei progetti dell'utente loggato e relativi ruoli (ByRef)
+     * @param accessList  log degli accessi all'applicazione (ByRef)
+     * @param user      utente loggato
+     * @param password  nuova password (ByRef)
+     * @param write     flag di scrittura: true se la chiamata &egrave; di tipo POST, false se la chiamata &egrave; di tipo GET
+     * @return  <code>String</code> - valore della pagina di forward
+     * @throws CommandException se si verifica un problema SQL, nell'accesso a un campo obbligatorio non valorizzato, nell'algoritmo di generazione password e altri  
+     */
+    private static String requestByUsr(ParameterParser parser, 
+                                       Vector<CodeBean> usrRoles,
+                                       Vector<ItemBean> projectsByRole,
+                                       Vector<StatusBean> accessList,
+                                       PersonBean user,
+                                       StringBuffer password,
+                                       boolean write) 
+                                throws CommandException {
+        // Recupera o inizializza il valore della password  
+        String whichPw = parser.getStringParameter("pwd", Utils.DASH);
+        // Pagina per il forward
+        String page = null;
+        try {
+            /* **************************************** *
+             *                 POST on usr              *
+             * **************************************** */
+            if (write) {
+                /* **************************************** *
+                 *          UPDATE Profile User             *
+                 * **************************************** */
+                if (whichPw.equals(Utils.DASH)) {
+                    String passwd = parser.getStringParameter("txtPwd", Utils.VOID_STRING);
+                    String passwdConf = parser.getStringParameter("txtConfPwd", Utils.VOID_STRING);
+                    if (passwd != Utils.VOID_STRING && passwdConf != Utils.VOID_STRING && passwd.equals(passwdConf)) {
+                        String salt = SessionManager.generateSalt(SessionManager.SALT_LENGTH);
+                        String encryptedPassword = SessionManager.hashPassword(passwd, salt);
+                        db.updatePassword(user, encryptedPassword, salt);
+                    }
+                }
+                /* **************************************** *
+                 *          RESET password user             *
+                 * **************************************** */
+                else {
+                    for (CodeBean ruoloUsr : usrRoles) {
+                        if (ruoloUsr.getOrdinale() == 1 || ruoloUsr.getOrdinale() == 2) {
+                            PasswordGenerator passwordGenerator = new PasswordGenerator.PasswordGeneratorBuilder()
+                                                                                       .useDigits(true)
+                                                                                       .useLower(true)
+                                                                                       .useUpper(true)
+                                                                                       .usePunctuation(true)
+                                                                                       .build();
+                            String generatedPassword = passwordGenerator.generate(8);
+                            password.append(generatedPassword);
+                            int userModified = parser.getIntParameter("pwd-usr");
+                            db.updatePassword(userModified, user, generatedPassword);
+                        }
+                    }
+                }
+            }
+            /* **************************************************** *
+             *                       GET on usr                     *
+             * **************************************************** */
+            if (whichPw.equals(Utils.DASH)) {
+                projectsByRole.addAll(db.getProjectsByRole(user.getId()));
+                accessList.addAll(db.getAccessLog(user.getId()));
+                page = nomeFileProfilo;
+            } else {
+                page = nomeFileReset;
+            }
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio del bean.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + anve.getMessage(), anve);
+        } catch (WebStorageException wse) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di valori dal db.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + wse.getMessage(), wse);
+        } catch (NumberFormatException nfe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel formato di un valore numerico.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + nfe.getMessage(), nfe);
+        } catch (ParameterNotFoundException pnfe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel valore di un parametro.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + pnfe.getMessage(), pnfe);
+        } catch (NoSuchAlgorithmException nsae) {
+            String msg = FOR_NAME + "Si e\' verificato un problema in un\'assunzione fatta nel codice.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + nsae.getMessage(), nsae);
+        } catch (InvalidKeySpecException ikse) {
+            String msg = FOR_NAME + "Chiave specificata non valida!\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + ikse.getMessage(), ikse);
+        }
+        return page;
+    }
+    
+    
+    /**
+     * <p>Restituisce la pagina di forward a cui indirizzare.</p>
+     * <p>Valorizza per riferimento la lista dei progetti con relativi
+     * ruoli ricoperti dall'utente &quot;guest&quot;, che viene passato
+     * come parametro e, in caso di chiamata POST (flag &#39;write&#39; a 
+     * <code>true</code>) aggiorna i ruoli nei relativi progetti in base a
+     * quando scelto dall'utente tramite la form che ha inviato la richiesta.</p>
+     * <p><code><strong>Nota sull'implementazione:</strong> 
+     * Se nei vari ruoli dell'utente se ne trova almeno uno come PMO
+     * ci&ograve; &egrave; sufficiente per permettergli di resettare i diritti
+     * degli altri utenti. Questo algoritmo potenzialmente
+     * potrebbe soffrire di incompletezza; infatti, se un
+     * utente &egrave; PMODIP presso un dipartimento, qualora
+     * fosse anche, poniamo, TL presso un altro dipartimento,
+     * questo tipo di implementazione gli consentirebbe
+     * di cambiare i diritti non solo degli utenti
+     * dei progetti del dipartimento in cui egli &egrave; PMODIP,
+     * ma anche degli utenti dei progetti del dipartimento in cui egli &egrave;  
+     * TL e non PMO, cosa che non dovrebbe avvenire. 
+     * In pratica, per implementare un algoritmo meno
+     * incompleto, bisognerebbe controllare progetto
+     * per progetto se l'utente che sta cambiando i diritti
+     * &egrave; PMODIP sul dipartimento a cui il progetto
+     * afferisce; se cos&iacute; non &egrave;, non dovrebbe essere 
+     * possibile la modifica dei diritti. Tuttavia, 
+     * siccome il ruolo di PMODIP &egrave; un ruolo amministrativo
+     * che in linea generale, e certamente secondo le
+     * decisioni assunte al momento da questo ateneo,
+     * non collider&agrave; mai con un ruolo di tipo accademico
+     * (TL, User...) si implementa effettuando il semplice
+     * controllo che tra i potenziali vari ruoli dell'utente
+     * ci sia almeno quello di PMODIP.</code></p>
+     * 
+     * @param parser    oggetto ParameterParser contente tutti i parametri passati sulla HttpServletRequest
+     * @param userCanReset flag specificante se l'utente che deve effettuare l'operazione di cambio dei diritti e' almeno PMO di dipartimento
+     * @param projectsByRole   elenco dei progetti dell'utente loggato e relativi ruoli (ByRef)
+     * @param user  utente loggato
+     * @param guest utente a cui user vuol cambiare i permessi sui projectsByRole
+     * @param part  stringa identificante la parte dell'applicazione in cui l'utente vuol gestire i ruoli di altri utenti su specifici progetti
+     * @param write flag di scrittura: true se la chiamata &egrave; di tipo POST, false se la chiamata &egrave; di tipo GET
+     * @return  <code>String</code> - valore della pagina di forward
+     * @throws CommandException se si verifica un problema SQL, nell'accesso a un campo obbligatorio non valorizzato, nell'algoritmo di generazione password e altri
+     */
+    private static String requestByPerson(ParameterParser parser, 
+                                          boolean userCanReset,
+                                          Vector<ItemBean> projectsByRole,
+                                          PersonBean user,
+                                          PersonBean guest,
+                                          String part,
+                                          boolean write) 
+                                   throws CommandException {
+        // Pagina per il forward, da restituire
+        String page = null;
+        try {
+            /* **************************************************** *
+             *                SELECT User Permission                *
+             * **************************************************** */
+            int idGuest = guest.getId();
+            projectsByRole.addAll(db.getProjectsByRole(guest.getId()));
+            if (write) {
+                // Creazione della tabella che conterrà i valori dei parametri passati dalle form
+                HashMap<Integer, String> params = new HashMap<Integer, String>();
+                /* **************************************** *
+                 *         UPDATE User Permission           *
+                 * **************************************** */
+                if (userCanReset) {
+                    /* v. Nota sull'implementazione */   
+                    if (idGuest > Query.NOTHING) {
+                        int dept = loadParams(part, parser, params, projectsByRole);
+                        // Aggiorna i ruoli
+                        db.updatePermissions(user, guest, dept, params);
+                        // Aggiorna il ruolo utente nei vari suoi progetti
+                        projectsByRole.removeAllElements();
+                        projectsByRole.addAll(db.getProjectsByRole(guest.getId()));
+                        // Pagina di forward
+                        page = nomeFileGrant;
+                    }
+                }
+            } else {
+                // Ramo al momento non necessario, ma codice predisposto per eventuale comportamento differenziato
+                page = nomeFileGrant;
+            }
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio del bean.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + anve.getMessage(), anve);
+        } catch (WebStorageException wse) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di valori dal db.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + wse.getMessage(), wse);
+        } catch (NumberFormatException nfe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel formato di un valore numerico.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + nfe.getMessage(), nfe);
+        } catch (ClassCastException cce) {
+            String msg = FOR_NAME + "Si e\' verificato un problema in una conversione di tipo.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + cce.getMessage(), cce);
+        } catch (RuntimeException re) {
+            String msg = FOR_NAME + "Si e\' verificato un problema in un\'assunzione fatta nel codice.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + re.getMessage(), re);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Chiave specificata non valida!\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+        return page;
+    }
+    
+    
+    /**
+     * <p>Valorizza per riferimento una mappa contenente i valori relativi  
+     * ad una attivit&agrave; eventualmente da aggiornare.</p> 
+     * 
+     * @param part la sezione del sito che si vuole aggiornare
+     * @param parser oggetto per la gestione assistita dei parametri di input, gia' pronto all'uso
+     * @param formParams mappa da valorizzare per riferimento (ByRef)
+     * @param projects struttura vettoriale contenente la lista dei progetti recuperati in base all'utente
+     * @return <code>int</code> - l'identificativo del dipartimento associato all'ultimo progetto della lista di progetti passata come parametro
+     * @throws CommandException se si verifica un problema nella gestione degli oggetti data o in qualche tipo di puntamento
+     */
+    private static int loadParams(String part, 
+                                   ParameterParser parser,
+                                   HashMap<Integer, String> formParams,
+                                   Vector<ItemBean> projects)
+                            throws CommandException {
+        // Identificativo (ultimo) dipartimento da restituire
+        int idLastDip = Query.NOTHING;
+        /* **************************************************** *
+         *        Ramo di UPDATE del ruolo su progetto          *
+         * **************************************************** */
+        if (part.equalsIgnoreCase(Query.PART_PERMISSION)) {
+            // Recupero e caricamento parametri di cambia permessi
+            for (ItemBean pr : projects) {
+                // Nome della dropdownlist
+                String key = pr.getId() + "-rol";
+                // Valore della dropdownlist
+                String value = parser.getStringParameter(key, Utils.VOID_STRING);
+                // Chiave della tabella hash da passare al dbWrapper
+                Integer mapKey = new Integer(pr.getId());
+                // Aggiunta alla tabella
+                formParams.put(mapKey, value);
+                // Scrittura distruttiva id (corrente) dipartimento
+                idLastDip = pr.getLivello();
+            }
+        }
+        return idLastDip;
     }
     
     
@@ -367,11 +645,15 @@ public class HomePageCommand extends ItemBean implements Command {
             // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
             HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
             if (ses == null) {
-                throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
+                String msg = FOR_NAME + "Attenzione: controllare di essere autenticati nell\'applicazione!\n";
+                LOG.severe(msg + "Sessione non trovata!\n");
+                throw new CommandException();
             }
             user = (PersonBean) ses.getAttribute("usr");
             if (user == null) {
-                throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
+                String msg = FOR_NAME + "Attenzione: controllare di essere autenticati nell\'applicazione!\n";
+                LOG.severe(msg + "Attributo \'utente\' non trovato in sessione!\n");
+                throw new CommandException(msg);
             }
             return user;
         } catch (IllegalStateException ise) {
@@ -394,6 +676,10 @@ public class HomePageCommand extends ItemBean implements Command {
     }
     
     
+    /* ************************************************************************ *
+     *                      Metodi di generazione dei MENU                      *
+     * ************************************************************************ */
+    
     /**
      * <p>Restituisce una struttura vettoriale <cite>(by the way: 
      * with insertion order)</cite> contenente le voci principali
@@ -415,7 +701,7 @@ public class HomePageCommand extends ItemBean implements Command {
         vO.setNome("pol");
         vO.setNomeReale("pcv");
         vO.setLabelWeb("Project Charter");
-        vO.setInformativa("Il Project Charter rappresenta la &quot;carta d\'identut&agrave;&quot; del progetto");
+        vO.setInformativa("Il Project Charter rappresenta la &quot;carta d\'identit&agrave;&quot; del progetto");
         vO.setUrl(appName + "/?q=" + vO.getNome() + "&p=" + vO.getNomeReale() + "&id=" + projId);
         vO.setIcona("pc.png");
         vO.setLivello(MAIN_MENU);
@@ -712,7 +998,7 @@ public class HomePageCommand extends ItemBean implements Command {
     /**
      * <p>Restituisce una String che rappresenta un url da impostare in una
      * voce di menu, il cui padre viene passato come argomento, come 
-     * analogamente la web applicazion seguente la root ed un eventuale
+     * analogamente la web application seguente la root ed un eventuale
      * parametro aggiuntivo.</p>
      * 
      * @param appName nome della web application, seguente la root, per la corretta generazione dell'url
