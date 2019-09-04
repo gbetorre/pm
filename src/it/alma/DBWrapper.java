@@ -46,7 +46,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -394,6 +396,95 @@ public class DBWrapper implements Query {
     
     
     /**
+     * <p>Restituisce un PersonBean dato l'id di un'utenza associata
+     * alla persona restituita.</p>
+     * <p><code><strong>Nota sull'implementazione:</strong>
+     * per permettere all'applicazione la libert&agrave; di associare
+     * eventualmente pi&uacute; utenze alla stessa persona, la relazione
+     * &egrave; stata progettata non con una cardinalit&agrave; uno a uno 
+     * ma con una cardinalit&agrave; uno a molti 
+     * (pi&ugrave; utenze possono corrispondere a una data persona mentre
+     * a un'utenza &egrave; associata una sola persona.
+     * In altri termini, viene definita la funzione f(u) definita
+     * dal dominio = {insieme delle utenze} 
+     * al codominio = {insieme delle persone} &ndash; 
+     * una funzione ovviamente non iniettiva, e quindi non bijettiva).<br />
+     * Se la relazione tra utente e persona non fosse stata disegnata cos&iacute;,
+     * se cio&egrave; fosse stata fissata in una cardinalit&agrave; uno a uno,
+     * non sarebbe stato necessario avere una relazione di appoggio 
+     * tra utente e persona, ma sarebbe stato sufficiente inserire 
+     * l'identificativo della persona come chiave esterna della tabella
+     * dell'utente (se non, addirittura, l'identificativo dell'utente come
+     * attributo della persona).<br /> 
+     * Tuttavia, come anzidetto, l'applicazione consente 
+     * in potenza l'esistenza di pi&uacute; utenze per una sola persona; 
+     * si accorda con questi gradi di libert&agrave;
+     * la mancanza di vincoli sulla relazione <strong>identita</strong>. 
+     * Tuttavia, se &egrave; vero che a una data persona possono corrispondere 
+     * potenzialmente pi&uacute; utenze, a una sola utenza dovrebbe corrispondere 
+     * una e una sola persona (altrimenti, peraltro, quella tra 
+     * utenza e persona non potrebbe essere stata descritta come una funzione); 
+     * di qui il senso dell'implementazione, 
+     * che non effettua un ciclo sul resultset ma una sua lettura
+     * puntuale.</code></p>
+     * 
+     * @param idUsr identificativo dell'utenza della persona
+     * @return <code>PersonBean</code> - PersonBean rappresentante l'utente loggato
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di un attributo obbligatorio, nell'accesso al db o in qualche tipo di puntamento 
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public PersonBean getUser(int idUsr)
+                       throws WebStorageException {
+        ResultSet rs, rs1 = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        PersonBean usr = null;
+        int nextInt = 0;
+        Vector<CodeBean> vRuoli = new Vector<CodeBean>();
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_PERSON_BY_USER_ID);
+            pst.clearParameters();
+            pst.setInt(++nextInt, idUsr);
+            rs = pst.executeQuery();
+            if (rs.next()) {
+                usr = new PersonBean();
+                BeanUtil.populate(usr, rs);
+            }
+            pst = con.prepareStatement(GET_RUOLIPERSONA);
+            pst.clearParameters();
+            pst.setInt(1, usr.getId());
+            rs1 = pst.executeQuery();
+            while(rs1.next()) {
+                CodeBean ruolo = new CodeBean();
+                BeanUtil.populate(ruolo, rs1);
+                vRuoli.add(ruolo);
+            }
+            usr.setRuoli(vRuoli);
+            return usr;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query della persona.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } catch (AttributoNonValorizzatoException sqle) {
+            String msg = FOR_NAME + "Oggetto id della persona non valorizzato; problema nella query della persona.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
      * <p>Restituisce un Vector&lt;PersonBean&gt; contenente tutti
      * gli utenti che appartengono ad un certo gruppo.</p>
      * <p>Il gruppo si riferisce al dipartimento di appartenenza.
@@ -405,7 +496,7 @@ public class DBWrapper implements Query {
      * @throws WebStorageException se si verifica un problema SQL o in qualsiasi puntamento
      */
     @SuppressWarnings({ "null", "static-method" })
-    public ArrayList<PersonBean> getUsrByGrp (PersonBean admin) 
+    public ArrayList<PersonBean> getUsrByGrp(PersonBean admin) 
                                        throws WebStorageException{
         ResultSet rs, rs1 = null;
         Connection con = null;
@@ -428,7 +519,7 @@ public class DBWrapper implements Query {
                 pst1.clearParameters();
                 pst1.setString(++nextInt1, "%" + depart.substring(depart.lastIndexOf("-"), depart.length()));
                 pst1.setInt(++nextInt1, 0);
-                if(admin.isPmoAteneo()) {
+                if (admin.isPmoAteneo()) {
                     nextInt1 = 0;
                     pst1.setString(++nextInt1, Utils.VOID_STRING);
                     pst1.setInt(++nextInt1, -1);
@@ -462,6 +553,7 @@ public class DBWrapper implements Query {
             }
         }
     }
+    
     
     /**
      * <p>Restituisce un Vector&lt;ItemBean&gt; contenente ciascuno
@@ -898,7 +990,7 @@ public class DBWrapper implements Query {
      * <p>Restituisce un ProjectBean rappresentante un progetto dell'utente loggato.</p>
      * 
      * @param projectId identificativo del progetto che si vuol recuperare
-     * @param userId    identificativo della persona che si vuol recuperare
+     * @param userId    identificativo della persona che deve avere un qualche ruolo sul progetto
      * @return <code>ProjectBean</code> - ProjectBean rappresentante il progetto selezionato
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
@@ -1745,7 +1837,7 @@ public class DBWrapper implements Query {
      * @return <code>Vector&lt;AttivitaBean&gt;</code> - Vector contenente la lista delle attivit&agrave; della WBS
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
      */
-    @SuppressWarnings({ "null", "static-method" })
+    @SuppressWarnings({ "null" })
     public Vector<ActivityBean> getActivitiesByWbs(int idWbs,
                                                    int idProj, 
                                                    PersonBean user)
@@ -1814,11 +1906,11 @@ public class DBWrapper implements Query {
      * @return <code>int</code> - intero che rappresenta il numero di istanze di attivit&agrave; sottostanti alla wbs data
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento
      */
-    @SuppressWarnings({ "static-method", "null" })
-    public int getActivitiesAmountByWbs (int idProj, 
-                                         int idWbs, 
-                                         PersonBean user) 
-                                  throws WebStorageException {
+    @SuppressWarnings({ "null" })
+    public int getActivitiesAmountByWbs(int idProj, 
+                                        int idWbs, 
+                                        PersonBean user) 
+                                 throws WebStorageException {
         Connection con = null;
         PreparedStatement pst = null;
         ResultSet rs = null;
@@ -1873,7 +1965,7 @@ public class DBWrapper implements Query {
      * @return Vector$lt;ActivityBean&gt; - contenente la lista di attivit&agrave; richiesta
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento
      */
-    @SuppressWarnings({ "null", "static-method" })
+    @SuppressWarnings({ "null" })
     public Vector<ActivityBean> getActivitiesByRange(int idProj,
                                                      PersonBean user,
                                                      Date dataInizio, 
@@ -1941,7 +2033,7 @@ public class DBWrapper implements Query {
      * @return Vector$lt;ActivityBean&gt; - contenente la lista di attivit&agrave; richiesta
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento
      */
-    @SuppressWarnings({ "null", "static-method" })
+    @SuppressWarnings({ "null" })
     public Vector<ActivityBean> getActivitiesByDate(int idProj,
                                                     PersonBean user,
                                                     Date dataInizio, 
@@ -2008,7 +2100,7 @@ public class DBWrapper implements Query {
      * @return <code>Vector&lt;AttvitaBean&gt;</code> - ActivityBean rappresentante l'attivit&agrave; del progetto di identificativo passato come argomento.
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
      */
-    @SuppressWarnings({ "null", "static-method" })
+    @SuppressWarnings({ "null" })
     public ActivityBean getActivity(int projId,
                                     int activityId,
                                     PersonBean user) 
@@ -2095,7 +2187,7 @@ public class DBWrapper implements Query {
      * @return <code>Vector&lt;SkillBean&gt;</code> - SkillBean rappresentante le competenze del progetto.
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
-    @SuppressWarnings({ "null", "static-method" })
+    @SuppressWarnings({ "null" })
     public Vector<SkillBean> getSkills(int projId,
                                        PersonBean user)
                                 throws WebStorageException {
@@ -2153,7 +2245,7 @@ public class DBWrapper implements Query {
      * @return <code>Vector&lt;RiskBean&gt;</code> - RiskBean rappresentante i rischi del progetto.
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
-    @SuppressWarnings({ "null", "static-method" })
+    @SuppressWarnings({ "null" })
     public Vector<RiskBean> getRisks(int projId, 
                                      PersonBean user)
                               throws WebStorageException {
@@ -2212,7 +2304,7 @@ public class DBWrapper implements Query {
      * @return WbsBean - bean contenente la wbs richiesta
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
-    @SuppressWarnings({ "null", "static-method" })
+    @SuppressWarnings({ "null" })
     public WbsBean getWbsInstance(int idProj, 
                                   int idWbs, 
                                   PersonBean user) 
@@ -2284,7 +2376,7 @@ public class DBWrapper implements Query {
      * @return <code>Vector&lt;WbsBean&gt;</code> - vettore contenente tutte le Wbs di un progetto
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
-    @SuppressWarnings({ "null", "static-method" })
+    @SuppressWarnings({ "null" })
     public Vector<WbsBean> getWbs(int idProj,
                                   PersonBean user,
                                   int getPartOfWbs) 
@@ -2494,7 +2586,7 @@ public class DBWrapper implements Query {
      * @return <code>WbsBean</code> - oggetto contenente tutte la gerarchia di Wbs di un progetto
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
-    @SuppressWarnings({ "null", "static-method" })
+    @SuppressWarnings({ "null" })
     public WbsBean getWbsHierarchyByWbs(int idProj,
                                         PersonBean user,
                                         int idWbs)
@@ -2828,7 +2920,7 @@ public class DBWrapper implements Query {
     * @return Vector&lt;WbsBean&gt; - vector contenente tutte le WBS figlie
     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
     */
-    @SuppressWarnings({ "null", "static-method" })
+    @SuppressWarnings({ "null" })
     public Vector<WbsBean> getWbsFiglie(int idProj,
                                         PersonBean user,
                                         int idWbs) 
@@ -3260,7 +3352,7 @@ public class DBWrapper implements Query {
             pst.setNull(++nextParam, Types.NULL);
             pst.setNull(++nextParam, Types.NULL);
             pst.setString(++nextParam, passwd);
-            pst.setString(++nextParam,  userLogged.getCognome() + " " + userLogged.getNome());;
+            pst.setString(++nextParam,  userLogged.getCognome() + " " + userLogged.getNome());
             pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate())));
             pst.setTime(++nextParam, Utils.getCurrentTime());
             pst.setInt(++nextParam, userId);
@@ -3718,7 +3810,7 @@ public class DBWrapper implements Query {
      * @param params    hashmap che contiene i parametri che si vogliono aggiornare del progetto
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
      */
-    @SuppressWarnings({ "null", "static-method" })
+    @SuppressWarnings({ "null" })
     public void updateActivityPart(int idProj,
                                    Vector<ProjectBean> projectsWritableByUser,
                                    int userId,
@@ -4001,7 +4093,7 @@ public class DBWrapper implements Query {
                 }
                 // Campi automatici: id utente, ora ultima modifica, data ultima modifica
                 pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
-                pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringe, ma un oggetto java.sql.Time
+                pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
                 pst.setString(++nextParam, user.getCognome() + String.valueOf(Utils.BLANK_SPACE) + user.getNome());
                 // Where id = ?
                 pst.setInt(++nextParam, calculatedId);
@@ -4153,7 +4245,7 @@ public class DBWrapper implements Query {
             pst.setInt(1, idState);
             // Campi automatici: id utente, ora ultima modifica, data ultima modifica
             pst.setDate(2, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
-            pst.setTime(3, Utils.getCurrentTime());   // non accetta una Stringe, ma un oggetto java.sql.Time
+            pst.setTime(3, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
             pst.setString(4, user.getCognome() + String.valueOf(Utils.BLANK_SPACE) + user.getNome());
             // Identificativo attività da aggiornare
             pst.setInt(5, idAct);
@@ -4284,7 +4376,7 @@ public class DBWrapper implements Query {
      * @param params hashmap che contiene i parametri che si vogliono aggiornare del progetto
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
      */
-    @SuppressWarnings({ "null", "static-method" })
+    @SuppressWarnings({ "null" })
     public void updateWbsPart(int idProj,
                               PersonBean user,
                               HashMap<Integer, ProjectBean> projects, 
@@ -4430,7 +4522,7 @@ public class DBWrapper implements Query {
             pst.setString(5, params.get("mon-d8"));
             // Campi automatici: id utente, ora ultima modifica, data ultima modifica
             pst.setDate(6, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
-            pst.setTime(7, Utils.getCurrentTime());   // non accetta una Stringe, ma un oggetto java.sql.Time
+            pst.setTime(7, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
             pst.setString(8, user.getCognome() + String.valueOf(Utils.BLANK_SPACE) + user.getNome());
             pst.setInt(9, year);
             pst.setInt(10, idDip);
@@ -4521,6 +4613,276 @@ public class DBWrapper implements Query {
     
     
     /**
+     * <p>Aggiorna i permessi degli utenti.</p>
+     * <p>Siccome c'&egrave; un vincolo di 
+     * <code>UNIQUE(id_progetto, id_persona)</code>, non &egrave; necessario
+     * recuperare l'id della tupla della tabella <code>ruologestione</code>
+     * al fine di aggiornarla, ma basta aggiornare la tupla con 
+     * <pre> {id_progetto = x ᐱ id_persona = y}</pre>
+     * Notare che sia id_progetto sia id_persona sono NOT NULL, per cui
+     * la coppia (id_progetto, id_persona) &ndash; che &egrave; quindi 
+     * <code>[UNIQUE, NOT NULL;]</code>, si configura, praticamente, 
+     * come una seconda chiave primaria della tabella 
+     * <code>ruologestione</code>.</p>
+     * <p><code><strong>Nota sull'implementazione:</strong> 
+     * merita un approfondimento l'implementazione della "cancellazione" 
+     * del ruolo di una persona su un progetto.<br /> 
+     * (i) L'applicazione permette
+     * di inserire un ruolo "NESSUNO" (NONE) per un utente su un progetto.
+     * Non avrebbe avuto senso gestire questo ruolo come un vero e proprio
+     * ruolo di progetto, anche perch&eacute; poi, retrospettivamente, 
+     * si sarebbe dovuti andare a cambiare tutte le query che mostrano 
+     * progetti controllando che il ruolo dell'utente corrente non fosse
+     * corrispondente a NONE. Pi&uacute; semplice e lineare la strada 
+     * scelta: associare un utente a un progetto con il ruolo "NESSUNO" 
+     * (NONE, /nʌn/) comporta il fatto che l'applicazione:
+     * <ol>
+     * <li>non lascia il ruolo "NONE" sul progetto stesso 
+     * (a differenza di come fa per gli altri ruoli:
+     * se l'utente con privilegi amministrativi decide che un dato utente
+     * non &egrave; TL ma USER, l'applicazione cambia il ruolo e lascia
+     * tutto il resto inalterato)</li>
+     * <li>non effettua una DELETE della riga della tabella 
+     * <strong>ruologestione</strong> che associa l'utente al progetto con
+     * il precedente ruolo, perch&eacute; questa operazione potrebbe essere
+     * considerata eccessivamente distruttiva, e peraltro non lascerebbe tracce.
+     * dell'accaduto. Infatti, nell'applicazione <strong>pol</strong> 
+     * le uniche operazioni non tracciate sono le cancellazioni fisiche 
+     * (DELETE) &ndash; che infatti
+     * non vengono praticamente mai consentite da interfaccia;</li>
+     * <li>ma:
+     * <ol>
+     * <li>ricava (SELECT) l'identificativo del progetto phantom corrispondente
+     * al progetto corrente</li>
+     * <li>associa (UPDATE) il ruolo "NESSUNO" (NONE) al progetto phantom
+     * individuato</li>
+     * </ol></ol>
+     * In questo modo l'applicazione ottiene il doppio scopo di:
+     * <ul>
+     * <li>dereferenziare il vecchio ruolo al progetto corrente</li>
+     * <li>ma senza cancellarlo fisicamente, quindi conservandolo, 
+     * anche rispetto al tracciamento dell'operazione</li>
+     * </ul>
+     * (ii) Ulteriore chiarificazione potrebbe essere necessaria per spiegare il 
+     * significato di "progetto phantom": per ogni dipartimento &egrave;
+     * stato definito un suo "progetto phantom", che ha lo stesso identificativo
+     * del dipartimento in modulo, ma segno diverso in Z dove Z:<pre>
+     * Z = {x &isin; <strong>R</strong> : x &egrave; un numero intero relativo}</pre>
+     * o, se si preferisce:<pre>
+     * Z = N &cup; {0} &cup;  {x &isin; <strong>N</strong> : x = x*-1}</pre> 
+     * dove N &egrave; l'insieme dei numeri naturali 
+     * (escluso quindi lo zero).<br />
+     * Quindi, per esempio, se il dipartimento di giurisprudenza ha id = 2 
+     * il suo progetto phantom, chiamato "phantom giurisprudenza" avr&agrave;
+     * id = -2. Se quindi l'utente amministratore (PMO) decide di staccare
+     * una persona da un progetto, stabilisce tramite interfaccia che quella
+     * persona ha ruolo "NESSUNO" su quel progetto e quindi, a seguito 
+     * dell'UPDATE, la riga:<pre>
+     *  id | id_ruolo | id_progetto | id_persona | dataultimamodifica | oraultimamodifica | autoreultimamodifica
+     * 134      3           11           74             null                 null                 null</pre>
+     * diventer&agrave;<pre>
+     *  id | id_ruolo | id_progetto | id_persona | dataultimamodifica | oraultimamodifica | autoreultimamodifica
+     * 134      6           -2           74             2019-09-02           18:02:00        Bortolazzi Chiara</pre>
+     * preservando, se non il ruolo che precedentemente aveva una data persona su
+     * un dato progetto, quanto meno il fatto che l'annullamento del ruolo
+     * &egrave; stato fatto da un determinato utente a una determinata data.
+     * Ci&ograve; consentir&agrave; anche, abbastanza agevolmente, di
+     * ripristinare il vecchio ruolo dell'utente su un progetto, tramite
+     * l'UPDATE<sup>-1</sup> inversa fatta da Query SQL:<pre>
+     * "UPDATE ruologestione   SET  id_ruolo = 3
+     *                          ,   id_progetto = 11
+     *                          ,   dataultimamodifica =  CURRENT_DATE
+     *                          ,   oraultimamodifica = CURRENT_TIME
+     *                          ,   autoreultimamodifica = 'Query SQL'
+     *      WHERE  id = 134;"</pre>
+     * (iii) Altra particolarit&agrave; riguarda la gestione degli id phantom,
+     * da inserire come valori della chiave esterna che punta sull'identificativo
+     * di progetto nella tabella <strong>ruologestione</strong>.
+     * Se gi&agrave; esiste una tupla con<br /> 
+     * (id_persona = guest.getId(), id_progetto = idProj)
+     * allora assegna come id_progetto fittizio l'id 
+     * immediatamente successivo in Z, ammesso che esista.<br />
+     * Se l'identificativo di progetto cercato non esiste, 
+     * solleva, finalmente, un'eccezione.<br />
+     * P.es. poniamo che il dipartimento del progetto sia
+     * quello avente id = 2 e quindi il suo phantom abbia 
+     * id = -2; se una persona &egrave; gi&agrave; stata
+     * staccata da un progetto del dipartimento 2, allora
+     * sar&agrave; gi&agrave; presente la tupla con<br /> 
+     * (id_persona = x, id_progetto = -2).<br />
+     * Siccome esiste un vincolo di UNIQUE sulla coppia
+     * (id_progetto, id_persona), non &egrave; possibile
+     * inserire una nuova tupla con gli stessi valori:
+     * (id_persona = x, id_progetto = -2).
+     * A questo punto l'algoritmo cerca quindi di ricavare
+     * un nuovo id_progetto da assegnare, incrementando
+     * il numero in valore assoluto ma procedendo in Z 
+     * "verso sinistra", cio&egrave; allontanandosi dall'
+     * origine. Tuttavia, anche questo espediente
+     * non garantisce la mancanza di eccezioni, perch&eacute;
+     * esiste un vincolo di integrit&agrave; referenziale
+     * tra l'id_progetto della tabella ruologestione e 
+     * l'id della tabella progetto:<pre>
+     * ALTER TABLE ruologestione ADD FOREIGN KEY (id_progetto) REFERENCES progetto (id);</pre>
+     * Alla fine, non &egrave; possibile garantire tutte le possibili
+     * situazioni; se non esiste un progetto phantom con id necessario
+     * (p.es. id = -6, id = -7, id = -8...) si pu&ograve; sempre inserire oppure,
+     * in alternativa, si pu&ograve; effettuare la cancellazione da Query SQL,
+     * on demand. Si potrebbe anche procedere in altro modo, per garantire
+     * l'inserimento, p.es. togliendo il vincolo di UNIQUE sulla coppia<br />
+     * (id_progetto, id_persona) per&ograve; visto che questa operazione
+     * di "cancellazione" del ruolo non &egrave; un'attivit&agrave; di 
+     * ordinaria amministrazione ma serve solo a sanare qualche ruolo
+     * erroneamente attribuito, non vale la pena di complicare ulteriormente
+     * l'algoritmo &ndash; che per ulteriore sicurezza viene limitato 
+     * alla gestione di 2 sole dereferenziazioni consentite.</code></p>
+     * <p><small>About the method name:<br /> 
+     * <cite id="cambridge" rel="https://dictionary.cambridge.org/it/grammatica/grammatica-britannico/permit-or-permission">
+     * The countable noun <tt>permit</tt> (pronounced /ˈpɜ:mɪt/) refers to an 
+     * official document that allows you to do something or go somewhere. 
+     * The uncountable noun <tt>permission</tt> refers to when someone 
+     * is allowed to do something.<br /> 
+     * It does not refer to a document:<br /> 
+     * <em>You need to have a work permit before you can work</em>.</cite><br />
+     * So, using /permission/ instead of /permit/ is here 
+     * legit AND preferable.</small></p>
+     * 
+     * @param user utente che vuol cambiare i permessi degli utenti (deve essere un PMO)
+     * @param guest utente di cui si vuol cambiare i permessi
+     * @param params tabella hash contentente tante coppie chiave/valore quanti sono i progetti su cui si vuol effettuare un cambiamento di ruolo
+     * @throws WebStorageException se si verifica un problema nel recupero di qualche attributo, nella query o in qualche altro tipo di puntamento
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public void updatePermissions(PersonBean user,
+                                  PersonBean guest,
+                                  int idDipart,
+                                  HashMap<Integer, String> params) 
+                           throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+        try {
+            // Ottiene la connessione
+            con = pol_manager.getConnection();
+            // Inizia la transazione
+            con.setAutoCommit(false);
+            // Cicla la mappa ricevuta
+            Iterator<Map.Entry<Integer, String>> iterator = params.entrySet().iterator();
+            while (iterator.hasNext()) {
+                // Scrittura distruttiva del contatore (v. Deitel & Deitel: "C, corso completo di programmazione", pp. 28-29)
+                int nextParam = 0;
+                // Stringa dinamica per contenere il valore del ruolo da passare alla query
+                StringBuffer roleToSetAsStringBuffer = null;
+                // Query designata per l'aggiornamento
+                String query = null;
+                // Entry corrente per puntamento ai valori parametrici
+                Map.Entry<Integer, String> entry = iterator.next();
+                // Recupera identificativo di progetto passato sotto forma di chiave 
+                int idProj = entry.getKey();
+                // Recupera il ruolo impostato per il progetto di dato id
+                String roleToSet = entry.getValue().substring(entry.getValue().lastIndexOf(Data.HYPHEN) + 1);
+                // Se il mio ruolo è "NESSUNO" deve dereferenziare il progetto collegato e associarlo al progetto phantom
+                if (roleToSet.equalsIgnoreCase("NESSUNO")) {
+                    // Recupera l'id di progetto phantom da inserire
+                    pst = con.prepareStatement(GET_PROJECT_BY_DIPART);
+                    pst.clearParameters();
+                    pst.setInt(++nextParam, idDipart);
+                    rs = pst.executeQuery();
+                    // Sovrascrive identificativo del progetto corrente... 
+                    if (rs.next()) {
+                        // ...con identificativo del progetto phantom per quel dipartimento
+                        idProj = rs.getInt("id");
+                    }
+                    /* v. Nota sull'implementazione (iii): controlla se
+                     * la coppia (id_persona, id_phantom) esiste gia' e in tal 
+                     * caso cerca di assegnare come id_progetto phantom l'id
+                     * phantom immediatamente precedente */ 
+                    // Pulizia delle variabili
+                    pst = null;
+                    rs = null;
+                    nextParam = 0;
+                    // Controlla se la coppia (id_persona, id_progetto_phantom) esiste già
+                    pst = con.prepareStatement(IS_PROJECT_BY_ROLE);
+                    pst.clearParameters();
+                    // Id persona da cercare
+                    pst.setInt(++nextParam, guest.getId());
+                    // Id progetto phantom di cui verificare l'associazione già esistente con la persona
+                    pst.setInt(++nextParam, idProj);
+                    rs = pst.executeQuery();
+                    // Se è presente qualcosa non c'è bisogno di approfondire... 
+                    if (rs.next()) {
+                        // ...quel qualcosa sarà il valore boolean 'true' e quindi basta operare di conseguenza
+                        --idProj;
+                    }
+                    // Designazione della query
+                    query = DELETE_ROLE;
+                    // Pulizia delle variabili
+                    pst = null;
+                    nextParam = 0;
+                    // If you say: "NESSUNO" then you mean: /nʌn/
+                    roleToSetAsStringBuffer = new StringBuffer("NONE");
+                } else if (roleToSet.equalsIgnoreCase("PMO")) {
+                    // If you say "PMO" then you mean "PMODIP"
+                    roleToSetAsStringBuffer = new StringBuffer("PMODIP");
+                    query = UPDATE_ROLES_BY_USER;
+                } else {
+                    // Whatever
+                    roleToSetAsStringBuffer = new StringBuffer(roleToSet);
+                    query = UPDATE_ROLES_BY_USER;
+                }
+                // Query
+                pst = con.prepareStatement(query);
+                pst.clearParameters();
+                // Nome nuovo ruolo
+                pst.setString(++nextParam, String.valueOf(roleToSetAsStringBuffer));
+                // Progetto da referenziare in caso di cancellazione logica
+                if (query.equals(DELETE_ROLE)) {
+                    pst.setInt(++nextParam, idProj);
+                }
+                // Campi automatici: id utente, ora ultima modifica, data ultima modifica
+                pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+                pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
+                pst.setString(++nextParam, user.getCognome() + String.valueOf(Utils.BLANK_SPACE) + user.getNome());
+                // Id progetto su cui cambiare il ruolo
+                pst.setInt(++nextParam, entry.getKey());
+                // Id persona a cui cambiare il ruolo
+                pst.setInt(++nextParam, guest.getId());
+                // Exec
+                pst.executeUpdate();
+            }
+            // Se tutto è andato a buon fine, committa la transazione
+            con.commit();
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Probabile problema nel recupero dei dati dell\'autore ultima modifica.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna i permessi utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } catch (NumberFormatException nfe) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna i permessi utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + nfe.getMessage(), nfe);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna i permessi utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + npe.getMessage(), npe);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
      * <p>Verifica se per l'utente loggato esiste una tupla che indica
      * un precedente login. 
      * <ul>
@@ -4568,7 +4930,7 @@ public class DBWrapper implements Query {
                 pst.setString(++nextParam, serverName);
                 // Campi automatici: ora ultimo accesso, data ultimo accesso
                 pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
-                pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringe, ma un oggetto java.sql.Time
+                pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
                 pst.setInt(++nextParam, accessRow.getId());
                 pst.executeUpdate();
                 con.commit();
@@ -4923,7 +5285,7 @@ public class DBWrapper implements Query {
                 pst.setInt(++nextParam, stato.getId());
                 /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
                 pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
-                pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringe, ma un oggetto java.sql.Time
+                pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
                 pst.setString(++nextParam, user.getCognome() + String.valueOf(Utils.BLANK_SPACE) + user.getNome());
                 /* === Query contestuale di inserimento in attivitagestione === */ 
                 int maxActGestId = getMax("attivitagestione") + 1;
