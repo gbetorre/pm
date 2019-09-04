@@ -101,6 +101,10 @@ public interface Query extends Serializable {
      */
     public static final String PART_USR                         = "usr";
     /**
+     * <p>Costante per il parametro identificante la gestione dei ruoli dell'utente.</p>
+     */
+    public static final String PART_PERMISSION                  = "per";
+    /**
      * <p>Costante per il parametro identificante la pagina della Vision di un progetto.</p>
      */
     public static final String PART_PROJECT_CHARTER_VISION      = "pcv";
@@ -155,7 +159,7 @@ public interface Query extends Serializable {
     /**
      * <p>Costante per il parametro identificante la pagina del Report di un progetto.</p>
      */
-    public static final String PART_TIMELINES                      = "tml";
+    public static final String PART_TIMELINES                   = "tml";
     /**
      * <p>Costante per il parametro identificante la pagina del grafico di WBS di un progetto.</p>
      */
@@ -609,9 +613,9 @@ public interface Query extends Serializable {
             "       INNER JOIN identita I ON U.id = I.id0_usr" + 
             "       INNER JOIN persona P ON P.id = I.id1_persona" +
             "       INNER JOIN ruologestione RG ON RG.id_persona = P.id" + 
-            "   WHERE P.id = ? AND RG.id_ruolo <= 2";
+            "   WHERE P.id = ? " +
+            "       AND RG.id_ruolo <= 2";
             
-    
     /**
      * <p>Estrae l'username dell'utente tramite l'id, passato come parametro.</p>
      */
@@ -630,7 +634,6 @@ public interface Query extends Serializable {
             "   ,   U.salt          AS \"informativa\"" +
             "   FROM usr U" + 
             "   WHERE U.login = ?";
-    
     
     /**
      * <p>Estrae i ruoli di una persona  
@@ -677,12 +680,14 @@ public interface Query extends Serializable {
     		"		INNER JOIN identita I ON P.id = I.id1_persona" + 
     		"		INNER JOIN usr U ON I.id0_usr = U.id" + 
     		"	WHERE 	P.id = ?" +
+            "       AND PJ.id > 0" + 
     		"   ORDER BY PJ.titolo ASC";
     
     /**
      * <p>Estrae i progetti dell'utente 
      * avente identificativo passato come parametro
-     * appartenenti al dipartimento avente identificativo passato come parametro.</p>
+     * appartenenti al dipartimento avente identificativo 
+     * passato come parametro.</p>
      */
     public static final String GET_PROJECTS_BY_DEPART = 
             "SELECT " +
@@ -693,29 +698,27 @@ public interface Query extends Serializable {
             "   ,   PJ.datainizio               AS \"dataInizio\"" + 
             "   ,   PJ.datafine                 AS \"dataFine\"" + 
             "   ,   PJ.id_statoprogetto         AS \"idStatoProgetto\"" + 
-            //"   ,   PJ.situazioneattuale        AS \"situazioneAttuale\"" + 
-            //"   ,   PJ.situazionefinale         AS \"situazioneFinale\"" + 
-            //"   ,   PJ.obiettivimisurabili      AS \"obiettiviMisurabili\"" + 
-            //"   ,   PJ.minacce                  AS \"minacce\"" + 
-            //"   ,   PJ.stakeholdermarginali     AS \"stakeholderMarginali\"" + 
-            //"   ,   PJ.stakeholderoperativi     AS \"stakeholderOperativi\"" + 
-            //"   ,   PJ.stakeholderistituzionali AS \"stakeholderIstituzionali\"" + 
-            //"   ,   PJ.stakeholderchiave        AS \"stakeholderChiave\"" + 
-            //"   ,   PJ.deliverable              AS \"deliverable\"" + 
-            //"   ,   PJ.fornitorichiaveinterni   AS \"fornitoriChiaveInterni\"" + 
-            //"   ,   PJ.fornitorichiaveesterni   AS \"fornitoriChiaveEsterni\"" + 
-            //"   ,   PJ.serviziateneo            AS \"serviziAteneo\"" + 
-            //"   ,   PJ.vincoli                  AS \"vincoli\"" + 
             "   ,   PJ.sottotipo                AS \"tag\"" +
             "   FROM progetto PJ" + 
             "       INNER JOIN ruologestione RG ON PJ.id = RG.id_progetto" + 
             "       INNER JOIN persona P ON RG.id_persona = P.id" + 
             "       INNER JOIN identita I ON P.id = I.id1_persona" + 
             "       INNER JOIN usr U ON I.id0_usr = U.id" + 
-            "   WHERE   P.id = ?" +
-            "       AND PJ.id_dipart = ?" + 
+            "   WHERE   P.id = ?" + 
+            "       AND PJ.id_dipart = ?" +
+            "       AND PJ.id > 0" + 
             "   ORDER BY PJ.titolo ASC";
     
+    /**
+     * <p>Estrae il primo progetto con id negativo, 
+     * dato in input l'id del dipartimento.</p>
+     */
+    public String GET_PROJECT_BY_DIPART = 
+            "SELECT " +
+            "   PJ.id    AS \"id\"" +
+            "   FROM progetto PJ" + 
+            "   WHERE PJ.id_dipart = ?" +
+            "       AND PJ.id < 0";
     
     /**
      * <p>Estrae i progetti, con il loro dipartimento, partendo dal ruolo
@@ -723,17 +726,31 @@ public interface Query extends Serializable {
      */
     public static final String GET_PROJECTS_BY_ROLE = 
             "SELECT " + 
-            "       P.id" +
-            "   ,   P.titolo        AS \"informativa\"" +
+            "       PJ.id" +
+            "   ,   PJ.titolo       AS \"informativa\"" +
+            "   ,   D.id            AS \"livello\"" +
             "   ,   D.nome          AS \"nome\"" +
             "   ,   R.nome          AS \"extraInfo\"" +
-            "   FROM progetto P" +
-            "       INNER JOIN dipartimento D on D.id = P.id_dipart" +
-            "       INNER JOIN ruologestione RG on RG.id_progetto = P.id" +
+            "   FROM progetto PJ" +
+            "       INNER JOIN dipartimento D on D.id = PJ.id_dipart" +
+            "       INNER JOIN ruologestione RG on RG.id_progetto = PJ.id" +
             "       INNER JOIN ruolo R on R.id = RG.id_ruolo" +
             "   WHERE RG.id_persona = ?" +
-            "   ORDER BY (D.nome, P.titolo) ASC";
+            "       AND PJ.id > 0" + 
+            "   ORDER BY (D.nome, PJ.titolo) ASC";
     
+    /**
+     * <p>Restituisce il valore boolean 'true' se e solo se
+     * esiste gi&agrave; una riga nella tabella <code>ruologestione</code>
+     * avente id_progetto e id_persona passati come parametri.</p>
+     */
+    public String IS_PROJECT_BY_ROLE = 
+            "SELECT " +
+            "   true" +
+            "   WHERE EXISTS" +
+            "       (SELECT 1 FROM ruologestione RG" +
+            "           WHERE RG.id_persona = ?" +
+            "               AND RG.id_progetto = ?)";
     
     /**
      * <p>Estrae i progetti dell'utente avente <code>username</code> 
@@ -828,11 +845,13 @@ public interface Query extends Serializable {
             "       AND R.nome IN ('PM', 'PMOATE', 'PMODIP')";
     
     /**
-     * <p>Estrae un progetto di dato id, passato come parametro.</p>
+     * <p>Estrae un progetto di dato id, passato come parametro
+     * su cui, a qualche titolo, &egrave; autorizzata una persona,
+     * il cui identificativo &egrave; a sua volta passato come parametro.</p>
      */
     public static final String GET_PROJECT = 
             "SELECT " +
-            "       PJ.id           " + 
+            "       PJ.id" + 
             "   ,   PJ.id_dipart                AS \"idDipart\"" + 
             "   ,   PJ.titolo                   AS \"titolo\"" + 
             "   ,   PJ.descrizione              AS \"descrizione\"" + 
@@ -856,7 +875,7 @@ public interface Query extends Serializable {
             "       INNER JOIN ruologestione RG ON PJ.id = RG.id_progetto" + 
             "       INNER JOIN persona P ON RG.id_persona = P.id" + 
             "   WHERE   PJ.id = ?" +
-            "       AND P.id= ?";
+            "       AND P.id = ?";
     
     /**
      * <p>Estrae la wbs (o il workpackage) selezionata,
@@ -1050,6 +1069,44 @@ public interface Query extends Serializable {
             "       INNER JOIN persona P ON I.id1_persona = P.id" +
             "   WHERE PJ.id = ?" + 
             "   ORDER BY P.cognome, P.nome";
+    
+    /**
+     * <p>Estrae una persona, identificata 
+     * tramite il suo id, passato come parametro.</p>
+     */
+    public static final String GET_PERSON_BY_ID = 
+            "SELECT " +
+            "       P.id            AS \"id\"" +
+            "   ,   P.nome          AS \"nome\"" +
+            "   ,   P.cognome       AS \"cognome\"" +
+            "   ,   P.sesso         AS \"sesso\"" +
+            "   ,   P.datanascita   AS \"dataNascita\"" +
+            "   FROM persona P    " +
+            "   WHERE P.id = ?";
+    
+    /**
+     * <p>Estrae una persona, identificata 
+     * tramite il suo id utente, passato come parametro.</p>
+     * <p>OSSERVAZIONE: avendo una relazione di appoggio tra utente e persona,
+     * l'applicazione consente in potenza pi&uacute; utenze per 
+     * una sola persona; si accorda con questi gradi di libert&agrave;
+     * la mancanza di vincoli sulla relazione <code>identita</code>. 
+     * Tuttavia, se &egrave; vero che a una data persona possono corrispondere 
+     * potenzialmente pi&acute; utenze, a una sola utenza dovrebbe corrispondere 
+     * una e una sola persona; di qui il senso della query, che risale 
+     * la relazione dall'utenza alla persona.</p>
+     */
+    public static final String GET_PERSON_BY_USER_ID = 
+            "SELECT " +
+            "       P.id            AS \"id\"" +
+            "   ,   P.nome          AS \"nome\"" +
+            "   ,   P.cognome       AS \"cognome\"" +
+            "   ,   P.sesso         AS \"sesso\"" +
+            "   ,   P.datanascita   AS \"dataNascita\"" +
+            "   FROM usr U " +
+            "       INNER JOIN identita I ON U.id = I.id0_usr " +
+            "       INNER JOIN persona P ON I.id1_persona = P.id" + 
+            "   WHERE U.id = ?";
     
     /**
      * <p>Estrae i valori dei campi relativi alla vision di un progetto, 
@@ -1344,7 +1401,6 @@ public interface Query extends Serializable {
             "   ,   C.descrizione   AS \"nome\"" +
             "   ,   C.informativa   AS \"informativa\"" + 
             "   ,   C.presenza      AS \"presenza\"" +
-            //"   ,   C.id_persona    AS \"idPersona\"" +
             "   FROM competenza C" +
             "   WHERE C.id_progetto = ?";
     
@@ -1761,7 +1817,7 @@ public interface Query extends Serializable {
             "   WHERE id = " +
             "               (SELECT U.id " +
             "                   FROM usr U " +
-            "                       INNER JOIN identita I ON U.id = I.id " +
+            "                       INNER JOIN identita I ON U.id = I.id0_usr " +
             "                       WHERE I.id1_persona = ?)";
     
     /**
@@ -2004,7 +2060,21 @@ public interface Query extends Serializable {
             "UPDATE monitoraggio " +
             "   SET     aperto = ?" +
             "   WHERE  anno = ? " +
-            "      AND id_dipart = ?";   
+            "      AND id_dipart = ?";
+    
+    /**
+     * <p>Aggiorna i permessi dell'utente dipartimentale di un dato anno.</p>
+     */
+    public static final String UPDATE_ROLES_BY_USER = 
+            "UPDATE ruologestione " +
+            "   SET     id_ruolo = (SELECT R.id " +
+            "                       FROM ruolo R " +
+            "                       WHERE R.nome = ?)" +
+            "   ,       dataultimamodifica = ?" +
+            "   ,       oraultimamodifica = ?" +
+            "   ,       autoreultimamodifica = ?" +
+            "   WHERE  id_progetto = ? " +
+            "      AND id_persona = ?";
     
     /**
      * <p>Query per aggiornamento di ultimo accesso al sistema.</p>
@@ -2254,18 +2324,24 @@ public interface Query extends Serializable {
             "   ,   dataultimamodifica = ?" +
             "   ,   oraultimamodifica = ?" +
             "   ,   autoreultimamodifica = ?" +
-            "   WHERE id = ?";
+            "   WHERE id = ?";    
     
     /**
-     * <p>Estrae il primo progetto con id negativo, 
-     * dato in input l'id del dipartimento.</p>
+     * <p>Dereferenzia il ruolo di una persona rispetto a un progetto cui
+     * era referenziato, collegandolo ad un altro progetto, che nella logica
+     * applicativo corrisponder&agrave; al progetto fantasma di dipartimento.</p>
      */
-    public String GET_PROJECT_BY_DIPART = 
-            "SELECT " +
-            "   P.id    AS \"id\"" +
-            "   FROM progetto P" + 
-            "   WHERE P.id_dipart = ?" +
-            "       AND P.id < 0";
+    public static final String DELETE_ROLE = 
+            "UPDATE ruologestione " +
+            "   SET     id_ruolo = (SELECT R.id " +
+            "                       FROM ruolo R " +
+            "                       WHERE R.nome ILIKE ?)" +
+            "   ,       id_progetto = ?" +
+            "   ,       dataultimamodifica = ?" +
+            "   ,       oraultimamodifica = ?" +
+            "   ,       autoreultimamodifica = ?" +
+            "   WHERE  id_progetto = ? " +
+            "      AND id_persona = ?";
     
     
 }
