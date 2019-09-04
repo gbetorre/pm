@@ -1,6 +1,10 @@
 <%@ include file="pcURL.jspf" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"  %>
+<c:url var="grant" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="home" />
+  <c:param name="p" value="per" />
+</c:url> 
 <c:if test="${not empty sessionScope.usr}">
     <hr class="separatore" />
     <span class="float-right">
@@ -31,6 +35,7 @@
           </c:if>
           <c:if test="${requestScope.resetPwd}">
             <a href="#resetPwd" class="btn btn-success marginLeftLarge marginBottom" id="btn-resetPwd" rel="modal:open"><i class="fas fa-users-cog"></i> Reset password</a>
+            <a href="#setGrant" class="btn btn-success marginLeftLarge marginBottom" id="btn-resetPwd" rel="modal:open"><i class="fas fa-user-cog"></i> Imposta permessi</a>
           </c:if>
           </div>
         </div>
@@ -124,6 +129,7 @@
         </c:forEach>
       </div>
     </div>
+    <!-- Reset password -->
     <div id="resetPwd" class="modal">
       <form id="resetPwd" action="${utente}&pwd=rst" method="post" onsubmit="return confirmReset();">
         <hr class="separatore" />
@@ -144,6 +150,27 @@
         </button>
       </form>
     </div>
+    <!-- Imposta permessi -->
+    <div id="setGrant" class="modal">
+      <form id="formGrant" action="${utente}&pwd=rst" method="post" onsubmit="return confirmReset();">
+        <hr class="separatore" />
+        <div class="row">
+          <div class="col-sm-4"><label for="txt-pwd"><strong>Seleziona l'utente sul quale visualizzare/modificare i permessi: </strong></label></div>
+          <div class="col-sm-4">
+            <select class="form-control" id="per-usr" name="per-usr">
+              <c:forEach var="usr" items="${requestScope.userList}" varStatus="status">
+                <c:if test="${status.index eq 0}">
+                  <c:set var="first" value="${usr.id}" scope="page" />
+                </c:if>
+                <option value="${usr.id}"><c:out value="${usr.cognome} ${usr.nome}" /></option>
+              </c:forEach>
+            </select>
+          </div>
+        </div>
+        <hr class="separatore" />
+        <a href="${grant}&idp=${first}" class="btn btn-success marginLeftLarge marginBottom" id="btn-setGrant"><i class="fas fa-user-cog"></i> Modifica</a>
+      </form>
+    </div>
     <script type="text/javascript">
       function checkForm(form) {
         if ($('#txtPwd').val().length < 1 || $('#txtConfPwd').val().length < 1 || $('#txtPwd').val() != $('#txtConfPwd').val()) {
@@ -157,6 +184,13 @@
       $(document).ready(function(){
         $("select#pwd-usr").change(function(){
             utente = $(this).children("option:selected").text();
+        });
+        $("select#per-usr").change(function(){
+          //var $linkGrant = $("a#btn-setGrant").attr("href");
+          //console.log($linkGrant);
+          var $linkGrant = '<c:out value="${grant}" escapeXml="false" />' + "&idp=" + $(this).val();
+          //console.log($linkGrant);
+          $("a#btn-setGrant").attr("href",$linkGrant);
         });
       });
       function confirmReset() {
