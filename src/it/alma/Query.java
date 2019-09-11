@@ -789,8 +789,9 @@ public interface Query extends Serializable {
             "       AND R.nome IN ('PM', 'TL', 'PMOATE', 'PMODIP')";
     
     /**
-     * <p>Estrae i progetti dell'utente avente <code>user id</code> 
-     * passato come parametro e nel contesto dei quali lo stesso risulta essere 
+     * <p>Estrae i progetti dell'utente corrispondente alla persona
+     * avente <code>id</code> passato come parametro 
+     * e nel contesto dei quali lo stesso risulta essere 
      * un utente che pu&ograve; modificare i dati del progetto.</p>
      */
     public static final String GET_WRITABLE_PROJECTS_BY_USER_ID = 
@@ -818,10 +819,8 @@ public interface Query extends Serializable {
             "   FROM progetto PJ" + 
             "       INNER JOIN ruologestione RG ON PJ.id = RG.id_progetto" + 
             "       INNER JOIN ruolo R ON RG.id_ruolo = R.id" +
-            "       INNER JOIN persona P ON RG.id_persona = P.id" + 
-            "       INNER JOIN identita I ON P.id = I.id1_persona" + 
-            "       INNER JOIN usr U ON I.id0_usr = U.id" + 
-            "   WHERE   U.id = ?" + 
+            "       INNER JOIN persona P ON RG.id_persona = P.id" +  
+            "   WHERE   P.id = ?" + 
             "       AND R.nome IN ('PM', 'TL', 'PMOATE', 'PMODIP')";
     
     /**
@@ -1014,14 +1013,17 @@ public interface Query extends Serializable {
      * progetto, il cui identificativo viene passato come parametro,
      * c'&egrave; almeno una persona.</p>
      */
-    public static final String GET_PEOPLE_ON_PROJECT = 
+    public static final String GET_PEOPLE_BY_PROJECT = 
             "SELECT " + 
             "       P.id            AS \"id\"" +
             "   ,   P.nome          AS \"nome\"" +
-            "   ,   P.cognome       AS \"cognome\"" +
+            "   ,   P.cognome       AS \"nomeReale\"" +
+            "   ,   R.nome          AS \"nomeClasse\"" +
             "   FROM ruologestione  RG" +
             "       INNER JOIN persona P ON RG.id_persona = P.id" +
-            "   WHERE RG.id_progetto = ?";
+            "       INNER JOIN ruolo R ON RG.id_ruolo = R.id" +
+            "   WHERE RG.id_progetto = ?" + 
+            "   ORDER BY R.id, P.cognome";
 
     /**
      * <p>Verifica se una persona, il cui identificativo viene
@@ -1913,6 +1915,9 @@ public interface Query extends Serializable {
             "   ,       descrizione = ?" +
             "   ,       obiettivimisurabili = ?" +
             "   ,       minacce = ? " + 
+            "   ,       dataultimamodifica = ?" +
+            "   ,       oraultimamodifica = ?" +
+            "   ,       autoreultimamodifica = ?" +
             "   WHERE id = ?";
     
     /**
@@ -1925,6 +1930,9 @@ public interface Query extends Serializable {
             "   ,       stakeholderoperativi = ? " +
             "   ,       stakeholderistituzionali = ?" +
             "   ,       stakeholderchiave = ?" + 
+            "   ,       dataultimamodifica = ?" +
+            "   ,       oraultimamodifica = ?" +
+            "   ,       autoreultimamodifica = ?" +
             "   WHERE id = ?";
     
     /**
@@ -1934,6 +1942,9 @@ public interface Query extends Serializable {
     public static final String UPDATE_DELIVERABLE = 
             "UPDATE progetto" + 
             "   SET     deliverable = ?" + 
+            "   ,       dataultimamodifica = ?" +
+            "   ,       oraultimamodifica = ?" +
+            "   ,       autoreultimamodifica = ?" +
             "   WHERE id = ?";
     
     /**
@@ -1957,6 +1968,9 @@ public interface Query extends Serializable {
             "   SET     fornitorichiaveesterni = ?" +
             "   ,       fornitorichiaveinterni = ?" +
             "   ,       serviziateneo = ?" +
+            "   ,       dataultimamodifica = ?" +
+            "   ,       oraultimamodifica = ?" +
+            "   ,       autoreultimamodifica = ?" +
             "   WHERE id = ?";
     
     /**
@@ -1979,7 +1993,10 @@ public interface Query extends Serializable {
      */
     public static final String UPDATE_CONSTRAINT = 
             "UPDATE progetto" + 
-            "   SET vincoli = ?" +
+            "   SET     vincoli = ?" +
+            "   ,       dataultimamodifica = ?" +
+            "   ,       oraultimamodifica = ?" +
+            "   ,       autoreultimamodifica = ?" +
             "   WHERE id = ?";
     
     /**
