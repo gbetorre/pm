@@ -497,7 +497,7 @@ public class DBWrapper implements Query {
      */
     @SuppressWarnings({ "null", "static-method" })
     public ArrayList<PersonBean> getUsrByGrp(PersonBean admin) 
-                                       throws WebStorageException{
+                                      throws WebStorageException{
         ResultSet rs, rs1 = null;
         Connection con = null;
         PreparedStatement pst, pst1 = null;
@@ -566,7 +566,7 @@ public class DBWrapper implements Query {
      */
     @SuppressWarnings({ "null", "static-method" })
     public Vector<ItemBean> getProjectsByRole (int userId)
-                                       throws WebStorageException {
+                                        throws WebStorageException {
         ResultSet rs = null;
         Connection con = null;
         PreparedStatement pst = null;
@@ -605,18 +605,18 @@ public class DBWrapper implements Query {
     
     /**
      * <p>Restituisce un Vector di PersonBean, ciascuno rappresentante 
-     * un utente del dipartimento il cui identificativo viene 
-     * passato come argomento.</p>
+     * un utente del dipartimento collegato ad un suo progetto, 
+     * il cui identificativo viene passato come parametro.</p>
      * 
-     * @param projectId username della persona che ha eseguito il login
+     * @param projectId     identificativo del progetto di cui si vogliono recuperare le persone collegate
      * @return <code>Vector&lt;PersonBean&gt;</code> - elenco di PersonBean rappresentante le persone del dipartimento a cui il progetto e' collegato
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e l'id della persona non &egrave; stato valorizzato (&egrave; un dato obbligatorio) 
      */
     @SuppressWarnings({ "null", "static-method" })
-    public Vector<PersonBean> getPeople(int projectId)
-                                 throws WebStorageException, 
-                                        AttributoNonValorizzatoException {
+    public Vector<PersonBean> getPeopleByBelonging(int projectId)
+                                            throws WebStorageException, 
+                                                   AttributoNonValorizzatoException {
         ResultSet rs, rs1 = null;
         Connection con = null;
         PreparedStatement pst = null;
@@ -663,7 +663,55 @@ public class DBWrapper implements Query {
                 throw new WebStorageException(FOR_NAME + sqle.getMessage());
             }
         }
-    }    
+    }
+    
+    
+    /**
+     * <p>Restituisce un Vector di ItemBean, ciascuno rappresentante 
+     * un utente del progetto il ruolo rivestito all'interno del progetto stesso, 
+     * il cui identificativo viene passato come parametro.</p>
+     * 
+     * @param projectId     identificativo del progetto di cui si vogliono recuperare le persone collegate e relativi ruoli
+     * @return <code>Vector&lt;ItemBean&gt;</code> - elenco di ItemBean contenenti ciascuno una miscela di dati provenienti dalla persona e dal relativo ruolo
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public ArrayList<ItemBean> getPeople(int projectId)
+                                  throws WebStorageException {
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        ItemBean role = null;
+        ArrayList<ItemBean> roles = new ArrayList<ItemBean>();
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_PEOPLE_BY_PROJECT);
+            pst.clearParameters();
+            pst.setInt(1, projectId);
+            rs = pst.executeQuery();
+            // Recupera ogni persona con relativo ruolo nel progetto di dato id
+            while (rs.next()) {
+                role = new ItemBean();
+                BeanUtil.populate(role, rs);
+                roles.add(role);
+            }
+            return roles;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto ItemBean non valorizzato; problema nella query che recupera quelli che lavorano su un progetto.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
     
     
     /**
@@ -3465,17 +3513,17 @@ public class DBWrapper implements Query {
      * per definizione!</p>
      * 
      * @param idProj    id del progetto da aggiornare
-     * @param projectsWritableByUser Vector contenente la lista dei progetti su cui l'utente corrente e' abilitato alla modifica
-     * @param userId    id dell'utente che ha eseguito il login
+     * @param projectsWritableByUser    Vector contenente la lista dei progetti su cui l'utente corrente e' abilitato alla modifica
+     * @param user      utente che ha eseguito il login, oggetto contenente il proprio id persona 
      * @param projects  Map contenente la lista dei progetti su cui l'utente corrente e' abilitato alla modifica
-     * @param objectsRelatedToProject  Map contenente le hashmap che contengono le attività, i rischi e le competenze su cui l'utente e' abilitato alla modifica
+     * @param objectsRelatedToProject   Map contenente le hashmap che contengono le attività, i rischi e le competenze su cui l'utente e' abilitato alla modifica
      * @param params    hashmap che contiene i parametri che si vogliono aggiornare del progetto
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
      */
     @SuppressWarnings({ "null", "rawtypes" })
     public void updateProjectPart(int idProj,
                                   Vector<ProjectBean> projectsWritableByUser,
-                                  int userId,
+                                  PersonBean user,
                                   HashMap<Integer, ProjectBean> projects, 
                                   HashMap<String, HashMap<Integer, Vector>> objectsRelatedToProject,
                                   HashMap<String, HashMap<String, String>>params) 
@@ -3499,12 +3547,12 @@ public class DBWrapper implements Query {
             try {
                 if (!userCanWrite(idProj, projectsWritableByUser)) {
                     String msg = FOR_NAME + "Attenzione: l'utente ha tentato di modificare un\'attivita\' legata ad un progetto su cui non ha i diritti di scrittura!\n";
-                    LOG.severe(msg + "Problema durante il tentativo di inserire una nuova attivita\'.\n");
+                    LOG.severe(msg + "Problema durante il tentativo di aggiornare una parte del progetto.\n");
                     throw new WebStorageException(msg);
                 }
             } catch (WebStorageException wse) {
                 String msg = FOR_NAME + "Problema nel tentativo di capire se l\'utente ha o non ha i diritti di scrittura!\n";
-                LOG.severe(msg + "Problema durante il tentativo di inserire una nuova attivita\'.\n");
+                LOG.severe(msg + "Problema durante il tentativo di aggiornare una parte del progetto.\n");
                 throw new WebStorageException(msg);
             }
             /* **************************************************************** *
@@ -3518,7 +3566,7 @@ public class DBWrapper implements Query {
                     pst = con.prepareStatement(GET_PROJECT_VISION);
                     pst.clearParameters();
                     pst.setInt(1, idProj);
-                    pst.setInt(2, userId);
+                    pst.setInt(2, user.getId());
                     rs = pst.executeQuery();
                     if (rs.next()) {
                         requestPrj = new ProjectBean();
@@ -3535,7 +3583,10 @@ public class DBWrapper implements Query {
                             pst.setString(2, paramsVision.get("pcv-descrizione"));
                             pst.setString(3, paramsVision.get("pcv-obiettivi"));
                             pst.setString(4, paramsVision.get("pcv-minacce"));
-                            pst.setInt(5, idProj);
+                            pst.setDate(5, Utils.convert(Utils.convert(Utils.getCurrentDate())));
+                            pst.setTime(6, Utils.getCurrentTime());
+                            pst.setString(7, user.getNome() + Utils.BLANK_SPACE + user.getCognome());
+                            pst.setInt(8, idProj);
                             pst.executeUpdate();
                             con.commit();
                         }
@@ -3554,7 +3605,7 @@ public class DBWrapper implements Query {
                     pst = con.prepareStatement(GET_PROJECT_STAKEHOLDER);
                     pst.clearParameters();
                     pst.setInt(1, idProj);
-                    pst.setInt(2, userId);
+                    pst.setInt(2, user.getId());
                     rs = pst.executeQuery();
                     if (rs.next()) {
                         requestPrj = new ProjectBean();
@@ -3571,7 +3622,10 @@ public class DBWrapper implements Query {
                                pst.setString(2, paramsStakeholder.get("pcs-operativo"));
                                pst.setString(3, paramsStakeholder.get("pcs-istituzionale"));
                                pst.setString(4, paramsStakeholder.get("pcs-chiave"));
-                               pst.setInt(5, idProj);
+                               pst.setDate(5, Utils.convert(Utils.convert(Utils.getCurrentDate())));
+                               pst.setTime(6, Utils.getCurrentTime());
+                               pst.setString(7, user.getNome() + Utils.BLANK_SPACE + user.getCognome());
+                               pst.setInt(8, idProj);
                                pst.executeUpdate();
                                con.commit();
                         }
@@ -3590,7 +3644,7 @@ public class DBWrapper implements Query {
                     pst = con.prepareStatement(GET_PROJECT_DELIVERABLE);
                     pst.clearParameters();
                     pst.setInt(1, idProj);
-                    pst.setInt(2, userId);
+                    pst.setInt(2, user.getId());
                     rs = pst.executeQuery();
                     if (rs.next()) {
                         requestPrj = new ProjectBean();
@@ -3600,7 +3654,10 @@ public class DBWrapper implements Query {
                             pst = con.prepareStatement(UPDATE_DELIVERABLE);
                             pst.clearParameters();
                             pst.setString(1, paramsDeliverable.get("pcd-descrizione"));
-                            pst.setInt(2, idProj);
+                            pst.setDate(2, Utils.convert(Utils.convert(Utils.getCurrentDate())));
+                            pst.setTime(3, Utils.getCurrentTime());
+                            pst.setString(4, user.getNome() + Utils.BLANK_SPACE + user.getCognome());
+                            pst.setInt(5, idProj);
                             pst.executeUpdate();
                             con.commit();
                         }
@@ -3635,7 +3692,10 @@ public class DBWrapper implements Query {
                     pst.setString(1, paramsResource.get("pcr-chiaveesterni"));
                     pst.setString(2, paramsResource.get("pcr-chiaveinterni"));
                     pst.setString(3, paramsResource.get("pcr-serviziateneo"));
-                    pst.setInt(4, idProj);
+                    pst.setDate(4, Utils.convert(Utils.convert(Utils.getCurrentDate())));
+                    pst.setTime(5, Utils.getCurrentTime());
+                    pst.setString(6, user.getNome() + Utils.BLANK_SPACE + user.getCognome());
+                    pst.setInt(7, idProj);
                     //JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
                     pst.executeUpdate();
                     con.commit();
@@ -3675,7 +3735,7 @@ public class DBWrapper implements Query {
                     pst = con.prepareStatement(GET_PROJECT_CONSTRAINT);
                     pst.clearParameters();
                     pst.setInt(1, idProj);
-                    pst.setInt(2, userId);
+                    pst.setInt(2, user.getId());
                     rs = pst.executeQuery();
                     if (rs.next()) {
                         requestPrj = new ProjectBean();
@@ -3686,7 +3746,10 @@ public class DBWrapper implements Query {
                             con.setAutoCommit(false);
                             pst.clearParameters();
                             pst.setString(1, paramsConstraint.get("pcc-descrizione"));
-                            pst.setInt(2, idProj);
+                            pst.setDate(2, Utils.convert(Utils.convert(Utils.getCurrentDate())));
+                            pst.setTime(3, Utils.getCurrentTime());
+                            pst.setString(4, user.getNome() + Utils.BLANK_SPACE + user.getCognome());
+                            pst.setInt(5, idProj);
                             //JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
                             pst.executeUpdate();
                             con.commit();
@@ -3762,7 +3825,7 @@ public class DBWrapper implements Query {
                     pst.setInt(12, Integer.parseInt(paramsStatus.get("sts-stakeholder")));
                     pst.setDate(13, Utils.convert(Utils.convert(Utils.getCurrentDate())));
                     pst.setTime(14, Utils.getCurrentTime());
-                    pst.setString(15, getLogin(userId));
+                    pst.setString(15, user.getNome() + Utils.BLANK_SPACE + user.getCognome());
                     pst.setInt(16, idProj);
                     pst.setInt(17, Integer.parseInt(paramsStatus.get("sts-id")));
                     //JOptionPane.showMessageDialog(null, "Chiamata arrivata a updateProjectPart dall\'applicazione!", FOR_NAME + ": esito OK", JOptionPane.INFORMATION_MESSAGE, null);
@@ -3770,6 +3833,14 @@ public class DBWrapper implements Query {
                     con.commit();
                 }
             }
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Problema nel recupero di un attributo obbligatorio di un bean.\n";
+            LOG.severe(msg + "Nome, cognome o id utente non valorizzato.\n"); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } catch (CommandException ce) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nel metodo che aggiorna il progetto.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + ce.getMessage(), ce);
         } catch (NotFoundException nfe) {
             String msg = FOR_NAME + "Probabile problema nel puntamento alla HashMap dei parametri.\n";
             LOG.severe(msg); 
@@ -3779,13 +3850,9 @@ public class DBWrapper implements Query {
             LOG.severe(msg); 
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
         } catch (NumberFormatException nfe) {
-            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il progetto.\n";
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema in un formato di dato.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + nfe.getMessage(), nfe);
-        } catch (CommandException ce) {
-            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il progetto.\n";
-            LOG.severe(msg); 
-            throw new WebStorageException(msg + ce.getMessage(), ce);
         } finally {
             try {
                 con.close();
@@ -4747,9 +4814,10 @@ public class DBWrapper implements Query {
      * So, using /permission/ instead of /permit/ is here 
      * legit AND preferable.</small></p>
      * 
-     * @param user utente che vuol cambiare i permessi degli utenti (deve essere un PMO)
-     * @param guest utente di cui si vuol cambiare i permessi
-     * @param params tabella hash contentente tante coppie chiave/valore quanti sono i progetti su cui si vuol effettuare un cambiamento di ruolo
+     * @param user      utente che vuol cambiare i permessi degli utenti (deve essere un PMO)
+     * @param guest     utente di cui si vuol cambiare i permessi
+     * @param idDipart  identificativo del dipartimento di cui si vuol eventualmente recuperare il progetto phantom associato
+     * @param params    tabella hash contentente tante coppie chiave/valore quanti sono i progetti su cui si vuol effettuare un cambiamento di ruolo
      * @throws WebStorageException se si verifica un problema nel recupero di qualche attributo, nella query o in qualche altro tipo di puntamento
      */
     @SuppressWarnings({ "null", "static-method" })
