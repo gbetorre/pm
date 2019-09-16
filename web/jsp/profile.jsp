@@ -60,7 +60,9 @@
       <div class="row">
         <div class="col-sm-1"></div>
         <div class="col-sm-4 rowBottomLine">
-          <c:out value="${role.informativa}"/>
+          <a href="${progetto}${role.id}">
+            <c:out value="${role.informativa}"/>
+          </a>
         </div>
         <div class="col-sm-3 rowBottomLine">
           <c:out value="${role.nome}"/>
