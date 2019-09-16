@@ -41,6 +41,12 @@ h3.heading {
 	border-width: 2px;
 }
 
+h4.heading {
+	border-color: #99CCCC;
+	border-style: groove;
+	border-width: 1px;
+}
+
 body {
 	background-color: white;
 	font-size: medium;
