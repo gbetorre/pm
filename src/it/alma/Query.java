@@ -638,6 +638,12 @@ public interface Query extends Serializable {
     /**
      * <p>Estrae i ruoli di una persona  
      * avente identificativo passato come parametro.</p>
+     * <p>Scarta dai ruoli quello di 'NONE' perch&egrave; questo serve 
+     * solo come segnaposto per i ruoli cancellati dal PMODIP, ma non 
+     * &egrave; per nulla utile all'utente nella gestione delle informazioni
+     * (anzi, potrebbe dare errore nelle assunzioni fatte a livello di cicli
+     * nelle pagine JSP dal momento che l'id progetto associato al ruolo NONE
+     * che ha id = 6, ha id negativo).</p>
      */
     public static final String GET_RUOLIPERSONA = 
             "SELECT " +
@@ -646,7 +652,8 @@ public interface Query extends Serializable {
             "   ,   R.nome          AS \"nome\"" +
             "   FROM ruologestione RG " +
             "       INNER JOIN ruolo R on RG.id_ruolo = R.id " +
-            "   WHERE RG.id_persona = ?";
+            "   WHERE RG.id_persona = ?" +
+            "       AND RG.id_ruolo <> 6";
         
     /**
      * <p>Estrae i progetti dell'utente 
@@ -1621,7 +1628,7 @@ public interface Query extends Serializable {
             "   FROM avanzamentoprogetto AP " +
             "   WHERE AP.id_progetto = ?" +
             "   ORDER BY AP.datainizio";
-    
+
     /**
      * <p>Estrae le attivit&agrave; presenti nel periodo di avanzamento progetto corrente.</p>
      */
@@ -1652,7 +1659,8 @@ public interface Query extends Serializable {
             "                   (A.datainizio <= ? AND A.datafine >= ?) " +
             "                OR ((A.datainizio BETWEEN ? AND ?))" +
             "           )" +
-            "       AND A.id_stato <> 12";
+            "       AND A.id_stato <> 12" +
+            "   ORDER BY A.nome";
     
     /**
      * <p>Estrae lo status di avanzamento di un progetto successivo, in ordine di datainizio, 
