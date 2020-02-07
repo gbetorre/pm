@@ -75,9 +75,9 @@ public class Utils {
     static final String FOR_NAME = "\n" + Logger.getLogger(new Throwable().getStackTrace()[0].getClassName()) + ": ";
     /**
      * <p>Costante da utilizzare quando serve uno spazio (l'equivalente,
-     * in html, di &nbsp;), generalmente usato per separare pi&uacute; 
-     * sottostostringhe in una stringa da restituire come valore 
-     * oppure messaggio.</p>
+     * in java, dell'html &quot;&nbsp;&quot;), generalmente usato 
+     * per separare pi&uacute; sottostostringhe in una stringa 
+     * da restituire come valore oppure messaggio.</p>
      */
     public static final char BLANK_SPACE = ' ';
     /**
@@ -97,6 +97,9 @@ public class Utils {
     /**
      * <p>Costante da utilizzare quando serve un valore per inizializzazione
      * di default di un parametro mancante sulla querystring.</p>
+     * <p>Incapsula il classico trattino (-) che viene utilizzato come default
+     * per i valori mancanti di parametri richiesti tipicamente dalle 
+     * Command.</p> 
      */
     public static final String DASH = "-"; 
     /**
