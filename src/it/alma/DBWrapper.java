@@ -1135,7 +1135,8 @@ public class DBWrapper implements Query {
     
     
     /**
-     * <p>Restituisce un Vector di StatusBean rappresentante tutti gli status del progetto attuale</p>
+     * <p>Restituisce un ArrayList di StatusBean 
+     * rappresentante tutti gli status del progetto attuale</p>
      * 
      * @param projId  id del progetto di cui estrarre gli status
      * @param user    utente loggato
@@ -1166,6 +1167,68 @@ public class DBWrapper implements Query {
             while (rs.next()) {
                 status = new StatusBean();
                 BeanUtil.populate(status, rs);
+                statusList.add(status);
+            }
+            return statusList;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto VectorStatusBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce un ArrayList di StatusBean 
+     * rappresentante tutti gli status del progetto attuale, 
+     * contenenti ciascuno, al proprio interno, la lista delle sue 
+     * attivit&agrave; correnti e delle sue attivit&agrave; future.</p>
+     * 
+     * @param projId  id del progetto di cui estrarre gli status
+     * @param user    utente loggato
+     * @return <code>ArrayList&lt;StatusBean&gt;</code> - ArrayList&lt;StatusBean&gt; rappresentante gli status del progetto, corredati di info sulle attivita'
+     * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
+     */
+    @SuppressWarnings({ "null" })
+    public ArrayList<StatusBean> getFullStatusList(int projId,
+                                                   PersonBean user) 
+                                            throws WebStorageException {
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        StatusBean status, projectStatus = null;
+        ArrayList<StatusBean> statusList = new ArrayList<StatusBean>();
+        try {
+            con = pol_manager.getConnection();
+            // Per prima cosa verifica che l'utente abbia i diritti di accesso al progetto
+            if (!userCanRead(projId, user.getId())) {
+                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id progetto non valido!.\n";
+                LOG.severe(msg + "E\' presente il parametro \"q=act\" ma non un valore \"id\" - cioe\' id progetto - significativo!\n");
+                throw new WebStorageException("Attenzione: indirizzo richiesto non valido!\n");
+            }
+            pst = con.prepareStatement(GET_PROJECT_STATUS_LIST);
+            pst.clearParameters();
+            pst.setInt(1, projId);
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                // Recupera i dati di base dello status
+                status = new StatusBean();
+                BeanUtil.populate(status, rs);
+                projectStatus = getStatus(projId, status.getDataFine(), user);
                 statusList.add(status);
             }
             return statusList;

@@ -216,7 +216,7 @@ public class ActivityCommand extends ItemBean implements Command {
         // Recupera o inizializza 'id attività' (da modificare)
         int idAct = parser.getIntParameter("ida", Utils.DEFAULT_ID);
         // Recupera o inizializza 'tipo pagina'   
-        String part = parser.getStringParameter("p", "-");
+        String part = parser.getStringParameter("p", Utils.DASH);
         // Flag di scrittura
         boolean write = (boolean) req.getAttribute("w");
         /* ******************************************************************** *
@@ -361,7 +361,7 @@ public class ActivityCommand extends ItemBean implements Command {
                              *      all'inserimento di una nuova attivita'      *
                              * ************************************************ */
                             //isHeader = isFooter = false;
-                            candidates = db.getPeople(runtimeProject.getId());
+                            candidates = db.getPeopleByBelonging(runtimeProject.getId());
                             workPackage = db.getWbs(runtimeProject.getId(), user, Query.WBS_WP_ONLY);
                             for (WbsBean wp: workPackage) {
                                 wp.setWbsPadre(db.getWbsParentByOffspring(idPrj, user, wp.getId()));
@@ -383,7 +383,7 @@ public class ActivityCommand extends ItemBean implements Command {
                             }
                             //isHeader = isFooter = false;
                             activity = db.getActivity(idPrj, idAct, user);
-                            candidates = db.getPeople(runtimeProject.getId());
+                            candidates = db.getPeopleByBelonging(runtimeProject.getId());
                             workPackage = db.getWbs(runtimeProject.getId(), user, Query.WBS_WP_ONLY);
                             for (WbsBean wp: workPackage) {
                                 wp.setWbsPadre(db.getWbsParentByOffspring(idPrj, user, wp.getId()));

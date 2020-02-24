@@ -38,10 +38,13 @@ package it.alma;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Vector;
 import java.util.logging.Logger;
 
@@ -54,12 +57,15 @@ import javax.servlet.http.HttpServletResponse;
 import com.oreilly.servlet.ParameterParser;
 
 import it.alma.bean.ActivityBean;
+import it.alma.bean.CodeBean;
 import it.alma.bean.ItemBean;
 import it.alma.bean.PersonBean;
 import it.alma.bean.ProjectBean;
+import it.alma.bean.StatusBean;
 import it.alma.bean.WbsBean;
 import it.alma.command.Command;
 import it.alma.command.HomePageCommand;
+import it.alma.command.ProjectCommand;
 import it.alma.command.WbsCommand;
 import it.alma.exception.AttributoNonValorizzatoException;
 import it.alma.exception.CommandException;
@@ -72,7 +78,7 @@ import it.alma.exception.WebStorageException;
  * 'text/html'.</p>
  * Questa servlet fa a meno, legittimamente, del design (View),
  * in quanto l'output prodotto consiste in pure tuple prive di presentazione
- * (e.g. fileset CSV, formati XML, dati con o senza metadati, RDF 
+ * (e.g. fileset CSV, formati XML, dati con o senza metadati, RDF, RTF 
  * <cite>and so on</cite>).<br />
  * <p>
  * Questa servlet estrae l'azione dall'URL, ne verifica la
@@ -83,18 +89,17 @@ import it.alma.exception.WebStorageException;
  * 'text/html' (come nel funzionamento standard delle applicazioni web), 
  * quanto sotto forma di file nel formato richiesto (.csv, .xml, ecc.).<br /> 
  * Elabora anche un nome univoco per ogni file generato, basandosi sul
- * timestamp dell'estrazione/richiesta.
- * </p>
+ * timestamp dell'estrazione/richiesta.</p>
  * <p>
  * La classe che realizza l'azione deve implementare l'interfaccia
  * Command e, dopo aver eseguito le azioni necessarie, restituire
  * un set di risultati che dovr&agrave; essere utilizzato per
  * visualizzare i dati all'interno dei files serviti, ai quali
- * sarà fatto un forward.
+ * sar&agrave; fatto un forward.
  * </p>
  * L'azione presente nell'URL deve avere il seguente formato:
  * <pre>q=&lt;nome&gt;</pre>
- * dove 'nome' è il valore del parametro 'q' che identifica 
+ * dove 'nome' &egrave; il valore del parametro 'q' che identifica 
  * l'azione da compiere al fine di generare i record.<br />
  * Oltre al parametro <code>'q'</code> possono essere presenti anche
  * eventuali altri parametri, ma essi non hanno interesse nel contesto
@@ -152,6 +157,10 @@ public class Data extends HttpServlet {
      * Attributo per il valore del parametro obbligatorio 'ent'
      */
     private static String entToken;
+    /** 
+     * Attributo per il valore del parametro identificativo dell'output 'out'
+     */
+    private String format;
     /**
      * Costante per l'uso del separatore trattino
      */
@@ -269,46 +278,7 @@ public class Data extends HttpServlet {
             }
         }
     }
-    
-    
-    /**
-     * <p>Il metodo Service gestisce le richieste del client.</p>
-     * <p><cite id="malacarne" data-exact-page="99">
-     *  Il metodo service viene invocato dal servlet-engine come azione
-     *  di risposta alla ricezione di una HttpRequest.
-     *  Questo metodo, nella sua implementazione originale, funziona
-     *  come dispatcher, ossia, in base al codice operazione HTTP ricevuto,
-     *  attiva il metodo disponibile pi&uacute; opportuno (...)
-     * </cite></p>
-     * <p>Considerando che:<br />
-     * <cite id="malacarne" data-exact-page="100">
-     * "Una sottoclasse di HttpServlet dovrebbe preferenzialmente
-     *  sovrascrivere uno dei metodi precedenti<br />
-     *  (n.d.r.: <code>doGet | doPost | doOption | doPut | doTrace</code>)<br />
-     *  In taluni casi per&ograve; (...) risulta essere pi&uacute; 
-     *  conveniente, ma deve essere una scelta ben ponderata, sovrascrivere
-     *  direttamente il metodo service"</cite><br />
-     * la Servlet Data, correttamente, non implementa il metodo 
-     * service, anche perch&eacute; questo si limiterebbe
-     * a richiamare semplicemente la doGet(), e dunque potrebbe essere
-     * fonte di perdita di prestazioni a fronte di nessun guadagno. 
-     * </p>
-     * Se implementare il metodo service() non avesse avuto controindicazioni, 
-     * un'implementazione di tale metodo 
-     * avrebbe potuto quindi assumere la seguente forma:
-     * <pre>
-     * @param req HttpServletRequest proveniente dal client
-     * @param res HttpServletResponse che verra' utilizzata per rispedire al client il file di dati richiesto
-     * @throws ServletException eccezione propagata che puo' originare dalla doGet richiamata
-     * @throws IOException eccezione propagata che puo' originare dalla doGet richiamata
-     *
-     * public void service(HttpServletRequest req, HttpServletResponse res)
-     * 	            throws ServletException, IOException {
-     *      doGet(req, res);
-     * }
-     * </pre>
-     */
-    
+        
     
     /** (non-Javadoc)
      * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
@@ -331,38 +301,6 @@ public class Data extends HttpServlet {
            log("Eccezione: " + ce);
         }
         try {
-            // Crea un nome univoco per il file che andrà ad essere generato
-            Calendar now = Calendar.getInstance();
-            String fileName = req.getParameter(entToken) + '_' + 
-                              new Integer(now.get(Calendar.YEAR)).toString() + HYPHEN +
-                              String.format("%02d", now.get(Calendar.MONTH) + 1) + HYPHEN +
-                              String.format("%02d", now.get(Calendar.DAY_OF_MONTH)) + '_' +
-                              String.format("%02d", now.get(Calendar.HOUR_OF_DAY)) + 
-                              String.format("%02d", now.get(Calendar.MINUTE)) + 
-                              String.format("%02d", now.get(Calendar.SECOND));
-            // Configura il response per il browser
-            res.setContentType("text/x-comma-separated-values");
-            /* Il db di pol e' codificato in UTF-8:
-             * pol  | gtorre   | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =Tc/gtorre 
-             * pertanto la prima idea nell'implementazione era che
-             * il characterEncoding migliore da impostare fosse il medesimo:
-             * //res.setCharacterEncoding("UTF-8");
-             * Tuttavia, le estrazioni sono destinate ad essere visualizzate
-             * attraverso fogli di calcolo che per impostazione predefinita
-             * considerano il charset dei dati il latin1, non UTF-8, 
-             * perlomeno per la nostra utenza e per la maggior parte
-             * delle piattaforme, per cui dati, se espressi in formato UTF-8, 
-             * risultano codificati in maniera imprecisa, perche', come al solito, 
-             * quando un dato UTF-8 viene codificato in latin1 
-             * (quest'ultimo anche identificato come: l1, csISOLatin1, iso-ir-100, 
-             * IBM819, CP819, - o ultimo ma non ultimo - ISO-8859-1) 
-             * i caratteri che escono al di fuori dei primi 128 caratteri,
-             * che sono comuni (in quanto UTF-8 usa un solo byte per 
-             * codificare i primi 128 caratteri) non vengono visualizzati
-             * correttamente ma vengono espressi con caratteri che in ASCII sono 
-             * non corrispondenti.                                              */
-            res.setCharacterEncoding("ISO-8859-1");
-            res.setHeader("Content-Disposition","attachment;filename=" + fileName + ".csv");
             fprintf(req, res, usr);
         } catch (Exception e) {
             log.severe("Problema nella doGet di Data" + e.getMessage());
@@ -405,6 +343,84 @@ public class Data extends HttpServlet {
     private int fprintf(HttpServletRequest req, HttpServletResponse res, PersonBean usr)
                  throws ServletException, IOException {
         /*
+         * Definisce una variabile per il valore di ritorno (valori negativi significano 'problema')
+         */
+        int success = -1;
+        /*
+         *  Parser per la gestione assistita dei parametri di input
+         */
+        ParameterParser parser = new ParameterParser(req);
+        /*
+         * Recupera il valore del parametro obbligatorio 'out'
+         */
+        format = parser.getStringParameter("out", Utils.DASH);
+        /*
+         *  Crea un nome univoco per il file che andrà ad essere generato
+         */
+        Calendar now = Calendar.getInstance();
+        String fileName = req.getParameter(entToken) + '_' + 
+                          new Integer(now.get(Calendar.YEAR)).toString() + HYPHEN +
+                          String.format("%02d", now.get(Calendar.MONTH) + 1) + HYPHEN +
+                          String.format("%02d", now.get(Calendar.DAY_OF_MONTH)) + '_' +
+                          String.format("%02d", now.get(Calendar.HOUR_OF_DAY)) + 
+                          String.format("%02d", now.get(Calendar.MINUTE)) + 
+                          String.format("%02d", now.get(Calendar.SECOND));
+        /*
+         *  Gestisce il tipo di output in funzione del tipo di output voluto
+         */
+        if (format.equalsIgnoreCase("rtf")) { 
+            res.setContentType("application/rtf");
+            res.setCharacterEncoding("ISO-8859-1");
+            res.setHeader("Content-Disposition","attachment;filename=" + fileName + ".rtf");
+            success = makeRTF(req, res, usr);
+        } else {
+            // Configura il response per il browser
+            res.setContentType("text/x-comma-separated-values");
+            /* Il db di pol e' codificato in UTF-8:
+             * pol  | gtorre   | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =Tc/gtorre 
+             * pertanto la prima idea nell'implementazione era che
+             * il characterEncoding migliore da impostare fosse il medesimo:
+             * //res.setCharacterEncoding("UTF-8");
+             * Tuttavia, le estrazioni sono destinate ad essere visualizzate
+             * attraverso fogli di calcolo che per impostazione predefinita
+             * considerano il charset dei dati il latin1, non UTF-8, 
+             * perlomeno per la nostra utenza e per la maggior parte
+             * delle piattaforme, per cui dati, se espressi in formato UTF-8, 
+             * risultano codificati in maniera imprecisa, perche', come al solito, 
+             * quando un dato UTF-8 viene codificato in latin1 
+             * (quest'ultimo anche identificato come: l1, csISOLatin1, iso-ir-100, 
+             * IBM819, CP819, - o ultimo ma non ultimo - ISO-8859-1) 
+             * i caratteri che escono al di fuori dei primi 128 caratteri,
+             * che sono comuni (in quanto UTF-8 usa un solo byte per 
+             * codificare i primi 128 caratteri) non vengono visualizzati
+             * correttamente ma vengono espressi con caratteri che in ASCII sono 
+             * non corrispondenti.                                              */
+            res.setCharacterEncoding("ISO-8859-1");
+            res.setHeader("Content-Disposition","attachment;filename=" + fileName + ".csv");
+            success = makeCSV(req, res, usr);
+        }
+        return success;
+    }
+
+    
+    /**
+     * <p>Genera il contenuto dello stream, che questa classe tratta 
+     * sotto forma di file CSV, che viene trasmesso sulla risposta in output,
+     * a seconda del valore di <code>'ent' (q)</code> che riceve in input.</p>
+     * 
+     * @param req la HttpServletRequest contenente il valore di 'ent' e gli altri parametri necessari a formattare opportunamente l'output
+     * @param res la HttpServletResponse utilizzata per ottenere il 'Writer' su cui stampare il contenuto, cioe' il file stesso
+     * @param usr PersonBean rappresentante l'utente loggato (per evitare che, conoscendo l'url, si possano scaricare report senza loggarsi!)
+     * @return <code>int</code> - un valore intero corrispondente al numero di record inviati allo stream oppure -1 in caso non se ne siano trovati
+     * @throws ServletException   java.lang.Throwable.Exception.ServletException che viene sollevata se manca un parametro di configurazione considerato obbligatorio o per via di qualche altro problema di puntamento
+     * @throws IOException        java.io.IOException che viene sollevata se si verifica un puntamento a null o in genere nei casi in cui nella gestione del flusso informativo di questo metodo si verifica un problema
+     */
+    private int makeCSV(HttpServletRequest req,
+                        HttpServletResponse res, 
+                        PersonBean usr)
+                 throws ServletException, 
+                        IOException {
+        /*
          *  Genera l'oggetto per lo standard output
          */
         PrintWriter out = res.getWriter();
@@ -422,11 +438,10 @@ public class Data extends HttpServlet {
          */
         int success = -1;
         /* **************************************************************** *
-         *          Contenuto files CSV per Report di WBS          *
+         *              Contenuto files CSV per Report di WBS               *
          * **************************************************************** */
         if (req.getParameter(entToken).equals("wbs")) { 
             try {
-                WbsCommand wbsc = (WbsCommand) cmd;
                 ProjectBean p = db.getProject(idPrj, usr.getId());
                 Vector<WbsBean> listWP = WbsCommand.retrieveWorkPackages(idPrj, db, usr);
                 // Scrittura file CSV
@@ -494,140 +509,20 @@ public class Data extends HttpServlet {
             }
         }
         /* **************************************************************** *
-         *                Contenuto files CSV per Report di progetto             *
+         *             Contenuto files CSV per Report di progetto           *
          * **************************************************************** */
-        else if (req.getParameter(entToken).equalsIgnoreCase("gareavcp")) { /*
-            try {            
-                GareAVCPCommand avcp = (GareAVCPCommand) cmd;
-                Vector<LottoBean> elencoGare = avcp.requestByContent(req, lingue);
-                String unitaOperativa = new String("");
-                String areaDiDirezione = new String("");
-                String direzione = new String("");
-                String biblioteca = new String("");
-                String struttura = new String("");
-                // Scrittura file CSV
-                out.println("N." + SEPARATOR +
-                            bundle.getString("CodiceCig") + SEPARATOR + 
-                            bundle.getString("Oggetto") + SEPARATOR + 
-                            bundle.getString("DataPubbl") + SEPARATOR + 
-                            bundle.getString("TipologiaGara") + SEPARATOR + 
-                            bundle.getString("SceltaContraente") + SEPARATOR +
-                            bundle.getString("ImportoDiAggiudicazione") + SEPARATOR + 
-                            bundle.getString("ImportoComplessivo") + SEPARATOR +
-                            bundle.getString("PartecipantiGara") + SEPARATOR +
-                            bundle.getString("DataInizio") + SEPARATOR +
-                            bundle.getString("DataFine") + SEPARATOR +
-                            bundle.getString("Anno") + SEPARATOR + 
-                            bundle.getString("Direzione") + SEPARATOR +
-                            bundle.getString("AreaDiDirezione") + SEPARATOR +
-                            bundle.getString("UnitaOperativa").replace("&agrave;", "a\'") + SEPARATOR +
-                            bundle.getString("StrutturaServizio") + " " + 
-                            bundle.getString("DelDipartimento") + "/" + 
-                            bundle.getString("DellaScuola") + SEPARATOR +
-                            bundle.getString("Biblioteca")
-                            );
-                if (elencoGare.size() > 0) {
-                    int itCounts = 0, record = 0;
-                    do {
-                        LottoBean lotto = elencoGare.elementAt(itCounts);
-                        GaraBean primaGara = (GaraBean) lotto.getGara().firstElement();
-                        // Calcolo dei partecipanti
-                        StringBuffer partecipanti = new StringBuffer();
-                        // Vector<EnteEsternoBean> partecipantiSingoli
-                        Vector<?> partecipantiSingoli = lotto.getPartecipantiSingoli();
-                        // Vector<GruppoOperatoriBean> partecipantiGruppi
-                        Vector<?> partecipantiGruppi = lotto.getPartecipantiGruppi();
-                        // Numero di partecipanti
-                        int numPartecipante = 1;
-                        if (!partecipantiSingoli.isEmpty()) {
-                            for (int i = 0; i < partecipantiSingoli.size(); i++) {
-                                EnteEsternoBean partecipante = (EnteEsternoBean) partecipantiSingoli.get(i);
-                                partecipanti.append(numPartecipante);
-                                partecipanti.append(". ");
-                                partecipanti.append(partecipante.getRagioneSociale());
-                                if (partecipante.isAggiudicatario())
-                                    partecipanti.append(" (*) ");
-                                numPartecipante++;
-                            }
-                            for (int i = 0; i < partecipantiGruppi.size(); i++) {
-                                GruppoOperatoriBean gruppo = (GruppoOperatoriBean) partecipantiGruppi.get(i);
-                                if (!gruppo.getOperatori().isEmpty()) {
-                                    Vector<EnteEsternoBean> operatori = gruppo.getOperatori();
-                                    partecipanti.append(" Gruppo: ");
-                                    if (gruppo.isAggiudicatario()) {
-                                        partecipanti.append("(*) ");
-                                    }
-                                    numPartecipante = 1;
-                                    for(int j = 0; j < operatori.size(); j++) {
-                                        EnteEsternoBean operatore = operatori.get(j);
-                                        partecipanti.append(numPartecipante);
-                                        partecipanti.append(". ");
-                                        partecipanti.append(operatore.getRagioneSociale());
-                                        partecipanti.append(" (");
-                                        partecipanti.append(operatore.getRuoloInGruppoOE().substring(3, operatore.getRuoloInGruppoOE().length()));
-                                        partecipanti.append(") ");
-                                        numPartecipante++;
-                                    }
-                                }
-                            }
-                        }
-                        // Controlli sull'input 
-                        String dataInizio = (lotto.getDatainiziolavori() != null ? String.valueOf(lotto.getDatainiziolavori()) : bundle.getString("NonInserito").toUpperCase());
-                        String dataFine = (lotto.getDatafinelavori() != null ? String.valueOf(lotto.getDatafinelavori()) : bundle.getString("NonInserito").toUpperCase());
-                        String importoAggiudicazione = (lotto.getImportoaggiudicazione() > OrganizzazioneCommand.NONE ? String.format("%.2f", lotto.getImportoaggiudicazione()).replace('.', ',') : bundle.getString("NonInserito").toUpperCase());
-                        String importoLiquidazione = (lotto.getImportosommeliquidate() > OrganizzazioneCommand.NONE ? String.format("%.2f", lotto.getImportosommeliquidate()).replace('.', ',') : bundle.getString("NonInserito").toUpperCase());
-                        if (primaGara.getUnitaMittente() != null){
-                            unitaOperativa = (primaGara.getUnitaMittente().getNome() != null ? primaGara.getUnitaMittente().getNome() : new String(""));
-                        } else {
-                            unitaOperativa = new String("");
-                        }
-                        if (primaGara.getAreaMittente() != null){
-                            areaDiDirezione = (primaGara.getAreaMittente().getNome() != null ? String.valueOf(primaGara.getAreaMittente().getNome()) : new String(""));
-                        } else {
-                            areaDiDirezione = new String("");
-                        }
-                        if (primaGara.getDirMittente() != null){
-                            direzione = (primaGara.getDirMittente().getNome() != null ? String.valueOf(primaGara.getDirMittente().getNome()) : new String(""));
-                        } else {
-                            direzione = new String("");
-                        }
-                        if (primaGara.getBiblioMittente() != null){
-                            biblioteca = (primaGara.getBiblioMittente().getNome() != null ? String.valueOf(primaGara.getBiblioMittente().getNome()) : new String(""));
-                        } else {
-                            biblioteca = new String("");
-                        }
-                        if (primaGara.getStruttMittente() != null){
-                            struttura = (primaGara.getStruttMittente().getNome() != null ? String.valueOf(primaGara.getStruttMittente().getNome()) : new String(""));
-                        } else {
-                            struttura = new String("");
-                        }
-                        // Stampa il contenuto del file
-                        out.println(
-                                    String.valueOf(++record) + SEPARATOR +
-                                    lotto.getCodiceCig().replace(';', ',') + SEPARATOR +
-                                    lotto.getNome().replace(';', ',').replace('’', '\'') + SEPARATOR +
-                                    primaGara.getDataAlbo() + SEPARATOR + 
-                                    primaGara.getTipo() + SEPARATOR + 
-                                    lotto.getSceltacontraente() + SEPARATOR + 
-                                    importoAggiudicazione + SEPARATOR +
-                                    importoLiquidazione + SEPARATOR +
-                                    partecipanti.toString().replace(';', ',') + SEPARATOR +
-                                    dataInizio + SEPARATOR +
-                                    dataFine + SEPARATOR +
-                                    primaGara.getAnno() + SEPARATOR +
-                                    direzione + SEPARATOR +
-                                    areaDiDirezione + SEPARATOR +
-                                    unitaOperativa + SEPARATOR +
-                                    struttura + SEPARATOR +
-                                    biblioteca                                    
-                                   );
-                        itCounts++;
-                    } while (itCounts < elencoGare.size());
-                    success = itCounts;
+        else if (req.getParameter(entToken).equalsIgnoreCase("pol")) { 
+            ArrayList<StatusBean> stati = new ArrayList<StatusBean>();
+            try {
+                
+                ArrayList<StatusBean> projectStatusList =  db.getStatusList(idPrj, usr);
+                for (StatusBean projectStatusItem : projectStatusList) {
+                    StatusBean stato = db.getStatus(idPrj, projectStatusItem.getId(), usr);
+                    stati.add(stato);
                 }
-            } catch (CommandException ce) {
-                log.severe(FOR_NAME + "Si e\' verificato un problema nel recupero di elenco gare AVCP" + ce.getMessage());
-                out.println(ce.getMessage());
+            } catch (WebStorageException wse) {
+                log.severe(FOR_NAME + "Si e\' verificato un problema nel recupero di elenco status" + wse.getMessage());
+                out.println(wse.getMessage());
             } catch (IndexOutOfBoundsException iobe) {
                 String msg = FOR_NAME + "Si e\' verificato un problema nello scorrimento di liste.\n" + iobe.getMessage();
                 log.severe(msg + "Probabile puntamento fuori tabella!");
@@ -651,7 +546,167 @@ public class Data extends HttpServlet {
             } catch (Exception e) {
                 log.severe(FOR_NAME + "Problema nella fprintf di Data" + e.getMessage());
                 out.println(e.getMessage());
-            }*/
+            }
+        }
+        else {
+            String msg = FOR_NAME + "La Servlet Data non accetta la stringa passata come valore di 'ent': " + req.getParameter(entToken);
+            log.severe(msg + "Tentativo di indirizzare alla Servlet Data una richiesta non gestita. Hacking test?\n");
+            throw new IOException(msg);
+        }
+        return success;
+    }
+    
+    
+    /**
+     * <p>Genera il contenuto dello stream, che questa classe tratta 
+     * sotto forma di file formato RTF, che viene trasmesso sulla risposta 
+     * in output, a seconda del valore di <code>'ent' (q)</code> 
+     * che riceve in input.</p>
+     * 
+     * @param req la HttpServletRequest contenente il valore di 'ent' e gli altri parametri necessari a formattare opportunamente l'output
+     * @param res la HttpServletResponse utilizzata per ottenere il 'Writer' su cui stampare il contenuto, cioe' il file stesso
+     * @param usr PersonBean rappresentante l'utente loggato (per evitare che, conoscendo l'url, si possano scaricare report senza loggarsi!)
+     * @return <code>int</code> - un valore intero corrispondente al numero di record inviati allo stream oppure -1 in caso non se ne siano trovati
+     * @throws ServletException   java.lang.Throwable.Exception.ServletException che viene sollevata se manca un parametro di configurazione considerato obbligatorio o per via di qualche altro problema di puntamento
+     * @throws IOException        java.io.IOException che viene sollevata se si verifica un puntamento a null o in genere nei casi in cui nella gestione del flusso informativo di questo metodo si verifica un problema
+     */
+    private int makeRTF(HttpServletRequest req, 
+                        HttpServletResponse res, 
+                        PersonBean usr)
+                 throws ServletException, 
+                        IOException {
+        /*
+         *  Genera l'oggetto per lo standard output
+         */
+        PrintWriter out = res.getWriter();
+        /* 
+         * Parser per la gestione assistita dei parametri di input
+         */
+        ParameterParser parser = new ParameterParser(req);
+        /* 
+         * Recupera o inizializza 'id progetto'
+         */
+        int idPrj = parser.getIntParameter("id", Utils.DEFAULT_ID);
+        /*
+         *  Tradizionalmente, ogni funzione della famiglia x-printf 
+         *  restituisce un intero
+         */
+        int success = -1;
+        /* **************************************************************** *
+         *       Contenuto files RTF per Relazione degli Avanzamenti        * 
+         *                        (Relazione Finale)                        *
+         * **************************************************************** */
+        if (req.getParameter(entToken).equalsIgnoreCase("pol")) {
+            try {
+                ProjectBean p = db.getProject(idPrj, usr.getId());
+                ArrayList<StatusBean> statusJournal = ProjectCommand.retrieveStatusJournal(idPrj, db, usr);
+                // Preprazione file RTF
+                String header = "{\\rtf1 \\ansi \\deff0 {\\fonttbl {\\f0 Times New Roman;}}" +
+                                "{\\info" +
+                                    "{\\title Bozza di relazione ammuale}" +
+                                    "{\\author Giovanroberto Torre}" +
+                                    "{\\company Verona University}" +
+                                    "{\\creatim\\yr2019\\mo10\\dy1\\hr8\\min34}" +
+                                    "{\\doccomm https://pm.pcd.univr.it/pm/}" +
+                                "}" +
+                                "\\qc \\f0 \\fs60 " + 
+                                "{\\i \\b " + p.getTitolo() + "}" +
+                                "\\line" +
+                                "{\\pard" +
+                                    "\\qc \\f0 \\fs30 " + 
+                                    "Numero di avanzamenti di progetto trovati: " +
+                                    statusJournal.size() +
+                                "\\par}" +
+                                "\\line";
+                StringBuffer content = new StringBuffer(header);
+                // Ricava il contenuto
+                for (StatusBean status : statusJournal) {
+                    content.append("{\\pard ");
+                    content.append("\\qj \\f0 \\fs26 ");
+                    content.append("Avanzamento di progetto dal: ");
+                    content.append(Utils.format(status.getDataInizio()));
+                    content.append(" al: ");
+                    content.append(Utils.format(status.getDataFine()));
+                    content.append("\\line");
+                    content.append("{\\pard ");
+                        content.append("\\qj \\f0 \\fs18 ");
+                        content.append("\\line ");
+                        content.append("Descrizione: ");
+                        content.append("{\\i ");
+                        content.append(status.getDescrizioneAvanzamento());
+                        content.append("}");
+                        content.append("\\line ");
+                        Iterator<Map.Entry<String, CodeBean>> it = status.getStati().entrySet().iterator();
+                        do {
+                            Map.Entry<String, CodeBean> entry = it.next();
+                            String key = entry.getKey();
+                            CodeBean value = entry.getValue();
+                            content.append(key);
+                            content.append(": ");
+                            content.append(value.getNome());
+                            content.append( "\\line ");
+                        } while (it.hasNext());
+                        content.append("\\line ");
+                        content.append("{\\qj \\f0 \\fs24 ");
+                        content.append("Attività correnti nello status: ");
+                        content.append("\\line }");
+                        ArrayList<ActivityBean> activities = status.getAttivita();
+                        for (ActivityBean act : activities) {
+                            //content.append("{\\pard \\ql \\li720 \\fs20 \\b ");
+                            content.append("{\\pard ");
+                            content.append("{\\pn \\pnlvlblt}{\\ltrch " + act.getNome() + " } \\li720 \\ri0 \\sb0 \\tx720 \\fi-360 \\ql ");
+                            content.append("\\par}");
+                            if (!act.getNoteAvanzamento().equals(Utils.VOID_STRING)) {
+                                content.append("{\\pard \\ql \\li1400 ");
+                                content.append("Note di avanzamento: ");
+                                content.append("\\line ");
+                                content.append("{\\i " + act.getNoteAvanzamento() + "}");
+                                content.append("\\line ");
+                                content.append("\\par}");
+                            }
+                            if (!act.getRisultatiRaggiunti().equals(Utils.VOID_STRING)) {
+                                content.append("{\\pard \\ql \\li1400 ");
+                                content.append("Risultati raggiunti: ");
+                                content.append("\\line ");
+                                content.append("{\\i " + act.getRisultatiRaggiunti() + "}");
+                                content.append("\\line ");
+                                content.append("\\par}");
+                            }
+                        }
+                    content.append("\\par}");
+                    content.append("\\qj \\f0 \\fs26 ");
+                    content.append("\\par}");
+                }
+                content.append("}");
+                // Stampa il contenuto del file
+                out.println(String.valueOf(content));
+            } catch (WebStorageException wse) {
+                log.severe(FOR_NAME + "Si e\' verificato un problema nel recupero di elenco status" + wse.getMessage());
+                out.println(wse.getMessage());
+            } catch (IndexOutOfBoundsException iobe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nello scorrimento di liste.\n" + iobe.getMessage();
+                log.severe(msg + "Probabile puntamento fuori tabella!");
+                out.println(msg);            
+            } catch (ClassCastException cce) {
+                String msg = FOR_NAME + "Problema nel definire il tipo di una risorsa.\n" + cce.getMessage();
+                log.severe(msg);
+                out.println(msg);
+            } catch (NullPointerException npe) {
+                StackTraceElement[] stackTrace = npe.getStackTrace();
+                StringBuffer trace = new StringBuffer("\n");
+                for (StackTraceElement stack : stackTrace) 
+                    trace.append(stack.toString()).append("\n");
+                String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a: " + npe.getMessage() + trace.toString();
+                log.severe(msg);
+                out.println(msg);
+            } catch (RuntimeException re) {
+                String msg = FOR_NAME + "Si e\' verificato un problema a tempo di esecuzione\n." + re.getMessage();
+                log.severe(msg);
+                out.println(msg);
+            } catch (Exception e) {
+                log.severe(FOR_NAME + "Problema nella fprintf di Data" + e.getMessage());
+                out.println(e.getMessage());
+            }
         }
         else {
             String msg = FOR_NAME + "La Servlet Data non accetta la stringa passata come valore di 'ent': " + req.getParameter(entToken);
