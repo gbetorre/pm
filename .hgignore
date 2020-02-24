@@ -5,3 +5,5 @@ javadoc.xml
 .settings/
 .classpath
 web/style/__history/
+RemoteSystemsTempFiles\.project
+etc\content-types.properties
