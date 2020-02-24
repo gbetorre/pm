@@ -36,7 +36,6 @@
 
 package it.alma.command;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -64,7 +63,6 @@ import it.alma.bean.DepartmentBean;
 import it.alma.bean.ItemBean;
 import it.alma.bean.PersonBean;
 import it.alma.bean.ProjectBean;
-import it.alma.bean.RiskBean;
 import it.alma.bean.SkillBean;
 import it.alma.bean.StatusBean;
 import it.alma.bean.WbsBean;
@@ -180,7 +178,7 @@ public class ProjectCommand extends ItemBean implements Command {
         // Recupera o inizializza 'id stato progetto'
         int idStatus = parser.getIntParameter("ids", -1);
         // Recupera o inizializza 'tipo pagina'   
-        String part = parser.getStringParameter("p", "-");
+        String part = parser.getStringParameter("p", Utils.DASH);
         // Recupera o inizializza 'data visualizzazione report'
         String selectionDate = parser.getStringParameter("d", Utils.format(Utils.getCurrentDate()));
         // Flag di scrittura
@@ -195,8 +193,8 @@ public class ProjectCommand extends ItemBean implements Command {
         LinkedList<CodeBean> statiValues = null;
         // Dichiara elenco di competenze
         Vector<SkillBean> vSkills = new Vector<SkillBean>();
-        // Dichiara elenco di rischi
-        Vector<RiskBean> vRisks = new Vector<RiskBean>();
+        // Dichiara elenco di persone con ruoli su specifico progetto
+        ArrayList<ItemBean> roles = null;
         // Dichiara l'elenco degli status di un progetto
         ArrayList<StatusBean> projectStatusList = new ArrayList<StatusBean>();
         // Dichiara l'avanzamento progetto più recente
@@ -263,7 +261,7 @@ public class ProjectCommand extends ItemBean implements Command {
                         HashMap<String, HashMap<String, String>> params = new HashMap<String, HashMap<String, String>>();
                         loadParams(part, parser, params);
                         try {
-                            // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
+                            // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate (o authenticateEncrypted)
                             HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
                             Vector<ProjectBean> writablePrj = (Vector<ProjectBean>) ses.getAttribute("writableProjects");
                             if (writablePrj == null) {
@@ -283,13 +281,13 @@ public class ProjectCommand extends ItemBean implements Command {
                                 /* **************************************************** *
                                  *                  UPDATE Project Part                 *
                                  * **************************************************** */
-                                db.updateProjectPart(idPrj, writablePrj, user.getId(), writableProjects, objectsMap, params);
+                                db.updateProjectPart(idPrj, writablePrj, user, writableProjects, objectsMap, params);
                                 Vector<ProjectBean> userWritableProjects = db.getProjects(user.getId(), Query.GET_WRITABLE_PROJECTS_ONLY);
-                                // Aggiorna i progetti, le attivita dell'utente in sessione
+                                // Aggiorna i progetti dell'utente in sessione
                                 ses.removeAttribute("writableProjects");
-                                ses.removeAttribute("writableActivity");
                                 ses.setAttribute("writableProjects", userWritableProjects);
-                                ses.setAttribute("writableActivity", userWritableActivitiesByProjectId);
+                                //ses.removeAttribute("writableActivity");
+                                //ses.setAttribute("writableActivity", userWritableActivitiesByProjectId);
                             }
                         } catch (AttributoNonValorizzatoException anve) {
                             String msg = FOR_NAME + "Impossibile recuperare un attributo obbligatorio, probabilmente l\'id dell\'utente.\n";
@@ -323,7 +321,8 @@ public class ProjectCommand extends ItemBean implements Command {
                     projectStatusList = db.getStatusList(idPrj, user);
                     // Per ottimizzare il caricamento di dati nella request separa i rami della richiesta
                     if (part.equals(Query.PART_PROJECT)) {
-                        ; // Codice per mostrare dati aggregati sul progetto, o relazioni o altro
+                        // Codice per mostrare dati aggregati sul progetto, o relazioni o altro
+                        roles = db.getPeople(idPrj);
                     } else if (part.equals(Query.PART_STATUS)) {
                         /* ************************************************************ *
                          *      Implementazione logica per recupero degli status        *
@@ -437,8 +436,10 @@ public class ProjectCommand extends ItemBean implements Command {
         req.setAttribute("progetto", runtimeProject);
         // Imposta nella request elenco competenze del progetto
         req.setAttribute("competenze", vSkills);
-        // Imposta nella request elenco rischi del progetto
-        //req.setAttribute("rischi", vRisks);
+        // Imposta nella request elenco ruoli del progetto
+        if (roles != null) {
+            req.setAttribute("staff", roles);
+        }
         // Imposta nella request elenco degli status di un progetto
         req.setAttribute("listProjectStatus", projectStatusList);
         // Imposta nella request l'avanzamento progetto più recente
@@ -794,4 +795,52 @@ public class ProjectCommand extends ItemBean implements Command {
             throw new CommandException(msg + e.getMessage(), e);
         }
     }
+    
+    
+    /**TODO commento
+     * <p>Restituisce un Vector di .</p>
+     * 
+     * @param idPrj identificativo del progetto corrente
+     * @param db    WebStorage per l'accesso ai dati
+     * @return <code>Vector&lt;WbsBean&gt;</code> - lista di work packages recuperati 
+     * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
+     */
+    public static ArrayList<StatusBean> retrieveStatusJournal(int idPrj,
+                                                        DBWrapper db,
+                                                        PersonBean user)
+                                                 throws CommandException {
+        // Lista di avanzamenti da restituire
+        ArrayList<StatusBean> richStatusList = new ArrayList<StatusBean>();
+        // Attività correnti nello status
+        ArrayList<ActivityBean> activitiesByRange = null;
+        try {
+            // Recupera la lista degli avanzamenti di progetto
+            ArrayList<StatusBean> projectStatusList = db.getStatusList(idPrj, user);
+            // Per ogni status di progetto trovato
+            for (StatusBean status : projectStatusList) {
+                // Ne arricchisce i dati richiamando il metodo chiamato quando si vuol consultare un singolo status 
+                StatusBean projectStatus = db.getStatus(idPrj, status.getId(), user);
+                if (projectStatus != null) {
+                    // Recupera la lista di attività presenti in un range di date
+                    activitiesByRange = new ArrayList<ActivityBean>(db.getActivitiesByRange(idPrj, user, projectStatus.getDataInizio(), projectStatus.getDataFine()));
+                    projectStatus.setAttivita(activitiesByRange);
+                    richStatusList.add(projectStatus);
+                }
+            }
+        } catch (WebStorageException wse) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di work packages.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + wse.getMessage(), wse);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n Attenzione: controllare di essere autenticati nell\'applicazione!\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + npe.getMessage(), npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+        return richStatusList;
+    }
+    
 }

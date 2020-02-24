@@ -33,14 +33,12 @@
  *   Via Dell'Artigliere, 8
  *   37129 Verona (Italy)
  */
-/**
- * 
- */
 
 package it.alma.bean;
 
 import java.io.Serializable;
 import java.sql.Time;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Vector;
@@ -100,6 +98,14 @@ public class StatusBean implements Serializable {
      * un riferimento logico ad un allegato fisico
      */
     private Vector<FileDocBean> allegati;
+    /* *******************************************************  *
+     *         Attivita' correlate allo status corrente         *
+     * ******************************************************** */
+    /**
+     * Lista di attivit&agrave;, contenente le attivit&agrave; 
+     * attuali nello status corrente
+     */
+    private ArrayList<ActivityBean> attivita;
 
     
     /**
@@ -113,6 +119,7 @@ public class StatusBean implements Serializable {
         oraUltimaModifica = null;
         autoreUltimaModifica = null;
         allegati = null;
+        attivita = null;
     }
     
     
@@ -321,6 +328,32 @@ public class StatusBean implements Serializable {
      */
     public void setAllegati(Vector<FileDocBean> allegati) {
         this.allegati = allegati;
+    }
+    
+    
+    /* ************************************************************** *
+     *              Metodi getter e setter per attivita               *
+     * ************************************************************** */
+    /**
+     * Restituisce la lista, che tiene conto dell'ordine, contenente
+     * le attivit&agrave; correnti, ovvero con date rientranti nel range
+     * delle date dello status corrente 
+     * 
+     * @return <code>ArrayList&lt;ActivityBean&gt;</code> - struttura contenente le attivita'
+     */
+    public ArrayList<ActivityBean> getAttivita() {
+        return attivita;
+    }
+
+    /**
+     * Imposta la lista, che tiene conto dell'ordine, contenente
+     * le attivit&agrave; correnti, ovvero con date rientranti nel range
+     * delle date dello status corrente 
+     * 
+     * @param attivita ArrayList contenente le attivita' da impostare
+     */
+    public void setAttivita(ArrayList<ActivityBean> attivita) {
+        this.attivita = attivita;
     }
     
 }

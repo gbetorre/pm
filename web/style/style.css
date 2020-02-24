@@ -972,3 +972,9 @@ a:hover.linkPopup {
   background: #cccc99;
   /*text-align: right;*/
   }
+  
+ .heading {
+  border-color: #99CCCC;
+  border-style: groove;
+  border-width: 1px;
+}
