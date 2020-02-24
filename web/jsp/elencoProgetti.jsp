@@ -10,7 +10,7 @@
       <div class="module">
         <c:set var="key" value="${entry.key}" scope="page" />
         <c:set var="d" value="${requestScope.dipart.get(key)}" />
-        <h4>Dipartimento di ${d.nome}</h4>
+        <h4>${d.prefisso} ${d.nome}</h4>
         <table class="table table-hover">
           <thead class="thead-light">
             <tr>
