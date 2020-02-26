@@ -604,7 +604,7 @@ public interface Query extends Serializable {
      * <p>Estrae il gruppo di appartenenza dell'utente che ha eseguito la login.</p>
      */
     public static final String GET_GROUP = 
-            "SELECT " +
+            "SELECT DISTINCT" +
             "   G.id        AS \"id\"" +
             "   ,   G.name  AS \"nome\"" +
             "   FROM grp G " +
