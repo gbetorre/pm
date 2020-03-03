@@ -99,6 +99,10 @@ public class WbsCommand extends ItemBean implements Command {
      */
     private static final String nomeFileGrafico = "/jsp/wbsGrafico.jsp";
     /**
+     * Pagina a cui la command fa riferimento per mostrare l'ordine delle wbs
+     */
+    private static final String nomeFileOrderBy = "/jsp/wbsSort.jsp";
+    /**
      * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutti gli attributi del progetto
      */    
     private static final HashMap<String, String> nomeFile = new HashMap<String, String>();
@@ -141,6 +145,7 @@ public class WbsCommand extends ItemBean implements Command {
         nomeFile.put(Query.DELETE_PART, nomeFileWbs);
         nomeFile.put(Query.PART_REPORT, nomeFileReport);
         nomeFile.put(Query.PART_GRAPHIC, nomeFileGrafico);
+        nomeFile.put(Query.ORDER_BY_PART, nomeFileOrderBy);
     }  
   
     
@@ -304,6 +309,13 @@ public class WbsCommand extends ItemBean implements Command {
                             vWbsAncestors = db.getWbsHierarchy(idPrj, user);
                             wbsPutativeFather = db.getWbs(idPrj, user, Query.WBS_BUT_WP);
                             fileJspT = nomeFile.get(part);
+                        } else if (part.equalsIgnoreCase(Query.ORDER_BY_PART)) {
+                            /* ************************************************ *
+                             *          UPDATE only ORDER BY single Wbs         *
+                             * ************************************************ */
+                            loadParams(part, parser, params);
+                            db.updateWbsPart(idPrj, user, writableProjects, userWritableWbsByProjectId, writablePrj, params);
+                            redirect = "q=" + Query.PART_WBS + "&p=" + Query.ORDER_BY_PART + "&id=" + idPrj;
                         }
                     }
                 } else {
@@ -316,6 +328,9 @@ public class WbsCommand extends ItemBean implements Command {
                         } else if (part.equalsIgnoreCase(Query.PART_GRAPHIC)) {
                             vWbsAncestors = db.getWbsHierarchy(idPrj, user);
                             wbsPutativeFather = db.getWbs(idPrj, user, Query.WBS_BUT_WP);
+                        } else if (part.equalsIgnoreCase(Query.ORDER_BY_PART))  { 
+                            // for instance: q=wbs&p=srt&id=3
+                            vWbsAncestors = db.getWbsHierarchy(idPrj, user);
                         } else {
                             // Selezioni per visualizzazione, aggiunta e modifica wbs
                             // Seleziona tutte le WBS non workpackage per mostrare i possibili padri nella pagina di dettaglio
@@ -466,9 +481,18 @@ public class WbsCommand extends ItemBean implements Command {
          * **************************************************** */
         else if (part.equalsIgnoreCase(Query.PART_GRAPHIC)) {
             HashMap<String, String> wbs = new HashMap<String, String>();
-            wbs.put("wbs-id",              parser.getStringParameter("wbs-id", Utils.VOID_STRING));
-            wbs.put("wbs-idpadre",         parser.getStringParameter("wbs-padre", Utils.VOID_STRING));
+            wbs.put("wbs-id",           parser.getStringParameter("wbs-id", Utils.VOID_STRING));
+            wbs.put("wbs-idpadre",      parser.getStringParameter("wbs-padre", Utils.VOID_STRING));
             formParams.put(Query.PART_GRAPHIC, wbs);
+        }
+        /* **************************************************** *
+         *            Ramo di UPDATE ordinale wbs               *
+         * **************************************************** */
+        else if (part.equalsIgnoreCase(Query.ORDER_BY_PART)) {
+            HashMap<String, String> wbs = new HashMap<String, String>();
+            wbs.put("wbs-id",           parser.getStringParameter("wbs-id", Utils.VOID_STRING));
+            wbs.put("wbs-ordinale",     parser.getStringParameter("wbs-srt", Utils.VOID_STRING));
+            formParams.put(Query.ORDER_BY_PART, wbs);
         }
     }
     
