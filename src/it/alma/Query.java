@@ -205,6 +205,10 @@ public interface Query extends Serializable {
      */
     public static final String PROJECT_PART                     = "pol";
     /**
+     * <p>Costante per il parametro identificante la pagina deil'ordinamento.</p>
+     */
+    public static final String ORDER_BY_PART                    = "srt";
+    /**
      * <p>Costante per il parametro identificante la pagina dei credits dell'applicazione.</p>
      */
     public static final String CREDITS                          = "credits";
@@ -605,8 +609,8 @@ public interface Query extends Serializable {
      */
     public static final String GET_GROUP = 
             "SELECT DISTINCT" +
-            "   G.id        AS \"id\"" +
-            "   ,   G.name  AS \"nome\"" +
+            "       G.id        AS \"id\"" +
+            "   ,   G.name      AS \"nome\"" +
             "   FROM grp G " +
             "       INNER JOIN belongs B ON B.id1_grp = G.id" +
             "       INNER JOIN usr U ON U.id = B.id0_usr" +
@@ -930,6 +934,7 @@ public interface Query extends Serializable {
             "SELECT " +
             "       W.id                    AS \"id\"" +
             "   ,   W.nome                  AS \"nome\"" +
+            "   ,   W.ordinale              AS \"ordinale\"" +
             "   ,   W.descrizione           AS \"descrizione\"" +
             "   ,   W.workpackage           AS \"workPackage\"" + 
             "   ,   W.noteavanzamento       AS \"noteAvanzamento\"" +
@@ -937,7 +942,7 @@ public interface Query extends Serializable {
             "   FROM wbs W" + 
             "   WHERE W.id_progetto = ?" +
             "       AND W.id_wbs = ?" + 
-            "   ORDER BY W.nome, W.dataultimamodifica DESC"; 
+            "   ORDER BY W.ordinale, W.nome, W.dataultimamodifica DESC"; 
     
     /**
      * <p>Estrae le wbs che non sono workpackage di un progetto,
@@ -984,6 +989,7 @@ public interface Query extends Serializable {
             "SELECT " +
             "       W.id                    AS \"id\"" + 
             "   ,   W.nome                  AS \"nome\"" + 
+            "   ,   W.ordinale              AS \"ordinale\"" +
             "   ,   W.descrizione           AS \"descrizione\"" + 
             "   ,   W.workpackage           AS \"workPackage\"" + 
             "   ,   W.noteavanzamento       AS \"noteAvanzamento\"" +
@@ -994,7 +1000,7 @@ public interface Query extends Serializable {
             "   FROM wbs W" +
             "   WHERE W.id_progetto = ?" + 
             "       AND W.id_wbs IS NULL" +
-            "   ORDER BY W.nome, W.dataultimamodifica ASC";
+            "   ORDER BY W.ordinale, W.nome, W.dataultimamodifica ASC";
     
     /**
      * <p>Estrae i workpackage relative ad un progetto, identificato tramite id, passato come parametro</p>
@@ -2047,7 +2053,6 @@ public interface Query extends Serializable {
             "   ,       oraultimamodifica = ?" +
             "   ,       autoreultimamodifica = ?" +
             "   WHERE id = ?";
-
     
     /**
      * <p>Modifica il padre di una WBS (o workpackage) selezionato,
@@ -2061,6 +2066,17 @@ public interface Query extends Serializable {
             "   ,       autoreultimamodifica = ?" +
             "   WHERE id = ?";
     
+    /**
+     * <p>Modifica il numero d'ordine di una WBS (o workpackage) selezionato,
+     * identificato tramite l'id, passato come parametro.</p>
+     */
+    public static final String UPDATE_WBS_ORDER = 
+            "UPDATE wbs" +
+            "   SET     ordinale = ?" +
+            "   ,       dataultimamodifica = ?" +
+            "   ,       oraultimamodifica = ?" +
+            "   ,       autoreultimamodifica = ?" +
+            "   WHERE id = ?";
     
     /**
      * <p>Aggiorna un monitoraggio dipartimentale di un dato anno.</p>
