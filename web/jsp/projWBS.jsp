@@ -6,6 +6,17 @@
       <c:param name="id" value="${p.id}" />
       <c:param name="idw" value="" />
     </c:url>
+    <c:set var="ruoli" value="${sessionScope.usr.ruoli}" scope="page" />
+    <c:set var="ruolo" value="" scope="page" />
+    <c:forEach var="c" items="${ruoli}" varStatus="loop">
+      <c:if test="${c.id eq p.id}">
+        <c:set var="ruolo" value="${c.nome}" scope="page" />
+      </c:if>
+    </c:forEach>
+    <c:set var="superuser" value="${false}" scope="page" />
+    <c:if test="${(ruolo eq 'PMOATE') or (ruolo eq 'PMODIP')  or (ruolo eq 'PM') or (ruolo eq 'TL')}">
+      <c:set var="superuser" value="${true}" scope="page" />
+    </c:if>
     <h4>WBS del sotto progetto <strong><c:out value="${p.titolo}" /></strong></h4>
     <hr class="separatore" />
     <span class="float-right">
@@ -26,7 +37,7 @@
         <div class="tab-content responsive">
           <div role="tabpanel" class="tab-pane active" id="tab-wbs">
             <br />
-            <table class="table table-bordered table-hover">
+            <table class="table table-bordered table-hover table-sm">
               <thead class="thead-light">
                 <tr>
                   <th class="bg-primary" scope="col" width="*">Nome WBS padre</th>
@@ -77,7 +88,7 @@
                       </c:otherwise>
                     </c:choose>
                     </td>
-                    <td scope="col">
+                    <td scope="col" align="center">
                     <c:choose>
                       <c:when test="${wbsInstance.attivita.capacity() gt zero}">
                         <c:set var="icoAct" value="ico-act-outline.png" scope="page" />
@@ -816,8 +827,11 @@
             </a>
           </span>
         </div>
+      <c:if test="${superuser}">
         <div class="col-8 text-center">
-          <a href="${addWbs}${p.id}" class="btn btn-success" id="add-wbs"><i class="fas fa-plus"></i> Aggiungi</a>
-        </div>
+          <a href="${addWbs}${p.id}" class="btn btn-success" id="add-wbs"><i class="fas fa-plus" title="Aggiungi nuova WBS"></i> Aggiungi</a>
+          <a href="${srtWbs}${p.id}" class="btn btn-success" id="add-wbs"><i class="fas fa-sort" title="Ordina WBS"></i> Ordina</a>
+        </div>       
+      </c:if>
       </div>
     </div>
