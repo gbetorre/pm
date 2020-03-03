@@ -4588,6 +4588,29 @@ public class DBWrapper implements Query {
                     con.commit();
                 }
             }
+            // Ramo di modifica del solo ordinale della wbs
+            else if (params.containsKey(ORDER_BY_PART)) {
+                paramsWbs = params.get(ORDER_BY_PART);
+                if (Utils.containsValues(paramsWbs)) {
+                    pst = con.prepareStatement(UPDATE_WBS_ORDER);
+                    pst.clearParameters();
+                    // Controllo che l'id del padre non sia null
+                    Integer ordinale = null;
+                    if (!paramsWbs.get("wbs-ordinale").equals(Utils.VOID_STRING)) {
+                        ordinale = new Integer(paramsWbs.get("wbs-ordinale"));
+                        pst.setInt(++nextParam, ordinale);
+                    } else {
+                        // dato facoltativo non inserito
+                        pst.setNull(++nextParam, Types.NULL);
+                    }
+                    pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate())));
+                    pst.setTime(++nextParam, Utils.getCurrentTime());
+                    pst.setString(++nextParam, user.getCognome() + " " + user.getNome());
+                    pst.setInt(++nextParam, Integer.parseInt(paramsWbs.get("wbs-id")));
+                    pst.executeUpdate();
+                    con.commit();
+                }
+            }
         } catch (NotFoundException nfe) {
             String msg = FOR_NAME + "Probabile problema nel puntamento alla HashMap dei parametri.\n";
             LOG.severe(msg); 
@@ -4748,7 +4771,7 @@ public class DBWrapper implements Query {
      * <code>UNIQUE(id_progetto, id_persona)</code>, non &egrave; necessario
      * recuperare l'id della tupla della tabella <code>ruologestione</code>
      * al fine di aggiornarla, ma basta aggiornare la tupla con 
-     * <pre> {id_progetto = x ᐱ id_persona = y}</pre>
+     * <pre> {id_progetto = x ^ id_persona = y}</pre>
      * Notare che sia id_progetto sia id_persona sono NOT NULL, per cui
      * la coppia (id_progetto, id_persona) &ndash; che &egrave; quindi 
      * <code>[UNIQUE, NOT NULL;]</code>, si configura, praticamente, 
