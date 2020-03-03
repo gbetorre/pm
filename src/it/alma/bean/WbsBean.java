@@ -49,7 +49,7 @@ import it.alma.exception.AttributoNonValorizzatoException;
  * @author <a href="mailto:andrea.tonel@studenti.univr.it">Andrea Tonel</a>
  * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
  */
-public class WbsBean implements Serializable {
+public class WbsBean extends CodeBean implements Serializable {
 
 	/**
      * La serializzazione necessita di dichiarare una costante di tipo long
