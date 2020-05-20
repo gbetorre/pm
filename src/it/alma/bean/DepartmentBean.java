@@ -41,9 +41,11 @@ import java.io.Serializable;
 import it.alma.exception.AttributoNonValorizzatoException;
 
 /**
- * <p>Classe usata per rappresentare un dipartimento.</p>
+ * <p>Classe usata per rappresentare un dipartimento o, pi&uacute; 
+ * in generale, una struttura organizzativa (direzione, scuola, centro, etc.).</p>
  * 
  * @author <a href="mailto:andrea.tonel@studenti.univr.it">Andrea Tonel</a>
+ * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
  */
 public class DepartmentBean implements Serializable {
 
@@ -68,6 +70,8 @@ public class DepartmentBean implements Serializable {
     private String nome;
     /** Prefisso del dipartimento */
     private String prefisso;
+    /** Acronimo del dipartimento */
+    private String acronimo;
     /** Indirizzo della sede del dipartimento */
     private String indirizzoSede;
     
@@ -78,6 +82,7 @@ public class DepartmentBean implements Serializable {
     	id = -2;
     	nome = null;
     	prefisso = null;
+    	acronimo = null;
     	indirizzoSede = null;
     }
 
@@ -150,7 +155,26 @@ public class DepartmentBean implements Serializable {
 	}
 
 	
+    /* **************************************************** *
+     *           Metodi getter e setter per acronimo        *
+     * **************************************************** */
+    /**
+     * Restituisce l'acronimo di un dipartimento.
+     * @return <code>acronimo</code> - acronimo del dipartimento
+     */
+    public String getAcronimo() {
+        return acronimo;
+    }
 
+    /**
+     * Imposta il prefisso di un dipartimento.
+     * @param acronimo - il prefisso del dipartimento da impostare
+     */
+    public void setAcronimo(String acronimo) {
+        this.acronimo = acronimo;
+    }
+    
+    
 	/* **************************************************** *
      *        Metodi getter e setter per indirizzoSede      *
      * **************************************************** */
