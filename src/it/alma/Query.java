@@ -1068,10 +1068,11 @@ public interface Query extends Serializable {
     /**
      * <p>Estrae tutte le persone che appartengono al dipartimento 
      * a cui appartiene un determinato progetto,
-     * identificato tramite id, passato come parametro.</p>
+     * identificato tramite id, passato come parametro,
+     * e che abbiano almeno una competenza nel progetto stesso.</p>
      */
     public static final String GET_PEOPLE_BY_DEPARTMENT = 
-            "SELECT " + 
+            "SELECT DISTINCT" + 
             "       P.id            AS \"id\"" +
             "   ,   P.nome          AS \"nome\"" +
             "   ,   P.cognome       AS \"cognome\"" +
@@ -1082,7 +1083,10 @@ public interface Query extends Serializable {
             "       INNER JOIN usr U on B.id0_usr = U.id" +
             "       INNER JOIN identita I ON U.id = I.id0_usr" +
             "       INNER JOIN persona P ON I.id1_persona = P.id" +
+            "       INNER JOIN competenzagestione CG ON CG.id_persona = P.id" +
+            "       INNER JOIN competenza C ON CG.id_competenza = C.id" +
             "   WHERE PJ.id = ?" + 
+            "       AND C.id_progetto = PJ.id" +
             "   ORDER BY P.cognome, P.nome";
     
     /**
@@ -1211,7 +1215,8 @@ public interface Query extends Serializable {
             "       D.id              AS \"id\"" + 
             "   ,   D.nome            AS \"nome\"" + 
             "   ,   D.prefisso        AS \"prefisso\"" + 
-            "   ,   D.indirizzosede   AS \"indirizzoSede\"" + 
+            "   ,   D.acronimo        AS \"acronimo\"" +             
+            "   ,   D.indirizzosede   AS \"indirizzoSede\"" +
             "   FROM dipartimento D" + 
             "   WHERE   D.id = ? OR -1 = ?";
     
