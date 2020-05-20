@@ -3,14 +3,37 @@
   <c:when test="${requestScope.checkThisOut}">
     <br />
     <h3>Elenco dei sottoprogetti di ${sessionScope.usr.nome} ${sessionScope.usr.cognome}</h3>
-    <br />
-    <c:catch var="exception">
+    <c:set var="deptsWithPrj" value="${0}" scope="page" />
+    <c:forEach var="check" items="${requestScope.progetti.values()}">
+      <c:if test="${not check.isEmpty()}">
+        <c:set var="deptsWithPrj" value="${deptsWithPrj + 1}" scope="page" />
+      </c:if>
+    </c:forEach>
+  <c:catch var="exception">
+  <c:choose>
+    <c:when test="${deptsWithPrj > 4}">
+      <ul class="menu-nav">
+      <c:forEach var="entry" items="${requestScope.progetti}">
+        <c:if test="${not empty entry.value}">
+          <c:set var="key" value="${entry.key}" scope="page" />
+          <c:set var="d" value="${requestScope.dipart.get(key)}" />
+          <li><a class="smooth" href="#${d.acronimo}"><c:out value="${d.acronimo}" /></a></li>
+        </c:if>
+      </c:forEach>
+      </ul>
+    </c:when>
+    <c:otherwise>
+      <br />
+    </c:otherwise>
+  </c:choose>
     <c:forEach var="entry" items="${requestScope.progetti}">
       <c:if test="${not empty entry.value}">
       <div class="module">
         <c:set var="key" value="${entry.key}" scope="page" />
         <c:set var="d" value="${requestScope.dipart.get(key)}" />
-        <h4>${d.prefisso} ${d.nome}</h4>
+        <section id="${d.acronimo}">
+          <h4>${d.prefisso} ${d.nome}</h4>
+        </section>
         <table class="table table-hover">
           <thead class="thead-light">
             <tr>
@@ -49,7 +72,7 @@
       </div>
       </c:if>
     </c:forEach>
-    </c:catch>
+  </c:catch>
     <c:if test= "${not empty exception}">
       <div class= "alert alert-danger alert-dismissible" role= "alert">
         <button  type="button" class= "close fadeout" data-dismiss ="alert" aria-label="Close" >
