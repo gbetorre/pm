@@ -54,6 +54,7 @@ import it.alma.Query;
 import it.alma.Utils;
 import it.alma.bean.ActivityBean;
 import it.alma.bean.CodeBean;
+import it.alma.bean.DepartmentBean;
 import it.alma.bean.ItemBean;
 import it.alma.bean.PersonBean;
 import it.alma.bean.ProjectBean;
@@ -158,7 +159,7 @@ public class ActivityCommand extends ItemBean implements Command {
         nomeFile.put(Query.RESUME_PART, nomeFileElenco);
         nomeFile.put(Query.TRASH_PART, nomeFileElenco);
         nomeFile.put(Query.PART_PROJECT, this.getPaginaJsp());
-    }  
+    }
   
     
     /**
@@ -200,6 +201,8 @@ public class ActivityCommand extends ItemBean implements Command {
         LinkedList<CodeBean> complexity = null;
         // Dichiara lista di valori di stati attività
         LinkedList<CodeBean> states = null;
+        // Dichiara mappa di dipartimenti indicizzata per id
+        LinkedHashMap<Integer, DepartmentBean> d = null;
         // Data di oggi sotto forma di oggetto Date
         java.util.Date today = Utils.convert(Utils.getCurrentDate());
         // Attività da modificare, se l'utente ha scelto questa specifica funzionalità
@@ -368,6 +371,7 @@ public class ActivityCommand extends ItemBean implements Command {
                             }
                             complexity = HomePageCommand.getComplessita();
                             states = HomePageCommand.getStatiAttivita();
+                            d = db.getDeparts();
                         } else if (part.equals(Query.MODIFY_PART)) {
                             /* ************************************************ *
                              *        Effettua le selezioni che servono         * 
@@ -390,6 +394,7 @@ public class ActivityCommand extends ItemBean implements Command {
                             }
                             complexity = HomePageCommand.getComplessita();
                             states = HomePageCommand.getStatiAttivita();
+                            d = db.getDeparts();
                         // Effettua le selezioni che servono all'eliminazione o alla sospensione di una data attività
                         } else if (part.equalsIgnoreCase(Query.DELETE_PART) || part.equalsIgnoreCase(Query.SUSPEND_PART)) {
                             /* ************************************************ *
@@ -566,6 +571,10 @@ public class ActivityCommand extends ItemBean implements Command {
             // Imposta nella request elenco wbs associabili
             req.setAttribute("statiAttivita", states);
         }
+        // Imposta nella request elenco dipartimenti, se presente
+        if (d != null) {
+            req.setAttribute("dipart", d);
+        }
         if (activity != null) {
             // Attività che l'utente vul visualizzare nei dettagli, e/o modificare
             req.setAttribute("singolaAttivita", activity);
@@ -633,6 +642,7 @@ public class ActivityCommand extends ItemBean implements Command {
             act.put("act-result",       parser.getStringParameter("act-result", null));
             act.put("act-people",       parser.getStringParameter("act-people", Utils.VOID_STRING));
             act.put("act-role",         parser.getStringParameter("act-role", Utils.VOID_STRING));
+            act.put("act-grg",          parser.getStringParameter("act-grg", Utils.VOID_STRING));
             act.put("act-milestone",    parser.getStringParameter("act-milestone", Utils.VOID_STRING));
             act.put("act-wbs",          parser.getStringParameter("act-wbs", Utils.VOID_STRING));
             act.put("act-compl",        parser.getStringParameter("act-compl", Utils.VOID_STRING));
