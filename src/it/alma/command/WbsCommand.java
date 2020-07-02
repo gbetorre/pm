@@ -36,6 +36,7 @@
 
 package it.alma.command;
 
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -52,6 +53,7 @@ import it.alma.Main;
 import it.alma.Query;
 import it.alma.Utils;
 import it.alma.bean.ActivityBean;
+import it.alma.bean.IndicatorBean;
 import it.alma.bean.ItemBean;
 import it.alma.bean.PersonBean;
 import it.alma.bean.ProjectBean;
@@ -184,8 +186,10 @@ public class WbsCommand extends ItemBean implements Command {
         Vector<WbsBean> workPackages = null;
         // Dichiara l'elenco di wbs figlie di una wbs
         Vector<WbsBean> wbsOfWbs = null;
-        // Dichiara l'elenco delle attivit di una wbs di tipo workpackage
+        // Dichiara l'elenco delle attività di una wbs di tipo workpackage
         Vector<ActivityBean> wbsActivities = null;
+        // Dichiara l'elenco degli indicatori di una wbs data
+        Vector<IndicatorBean> wbsIndicators = null;
         // Dichiara la wbs richiesta dall'utente nel caso di modifica di una wbs
         WbsBean wbsInstance = null;
         // Data di oggi sotto forma di oggetto String
@@ -340,6 +344,7 @@ public class WbsCommand extends ItemBean implements Command {
                                 wbsInstance = db.getWbsInstance(idPrj, idWbs, user);
                                 wbsActivities = db.getActivitiesByWbs(idWbs, idPrj, user);
                                 wbsInstance.setAttivita(wbsActivities);
+                                wbsIndicators = db.getIndicatorsByWbs(idPrj, user, idWbs, idWbs);
                             }
                         }
                         fileJspT = nomeFile.get(part);
@@ -428,10 +433,10 @@ public class WbsCommand extends ItemBean implements Command {
         if (workPackages != null) {
             req.setAttribute("wps", workPackages);
         }
-        // Imposta nella request l'elenco delle attivita che appartengono alla wbs selezionata
-        //if (!wbsActivities.isEmpty()) {
-        //    req.setAttribute("attivitaWbs", wbsActivities);
-        //}
+        // Imposta nella request l'elenco degli indicatori che appartengono alla wbs selezionata
+        if (wbsIndicators != null) {
+            req.setAttribute("indicatori", wbsIndicators);
+        }
     }
     
     
@@ -505,6 +510,7 @@ public class WbsCommand extends ItemBean implements Command {
      * 
      * @param idPrj identificativo del progetto corrente
      * @param db    WebStorage per l'accesso ai dati
+     * @param user  utente loggato; viene passato ai metodi del DBWrapper per controllare che abbia i diritti di fare quello che vuol fare
      * @return <code>Vector&lt;WbsBean&gt;</code> - lista di work packages recuperati 
      * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
      */
@@ -514,7 +520,6 @@ public class WbsCommand extends ItemBean implements Command {
                                                 throws CommandException {
         Vector<WbsBean> workPackages = new Vector<WbsBean>();
         try {
-            //workPackages = db.getWbs(idPrj, Query.WBS_WP_ONLY);
             // Fa la stessa query usata dal grafico delle WBS e dall'elenco
             Vector<WbsBean> vWbsAncestors = db.getWbsHierarchy(idPrj, user);
             // Recupera solo i work packages (l'obiettivo finale è mostrare le attività...)
@@ -572,6 +577,72 @@ public class WbsCommand extends ItemBean implements Command {
             throw new CommandException(msg + e.getMessage(), e);
         }
         return workPackages;
+    }
+
+    
+    /**
+     * <p>Restituisce un Vector di work packages appartenenti al progetto
+     * il cui identificativo viene passato come argomento; ciascuno dei
+     * work package contiene al proprio interno la lista di attivit&agrave; 
+     * valorizzate, ciascuna a sua volta contenente lo stato calcolato.</p>
+     * 
+     * @param workPackagesRaw Vector di work package, anche privi di attivita' collegate
+     * @return <code>Vector&lt;WbsBean&gt;</code> - lista di work packages depurati di quelli che non hanno attivita' collegate 
+     * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
+     */
+    public static Vector<WbsBean> purge(Vector<WbsBean> workPackagesRaw)
+                                                throws CommandException {
+        Vector<WbsBean> workPackagesHavingActivities = new Vector<WbsBean>();
+        try {
+            for (WbsBean wbs : workPackagesRaw) {
+                if (wbs.isWorkPackage()) {
+                    if (wbs.getAttivita() != null && !wbs.getAttivita().isEmpty()) {
+                        workPackagesHavingActivities.add(wbs);
+                    }
+                }
+                for (WbsBean wbsChild : wbs.getWbsFiglie()) {
+                    if (wbsChild.isWorkPackage()) {
+                        if (wbsChild.getAttivita() != null && !wbsChild.getAttivita().isEmpty()) {
+                            workPackagesHavingActivities.add(wbsChild);
+                        }
+                    }
+                    for (WbsBean wbsGrandChild : wbsChild.getWbsFiglie()) {
+                        if (wbsGrandChild.isWorkPackage()) {
+                            if (wbsGrandChild.getAttivita() != null && !wbsGrandChild.getAttivita().isEmpty()) {
+                                workPackagesHavingActivities.add(wbsGrandChild);
+                            }
+                        }
+                        for (WbsBean wbsGreatGrandChild : wbsGrandChild.getWbsFiglie()) {
+                            if (wbsGreatGrandChild.isWorkPackage()) {
+                                if (wbsGreatGrandChild.getAttivita() != null && !wbsGreatGrandChild.getAttivita().isEmpty()) {
+                                    workPackagesHavingActivities.add(wbsGreatGrandChild);
+                                }
+                            }
+                            for (WbsBean wbsProgeny  : wbsGreatGrandChild.getWbsFiglie()) {
+                                if (wbsProgeny.isWorkPackage()) {
+                                    if (wbsProgeny.getAttivita() != null && !wbsProgeny.getAttivita().isEmpty()) {
+                                        workPackagesHavingActivities.add(wbsProgeny);
+                                    }
+                                }
+                            }
+                        }
+                    }    
+                }
+            }
+        } catch (IndexOutOfBoundsException wse) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nello scorrimento di work packages.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + wse.getMessage(), wse);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n Attenzione: controllare di essere autenticati nell\'applicazione!\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + npe.getMessage(), npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+        return workPackagesHavingActivities;
     }
     
 }
