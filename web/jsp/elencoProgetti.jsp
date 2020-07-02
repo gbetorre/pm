@@ -4,6 +4,8 @@
     <br />
     <h3>Elenco dei sottoprogetti di ${sessionScope.usr.nome} ${sessionScope.usr.cognome}</h3>
     <c:set var="deptsWithPrj" value="${0}" scope="page" />
+    <c:set var="totPrj" value="${0}" scope="page" />
+    <c:set var="totPPPrj" value="${0}" scope="page" />
     <c:forEach var="check" items="${requestScope.progetti.values()}">
       <c:if test="${not check.isEmpty()}">
         <c:set var="deptsWithPrj" value="${deptsWithPrj + 1}" scope="page" />
@@ -12,12 +14,12 @@
   <c:catch var="exception">
   <c:choose>
     <c:when test="${deptsWithPrj > 4}">
-      <ul class="menu-nav">
+      <ul class="nav nav-pills">
       <c:forEach var="entry" items="${requestScope.progetti}">
         <c:if test="${not empty entry.value}">
           <c:set var="key" value="${entry.key}" scope="page" />
           <c:set var="d" value="${requestScope.dipart.get(key)}" />
-          <li><a class="smooth" href="#${d.acronimo}"><c:out value="${d.acronimo}" /></a></li>
+          <li class="nav-item small"><a class="smooth nav-link" href="#${d.acronimo}" title="${d.nome}"><c:out value="${d.acronimo}" /></a></li>
         </c:if>
       </c:forEach>
       </ul>
@@ -52,13 +54,18 @@
                 <a href="<c:out value= "${vision}${prj.id}" />" class="btn btn-success btn-spacer"><i class="fas fa-file-invoice"></i> Project Charter</a>
                 <a href="<c:out value= "${lastStatus}${prj.id}" />" class="btn btn-success btn-spacer"><i class="far fa-clock"></i> Status</a>            
                 <a href="<c:out value= "${urlWbs}${prj.id}" />" class="btn btn-success btn-spacer"><i class="fas fa-sitemap"></i> WBS</a>
-                <a href="<c:out value= "${act}${prj.id}" />" class="btn btn-success btn-spacer"><i class="fas fa-bars"></i> Attivit&agrave;</a>
+                <a href="<c:out value= "${act}${prj.id}" />" class="btn btn-success btn-spacer"><i class="fas fa-bars"></i> Attivit&agrave;</a>              
                 <a href="<c:out value= "${report}${prj.id}" />" class="btn btn-success btn-spacer"><i class="fas fa-chart-line"></i> Report</a>
+              <c:if test="${prj.tipo eq 'P'}">
+                <a href="<c:out value= "${ind}${prj.id}" />" class="btn btn-success btn-spacer"><i class="fas fa-ruler"></i> Indicatori</a>
+                <c:set var="totPPPrj" value="${totPPPrj + 1}" scope="page" />
+              </c:if>
               </td>
               <td><cite><c:out value="${prj.tag}" /></cite></td>
             </tr>
+            <c:set var="totPrj" value="${totPrj + 1}" scope="page" />
             </c:forEach>
-            <c:if test="${not empty sessionScope.writableDeparments}">
+            <c:if test="${(not empty sessionScope.writableDeparments) and (totPrj gt totPPPrj)}">
             <tr>
               <td colspan="3" align="left">
                 <a href="${mon}${d.id}"  class="btn btn-success btn-spacer"><i class="fas fa-tv"></i> Monitoraggio MIUR</a>
@@ -71,6 +78,8 @@
         </table>
       </div>
       </c:if>
+      <c:set var="totPrj" value="${0}" scope="page" />
+      <c:set var="totPPPrj" value="${0}" scope="page" />
     </c:forEach>
   </c:catch>
     <c:if test= "${not empty exception}">
