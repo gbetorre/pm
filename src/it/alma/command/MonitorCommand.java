@@ -49,7 +49,6 @@ import it.alma.DBWrapper;
 import it.alma.Main;
 import it.alma.Query;
 import it.alma.Utils;
-import it.alma.bean.CodeBean;
 import it.alma.bean.DepartmentBean;
 import it.alma.bean.ItemBean;
 import it.alma.bean.MonitorBean;
@@ -134,8 +133,6 @@ public class MonitorCommand extends ItemBean implements Command {
         String fileJspT = null;
         // Flag per i privilegi di scrittura a livello dipartimentale
         boolean writePriv = false;
-        // Utente loggato
-        PersonBean user = null;
         // Dichiara un monitor
         MonitorBean monitor = null;
         // Data di oggi sotto forma di oggetto String
@@ -190,12 +187,12 @@ public class MonitorCommand extends ItemBean implements Command {
                 writePriv = db.userCanMonitor(idDip, writableDepts);
                 // Verifica se deve eseguire un'operazione di scrittura
                 if (write && writePriv) {
-                    if (HomePageCommand.isParameter(req, "start") && user.isPmoAteneo()) {
+                    if (HomePageCommand.isParameter(req, "start") && usr.isPmoAteneo()) {
                         /* **************************************************** *
                          *                  STARTS Monitoring                   *
                          * **************************************************** */
                         db.updateMonitor(yMon, idDip, true);
-                    } else if (HomePageCommand.isParameter(req, "end") && user.isPmoAteneo()) {
+                    } else if (HomePageCommand.isParameter(req, "end") && usr.isPmoAteneo()) {
                         /* **************************************************** *
                          *                   ENDS Monitoring                    *
                          * **************************************************** */                        
@@ -209,7 +206,7 @@ public class MonitorCommand extends ItemBean implements Command {
                         // Caricamento della tabella con i valori dei parametri passati dalla form
                         loadParams(String.valueOf(yMon), parser, params);
                         // Imposta il monitoraggio MIUR
-                        db.updateMonitorPart(yMon, idDip, user, writableDepts, params);                        
+                        db.updateMonitorPart(yMon, idDip, usr, writableDepts, params);                        
                     }
                 }
                 /* **************************************************** *
