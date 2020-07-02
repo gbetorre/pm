@@ -59,9 +59,11 @@ import it.alma.Query;
 import it.alma.SessionManager;
 import it.alma.Utils;
 import it.alma.bean.CodeBean;
+import it.alma.bean.DepartmentBean;
 import it.alma.bean.ItemBean;
 import it.alma.bean.PersonBean;
 import it.alma.bean.ProjectBean;
+import it.alma.bean.SkillBean;
 import it.alma.bean.StatusBean;
 import it.alma.exception.AttributoNonValorizzatoException;
 import it.alma.exception.CommandException;
@@ -121,6 +123,12 @@ public class HomePageCommand extends ItemBean implements Command {
      * eventualmente configurato
      */
     private static final String nomeFileGrant = "/jsp/profileRoles.jsp";
+    /**
+     * Pagina a cui la command reindirizza per mostrare le competenze 
+     * di un utente scelto a piacere sui vari progetti sui quali &egrave;
+     * eventualmente configurato
+     */
+    private static final String nomeFileSkills = "/jsp/profileSkills.jsp";
     /**
      * DataBound.
      */
@@ -216,8 +224,10 @@ public class HomePageCommand extends ItemBean implements Command {
         boolean userCanReset = false;
         // Elenco degli utenti
         ArrayList<PersonBean> userList = null;
+        // Elenco delle persone
+        ArrayList<PersonBean> personList = null;
         // Dichiara l'elenco dei progetti estratti dell'utente, partendo dal ruolo
-        Vector<ItemBean> projectsByRole = new Vector<ItemBean>();
+        Vector<ItemBean> projectsByRole = new Vector<ItemBean>(); Vector<ProjectBean> projectsWithSkills = new Vector<ProjectBean>();
         // Dichiara l'elenco degli accessi degli utenti, da mostrare solo a root
         Vector<StatusBean> accessList = new Vector<StatusBean>();
         // Dichiara la pagina a cui reindirizzare
@@ -246,7 +256,7 @@ public class HomePageCommand extends ItemBean implements Command {
          *             Rami in cui occorre che l'utente sia loggato             *
          * ******************************************************************** */
         try {
-            if (part.equals(Query.PART_USR) || part.equals(Query.PART_PERMISSION)) {
+            if (part.equals(Query.PART_USR) || part.equals(Query.PART_PERMISSION) || part.equals(Query.PART_RESOURCES)) {
                 // In questo punto la sessione deve esistere e l'utente deve esserne loggato 
                 try {
                     user = getLoggedUser(req);
@@ -260,14 +270,17 @@ public class HomePageCommand extends ItemBean implements Command {
                 for (CodeBean ruoloUsr : ruoliUsr) {
                     if (ruoloUsr.getOrdinale() == 1 || ruoloUsr.getOrdinale() == 2) {
                         userCanReset = true;
-                        userList = db.getUsrByGrp(user);
                         break;
                     }
                 }
                 /* **************************************** *
                  *          Ramo gestione utente            *
                  * **************************************** */
-                if (part.equals(Query.PART_USR)) { 
+                if (part.equals(Query.PART_USR)) {
+                    if (userCanReset) {
+                        userList = db.getUsrByGrp(user);
+                        personList = db.getPersonByGrp(user);
+                    }
                     fileJspT = requestByUsr(parser, ruoliUsr, projectsByRole, accessList, user, password, write);
                 }
                 /* **************************************** *
@@ -277,6 +290,21 @@ public class HomePageCommand extends ItemBean implements Command {
                     guest = db.getUser(idGuest);
                     fileJspT = requestByPerson(parser, userCanReset, projectsByRole, user, guest, part, write);
                 }
+                /* **************************************** *
+                 *         Ramo gestione competenze         *
+                 * **************************************** */
+                else if (part.equals(Query.PART_RESOURCES)) {
+                    guest = db.getPerson(idGuest);
+                    fileJspT = updateSkills(parser, userCanReset, projectsWithSkills, user, guest, part, write);
+                }
+                /* **************************************** *
+                 *         Ramo gestione appartenenze       *
+                 * **************************************** *
+                else if (part.equals(Query.PART_BELONGS)) {
+                    guest = db.getPerson(idGuest);
+                    deptList = db.getDeparts();
+                    //fileJspT = insertBelongs(parser, userCanReset, deptList, user, guest, part, write);
+                }*/
             }
             // Login page
             else {
@@ -314,9 +342,17 @@ public class HomePageCommand extends ItemBean implements Command {
         if (userList != null) {
             req.setAttribute("userList", userList);
         }
+        // Imposta nella request la lista di persone per ogni PMO, nel caso in cui sia valorizzata
+        if (personList != null) {
+            req.setAttribute("personList", personList);
+        }
         // Imposta nella request i progetti dell'utente tramite il ruolo, nel caso in cui siano valorizzati
         if (!projectsByRole.isEmpty()) {
             req.setAttribute("projectsByRole", projectsByRole);
+        }
+        // Imposta nella request i progetti dell'utente comprensivi delle competenze e delle competenze assegnate
+        if (!projectsWithSkills.isEmpty()) {
+            req.setAttribute("projects", projectsWithSkills);
         }
         // Imposta nella request il log degli accessi se l'utente ne ha i privilegi
         if (!accessList.isEmpty()) {   // Se l'utente non ne ha il privilegio, la lista è vuota
@@ -433,6 +469,7 @@ public class HomePageCommand extends ItemBean implements Command {
                             int userModified = parser.getIntParameter("pwd-usr");
                             db.updatePassword(userModified, user, generatedPassword);
                         }
+                        break;
                     }
                 }
             }
@@ -587,6 +624,117 @@ public class HomePageCommand extends ItemBean implements Command {
     
     
     /**
+     * <p>Restituisce la pagina di forward a cui indirizzare.</p>
+     * <p>Valorizza per riferimento la lista dei progetti con relative
+     * competenze ricoperti dall'utente &quot;guest&quot;, che viene passato
+     * come parametro e, in caso di chiamata POST (flag &#39;write&#39; a 
+     * <code>true</code>) aggiorna le competenze nei relativi progetti in base a
+     * quando scelto dall'utente tramite la form che ha inviato la richiesta.</p>
+     * 
+     * @param parser    oggetto ParameterParser contente tutti i parametri passati sulla HttpServletRequest
+     * @param userCanReset flag specificante se l'utente che deve effettuare l'operazione di cambio dei diritti e' almeno PMO di dipartimento
+     * @param projectsBySkill   elenco dei progetti dell'utente loggato e relative competenze (ByRef)
+     * @param user  utente loggato
+     * @param guest utente a cui user vuol cambiare le competenzegestione (competenze assegnate)
+     * @param part  stringa identificante la parte dell'applicazione in cui l'utente vuol gestire le competenze di altri utenti su specifici progetti
+     * @param write flag di scrittura: true se la chiamata &egrave; di tipo POST, false se la chiamata &egrave; di tipo GET
+     * @return  <code>String</code> - valore della pagina di forward
+     * @throws CommandException se si verifica un problema SQL, nell'accesso a un campo obbligatorio non valorizzato, nell'algoritmo di generazione password e altri
+     */
+    private static String updateSkills(ParameterParser parser, 
+                                          boolean userCanReset,
+                                          Vector<ProjectBean> projectsBySkill,
+                                          PersonBean user,
+                                          PersonBean guest,
+                                          String part,
+                                          boolean write) 
+                                   throws CommandException {
+        // Pagina per il forward, da restituire
+        String page = null;
+        try {
+            /* **************************************************** *
+             *                SELECT User Permission                *
+             * **************************************************** */
+            int idGuest = guest.getId();
+            if (write) {
+                /* **************************************** *
+                 *            UPDATE User Skill             *
+                 * **************************************** */
+                if (userCanReset) { 
+                    if (idGuest > Query.NOTHING) {
+                        int skillId = Integer.parseInt(parser.getStringParameter("skl-id", Utils.VOID_STRING));
+                        int prjId =  Integer.parseInt(parser.getStringParameter("prj-id", Utils.VOID_STRING));
+                        // Aggiorna le competenze utente nel progetto
+                        db.insertSkillByPerson(prjId, skillId, user, guest);
+                    }
+                }
+            }
+            // Estrae tutti i progetti dell'utente selezionato dal PMO (guest)
+            Vector<ProjectBean> guestProjects = db.getProjects(guest.getId(), Query.GET_ALL);
+            // Per ogni progetto...
+            for (int i = 0; i < guestProjects.size(); i++) {
+                // Punta al progetto corrente
+                ProjectBean prj = guestProjects.get(i);
+                // Ne recupera l'identificativo
+                int idPrj = prj.getId();
+                // Recupera tutte le competenze del progetto corrente, che siano assegnate al guest o meno
+                Vector<SkillBean> vSkills = db.getSkills(idPrj, user);
+                // Per ogni competenza di progetto recuperata
+                for (int j = 0; j < vSkills.size(); j++) {
+                    // Punta alla competenza corrente
+                    SkillBean currentSkill = vSkills.get(j);
+                    // Estrae le competenze assegnate a guest sul progetto corrente
+                    Vector<SkillBean> guestSkills = db.getSkillsByPersonAndProject(idPrj, idGuest);
+                    // Per ogni competenza di progetto assegnata al guest
+                    for (SkillBean sk : guestSkills) {
+                        // Se l'identificativo della competenza assegnata coincide con quello della competenza di progetto
+                        if (sk.getId() == currentSkill.getId()) {
+                            // Crea un elenco di persone
+                            Vector<PersonBean> personale = new Vector<PersonBean>();
+                            // Vi aggiunge il guest
+                            personale.add(guest);
+                            // Carica l'elenco (di uno) sulla competenza corrente
+                            currentSkill.setPersone(personale);
+                            // Aggiorna la competenza arricchita nell'elenco delle competenze di progetto
+                            vSkills.set(j, currentSkill);
+                        }
+                    }
+                }
+                prj.setCompetenze(new ArrayList<SkillBean>(vSkills));
+                guestProjects.set(i, prj);
+                page = nomeFileSkills;
+            }
+            projectsBySkill.addAll(guestProjects);
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nell\'accesso ad un attributo obbligatorio del bean.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + anve.getMessage(), anve);
+        } catch (WebStorageException wse) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di valori dal db.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + wse.getMessage(), wse);
+        } catch (NumberFormatException nfe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel formato di un valore numerico.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + nfe.getMessage(), nfe);
+        } catch (ClassCastException cce) {
+            String msg = FOR_NAME + "Si e\' verificato un problema in una conversione di tipo.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + cce.getMessage(), cce);
+        } catch (RuntimeException re) {
+            String msg = FOR_NAME + "Si e\' verificato un problema in un\'assunzione fatta nel codice.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + re.getMessage(), re);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Chiave specificata non valida!\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+        return page;
+    }   
+    
+    
+    /**
      * <p>Valorizza per riferimento una mappa contenente i valori relativi  
      * ad una attivit&agrave; eventualmente da aggiornare.</p> 
      * 
@@ -598,10 +746,10 @@ public class HomePageCommand extends ItemBean implements Command {
      * @throws CommandException se si verifica un problema nella gestione degli oggetti data o in qualche tipo di puntamento
      */
     private static int loadParams(String part, 
-                                   ParameterParser parser,
-                                   HashMap<Integer, String> formParams,
-                                   Vector<ItemBean> projects)
-                            throws CommandException {
+                                  ParameterParser parser,
+                                  HashMap<Integer, String> formParams,
+                                  Vector<ItemBean> projects)
+                           throws CommandException {
         // Identificativo (ultimo) dipartimento da restituire
         int idLastDip = Query.NOTHING;
         /* **************************************************** *
