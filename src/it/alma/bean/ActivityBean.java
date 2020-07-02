@@ -111,12 +111,16 @@ public class ActivityBean extends CodeBean implements Serializable {
      * *********************************************** */
     /** Riferimento alla WBS (Work Package) sotto cui viene aggregata l'attivit&agrave; */
     private int idWbs;
+    /** Riferimento alla struttura (dipartimento) che collabora allo sviluppo dell'attivit&agrave; */
+    private int idStrutturaGregaria;
     /** Riferimento al livello di complessit&agrave; dell'attivit&agrave; */
     private int idComplessita;
     /** Riferimento allo stato in cui si trova l'attivit&agrave; */
     private int idStato;
     /** Work package che aggrega l'attivit&agrave; */
     private WbsBean wbs;
+    /** Struttura gregaria che collabora allo sviluppo dell'attivit&agrave; */
+    private DepartmentBean dipartimento;
     /** Stato esatto in cui si trova l'attivit&agrave; */
     private CodeBean stato;
     
@@ -124,6 +128,7 @@ public class ActivityBean extends CodeBean implements Serializable {
      * <p>Costruttore: inizializza i campi a valori di default.</p>
      */
     public ActivityBean() {
+        super();
     	id = -2;
     	nome = null;
     	descrizione = null;
@@ -132,8 +137,9 @@ public class ActivityBean extends CodeBean implements Serializable {
     	noteAvanzamento = risultatiRaggiunti = null;
     	milestone = false;
     	persone = null;
-    	idWbs = idComplessita = idStato = -2;
+    	idWbs = idStrutturaGregaria = idComplessita = idStato = -2;
     	wbs = null;
+    	setDipartimento(null);
     	stato = null;
     }
     
@@ -164,6 +170,7 @@ public class ActivityBean extends CodeBean implements Serializable {
         this.milestone = old.isMilestone();
         this.persone = old.getPersone();
         this.idWbs = old.getIdWbs();
+        this.idStrutturaGregaria = old.getIdStrutturaGregaria();
         this.idComplessita = old.getIdComplessita();
         this.idStato = old.getIdStato();
         this.wbs = old.getWbs();
@@ -581,6 +588,29 @@ public class ActivityBean extends CodeBean implements Serializable {
     }
 
     
+    /* ******************************************************** *
+     *   Getter and setter methods about support rider office   *
+     *            who takes care of this activity               *
+     * ******************************************************** */
+    /**
+     * Returns the id of the support rider office that takes care of this activity  
+     * 
+     * @return <code>idStrutturaGregaria</code> - id della struttura gregaria
+     */
+    public int getIdStrutturaGregaria() {
+        return idStrutturaGregaria;
+    }
+
+    /**
+     * Sets the id of the support rider office that takes care of this activity
+     *   
+     * @param idStrutturaGregaria id della struttura gregaria da impostare
+     */
+    public void setIdStrutturaGregaria(int idStrutturaGregaria) {
+        this.idStrutturaGregaria = idStrutturaGregaria;
+    }
+
+    
     /* ******************************************************************** *
      *  Metodi getter e setter per il grado di complessita' dell'attivita'  *
      * ******************************************************************** */
@@ -700,4 +730,32 @@ public class ActivityBean extends CodeBean implements Serializable {
     public void setWbs(WbsBean wbs) {
         this.wbs = wbs;
     }
+
+    
+    /* ******************************************************** *
+     *   Metodi getter e setter per la struttura gregaria che   *
+     *   collabora con lo sviluppo dell'attivita', o comunque   *
+     *   che rappresenta una struttura che vi e' in qualche     *
+     *   modo collegata                                         *
+     * ******************************************************** */
+    /**
+     * <p>Restituisce la struttura (di tipo dipartimento generico) che 
+     * &egrave collegata all'attivit&agrave; corrente.</p>
+     * 
+     * @return <code>DepartmentBean</code> - oggetto rappresentante la struttura che si occupa di questa attivit&agrave;
+     */
+    public DepartmentBean getDipartimento() {
+        return dipartimento;
+    }
+
+    /**
+     * <p>Imposta la struttura (di tipo dipartimento generico) che &egrave;
+     * collegata all'attivit&agrave; corrente</p>
+     * 
+     * @param dipartimento - dipartimento da impostare
+     */
+    public void setDipartimento(DepartmentBean dipartimento) {
+        this.dipartimento = dipartimento;
+    }
+    
 }
