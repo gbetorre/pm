@@ -59,7 +59,6 @@ import it.alma.Query;
 import it.alma.SessionManager;
 import it.alma.Utils;
 import it.alma.bean.CodeBean;
-import it.alma.bean.DepartmentBean;
 import it.alma.bean.ItemBean;
 import it.alma.bean.PersonBean;
 import it.alma.bean.ProjectBean;
@@ -153,6 +152,10 @@ public class HomePageCommand extends ItemBean implements Command {
      * lo stato in cui si trova un progetto in generale
      */
     private static LinkedList<CodeBean> statiProgetto = new LinkedList<CodeBean>();
+    /**
+     * Nome del database su cui insiste l'applicazione
+     */
+    private static String dbName = null;
     
     
     /** 
@@ -189,6 +192,7 @@ public class HomePageCommand extends ItemBean implements Command {
             statiAttivita = db.getStati(Query.GET_STATI_ATTIVITA);
             statiAvanzamento = db.getStati(Query.GET_STATI_AVANZAMENTO);
             statiProgetto = db.getStati(Query.GET_STATI_PROGETTO);
+            dbName = db.get(Query.GET_DB_NAME);
         }
         catch (WebStorageException wse) {
             String msg = FOR_NAME + "Non e\' possibile avere una connessione al database.\n" + wse.getMessage();
@@ -329,7 +333,22 @@ public class HomePageCommand extends ItemBean implements Command {
         }
         /* ******************************************************************** *
          *                          Recupera i parametri                        *
-         * ******************************************************************** */      
+         * ******************************************************************** */ 
+        // Imposta una variabile di applicazione, se non è già stata valorizzata (singleton)
+        // Il contenuto in sé della variabile è stato sicuramente creato, altrimenti
+        // non sarebbe stato possibile arrivare a questo punto del codice, 
+        // ma, se questa è la prima richiesta che viene fatta all'applicazione
+        // (e siamo quindi in presenza dell'"handicap del primo uomo") 
+        // non è detto che la variabile stessa sia stata memorizzata a livello
+        // di application scope. Ci serve a questo livello per controllare,
+        // in tutte le pagine dell'applicazione, che stiamo puntando al db giusto.
+        dbName = (String) req.getServletContext().getAttribute("dbName");
+        if (dbName == null || dbName.isEmpty()) {
+            // Uso la stessa stringa perché, se non valorizzata in application, non sarà mai empty ma sarà null
+            dbName = Main.getDbName();
+            // Attenzione: crea una variabile di applicazione
+            req.getServletContext().setAttribute("db", dbName);    
+        }
         // Imposta il testo del Titolo da visualizzare prima dell'elenco
         req.setAttribute("titoloE", "Progetti di eccellenza: login");
         // Imposta nella request il permesso di reset password dell'utente loggato
