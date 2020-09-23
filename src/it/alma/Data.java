@@ -58,13 +58,16 @@ import com.oreilly.servlet.ParameterParser;
 
 import it.alma.bean.ActivityBean;
 import it.alma.bean.CodeBean;
+import it.alma.bean.IndicatorBean;
 import it.alma.bean.ItemBean;
+import it.alma.bean.MeasurementBean;
 import it.alma.bean.PersonBean;
 import it.alma.bean.ProjectBean;
 import it.alma.bean.StatusBean;
 import it.alma.bean.WbsBean;
 import it.alma.command.Command;
 import it.alma.command.HomePageCommand;
+import it.alma.command.IndicatorCommand;
 import it.alma.command.ProjectCommand;
 import it.alma.command.WbsCommand;
 import it.alma.exception.AttributoNonValorizzatoException;
@@ -230,6 +233,7 @@ public class Data extends HttpServlet {
          */
         entTokens.add("pol");
         entTokens.add("wbs");
+        entTokens.add("ind");
         ItemBean voceMenu = null;
         Command classCommand = null;
         commands = new HashMap<String, Command>();
@@ -368,7 +372,8 @@ public class Data extends HttpServlet {
         /*
          *  Gestisce il tipo di output in funzione del tipo di output voluto
          */
-        if (format.equalsIgnoreCase("rtf")) { 
+        if (format.equalsIgnoreCase("rtf")) {
+            // Configura il formato Rich Text Format
             res.setContentType("application/rtf");
             res.setCharacterEncoding("ISO-8859-1");
             res.setHeader("Content-Disposition","attachment;filename=" + fileName + ".rtf");
@@ -499,6 +504,80 @@ public class Data extends HttpServlet {
                 out.println(anve.getMessage());
             } catch (CommandException ce) {
                 log.severe(FOR_NAME + "Si e\' verificato un problema nel recupero di elenco work packages" + ce.getMessage());
+                out.println(ce.getMessage());
+            } catch (NullPointerException npe) {
+                log.severe(FOR_NAME + "Si e\' verificato un problema di puntamento: applicazione terminata!" + npe.getMessage());
+                out.println(npe.getMessage());
+            } catch (Exception e) {
+                log.severe(FOR_NAME + "Problema nella fprintf di Data" + e.getMessage());
+                out.println(e.getMessage());
+            }
+        }
+        /* ******************************************************************** *
+         * Contenuto files CSV per Report di Indicatori (e relative misurazioni)*
+         * ******************************************************************** */
+        if (req.getParameter(entToken).equals("ind")) { 
+            try {
+                ProjectBean p = db.getProject(idPrj, usr.getId());
+                Vector<MeasurementBean> measuresByIndicator = new Vector<MeasurementBean>(); 
+                Vector<IndicatorBean> listIndicator = IndicatorCommand.retrieveIndicators(db, idPrj, usr, Utils.convert(Utils.getUnixEpoch()), Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE, Query.GET_ALL);
+                // Scrittura file CSV
+                out.println("N." + SEPARATOR +
+                            "Indicatore" + SEPARATOR +
+                            "Baseline" + SEPARATOR + 
+                            "Data Baseline" + SEPARATOR + 
+                            "Target" + SEPARATOR + 
+                            "Data Target" + SEPARATOR + 
+                            "Valore Effettivo" + SEPARATOR + 
+                            "Risultati Conseguiti" + SEPARATOR +
+                            "Data Misurazione" + SEPARATOR +
+                            "Ultima Misurazione" + SEPARATOR +
+                            "Azione Misurata" + SEPARATOR +
+                            "Obiettivo Strategico" + SEPARATOR +
+                            "Autore Estrazione");
+                if (listIndicator.size() > 0) {
+                    int itCounts = 0, record = 0;
+                    do {
+                        IndicatorBean indicator = listIndicator.elementAt(itCounts);
+                        WbsBean wbs = indicator.getWbs();
+                        for (MeasurementBean mes : indicator.getMisurazioni()) {
+                            String ultimo = (mes.isUltimo()) ? "SI" : "NO";
+                            String data = (mes.getDataMisurazione() != null && mes.getDataMisurazione().after(new Date(0))) ? mes.getDataMisurazione().toString() : Utils.VOID_STRING;
+                            /* Qualora questi campi interessino, sono già pronti
+                             * Preparazione:
+                            String dataUltimaModifica = mes.getDataUltimaModifica().toString();
+                            String oraUltimaModifica = mes.getOraUltimaModifica().toString();
+                            String autore = mes.getAutoreUltimaModifica();
+                             * Output: 
+                                    dataUltimaModifica + SEPARATOR +
+                                    oraUltimaModifica + SEPARATOR +
+                                    autore + SEPARATOR +                        */
+                            out.println(
+                                    ++record + SEPARATOR +
+                                    indicator.getNome().replace(';', ',') + SEPARATOR +
+                                    indicator.getBaseline().replace(';', ',') + SEPARATOR +
+                                    indicator.getDataBaseline() + SEPARATOR +
+                                    indicator.getTarget().replace(';', ',') + SEPARATOR +
+                                    indicator.getDataTarget() + SEPARATOR +
+                                    mes.getDescrizione().replace(';', ',') + SEPARATOR +
+                                    mes.getInformativa().replace(';', ',') + SEPARATOR +
+                                    data + SEPARATOR +
+                                    ultimo + SEPARATOR +
+                                    wbs.getNome().replace(';', ',') + SEPARATOR +
+                                    p.getTitolo().replace(';', ',') + SEPARATOR +
+                                    usr.getNome() + Utils.BLANK_SPACE + usr.getCognome()
+                                   );
+                        }
+                        itCounts++;
+                    } while (itCounts < listIndicator.size());
+                    success = itCounts;
+                }
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Attributo obbligatorio di bean non valorizzato; problema nell\'accesso a valori ai fini della generazione del file.\n";
+                log.severe(msg); 
+                out.println(anve.getMessage());
+            } catch (CommandException ce) {
+                log.severe(FOR_NAME + "Si e\' verificato un problema nel recupero di elenco indicatori" + ce.getMessage());
                 out.println(ce.getMessage());
             } catch (NullPointerException npe) {
                 log.severe(FOR_NAME + "Si e\' verificato un problema di puntamento: applicazione terminata!" + npe.getMessage());
