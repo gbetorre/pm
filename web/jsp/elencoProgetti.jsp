@@ -48,7 +48,7 @@
           <tbody>
             <c:forEach var="prj" items="${entry.value}" varStatus="loop">
             <tr>
-              <td scope="row"><a href="<c:out value="${progetto}${prj.id}" />"><c:out value="${prj.titolo}" /></a></td>
+              <td scope="row"><a href="<c:out value="${progetto}${prj.id}" />"><c:out value="${prj.titolo}" escapeXml="false" /></a></td>
               <!-- <td scope="row"><c:out value="${prj.statoProgetto.nome}" escapeXml="false" /></td> -->
               <td width="45%" scope="row">
                 <a href="<c:out value= "${vision}${prj.id}" />" class="btn btn-success btn-spacer"><i class="fas fa-file-invoice"></i> Project Charter</a>
