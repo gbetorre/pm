@@ -127,7 +127,11 @@ public class DBWrapper implements Query {
      * <p>Connessione db postgres di pol.</p>
      */
     protected static DataSource pol_manager = null;
-
+    /**
+     * <p>Recupera da Main la stringa opportuna per il puntamento del DataSource.</p>
+     */
+    private static String contextDbName = Main.getDbName();
+    
     
     /**
      * <p>Costruttore. Prepara le connessioni.</p>
@@ -143,10 +147,9 @@ public class DBWrapper implements Query {
     public DBWrapper() throws WebStorageException {
         if (pol_manager == null) {
             try {
-                pol_manager = (DataSource) ((Context) new InitialContext()).lookup("java:comp/env/jdbc/poldev");
+                pol_manager = (DataSource) ((Context) new InitialContext()).lookup(contextDbName);
                 if (pol_manager == null)
-                    throw new WebStorageException(FOR_NAME + "La risorsa `jdbc/pol' non e\' disponibile. Verificare configurazione e collegamenti.\n");
-                //JOptionPane.showMessageDialog(null, "Accesso al DB di POL", "Inizializzazione Completata", 0, null);
+                    throw new WebStorageException(FOR_NAME + "La risorsa " + contextDbName + "non e\' disponibile. Verificare configurazione e collegamenti.\n");
             } catch (NamingException ne) {
                 throw new WebStorageException(FOR_NAME + "Problema nel recuperare la risorsa jdbc/pol per problemi di naming: " + ne.getMessage());
             } catch (Exception e) {
@@ -275,6 +278,47 @@ public class DBWrapper implements Query {
             return count;
         }  catch (SQLException sqle) {
             String msg = FOR_NAME + "Impossibile recuperare il max(id).\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce il primo valore trovato data una query in input</p>
+     * 
+     * @param query da eseguire
+     * @return <code>String</code> - stringa restituita
+     * @throws WebStorageException se si verifica un problema nella query o in qualche tipo di puntamento
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public String get(String query) 
+               throws WebStorageException {
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        String value = null;
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(query);
+            pst.clearParameters();
+            rs = pst.executeQuery();
+            if (rs.next()) {
+                value = rs.getString(1);
+            }
+            return value;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Impossibile recuperare un valore.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
         } finally {
@@ -533,9 +577,15 @@ public class DBWrapper implements Query {
             }
         }
     }
+   
     
-    
-    // TODO COMMENTO
+   /**
+    * <p>Restituisce un PersonBean dato l'id della persona.</p>
+    * 
+    * @param id identificativo della persona
+    * @return <code>PersonBean</code> - PersonBean rappresentante la persona cercata, di cui e' stato passato l'identificativo
+    * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di un attributo obbligatorio, nell'accesso al db o in qualche tipo di puntamento 
+    */ 
     @SuppressWarnings({ "null", "static-method" })
     public PersonBean getPerson(int id)
                          throws WebStorageException {
@@ -573,15 +623,67 @@ public class DBWrapper implements Query {
     }
     
     
-    // TODO COMMENTO
+    /**
+     * <p>Restituisce un CodeBean contenente l'id dell'utenza, 
+     * dato l'id della persona a cui l'utenza stessa &egrave; associata.</p>
+     * 
+     * @param idPer identificativo della persona
+     * @return <code>CodeBean</code> - CodeBean rappresentante l'utente cercato
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nel recupero di un attributo obbligatorio, nell'accesso al db o in qualche tipo di puntamento 
+     */ 
+     @SuppressWarnings({ "null", "static-method" })
+     public CodeBean getUserByPersonId(int idPer)
+                                throws WebStorageException {
+         ResultSet rs = null;
+         Connection con = null;
+         PreparedStatement pst = null;
+         CodeBean userBean = null;
+         int nextInt = 0;
+         try {
+             con = pol_manager.getConnection();
+             pst = con.prepareStatement(GET_USER_BY_PERSON_ID);
+             pst.clearParameters();
+             pst.setInt(++nextInt, idPer);
+             rs = pst.executeQuery();
+             if (rs.next()) {
+                 userBean = new CodeBean();
+                 BeanUtil.populate(userBean, rs);
+             }
+             return userBean;
+         } catch (SQLException sqle) {
+             String msg = FOR_NAME + "Oggetto UserBean non valorizzato; problema nella query della persona.\n";
+             LOG.severe(msg); 
+             throw new WebStorageException(msg + sqle.getMessage(), sqle);
+         } finally {
+             try {
+                 con.close();
+             } catch (NullPointerException npe) {
+                 String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                 LOG.severe(msg); 
+                 throw new WebStorageException(msg + npe.getMessage());
+             } catch (SQLException sqle) {
+                 throw new WebStorageException(FOR_NAME + sqle.getMessage());
+             }
+         }
+     }
+    
+    
+    /**
+     * <p>Estrae le competenze assegnate a un utente di dato identificativo
+     * nel contesto di un progetto di dato identificativo.</p>
+     * 
+     * @param projId identificativo del progetto cui l'utente e' collegato
+     * @param idUsr identificativo dell'utente di cui si vogliono recuperare le competenze
+     * @return <code>Vector&lt;SkillBean&gt;</code> - lista di competenze
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query o in qualche puntamento 
+     */
     @SuppressWarnings({ "null", "static-method" })
     public Vector<SkillBean> getSkillsByPersonAndProject(int projId, 
-                                        int idUsr)
-                       throws WebStorageException {
+                                                         int idUsr)
+                                                  throws WebStorageException {
         ResultSet rs = null;
         Connection con = null;
         PreparedStatement pst = null;
-        PersonBean usr = null;
         Vector<SkillBean> vSkill = new Vector<SkillBean>();
         try {
             con = pol_manager.getConnection();
@@ -619,11 +721,21 @@ public class DBWrapper implements Query {
     
     
     /**
-     * TODO : COMMENTO
+     * <p>Restituisce un ArrayList&lt;PersonBean&gt; contenente tutte
+     * le persone che appartengono ad un certo gruppo.</p>
+     * <p>Il gruppo si riferisce al dipartimento di appartenenza dell'utente
+     * 'admin' che ha effettuato la richiesta, e che viene passato come
+     * parametro.<br>
+     * Se l'utente loggato &egrave; il PMO di ateneo, il metodo restituisce
+     * la lista di tutte le persone inserite nel sistema.</p>
+     * 
+     * @param admin PersonBean della persona che ha richiesto la lista di persone
+     * @return ArrayList&lt;PersonBean&gt; - ArrayList contenente la lista di persone appartenenti al gruppo di 'admin' 
+     * @throws WebStorageException se si verifica un problema SQL o in qualsiasi puntamento
      */
     @SuppressWarnings({ "null", "static-method" })
     public ArrayList<PersonBean> getPersonByGrp(PersonBean admin) 
-                                      throws WebStorageException{
+                                         throws WebStorageException{
         ResultSet rs, rs1 = null;
         Connection con = null;
         PreparedStatement pst, pst1 = null;
@@ -682,14 +794,14 @@ public class DBWrapper implements Query {
         
     
     /**
-     * <p>Restituisce un Vector&lt;PersonBean&gt; contenente tutti
+     * <p>Restituisce un ArrayList&lt;PersonBean&gt; contenente tutti
      * gli utenti che appartengono ad un certo gruppo.</p>
      * <p>Il gruppo si riferisce al dipartimento di appartenenza.
      * Se l'utente loggato &egrave; il PMO di ateneo, il metodo restituisce
      * la lista di tutti gli utenti inseriti nel sistema.</p>
      * 
      * @param admin PersonBean della persona che ha richiesto la lista di utenti
-     * @return ArrayList&lt;PersonBean&gt; - Vector contenente la lista di utenti 
+     * @return ArrayList&lt;PersonBean&gt; - ArrayList contenente la lista di utenti 
      * @throws WebStorageException se si verifica un problema SQL o in qualsiasi puntamento
      */
     @SuppressWarnings({ "null", "static-method" })
@@ -762,8 +874,8 @@ public class DBWrapper implements Query {
      * @throws WebStorageException se si verifica un problema SQL o in qualsiasi puntamento
      */
     @SuppressWarnings({ "null", "static-method" })
-    public Vector<ItemBean> getProjectsByRole (int userId)
-                                        throws WebStorageException {
+    public Vector<ItemBean> getProjectsByRole(int userId)
+                                       throws WebStorageException {
         ResultSet rs = null;
         Connection con = null;
         PreparedStatement pst = null;
@@ -2794,8 +2906,10 @@ public class DBWrapper implements Query {
     
     
     /**
-     * <p>Restituisce un Vector di IndicatorBean rappresentante tutti
-     * gli indicatori del progetto attuale.</p>
+     * <p>Restituisce un Vector di IndicatorBean rappresentante &ndash; a 
+     * seconda dei valori dei flag passati come parametri &ndash; parte o tutti
+     * gli indicatori del progetto attuale, corredati o meno di tutte
+     * le relative misurazioni.</p>
      * <p>Pu&ograve; essere usato &quot;a valle&quot; dell'identificazione
      * di identificativi di progetto su cui l'utente sicuramente pu&ograve; 
      * scrivere, per recuperare tutti gli indicatori degli stessi,
@@ -2805,9 +2919,10 @@ public class DBWrapper implements Query {
      * 
      * @param projId  id del progetto di cui estrarre gli indicatori
      * @param user utente loggato
-     * @param date data baseline a partire dalla quale recuperare gli indicatori
+     * @param date data baseline a partire dalla quale recuperare gli indicatori; se si vogliono recuperare indicatori di qualsivoglia data passare una data antidiluviana
      * @param getSpecificType tipo specifico di indicatore che si vuol recuperare
      * @param getAll se si vogliono recuperare gli indicatori di tutti i tipi bisogna passare -1 sia sul parametro precedente che su questo; altrimenti bisogna passare l'id tipo su entrambi
+     * @param getMeasuresToo flag specificante se bisogna recuperare anche le misurazioni di ogni indicatore (true) o non interessa (false)
      * @return <code>Vector&lt;IndicatorBean&gt;</code> - IndicatorBean rappresentante l'indicatore del progetto.
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
      */
@@ -3374,11 +3489,15 @@ public class DBWrapper implements Query {
                     wbsF.setWbsFiglie(vWbsN);
                     Vector<ActivityBean> wbsAct = new Vector<ActivityBean>(getActivitiesAmountByWbs(idProj, wbsF.getId(), user));
                     wbsF.setAttivita(wbsAct);
+                    MeasurementBean statoWbs = getWbsState(idProj, wbsF.getId());
+                    wbsF.setStato(statoWbs);
                     vWbsF.add(wbsF);
                 }
                 wbsP.setWbsFiglie(vWbsF);
                 Vector<ActivityBean> wbsAct = new Vector<ActivityBean>(getActivitiesAmountByWbs(idProj, wbsP.getId(), user));
                 wbsP.setAttivita(wbsAct);
+                MeasurementBean statoWbs = getWbsState(idProj, wbsP.getId());
+                wbsP.setStato(statoWbs);
                 vWbsP.add(wbsP);
             }
             return vWbsP;
@@ -3798,7 +3917,60 @@ public class DBWrapper implements Query {
             }
         }
     }
-       
+    
+    
+    /**
+     * <p>Restituisce un MeasurementBean rappresentante lo stato di una WBS
+     * il cui identificativo viene passato come parametro, e che &egrave;
+     * collegata ad un progetto, il cui identificativo viene passato come
+     * parametro.</p>
+     * 
+     * @param projId    identificativo del progetto cui e' collegata la WBS che si vuol recuperare
+     * @param wbsId     identificativo della WBS il cui stato si vuol recuperare
+     * @return <code>MeasurementBean</code> - oggetto rappresentante lo stato della WBS selezionato
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public MeasurementBean getWbsState(int projId,
+                                       int wbsId) 
+                                throws WebStorageException {
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        MeasurementBean state = new MeasurementBean();
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_WBS_STATE);
+            pst.clearParameters();
+            pst.setInt(1, projId);
+            pst.setInt(2, wbsId);
+            rs = pst.executeQuery();
+            if (rs.next()) {
+                BeanUtil.populate(state, rs);
+            } else {
+                /* Se non ci sono i descrittori dello stato, vuol dire che 
+                 * nessun utente ha modificato lo stato di default, e quindi
+                 * il software imposta lo stato di default */
+                state.setId(1);
+            }
+            return state;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto non valorizzato; problema nella query.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
     
     /**
      * <p>Restituisce una lista formata dai possibili valori di 
@@ -4131,6 +4303,66 @@ public class DBWrapper implements Query {
                 return true;
             }
             // Il nome non esiste
+            return false;
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema nella query.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce il valore boolean <code>true</code> se l'utente,
+     * il cui identificativo viene passato come parametro, risulta gi&agrave;
+     * inserito come appartenente al gruppo principale (id_share_grp)
+     * del dipartimento/struttura a cui appartiene un progetto, 
+     * il cui identificativo viene passato come parametro.</p>
+     * <p>In altri termini, dato un id utente e un id progetto, il metodo
+     * controlla - e restituisce vero in caso trovi la corrispondenza - se 
+     * tale utente &egrave; gi&agrave; inserito come appartenente al gruppo
+     * principale del dipartimento che &quot;possiede&quot; il progetto.</p> 
+     * 
+     * @param userId identificativo utente di cui si vuol verificare l'appartenenza
+     * @param projId identificativo progetto da cui si risale alla struttura che lo aggrega e di li' al suo gruppo principale
+     * @return <code>boolean</code> - true se l'utente di dato id e' gia' stato inserito come appartenente al gruppo della struttura del progetto di dato id
+     * @throws WebStorageException se si verifica un problema di tipo SQL o in qualche puntamento
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public boolean existsBelongsTo(int userId, 
+                                   int projId)
+                            throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+        try {
+            con = pol_manager.getConnection();
+            try {
+                pst = con.prepareStatement(IS_BELONGS_PERSON);
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nel puntamento della connessione.\n";
+                LOG.severe(msg);
+                throw new WebStorageException(msg + npe.getMessage());
+            }
+            pst.clearParameters();
+            pst.setInt(1, userId);
+            pst.setInt(2, projId);
+            rs = pst.executeQuery();
+            // L'utente è stato già aggiunto al gruppo del dipartimento del progetto
+            if (rs.next()) {
+                return true;
+            }
+            // L'utente non è presente nel gruppo del dipartimento del progetto
             return false;
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Problema nella query.\n";
@@ -5222,14 +5454,15 @@ public class DBWrapper implements Query {
     }
     
     
-    /** <p>Aggiorna una attivit&agrave; di dato id, di un dato progetto.</p>
+    /** <p>Aggiorna un indicatore di dato id, collegato a un progetto
+     * di dato id.</p>
      * 
-     * @param idProj    id del progetto da aggiornare 
+     * @param idProj    id del progetto a cui l'indicatore da aggiornare e' collegato 
      * @param user      utente che ha eseguito il login
      * @param projectsWritableByUser Vector contenente la lista dei progetti su cui l'utente corrente e' abilitato alla modifica
      * @param userWritableIndicatorsByProjectId HashMap contenente gli indicatori su cui l'utente e' abilitato alla modifica, indicizzate per Wrapper di identificativo progetto
-     * @param params    hashmap che contiene i parametri che si vogliono aggiornare dell'attivita'
-     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento 
+     * @param params    hashmap che contiene i parametri che si vogliono aggiornare dell'indicatore
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
     @SuppressWarnings({ "null" })
     public void updateIndicator(int idProj,
@@ -5239,7 +5472,7 @@ public class DBWrapper implements Query {
                                 HashMap<String, String> params) 
                          throws WebStorageException {
         Connection con = null;
-        PreparedStatement pst, pst1 = null;
+        PreparedStatement pst = null;
         IndicatorBean iw = null;
         int calculatedId = -1;
         try {
@@ -5270,7 +5503,7 @@ public class DBWrapper implements Query {
             int index = 0;
             do {
                 iw = writableIndicators.elementAt(index);
-                // Se un id di attività scrivibili è uguale all'id sulla querystring è tutto ok 
+                // Se un id di indicatori scrivibili è uguale all'id sulla querystring è tutto ok 
                 if (iw.getId() == calculatedId) {
                     break;
                 }
@@ -5338,7 +5571,7 @@ public class DBWrapper implements Query {
                 }
                 /* === Id tipo indicatore === */
                 pst.setInt(++nextParam, Integer.parseInt(params.get("ind-tipo")));
-                /* === Riferimento a WBS === */;
+                /* === Riferimento a WBS === */
                 if (!params.get("ind-wbs").equals(Utils.VOID_STRING)) {
                     int idWbs = Integer.parseInt(params.get("ind-wbs"));
                     pst.setInt(++nextParam, idWbs);
@@ -5424,21 +5657,22 @@ public class DBWrapper implements Query {
     }
     
     
-    /** TODO : COMMENTO
-     * <p>Aggiorna un monitoraggio relativo a un dato anno solare, 
-     * passato come argomento, e a un relativo dipartimento, il cui 
-     * identificativo viene passato come argomento.</p>
+    /** 
+     * <p>Aggiorna uno stato relativo a un dato indicatore, 
+     * il cui identificativo &egrave; passato come parametro, 
+     * e a un relativo progetto, il cui 
+     * identificativo viene passato come parametro.</p>
      * 
-     * @param year  anno del monitoraggio
-     * @param idDip identificativo del dipartimento oggetto del monitoraggio
-     * @param flag  valore boolean che sostituisce il valore del campo 'attivo' nel monitor individuato
+     * @param idPrj identificativo del progetto che aggrega l'indicatore 
+     * @param idInd identificativo dell'indicatore di cui si deve aggiornare lo stato
+     * @param valueState valore stringa dello stato da aggiornare (tradotto in codice identificativo da subquery)
      * @throws WebStorageException se si verifica un problema nel recupero di qualche attributo, nella query o in qualche altro tipo di puntamento
      */
     @SuppressWarnings({ "null", "static-method" })
     public void updateIndicatorState(int idPrj,
                                      int idInd,
                                      String valueState) 
-                       throws WebStorageException {
+                              throws WebStorageException {
         Connection con = null;
         PreparedStatement pst = null;        
         try {
@@ -5609,6 +5843,118 @@ public class DBWrapper implements Query {
             String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il progetto.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + e.getMessage(), e);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Imposta un'attivit&agrave; in uno stato di sospensione logica 
+     * (attivit&agrave; sospesa o eliminata) il cui identificativo 
+     * viene desunto dal valore di un parametro di navigazione 
+     * passato come argomento.</p>
+     * <p>Gestisce anche la riattivazione di un'attivit&agrave; precedentemente
+     * sospesa, ricalcolandone lo stato aggiornato e reimpostandolo.</p>
+     * 
+     * @param idProj    identificativo del progetto nell'ambito del quale operare 
+     * @param idWbs     identificativo della WBS da aggiornare
+     * @param part      parametro di navigazione in base a cui si identifica se bisogna aggiornare la WBS in uno stato sospeso o (ri)attivo
+     * @param user      persona corrispondente all'utente loggato
+     * @param params    lista di parametri recuperati dalla form inviata in POST
+     * @throws WebStorageException se si verifica un problema in sql, nel recupero di valori, nella conversione di tipi o in qualche puntamento
+     */
+    @SuppressWarnings({ "null" })
+    public void updateWbsState(int idProj,
+                               int idWbs,
+                               String part,
+                               PersonBean user, 
+                               HashMap<String, String>params) 
+                        throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst, pst1 = null;
+        int idState = NOTHING;
+        try {
+            // Ottiene la connessione
+            con = pol_manager.getConnection();
+            if (part.equals(SUSPEND_PART)) {
+                idState = CHIUSA;
+            } else if (part.equals(RESUME_PART)) {                
+                idState = APERTA;
+            }
+            // Definisce un contatore per l'indice del parametro
+            int nextParam = 0;
+            // Begin: ==>
+            con = pol_manager.getConnection();
+            con.setAutoCommit(false);
+            pst = con.prepareStatement(UPDATE_WBS_STATE);
+            pst.clearParameters();
+            // id stato wbs
+            pst.setInt(++nextParam, idState);
+            // Campi automatici: id utente, ora ultima modifica, data ultima modifica
+            pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+            pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
+            pst.setString(++nextParam, user.getCognome() + String.valueOf(Utils.BLANK_SPACE) + user.getNome());
+            // Identificativo WBS da aggiornare
+            pst.setInt(++nextParam, idWbs);
+            // Se stiamo facendo una sospensione, dobbiamo inserirne anche gli estremi
+            if (part.equals(SUSPEND_PART)) {
+                // Azzera il contatore
+                nextParam = 0;
+                /* === Query contestuale di inserimento in wbsgestione === */ 
+                int maxWbsGestId = getMax("wbsgestione") + 1;
+                pst1 = con.prepareStatement(INSERT_WBS_STATE_EXTRAINFO);
+                pst1.clearParameters();
+                /* === id === */
+                pst1.setInt(++nextParam, maxWbsGestId);
+                /* === id_wbs === */
+                pst1.setInt(++nextParam, idWbs);
+                /* === id_progetto === */
+                pst1.setInt(++nextParam, idProj);
+                /* === data sospensione === */
+                java.util.Date dataSospensione = Utils.format(params.get("wbs-data"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
+                java.sql.Date  dateAsSqlDate = Utils.convert(dataSospensione);
+                pst1.setDate(++nextParam, dateAsSqlDate);
+                /* === motivazione sospensione === */
+                pst1.setString(++nextParam, params.get("wbs-note"));
+                // Campi automatici: id utente, ora ultima modifica, data ultima modifica
+                pst1.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+                pst1.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
+                pst1.setString(++nextParam, user.getCognome() + String.valueOf(Utils.BLANK_SPACE) + user.getNome());
+                // Ri-Azzera il contatore
+                nextParam = 0;
+                pst1.executeUpdate();
+            }
+            pst.executeUpdate();
+            con.commit();
+        } catch (CommandException ce) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di date.\n" + ce.getMessage();
+            LOG.severe(msg);
+            throw new WebStorageException(msg, ce);
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Probabile problema nel recupero dei dati dell\'autore ultima modifica.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna lo stato della WBS.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } catch (NumberFormatException nfe) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna lo stato della WBS.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + nfe.getMessage(), nfe);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna lo stato della WBS.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + npe.getMessage(), npe);
         } finally {
             try {
                 con.close();
@@ -5806,7 +6152,9 @@ public class DBWrapper implements Query {
      * o, se si preferisce:<pre>
      * Z = N &cup; {0} &cup;  {x &isin; <strong>N</strong> : x = x*-1}</pre> 
      * dove N &egrave; l'insieme dei numeri naturali 
-     * (escluso quindi lo zero).<br />
+     * (<strike>escluso quindi lo zero</strike> <small><em>che sto a di'?</em>
+     * Z = N &cup;  {x &isin; <strong>N</strong> : x = x*-1} perch&eacute;
+     * N = {0, 1, 2, 3 ...} con un unico punto di accumulazione a +&infin;</small>).<br />
      * Quindi, per esempio, se il dipartimento di giurisprudenza ha id = 2 
      * il suo progetto phantom, chiamato "phantom giurisprudenza" avr&agrave;
      * id = -2. Se quindi l'utente amministratore (PMO) decide di staccare
@@ -5888,7 +6236,7 @@ public class DBWrapper implements Query {
      * @param params    tabella hash contentente tante coppie chiave/valore quanti sono i progetti su cui si vuol effettuare un cambiamento di ruolo
      * @throws WebStorageException se si verifica un problema nel recupero di qualche attributo, nella query o in qualche altro tipo di puntamento
      */
-    @SuppressWarnings({ "null", "static-method" })
+    @SuppressWarnings({ "null" })
     public void updatePermissions(PersonBean user,
                                   PersonBean guest,
                                   int idDipart,
@@ -6593,36 +6941,69 @@ public class DBWrapper implements Query {
     }
     
     
-    /** TODO COMMENTO
+    /**
      * <p>Metodo per fare un nuovo inserimento di una nuova competenza relativa al progetto.</p>
+     * <p>Il metodo controlla anche se sia stato inserito un belongs (appartenenza)
+     * tra la persona e il gruppo a cui il progetto &egrave; collegato. Non avrebbe
+     * senso, infatti, aggiungere una competenza in assenza del relativo belongs.
+     * Se si aggiunge una competenza, vuol dire che si vuole associare una o 
+     * pi&uacute; attivit&agrave; alla persona, e ci&ograve; &egrave; possibile
+     * solo se esiste una riga di belongs che dice che la persona appartiene al
+     * gruppo del dipartimento a cui il progetto &egrave; collegato. 
+     * In assenza di belongs che associa la persona al gruppo, e quindi al 
+     * dipartimento del progetto, la persona stessa non compare nella casella
+     * a discesa da cui &egrave; possibile selezionare una persona da associare
+     * ad una attivit&agrave;. &Egrave quindi importante accertarsi che 
+     * l'associazione tra la persona e il gruppo del dipartimento che aggrega
+     * il progetto sia stabilita.</p>
      * 
-     * @param idProj    identificativo del progetto, al quale l'attivit&agrave; fa riferimento
-     * @param userId    identificativo dell'utente loggato
-     * @param valuesSkill   Vector contenente i valori inseriti dall'utente per inserimento nuovo rischio
+     * @param idProj    identificativo del progetto, al quale si fa riferimento
+     * @param skillId   identificativo della competenza che si vuole associare a una persona
+     * @param user      utente loggato, per eventuali controlli di autenticazione
+     * @param guest     persona a cui si vuol associare la competenza selezionata
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
-    @SuppressWarnings({ "static-method", "null" })
+    @SuppressWarnings({ "null" })
     public void insertSkillByPerson(int idProj,
-                                  int skillId, 
-                                  PersonBean user,
-                                  PersonBean guest)
-                     throws WebStorageException {
+                                    int skillId, 
+                                    PersonBean user,
+                                    PersonBean guest)
+                             throws WebStorageException {
         Connection con = null;
-        PreparedStatement pst = null;
+        PreparedStatement pst, pst1 = null;
         try {
-            // Ottiene il progetto precaricato quando l'utente si è loggato corrispondente al progetto sul quale aggiungere un'attività
-            Integer key = new Integer(idProj);
-            // Ottiene il contatore
+            // Crea il contatore dei parametri della query principale
             int nextParam = 0;
             // Ottiene l'id
             int maxId = getMax("competenzagestione") + 1;
+            // Ottiene la connessione
             con = pol_manager.getConnection();
+            // Inizia la transazione
             con.setAutoCommit(false);
+            // Query di inserimento di competenzagestione
             pst = con.prepareStatement(INSERT_COMPETENZA_GESTIONE);
             pst.clearParameters();
             pst.setInt(++nextParam, maxId);
             pst.setInt(++nextParam, skillId);
             pst.setInt(++nextParam, guest.getId());
+            /* ****************************************************************
+            Inserisce anche il belongs, se non c'è. Prima controlla se c'è.
+            A tale scopo recupera l'id dell'utente associato alla persona di cui si conosce l'id
+            Questo non era evitabile perche' a monte (cioe' passsato dalla pagina) 
+            ho l'informazione dell'id della persona, non dell'id dell'utente, che in
+            questo caso non e' in generale l'utente loggato (a meno che qualcuno
+            voglia aggiungersi competenze, ammesso di averne i diritti)         
+            ******************************************************************* */
+            CodeBean usr = getUserByPersonId(guest.getId());
+            if (!existsBelongsTo(usr.getId(), idProj)) {
+                int maxBelongsId = getMax("belongs") + 1;
+                pst1 = con.prepareStatement(INSERT_BELONGS_TO);
+                pst1.clearParameters();
+                pst1.setInt(1, maxBelongsId);
+                pst1.setInt(2, usr.getId());
+                pst1.setInt(3, idProj);
+                pst1.executeUpdate();
+            }
             pst.executeUpdate();
             con.commit();
         } catch (AttributoNonValorizzatoException anve) {
@@ -6835,7 +7216,7 @@ public class DBWrapper implements Query {
                 pst.setString(++nextParam, user.getCognome() + String.valueOf(Utils.BLANK_SPACE) + user.getNome());
                 /* === Id tipo indicatore === */
                 pst.setInt(++nextParam, Integer.parseInt(params.get("ind-tipo")));
-                /* === Riferimento a WBS === */;
+                /* === Riferimento a WBS === */
                 if (!params.get("ind-wbs").equals(Utils.VOID_STRING)) {
                     int idWbs = Integer.parseInt(params.get("ind-wbs"));
                     pst.setInt(++nextParam, idWbs);
@@ -6980,7 +7361,7 @@ public class DBWrapper implements Query {
                 pst.setString(++nextParam, user.getCognome() + String.valueOf(Utils.BLANK_SPACE) + user.getNome());
                 /* === Id indicatore misurato === */
                 pst.setInt(++nextParam, Integer.parseInt(params.get("ind-id")));
-                /* === Riferimento a WBS === */;
+                /* === Riferimento a WBS === */
                 // Per il momento trattiamo qusto dato come dato facoltativo non inserito
                 // TODO :: Dovrebbe essere un campo calcolato (fare subquery TODO)
                 pst.setInt(++nextParam, Integer.parseInt(params.get("ind-id")));
@@ -7033,18 +7414,18 @@ public class DBWrapper implements Query {
     
     
     /**
-     * <p>Metodo per fare l'inserimento di un nuovo progetto phantom per struttura.</p>
-     * TODO :: COMMENTO
-     * @param idProj    identificativo del progetto, al contesto del quale l'indicatore fa riferimento
+     * <p>Effettua l'inserimento di un nuovo progetto phantom per struttura di 
+     * dato id, restituendo l'identificativo di tale progetto, appena creato.</p>
+     * 
      * @param user      utente loggato
-     * @param projectsWritableByUser    Vector contenente tutti i progetti scrivibili dall'utente; l'indicatore deve essere agganciata ad uno di questi
-     * @param params    tabella contenente tutti i valori che l'utente inserisce per il nuovo indicatore;
+     * @param idDepart  identificativo della struttura relativamente alla quale deve essere creato il progetto phantom
+     * @return <code>int</code> - identificativo del progetto phantom appena inserito 
      * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche puntamento
      */
     @SuppressWarnings({ "null" })
     public int insertPhantom(PersonBean user,
-                              int idDepart) 
-                         throws WebStorageException {
+                             int idDepart) 
+                      throws WebStorageException {
         Connection con = null;
         PreparedStatement pst = null;
         try {
