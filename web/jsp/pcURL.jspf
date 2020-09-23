@@ -97,6 +97,16 @@
   <c:param name="p" value="srt" />
   <c:param name="id" value="" />
 </c:url>
+<c:url var="susWbs" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="wbs" />
+  <c:param name="p" value="sus" />
+  <c:param name="id" value="" />
+</c:url>
+<c:url var="resWbs" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="wbs" />
+  <c:param name="p" value="res" />
+  <c:param name="id" value="" />
+</c:url>
 <c:url var="rep" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="wbs" />
   <c:param name="p" value="rep" />
@@ -155,6 +165,30 @@
   <c:param name="q" value="mon" />
   <c:param name="p" value="ate" />
   <c:param name="y" value="${requestScope.theCurrentYear}" />
+</c:url>
+<c:url var="ind" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="ind" />
+  <c:param name="id" value="" />
+</c:url>
+<c:url var="addInd" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="ind" />
+  <c:param name="p" value="add" />
+  <c:param name="id" value="" />
+</c:url>
+<c:url var="modInd" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="ind" />
+  <c:param name="p" value="mod" />
+  <c:param name="id" value="" />
+</c:url>
+<c:url var="repInd" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="ind" />
+  <c:param name="p" value="rep" />
+  <c:param name="id" value="" />
+</c:url>
+<c:url var="monInd" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="ind" />
+  <c:param name="p" value="mon" />
+  <c:param name="id" value="" />
 </c:url>
 <c:url var="credits" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="pol" />
