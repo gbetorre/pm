@@ -206,6 +206,10 @@ public class Main extends HttpServlet {
      * per le attivit&agrave;
      */
     private static Timer updateTimer = new Timer();
+    /** 
+     * Stringa per il puntamento al db di produzione
+     */
+    private static StringBuffer contextDbName = new StringBuffer("java:comp/env/jdbc/pol");
     
     
     /**
@@ -227,12 +231,15 @@ public class Main extends HttpServlet {
                 long startTime = System.nanoTime();
                 if (db == null) {
                     try {
+                        log.info("DBWrapper is being created");
                         db = new DBWrapper();
+                        log.info("DBWrapper newborn");
                     } catch (WebStorageException wse) {
                         log.severe(FOR_NAME + "Problema nell\'accesso al database.\n" + wse.getMessage());
                     }
                 }
                 try {
+                    log.info("DBWrapper previously instanced");
                     log.info(FOR_NAME + "N. tuple aggiornate: " + refresh(db));
                 } catch (CommandException ce) {
                     log.severe(FOR_NAME + "Problema nell\'aggiornamento degli stati attivita\'.\n" + ce.getMessage());
@@ -298,6 +305,11 @@ public class Main extends HttpServlet {
         /*
          * Attiva la connessione al database
          */
+        // Prima deve capire su quale database deve insistere
+        // Di default va in produzione, ma se siamo in locale deve andare in locale
+        if (getServletContext().getRealPath("/").contains("\\Programs\\apache-tomcat-8.5.31\\webapps\\almalaurea\\")) {
+            contextDbName = new StringBuffer("java:comp/env/jdbc/poldev");
+        }
         try {
             db = new DBWrapper();
         }
@@ -650,6 +662,33 @@ public class Main extends HttpServlet {
         baseHref.append(req.getContextPath());
         baseHref.append('/');
         return new String(baseHref);
+    }
+    
+
+    /**
+     * <p>Restituisce la stringa necessaria a del database.</p>
+     * <p><cite id="https://stackoverrun.com/it/q/3104484">
+     * java:comp/env is the node in the JNDI tree where you can find properties 
+     * for the current Java EE component (a webapp, or an EJB).<br />
+     * <code>Context envContext = (Context)initContext.lookup("java:comp/env");</code>
+     * allows defining a variable pointing directly to this node. It allows doing
+     * <code>SomeBean s = (SomeBean) envContext.lookup("ejb/someBean");
+     * DataSource ds = (DataSource) envContext.lookup("jdbc/dataSource");</code>
+     * rather than
+     * <code>SomeBean s = (SomeBean) initContext.lookup("java:comp/env/ejb/someBean");
+     * DataSource ds = (DataSource) initContext.lookup("java:comp/env/jdbc/dataSource");</code>
+     * Relative paths instead of absolute paths. That's what it's used for.<br />
+     * It's an in-memory global hashtable where you can store global 
+     * variables by name. 
+     * The "java:" url scheme causes JNDI to look for a 
+     * javaURLContextFactory class, which is usually provided by your 
+     * app container, e.g. here is Tomcat's implementation javadoc.</cite></p>
+     * <p>Metodo getter sulla variabile di classe.</p>
+     * 
+     * @return <code>String</code> - il nome usato dal DbWrapper per realizzare il puntamento jdbc
+     */
+    public static String getDbName() {
+        return new String(contextDbName);
     }
     
     
