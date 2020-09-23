@@ -39,6 +39,8 @@ package it.alma;
 import java.io.File;
 import java.io.IOException;
 import java.net.FileNameMap;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -47,6 +49,7 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Scanner;
 import java.util.Vector;
 import java.util.logging.Logger;
 
@@ -66,6 +69,7 @@ import it.alma.bean.DepartmentBean;
 import it.alma.bean.PersonBean;
 import it.alma.bean.ProjectBean;
 import it.alma.exception.CommandException;
+import it.alma.exception.NotFoundException;
 import it.alma.exception.WebStorageException;
 
 
@@ -73,7 +77,7 @@ import it.alma.exception.WebStorageException;
  * <p>FileManager &egrave; la classe che si occupa della gestione dei files
  * caricati dall'utente, della generazione di link per il download, 
  * l'impostazione dei privilegi, secondo eventuali policy, 
- * dell'aggiornamento e di quan'altro occorra alle funzioni di gestione allegati 
+ * dell'aggiornamento e di quant'altro occorra alle funzioni di gestione allegati 
  * della web-application <code>pol</code>.</p>
  * 
  * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
@@ -102,7 +106,7 @@ public class FileManager extends HttpServlet {
      /**
      * Logger della classe per scrivere i messaggi di errore.
      */
-    private Logger log = Logger.getLogger(FileManager.class.getName());
+    private static Logger log = Logger.getLogger(FileManager.class.getName());
     /**
      * Name of the directory where uploaded files will be saved, relative to
      * the web application directory.
@@ -1163,12 +1167,12 @@ public class FileManager extends HttpServlet {
     }
 
     
-    /*
+    /**
      * Legge un file (di configurazione)
      * 
      * @param path
      * @return
-     *
+     */
     public static String getContent(String path)
                              throws NotFoundException, CommandException {
         StringBuffer content = new StringBuffer();
@@ -1178,8 +1182,8 @@ public class FileManager extends HttpServlet {
             try {
                 sc = new Scanner(file.openStream());
                 while (sc.hasNext()) {
-                    // Unnecessary Cast: Already returns a String
-                    content.append(/*(String)*//* sc.next());
+                    // Unnecessary Cast: sc Already returns a String
+                    content.append((String) sc.next());
                 }
             } catch (IOException ioe) {
                 String msg = FOR_NAME + "Si e\' verificato un problema nel puntamento al file remoto.\n";
@@ -1201,6 +1205,6 @@ public class FileManager extends HttpServlet {
             throw new NotFoundException("Attenzione: controllare che la risorsa sia raggiungibile!\n" + mue.getMessage(), mue);
         }        
         return new String(content);
-    }*/
+    }
     
 }
