@@ -33,6 +33,7 @@
 
 package it.alma.command;
 
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -49,6 +50,7 @@ import it.alma.DBWrapper;
 import it.alma.Main;
 import it.alma.Query;
 import it.alma.Utils;
+import it.alma.bean.ActivityBean;
 import it.alma.bean.CodeBean;
 import it.alma.bean.IndicatorBean;
 import it.alma.bean.ItemBean;
@@ -382,10 +384,9 @@ public class IndicatorCommand extends ItemBean implements Command {
                             vIndicators = db.getIndicators(idPrj, user, Utils.convert(Utils.getUnixEpoch()), Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE, !Query.GET_ALL);
                         } else if (part.equalsIgnoreCase(Query.PART_REPORT)) {
                             /* ************************************************ *
-                             *    Recupera gli indicatori di wbsa fini report   *
+                             *   Recupera gli indicatori di wbs a fini report   *
                              * ************************************************ */
-                            vIndicators = db.getIndicators(idPrj, user, Utils.convert(Utils.getUnixEpoch()), Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE, Query.GET_ALL);
-                            
+                            vIndicators = retrieveIndicators(db, idPrj, user, Utils.convert(Utils.getUnixEpoch()), Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE, Query.GET_ALL);
                         } else if (part.equals(Query.ADD_TO_PROJECT)) {
                             /* ************************************************ *
                              *        Effettua le selezioni che servono         * 
@@ -603,5 +604,50 @@ public class IndicatorCommand extends ItemBean implements Command {
             formParams.put(Query.MONITOR_PART, ind);
         }
     }
-    
+
+
+    /**
+     * <p>Restituisce un Vector di tutti gli indicatori appartenenti al progetto
+     * il cui identificativo viene passato come argomento; ciascuno degli
+     * indicatori contiene al proprio interno la lista di misurazioni 
+     * valorizzate, ciascuna a sua volta contenente i propri attributi.</p>
+     * 
+     * @param idPrj identificativo del progetto corrente
+     * @param db    WebStorage per l'accesso ai dati
+     * @param user  utente loggato; viene passato ai metodi del DBWrapper per controllare che abbia i diritti di fare quello che vuol fare
+     * @param from  data baseline a partire dalla quale cercare gli indicatori. Se non interessa, passare una data molto antica (tipo UNIX_EPOCH)
+     * @param typeId tipo specifico di indicatore che si vuol recuperare; per recuperare tutti i tipi, v. argomento successivo
+     * @param getAll se si vogliono recuperare gli indicatori di tutti i tipi bisogna passare -1 sia sul parametro precedente che su questo; altrimenti bisogna passare l'id tipo su entrambi
+     * @param measuresToo flag specificante se bisogna recuperare anche le misurazioni di ogni indicatore (true) o non interessa (false)
+     * @return <code>Vector&lt;WbsBean&gt;</code> - lista di work packages recuperati 
+     * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
+     */
+    public static Vector<IndicatorBean> retrieveIndicators(DBWrapper db,
+                                                           int idPrj,
+                                                           PersonBean user,
+                                                           Date from,
+                                                           int typeId,
+                                                           int getAll,
+                                                           boolean measuresToo)
+                                                    throws CommandException {
+        Vector<IndicatorBean> vIndicators = new Vector<IndicatorBean>();
+        try {
+            // Fa la stessa query usata nella execute()
+            vIndicators = db.getIndicators(idPrj, user, from, typeId, getAll, measuresToo);
+        } catch (WebStorageException wse) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di work packages.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + wse.getMessage(), wse);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n Attenzione: controllare di essere autenticati nell\'applicazione!\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + npe.getMessage(), npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+        return vIndicators;
+    }
+
 }
