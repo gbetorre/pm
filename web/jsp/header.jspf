@@ -1,5 +1,7 @@
 <%@ include file="pcURL.jspf" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<c:set var="bg" value="bg-success" scope="page" />
     <c:if test="${not empty sessionScope.usr.id}">    
       <div class="header">
         <div class="row justify-content-center">
@@ -20,6 +22,19 @@
                 </a>&nbsp;
                 <a class="btn btn-outline-danger" href="${initParam.appName}/auth?q=logout" ><i class="fas fa-sign-out-alt"></i> Esci</a>
               </span>
+              <c:if test="${pageContext.servletContext.getContextPath() eq '/almalaurea'}">
+                <c:if test="${fn:endsWith(applicationScope.db, 'pol')}">
+                  <c:set var="bg" value="bg-danger" scope="page" />
+                </c:if>
+              <span class="${bg}">
+                <c:out value="${applicationScope.db}" />
+              </span>
+              </c:if>
+              <c:set var="strToSubst" value="${fn:substring(applicationScope.db, fn:length(applicationScope.db)-3, fn:length(applicationScope.db))}" scope="page" />
+              <%--c:out value="${fn:replace(applicationScope.db, strToSubst, 'los')}" /--%>
+              <!-- Questo commento viene stampato nel codice della pagina
+                <c:out value="${fn:replace(applicationScope.db, strToSubst, 'los')}" />
+              -->
             </p>
           </div>
         </div>
