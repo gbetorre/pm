@@ -31,19 +31,19 @@
     	    <h5><label for="pcv-situazione">Situazione attuale</label></h5>
     		  <textarea id="pcv-situazione" name="pcv-situazione" class="form-control" aria-label="With textarea" maxlength="8104" readonly>${p.situazioneAttuale}</textarea>
           <div class="charNum"></div>
-          <br><br>
+          <br />
     	    <h5><label for="pcv-descrizione">Descrizione del Progetto</label></h5>
       		<textarea id="pcv-descrizione" name="pcv-descrizione" class="form-control" aria-label="With textarea" maxlength="8104" readonly>${p.descrizione}</textarea>
       		<div class="charNum"></div>
-          <br><br>
+          <br />
     	    <h5><label for="pcv-obiettivi">Obiettivi misurabili di Progetto</label></h5>
     		  <textarea id="pcv-obiettivi" name="pcv-obiettivi" class="form-control" aria-label="With textarea" maxlength="8104" readonly>${p.obiettiviMisurabili}</textarea>
     		  <div class="charNum"></div>
-          <br><br>
+          <br />
     	    <h5><label for="pcv-minacce">Minacce</label></h5>
     		  <textarea id="pcv-minacce" name="pcv-minacce" class="form-control" aria-label="With textarea" maxlength="8104" readonly>${p.minacce}</textarea>
     		  <div class="charNum"></div>
-          <br><br>
+          <br />
           <div id="container-fluid">
             <div class="row">
               <div class="col-2"></div>
