@@ -24,6 +24,7 @@
   <c:set var="wbs" value="-3" scope="page" />
   <c:set var="complexity" value="-3" scope="page" />
   <c:set var="state" value="-3" scope="page" />
+  <c:set var="support" value="-3" scope="page" />
   <c:set var="tP" value="" scope="page" />
   <c:choose>
   <c:when test="${not empty actInstance}">
@@ -44,6 +45,7 @@
     <c:set var="wbs" value="${actInstance.idWbs}" scope="page" />
     <c:set var="complexity" value="${actInstance.idComplessita}" scope="page" />
     <c:set var="state" value="${actInstance.idStato}" scope="page" />
+    <c:set var="support" value="${actInstance.idStrutturaGregaria}" scope="page" />
     <c:set var="tP" value="${actName}:" scope="page" />
   </c:when>
   <c:otherwise>
@@ -170,6 +172,30 @@
           </div>
         </div>
         <br />
+        <c:if test="${requestScope.progetto.tipo eq 'P'}">
+        <div class="row">
+          <div class="col-sm-5">Struttura Gregaria</div>
+          <div class="col-sm-5">
+            <select class="form-control" id="act-grg" name="act-grg" disabled>
+            <option value="">Nessuna</option>
+            <c:forEach var="entry" items="${requestScope.dipart}">
+            <c:if test="${not empty entry.value}">
+              <c:set var="key" value="${entry.key}" scope="page" />
+              <c:set var="dip" value="${requestScope.dipart.get(key)}" />
+              <c:set var="selected" value="" scope="page" />
+              <c:if test="${dip.id eq support}">
+                <c:set var="selected" value="selected" scope="page" />
+              </c:if>          
+              <option value="${dip.id}" ${selected}>
+              <c:out value="${dip.acronimo} - ${dip.nome}" />
+              </option>              
+            </c:if>
+            </c:forEach>
+            </select>
+          </div>
+        </div>
+        <br />
+        </c:if>
         <div class="row">
           <div class="col-sm-5">Note di avanzamento</div>
           <div class="col-sm-5">
