@@ -41,10 +41,10 @@
               <thead class="thead-light">
                 <tr>
                   <th class="bg-primary" scope="col" width="*">Nome WBS padre</th>
-                  <th class="bg-primary" scope="col" width="20%">Note di avanzamento</th>
-                  <th class="bg-primary" scope="col" width="20%">Risultati raggiunti</th>
+                  <th class="bg-primary" scope="col" width="15%">Note di avanzamento</th>
+                  <th class="bg-primary" scope="col" width="15%">Risultati raggiunti</th>
                   <th class="bg-primary" scope="col" width="5%"><div class="text-center">Workpackage</div></th>
-                  <th class="bg-primary" width="5%"><div class="text-center">Funzioni</div></th>
+                  <th class="bg-primary" width="10%"><div class="text-center">Funzioni</div></th>
                 </tr>
               </thead>
               <tbody>
@@ -55,10 +55,10 @@
                   <c:if test="${duplicateHeaders}">
                     <tr class="active">
                       <td class="bg-primary" width="*"><strong>Nome WBS padre</strong></td>
-                      <td class="bg-primary" width="20%"><strong>Note di avanzamento</strong></td>
-                      <td class="bg-primary" width="20%"><strong>Risultati raggiunti</strong></td>
+                      <td class="bg-primary" width="15%"><strong>Note di avanzamento</strong></td>
+                      <td class="bg-primary" width="15%"><strong>Risultati raggiunti</strong></td>
                       <td class="bg-primary" width="5%"><div class="text-center"><strong>Workpackage</strong></div></td>
-                      <td class="bg-primary" width="5%"><div class="text-center"><strong>Funzioni</strong></div></td>
+                      <td class="bg-primary" width="10%"><div class="text-center"><strong>Funzioni</strong></div></td>
                     </tr>
                   </c:if>
                   <tr>
@@ -68,11 +68,11 @@
                         <c:out value="${wbsInstance.nome}" />
                       </a>
                     </td>
-                    <td scope="col">
-                      <c:out value="${wbsInstance.noteAvanzamento}" />
+                    <td scope="col" class="small">
+                      <small><c:out value="${wbsInstance.noteAvanzamento}" /></small>
                     </td>
-                    <td scope="col">
-                      <c:out value="${wbsInstance.risultatiRaggiunti}" />
+                    <td scope="col" class="small">
+                      <small><c:out value="${wbsInstance.risultatiRaggiunti}" /></small>
                     </td>
                     <td scope="col">
                     <c:choose>
@@ -102,6 +102,19 @@
                       <a href="${act}${p.id}&idw=${wbsInstance.id}" class="ico" id="lightTable">
                         <img src="${initParam.urlDirectoryImmagini}/${icoAct}" class="btn-del" alt="Link a lista attivita" title="${txtAct}" />
                       </a>
+                    <!-- Suspend WBS Padre -->
+                      <c:set var="pauseico" value="/ico-pause.png" scope="page" />
+                      <c:set var="pausetxt" value="Sospendi" scope="page" />
+                      <c:set var="pauseurl" value="${susWbs}${p.id}&idw=${wbsInstance.id}" scope="page" />
+                      <c:if test="${wbsInstance.stato.id eq 3}">
+                        <c:set var="pauseico" value="/ico-start.png" scope="page" />
+                        <c:set var="pausetxt" value="Riprendi" scope="page" />
+                        <c:set var="pauseurl" value="javascript:DoPost(${wbsInstance.id})" scope="page" />
+                      </c:if>
+                      <a href="${pauseurl}" id="sus-wbs" class="ico">
+                        <img id="aboutSus${wbsInstance.id}" src="${initParam.urlDirectoryImmagini}${pauseico}" class="btn-del" alt="Gestione sospensione WBS" title="${pausetxt} WBS/Azione" />
+                      </a>
+                    <!-- End Suspend Padre -->
                       <a href="#del-form${wbsInstance.id}" class="ico" id="del-wbs" rel="modal:open">
                         <img src="${initParam.urlDirectoryImmagini}/ico-del-outline.png" class="btn-del" alt="Elimina" title="Elimina" />
                       </a>
@@ -217,11 +230,11 @@
                         <table class="table table-condensed col-md-11 marginLeftSmall">
                           <thead class="thead-light">
                             <tr>
-                              <th scope="col" width="60%">Nome WBS figlia</th>
+                              <th scope="col" width="*">Nome WBS figlia</th>
                               <th width="15%">Note di avanzamento</th>
                               <th width="15%">Risultati raggiunti</th>
                               <th width="5%"><div class="text-center">Workpackage</div></th>
-                              <th width="5%"><div class="text-center">Funzioni</div></th>
+                              <th width="10%"><div class="text-center">Funzioni</div></th>
                             </tr>
                           </thead>
                      	    <tbody>
@@ -650,11 +663,11 @@
                                   </div>
                                 </c:if>
                               </td>
-                              <td scope="col">
-                                <c:out value="${wbsFiglio.noteAvanzamento}" />
+                              <td scope="col" class="small">
+                                 <small><c:out value="${wbsFiglio.noteAvanzamento}" /></small>
                               </td>
-                              <td scope="col">
-                                <c:out value="${wbsFiglio.risultatiRaggiunti}" />
+                              <td scope="col" class="small">
+                                <small><c:out value="${wbsFiglio.risultatiRaggiunti}" /></small>
                               </td>
                               <td scope="col">
                                 <c:choose>
@@ -684,6 +697,19 @@
                                 <a href="${act}${p.id}&idw=${wbsFiglio.id}" class="ico" id="wbsActLev2">
                                   <img src="${initParam.urlDirectoryImmagini}/${icoAct}" class="btn-del" alt="Link a lista attivita" title="${txtAct}" />
                                 </a>
+                                <!-- Suspend WBS Figlia -->
+                                  <c:set var="pauseico" value="/ico-pause.png" scope="page" />
+                                  <c:set var="pausetxt" value="Sospendi" scope="page" />
+                                  <c:set var="pauseurl" value="${susWbs}${p.id}&idw=${wbsFiglio.id}" scope="page" />
+                                  <c:if test="${wbsFiglio.stato.id eq 3}">
+                                    <c:set var="pauseico" value="/ico-start.png" scope="page" />
+                                    <c:set var="pausetxt" value="Riprendi" scope="page" />
+                                    <c:set var="pauseurl" value="javascript:DoPost(${wbsFiglio.id})" scope="page" />
+                                  </c:if>
+                                  <a href="${pauseurl}" id="sus-wbs" class="ico">
+                                    <img id="aboutSus${wbsFiglio.id}" src="${initParam.urlDirectoryImmagini}${pauseico}" class="btn-del" alt="Gestione sospensione WBS" title="${pausetxt} WBS/Azione" />
+                                  </a>
+                                <!-- End Suspend Figlia -->
                                 <a href="#del-form${wbsFiglio.id}" class="ico" id="del-wbs" rel="modal:open">
                                   <img src="${initParam.urlDirectoryImmagini}/ico-del-outline.png" class="btn-del" alt="Elimina" title="Elimina" />
                                 </a>
@@ -835,3 +861,9 @@
       </c:if>
       </div>
     </div>
+    <script type="text/javascript"> 
+      function DoPost(idWbs){
+        $("#aboutSus"+idWbs).attr("src","${initParam.urlDirectoryImmagini}/spacer.gif");
+        $.post("${resWbs}${p.id}&idw="+idWbs, { id: "${p.id}", idw: idWbs } );  // Values must be in JSON format
+      }
+    </script>
