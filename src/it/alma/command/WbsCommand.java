@@ -1,16 +1,15 @@
 /*
- *   Alma on Line: Applicazione WEB per la visualizzazione 
- *   delle schede di indagine su popolazione dell'ateneo,
- *   della gestione dei progetti on line (POL) 
- *   e della preparazione e del monitoraggio delle informazioni riguardanti 
- *   l'offerta formativa che hanno ricadute sulla valutazione della didattica 
- *   (questionari on line - QOL).
+ *   Alma on Line: 
+ *   Applicazione WEB per la gestione dei progetti on line (POL)
+ *   coerentemente con le linee-guida del project management,
+ *   e per la visualizzazione delle schede di indagine 
+ *   su popolazione dell'ateneo.
  *   
- *   Copyright (C) 2018 Giovanroberto Torre<br />
- *   Alma on Line (aol), Projects on Line (pol), Questionnaire on Line (qol);
- *   web applications to publish, and manage, students evaluation,
- *   projects, students and degrees information.
- *   Copyright (C) renewed 2018 Universita' degli Studi di Verona, 
+ *   Copyright (C) 2018-2020 Giovanroberto Torre<br />
+ *   Alma on Line (aol), Projects on Line (pol);
+ *   web applications to publish, and manage, projects
+ *   according to the Project Management paradigm (PM).
+ *   Copyright (C) renewed 2020 Giovanroberto Torre, 
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify 
@@ -36,7 +35,6 @@
 
 package it.alma.command;
 
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -105,6 +103,11 @@ public class WbsCommand extends ItemBean implements Command {
      */
     private static final String nomeFileOrderBy = "/jsp/wbsSort.jsp";
     /**
+     * Pagina a cui la command fa riferimento per mostrare il riepilogo
+     * di una WBS esistente che l'utente vuol mettere in stato sospeso 
+     */
+    private static final String nomeFileWbsToSus = "/jsp/wbsSuspend.jsp";
+    /**
      * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutti gli attributi del progetto
      */    
     private static final HashMap<String, String> nomeFile = new HashMap<String, String>();
@@ -145,6 +148,8 @@ public class WbsCommand extends ItemBean implements Command {
         nomeFile.put(Query.ADD_TO_PROJECT, nomeFileWbs);
         nomeFile.put(Query.MODIFY_PART, nomeFileWbs);
         nomeFile.put(Query.DELETE_PART, nomeFileWbs);
+        nomeFile.put(Query.SUSPEND_PART, nomeFileWbsToSus);
+        nomeFile.put(Query.RESUME_PART, nomeFileElenco);
         nomeFile.put(Query.PART_REPORT, nomeFileReport);
         nomeFile.put(Query.PART_GRAPHIC, nomeFileGrafico);
         nomeFile.put(Query.ORDER_BY_PART, nomeFileOrderBy);
@@ -304,6 +309,14 @@ public class WbsCommand extends ItemBean implements Command {
                                 db.deleteWbs(user, runtimeProject.getIdDipart(), idWbsToDel);
                                 redirect = "q=" + Query.PART_WBS + "&id=" + idPrj;
                             }
+                        } else if (part.equalsIgnoreCase(Query.SUSPEND_PART)  ||
+                                   part.equalsIgnoreCase(Query.RESUME_PART)) {
+                            /* ************************************************ *
+                             *            SUSPEND or RESUME Wbs Part            *
+                             * ************************************************ */
+                            loadParams(part, parser, params);
+                            db.updateWbsState(idPrj, idWbs, part, user, params.get(Query.SUSPEND_PART));
+                            redirect = "q=" + Query.PART_WBS + "&id=" + idPrj;
                         } else if (part.equalsIgnoreCase(Query.PART_GRAPHIC)) {
                             /* ************************************************ *
                              *                  UPDATE Wbs padre                *
@@ -336,10 +349,9 @@ public class WbsCommand extends ItemBean implements Command {
                             // for instance: q=wbs&p=srt&id=3
                             vWbsAncestors = db.getWbsHierarchy(idPrj, user);
                         } else {
-                            // Selezioni per visualizzazione, aggiunta e modifica wbs
                             // Seleziona tutte le WBS non workpackage per mostrare i possibili padri nella pagina di dettaglio
-                            // isHeader = isFooter = false;
                             wbsPutativeFather = db.getWbs(idPrj, user, Query.WBS_BUT_WP);
+                            // Selezioni per visualizzazione, aggiunta, modifica e sospensione wbs
                             if (idWbs != Utils.DEFAULT_ID) {
                                 wbsInstance = db.getWbsInstance(idPrj, idWbs, user);
                                 wbsActivities = db.getActivitiesByWbs(idWbs, idPrj, user);
@@ -498,6 +510,15 @@ public class WbsCommand extends ItemBean implements Command {
             wbs.put("wbs-id",           parser.getStringParameter("wbs-id", Utils.VOID_STRING));
             wbs.put("wbs-ordinale",     parser.getStringParameter("wbs-srt", Utils.VOID_STRING));
             formParams.put(Query.ORDER_BY_PART, wbs);
+        }
+        /* **************************************************** *
+         *               Ramo di SOSPENSIONE wbs                *
+         * **************************************************** */
+        else if (part.equalsIgnoreCase(Query.SUSPEND_PART)) {
+            HashMap<String, String> wbs = new HashMap<String, String>();
+            wbs.put("wbs-data",         parser.getStringParameter("sus-data", null));
+            wbs.put("wbs-note",         parser.getStringParameter("sus-descr", Utils.VOID_STRING));
+            formParams.put(Query.SUSPEND_PART, wbs);
         }
     }
     
