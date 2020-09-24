@@ -11,14 +11,19 @@
   </c:if>
 </c:forEach>
 <c:set var="superuser" value="${false}" scope="page" />
+<c:set var="pmo" value="${false}" scope="page" />
 <c:if test="${(ruolo eq 'PMOATE') or (ruolo eq 'PMODIP') or (ruolo eq 'PM') or (ruolo eq 'TL')}">
   <c:set var="superuser" value="${true}" scope="page" />
+</c:if>
+<c:if test="${(ruolo eq 'PMOATE') or (ruolo eq 'PMODIP')}">
+  <c:set var="pmo" value="${true}" scope="page" />
 </c:if>
 <c:choose>
   <c:when test="${pageScope.superuser}">
     <c:choose>
       <c:when test="${param['q'] eq 'wbs'}">
         <c:if test="${not empty param['p']}">
+          <c:if test="${p.tipo ne 'P' or pageScope.pmo}">
           <div class="row">
             <div class="col-5">
               <label for="btnMod"><em>Per abilitare i campi clicca sul pulsante&nbsp;</em></label>
@@ -30,11 +35,11 @@
           <br />
           <hr class="riga" />
           <hr class="separatore" />
+          </c:if>
         </c:if>
       </c:when>
       <c:when test="${param['q'] eq 'act'}">
-      <c:choose>
-        <c:when test="${param['p'] eq 'mod' or param['p'] eq 'add'}">
+        <c:if test="${param['p'] eq 'mod' or param['p'] eq 'add'}">
         <div class="row">
           <div class="col-5">
             <label for="btnMod"><em>Per abilitare i campi clicca sul pulsante&nbsp;</em></label>
@@ -46,8 +51,34 @@
         <br />
         <hr class="riga" />
         <hr class="separatore" />
-        </c:when>
-      </c:choose>
+        </c:if>
+      </c:when>
+      <c:when test="${param['q'] eq 'ind'}">
+        <c:choose>
+          <c:when test="${pageScope.pmo}">
+            <c:if test="${param['p'] eq 'mod' or param['p'] eq 'add'}">
+            <div class="row">
+              <div class="col-5">
+                <label for="btnMod"><em>Per abilitare i campi clicca sul pulsante&nbsp;</em></label>
+              </div>
+              <div class="col-1">
+                <button class="btn btn-success" id="btnMod" name="modifica" onclick="modifyPart();"><i class="far fa-edit"></i> Modifica</button>
+              </div>
+            </div>
+            <hr class="riga" />
+            <hr class="separatore" />
+            </c:if>
+          </c:when>
+          <c:otherwise>
+            <hr class="separatore" />
+            <div class="alert alert-warning">
+              <p>
+                <span class="ui-icon ui-icon-alert"></span>
+                &nbsp;Il tuo ruolo nel progetto consente solo la visualizzazione degli indicatori esistenti.
+              </p>
+            </div>
+          </c:otherwise>
+        </c:choose>
       </c:when>
     </c:choose>
   </c:when>
