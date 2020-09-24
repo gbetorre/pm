@@ -9,8 +9,8 @@
  *   Copyright (C) 2018 Giovanroberto Torre<br />
  *   Alma on Line (aol), Projects on Line (pol), Questionnaire on Line (qol);
  *   web applications to publish, and manage, students evaluation,
- *   projects, students and degrees information.
- *   Copyright (C) renewed 2018 Universita' degli Studi di Verona, 
+ *   and projects according to the Project Management Paradigm.
+ *   Copyright (C) renewed 2020 Universita' degli Studi di Verona, 
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify 
@@ -67,6 +67,7 @@ import com.oreilly.servlet.ParameterParser;
 import it.alma.bean.ActivityBean;
 import it.alma.bean.CodeBean;
 import it.alma.bean.DepartmentBean;
+import it.alma.bean.IndicatorBean;
 import it.alma.bean.ItemBean;
 import it.alma.bean.PersonBean;
 import it.alma.bean.ProjectBean;
@@ -272,6 +273,7 @@ public class SessionManager extends HttpServlet {
                 LinkedHashMap<Integer, Vector<ActivityBean>> userWritableActivitiesByProject = new LinkedHashMap<Integer, Vector<ActivityBean>>();
                 LinkedHashMap<Integer, Vector<SkillBean>> userWritableSkillsByProject = new LinkedHashMap<Integer, Vector<SkillBean>>();
                 LinkedHashMap<Integer, Vector<RiskBean>> userWritableARisksByProject = new LinkedHashMap<Integer, Vector<RiskBean>>();
+                LinkedHashMap<Integer, Vector<IndicatorBean>> userWritableIndicatorsByProject = new LinkedHashMap<Integer, Vector<IndicatorBean>>();
                 for (ProjectBean writablePrj : userWritableProjects) {
                     int idPrj = writablePrj.getId();
                     Integer key = new Integer(idPrj);
@@ -281,6 +283,8 @@ public class SessionManager extends HttpServlet {
                     userWritableSkillsByProject.put(key, userWritableSkills);
                     Vector<RiskBean> userWritableRisks = db.getRisks(idPrj, user);
                     userWritableARisksByProject.put(key, userWritableRisks);
+                    Vector<IndicatorBean> userWritableIndicators = db.getIndicators(idPrj, user);
+                    userWritableIndicatorsByProject.put(key, userWritableIndicators);
                 }
                 // Prepara il menu
                 LinkedHashMap<ItemBean, ArrayList<ItemBean>> vO = HomePageCommand.makeMegaMenu((PersonBean) session.getAttribute("usr"), getServletContext().getInitParameter("appName"));
@@ -290,6 +294,7 @@ public class SessionManager extends HttpServlet {
                 session.setAttribute("writableActivity", userWritableActivitiesByProject);
                 session.setAttribute("writableSkills", userWritableSkillsByProject);
                 session.setAttribute("writableRisks", userWritableARisksByProject);
+                session.setAttribute("writableIndicators", userWritableIndicatorsByProject);
                 session.setAttribute("menu", vO);
                 res.sendRedirect(res.encodeRedirectURL(getServletContext().getInitParameter("appName") + "/?q=pol"));
             }
