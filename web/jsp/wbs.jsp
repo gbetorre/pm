@@ -168,6 +168,73 @@
           </div>
           </c:otherwise>
         </c:choose>
+        <c:if test="${not empty requestScope.indicatori}">
+          <hr class="separatore" />
+          <div class="lightTable">
+            <div class="row">
+              <div class="col"><strong>Indicatori della WBS</strong></div>
+            </div>
+            <hr class="separatore" />
+            <div class="row">
+              <div class="col-sm-1"></div>
+              <div class="col-sm-3 lightTableHead">Nome indicatore</div>
+              <div class="col-sm-1 lightTableHead">Baseline</div>
+              <div class="col-sm-1 lightTableHead">Anno</div>
+              <div class="col-sm-1 lightTableHead">Target</div>
+              <div class="col-sm-1 lightTableHead">Anno</div>
+              <div class="col-sm-2 lightTableHead">Misurazioni</div>
+            </div>
+            <hr class="separatore" />
+            <c:forEach var="ind" items="${requestScope.indicatori}" varStatus="loop">            
+            <div class="row">
+              <div class="col-sm-1"></div>
+              <div class="col-sm-3">
+                <a href="${modInd}${p.id}&idi=${ind.id}"><c:out value="${ind.nome}"/></a>
+              </div>
+              <div class="col-sm-1">
+                &nbsp;<c:out value="${ind.baseline}" />
+              </div>
+              <div class="col-sm-1">
+                <fmt:formatDate value='${ind.dataBaseline}' pattern='yyyy' />
+              </div>
+              <div class="col-sm-1">
+                &nbsp;<c:out value="${ind.target}" />
+              </div>
+              <div class="col-sm-1">
+                <fmt:formatDate value='${ind.dataTarget}' pattern='yyyy' />
+              </div>
+              <div class="col-sm-1 text-center">
+              <c:choose>
+                <c:when test="${ind.totMisurazioni eq 0}">
+                <a href="javascript:popupWindow('Note','popup1',true,'Su questo indicatore non sono state ancora inserite misurazioni. Il responsabile ha tempo fino al <em><fmt:formatDate value='${ind.dataTarget}' pattern='dd/MM/yyyy' /></em> per inserirle!');" class="helpInfo" id="helpAct1">
+                  <span class="badge badge-danger">
+                    <c:out value="${ind.totMisurazioni}" />
+                  </span>
+                </a>
+                </c:when>
+                <c:otherwise>
+                <c:set var="misurazioni" value="" scope="page" />
+                <c:forEach var="mis" items="${ind.misurazioni}" varStatus="loop">
+                  <c:set var="misurazioni" value="${misurazioni} ${loop.index+1}- ${mis.descrizione}<br>" scope="page" />
+                </c:forEach>
+                <a href="javascript:popupWindow('Misurazioni','popup1',true,'${misurazioni}');" class="helpInfo" id="helpAct1">
+                  <span class="badge badge-success">
+                    <c:out value="${ind.totMisurazioni}" />
+                  </span>
+                </a>
+                </c:otherwise>
+              </c:choose>
+              </div>
+              <div class="col-sm-1 text-center">
+                <a href="<c:out value="${monInd}${p.id}&idi=${ind.id}" escapeXml="false" />" id='btn-mon'>
+                  <button type="button" class="btn btn-sm btn-outline-primary">Misura</button>
+                </a>
+              </div>
+            </div>
+            <hr class="riga" />
+            </c:forEach>
+          </div>
+          </c:if>
       </c:if>
           <br />
           <div class="row">
@@ -257,6 +324,7 @@
       </form>
       </c:catch>
       <c:out value="${exception}" />
+      <%@ include file="subPopup.jspf" %>
       <script type="text/javascript">
         var offsetcharacter = 5;
         // Variabili per formattazione stringhe
