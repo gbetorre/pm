@@ -105,6 +105,14 @@ public interface Query extends Serializable {
      */
     public static final String PART_PERMISSION                  = "per";
     /**
+     * <p>Costante per il parametro identificante la gestione delle competenze.</p>
+     */
+    public static final String PART_RESOURCES                   = "ski";
+    /*
+     * <p>Costante per il parametro identificante la gestione delle appartenenze.</p>
+     */
+    //public static final String PART_BELONGS                     = "blg";
+    /**
      * <p>Costante per il parametro identificante la pagina della Vision di un progetto.</p>
      */
     public static final String PART_PROJECT_CHARTER_VISION      = "pcv";
@@ -152,6 +160,10 @@ public interface Query extends Serializable {
      * <p>Costante per il parametro identificante la pagina dei rischi associati ad un progetto.</p>
      */
     public static final String PART_RISK                        = "ris";
+    /**
+     * <p>Costante per il parametro identificante la navigazione degli indicatori.</p>
+     */
+    public static final String PART_INDICATOR                   = "ind";
     /**
      * <p>Costante per il parametro identificante la pagina del Report di un progetto.</p>
      */
@@ -567,6 +579,20 @@ public interface Query extends Serializable {
             "   ,   SP.nome      AS \"nome\"" +
             "   FROM statoprogetto SP" + 
             "   ORDER BY SP.id";
+
+    /**
+     * Estrae un tipo indicatore, dato il suo id, passato come parametro 
+     * &ndash; <strong>oppure</strong> tutti i tipi indicatori, 
+     * nel caso in cui la seconda clausola risulti <code>true</code>.
+     */
+   public static final String GET_INDICATOR_TYPES = 
+           "SELECT " +
+           "       T.id        AS \"id\"" +
+           "   ,   T.nome      AS \"nome\"" +
+           "   ,   T.valore    AS \"informativa\"" +
+           "   FROM tipoindicatore T" + 
+           "   WHERE  (T.id = ? OR -1 = ?)" +
+           "   ORDER BY T.id";
     
     /**
      * <p>Estrae l'utente con username e password passati come parametri.</p>
@@ -603,6 +629,52 @@ public interface Query extends Serializable {
             "       INNER JOIN grp G ON G.id = B.id1_grp" +
             "   WHERE G.name ILIKE ? OR -1 = ?" +
             "   ORDER BY P.cognome, P.nome";
+    
+    /**
+     * <p>Estrae la lista delle persone appartenenti ad un certo dipartimento 
+     * oppure la lista di tutti gli utenti del sistema.</p>
+     */
+    public static final String GET_BELONGS_PERSON = 
+            "SELECT DISTINCT" +
+            "   P.id            AS \"id\"" +
+            "   ,   P.nome      AS \"nome\"" +
+            "   ,   P.cognome   AS \"cognome\"" +
+            "   FROM usr U "  + 
+            "       INNER JOIN identita I ON U.id = I.id0_usr" + 
+            "       INNER JOIN persona P ON P.id = I.id1_persona" +
+            "       INNER JOIN belongs B ON B.id0_usr = U.id" +
+            "       INNER JOIN grp G ON G.id = B.id1_grp" +
+            "   WHERE G.name ILIKE ? OR -1 = ?" +
+            "   ORDER BY P.cognome, P.nome";
+    
+    /**
+     * <p>Restituisce il valore boolean 'true' (in realt&agrave; mostra 't')
+     * se l'id dell'utente passato come parametro gi&agrave; esce dalla 
+     * query che va a estrarre tutti gli appartenenti (belongs) al gruppo
+     * del dipartimento che aggrega il progetto di dato id.</p>
+     * <p>Nota che in postgres boolean &egrave; un tipo polimorfo:
+     * <pre>
+     * Boolean constants can be represented in SQL queries by the SQL key words 
+     * TRUE, FALSE, and NULL.
+     * The datatype input function for type boolean accepts 
+     * these string representations for the "true" state:<ul><li>true</li><li>yes</li><li>on</li><li>1</li></ul>
+     * and these representations for the "false" state:<ul><li>false</li><li>no</li><li>off</li><li>0</li></pre>
+     * </p>
+     * <p>In realt&agrave; non &egrave; importante che il valore restituito
+     * sia effettivamente di tipo boolean, perch&eacute; il valore di ritorno 
+     * non &egrave; veramente sfruttato:
+     * basta che la query torni qualcosa, qualsiasi cosa, perch&eacute; si 
+     * capisca che l'utente era gi&agrave; inserito, quindi si poteva anche 
+     * restituire 1 o qualunque altro valore a piacere.</p>
+     */
+    public static final String IS_BELONGS_PERSON = 
+            "SELECT " +
+            "   true" +
+            "   WHERE ? IN" +
+            "      (SELECT B.id0_usr FROM belongs B" +
+            "           INNER JOIN dipartimento D ON B.id1_grp = D.id_share_grp " +
+            "           INNER JOIN progetto PJ ON PJ.id_dipart = D.id " +
+            "       WHERE PJ.id = ?)";
     
     /**
      * <p>Estrae il gruppo di appartenenza dell'utente che ha eseguito la login.</p>
@@ -698,7 +770,8 @@ public interface Query extends Serializable {
      * <p>Estrae i progetti dell'utente 
      * avente identificativo passato come parametro
      * appartenenti al dipartimento avente identificativo 
-     * passato come parametro.</p>
+     * passato come parametro, 
+     * e che non si trovano in stato 'ELIMINATO'.</p>
      */
     public static final String GET_PROJECTS_BY_DEPART = 
             "SELECT " +
@@ -710,6 +783,7 @@ public interface Query extends Serializable {
             "   ,   PJ.datafine                 AS \"dataFine\"" + 
             "   ,   PJ.id_statoprogetto         AS \"idStatoProgetto\"" + 
             "   ,   PJ.sottotipo                AS \"tag\"" +
+            "   ,   PJ.tipo                     AS \"tipo\"" +
             "   FROM progetto PJ" + 
             "       INNER JOIN ruologestione RG ON PJ.id = RG.id_progetto" + 
             "       INNER JOIN persona P ON RG.id_persona = P.id" + 
@@ -718,13 +792,14 @@ public interface Query extends Serializable {
             "   WHERE   P.id = ?" + 
             "       AND PJ.id_dipart = ?" +
             "       AND PJ.id > 0" + 
+            "       AND PJ.id_statoprogetto < 5" +
             "   ORDER BY PJ.titolo ASC";
     
     /**
      * <p>Estrae il primo progetto con id negativo, 
      * dato in input l'id del dipartimento.</p>
      */
-    public String GET_PROJECT_BY_DIPART = 
+    public String GET_PHANTOM_PROJECT_BY_DEPART = 
             "SELECT " +
             "   PJ.id    AS \"id\"" +
             "   FROM progetto PJ" + 
@@ -749,6 +824,25 @@ public interface Query extends Serializable {
             "   WHERE RG.id_persona = ?" +
             "       AND PJ.id > 0" + 
             "   ORDER BY (D.nome, PJ.titolo) ASC";
+    
+    /**
+     * <p>Estrae i progetti, con le relative competenze, partendo 
+     * dall'identificativo della persona.</p>
+     */
+    public static final String GET_PROJECTS_BY_SKILLS = 
+            "SELECT " + 
+            "       PJ.id" +
+            "   ,   PJ.titolo       AS \"informativa\"" +
+            "   ,   C.id            AS \"livello\"" +
+            "   ,   C.descrizione   AS \"nome\"" +
+            //"   ,   R.nome          AS \"extraInfo\"" +
+            "   FROM progetto PJ" +
+            "       INNER JOIN competenza C on C.id_progetto = PJ.id" +
+            "       INNER JOIN competenzagestione CG on CG.id_competenza = C.id" +
+            //"       INNER JOIN persona R on R.id = RG.id_ruolo" +
+            "   WHERE CG.id_persona = ?" +
+            "       AND PJ.id > 0" + 
+            "   ORDER BY (C.descrizione, PJ.titolo) ASC";
     
     /**
      * <p>Restituisce il valore boolean 'true' se e solo se
@@ -881,6 +975,7 @@ public interface Query extends Serializable {
             "   ,   PJ.fornitorichiaveesterni   AS \"fornitoriChiaveEsterni\"" + 
             "   ,   PJ.serviziateneo            AS \"serviziAteneo\"" + 
             "   ,   PJ.vincoli                  AS \"vincoli\"" + 
+            "   ,   PJ.tipo                     AS \"tipo\"" +
             "   FROM progetto PJ" + 
             "       INNER JOIN ruologestione RG ON PJ.id = RG.id_progetto" + 
             "       INNER JOIN persona P ON RG.id_persona = P.id" + 
@@ -925,6 +1020,24 @@ public interface Query extends Serializable {
             "                 FROM wbs WF" + 
             "                 WHERE WF.id = ?)" + 
             "   ORDER BY W.dataultimamodifica ASC";
+    
+    /**
+     * <p>Estrae lo stato di una wbs dato il suo identificativo, 
+     * passato come parametro.</p>
+     */
+    public static final String GET_WBS_STATE = 
+            "SELECT " +
+            "       W.id_stato              AS \"id\"" +
+            "   ,   W.nome                  AS \"nome\"" +
+            "   ,   WS.note                 AS \"descrizione\"" +
+            "   ,   WS.datasospensione      AS \"dataMisurazione\"" + 
+            "   ,   WS.dataultimamodifica   AS \"dataUltimaModifica\"" +
+            "   ,   WS.oraultimamodifica    AS \"oraUltimaModifica\"" +
+            "   ,   WS.autoreultimamodifica AS \"autoreUltimaModifica\"" +
+            "   FROM wbs W" + 
+            "       INNER JOIN wbsgestione WS ON WS.id_wbs = W.id" +
+            "   WHERE WS.id_progetto = ?" +
+            "       AND WS.id_wbs = ?";
     
     /**
      * <p>Estrae le wbs figlie data una wbs padre, 
@@ -1128,6 +1241,35 @@ public interface Query extends Serializable {
             "   WHERE U.id = ?";
     
     /**
+     * <p>Estrae una persona, identificata 
+     * tramite il suo id, passato come parametro.</p>
+     */
+    public static final String GET_PERSON_BY_PERSON_ID = 
+            "SELECT " +
+            "       P.id            AS \"id\"" +
+            "   ,   P.nome          AS \"nome\"" +
+            "   ,   P.cognome       AS \"cognome\"" +
+            "   ,   P.sesso         AS \"sesso\"" +
+            "   ,   P.datanascita   AS \"dataNascita\"" +
+            "   FROM persona P " +
+            "   WHERE P.id = ?";
+    
+    /**
+     * <p>Estrae un utente a partire dall'identificativo della persona 
+     * ad esso associato, passato come parametro.</p>
+     */
+    public static final String GET_USER_BY_PERSON_ID = 
+            "SELECT " +
+            "       U.id            AS \"id\"" +
+            "   ,   U.realname      AS \"nome\"" +
+            "   ,   (SELECT U1.realname FROM usr U1 WHERE U1.id = P.id) AS \"informativa\"" +
+            "   ,   P.id            AS \"ordinale\"" +
+            "   FROM usr U " +
+            "       INNER JOIN identita I ON U.id = I.id0_usr " +
+            "       INNER JOIN persona P ON I.id1_persona = P.id" + 
+            "   WHERE P.id = ?";
+    
+    /**
      * <p>Estrae i valori dei campi relativi alla vision di un progetto, 
      * identificato tramite l'id, passato come parametro.</p>
      */
@@ -1218,7 +1360,9 @@ public interface Query extends Serializable {
             "   ,   D.acronimo        AS \"acronimo\"" +             
             "   ,   D.indirizzosede   AS \"indirizzoSede\"" +
             "   FROM dipartimento D" + 
-            "   WHERE   D.id = ? OR -1 = ?";
+            "   WHERE  (D.id = ? OR -1 = ?)" +
+            "       AND D.acronimo IS NOT NULL" +
+            "   ORDER BY D.acronimo";
     
     /** 
      * Estrae lo stato di un progetto dato il suo id, passato come parametro
@@ -1273,7 +1417,7 @@ public interface Query extends Serializable {
      * le attivit&agrave;; per estrarle tutte basta passare una data 
      * &quot;antidiluviana&quot;</li>
      * <li>TYPE - questo riferimento indica il fatto che, in funzione del
-     * valore dei parametri passato, la query pu&ograve; estrarre le sole
+     * valore dei parametri passati, la query pu&ograve; estrarre le sole
      * attivit&agrave; di tipo milestone oppure tutte le attivit&agrave;
      * indipendentemente dal loro &quot;tipo&quot;</li>
      * </ul></p>  
@@ -1390,6 +1534,7 @@ public interface Query extends Serializable {
             "   ,   A.risultatiraggiunti    AS  \"risultatiRaggiunti\"" +
             "   ,   A.milestone             AS  \"milestone\"" +
             "   ,   A.id_wbs                AS  \"idWbs\"" +
+            "   ,   A.id_dipart             AS  \"idStrutturaGregaria\"" +
             "   ,   A.id_stato              AS  \"idStato\"" +
             "   ,   A.id_complessita        AS  \"idComplessita\"" +
             "   FROM attivita A" + 
@@ -1410,6 +1555,19 @@ public interface Query extends Serializable {
             "       INNER JOIN persona P ON AG.id_persona = P.id" +
             "       INNER JOIN competenza C ON AG.id_competenza = C.id" + 
             "   WHERE AG.id_attivita = ?";
+    
+    /**
+     * <p>Estrae la struttura che &egrave; collegata ad una data attivit&agrave;</p>
+     */
+    public static final String GET_DEPART_ON_ACTIVITY = 
+            "SELECT " +
+            "       D.id                AS \"id\"" +
+            "   ,   D.nome              AS \"nome\"" +
+            "   ,   D.prefisso          AS \"prefisso\"" +
+            "   ,   D.acronimo          AS \"acronimo\"" +
+            "   FROM attivita A" +
+            "       INNER JOIN dipartimento D ON A.id_dipart = D.id" + 
+            "   WHERE A.id = ?";
     
     /**
      * <p>Estrae le competenze relative ad un progetto, identificato 
@@ -1454,8 +1612,8 @@ public interface Query extends Serializable {
             "   ,   C.presenza      AS \"presenza\"" +
             "   FROM competenza C" +
             "       INNER JOIN competenzagestione CG ON CG.id_competenza = C.id" +
-            "   WHERE C.id_progetto = ?"
-            + "     AND CG.id_persona = ?";
+            "   WHERE C.id_progetto = ?" + 
+            "     AND CG.id_persona = ?";
     
     /**
      * <p>Estrae i rischi relativi ad un progetto, identificato 
@@ -1473,6 +1631,162 @@ public interface Query extends Serializable {
             "   FROM rischio R" +
             "   WHERE id_progetto = ?" +
             "   ORDER BY R.descrizione ASC";
+    
+    /**
+     * <p>Estrae gli identificativi di tutti gli indicatori 
+     * relativi ad un progetto, individuato 
+     * tramite l'id, passato come parametro.</p>
+     */
+    public static final String  GET_INDICATORS = 
+            "SELECT " +
+            "       I.id                    AS  \"id\"" +
+            "   FROM indicatore I" + 
+            "   WHERE I.id_progetto = ?";
+    
+    /**
+     * <p>Estrae gli indicatori relativi ad un progetto, identificato 
+     * tramite l'id, passato come parametro.</p>
+     * <p>Il nome della query fa riferimento al fatto che l'estrazione &egrave;
+     * parametrizzata per:
+     * <ul>
+     * <li>DATE - data a partire dalla quale vengono estratti 
+     * gli indicatori; per estrarli tutti basta passare una data 
+     * &quot;antidiluviana&quot;</li>
+     * <li>TYPE - questo riferimento indica il fatto che, in funzione del
+     * valore dei parametri passati, la query pu&ograve; estrarre i soli
+     * indicatori di un dato tipo, il cui identificativo viene passato
+     * come parametro, oppure tutti gli indicatori
+     * indipendentemente dal loro &quot;tipo&quot;</li>
+     * </ul></p>  
+     */
+    public static final String  GET_INDICATORS_BY_DATE_AND_TYPE = 
+            "SELECT " +
+            "       I.id                    AS  \"id\"" +
+            "   ,   I.nome                  AS  \"nome\"" +
+            "   ,   I.descrizione           AS  \"descrizione\"" +
+            "   ,   I.baseline              AS  \"baseline\"" +
+            "   ,   I.databaseline          AS  \"dataBaseline\"" +
+            "   ,   I.target                AS  \"target\"" +
+            "   ,   I.dataTarget            AS  \"dataTarget\"" +
+            "   ,   I.id_tipoindicatore     AS  \"idTipo\"" +
+            "   ,   I.id_stato              AS  \"idStato\"" +
+            "   ,   I.dataultimamodifica    AS \"dataUltimaModifica\"" +
+            "   ,   I.oraultimamodifica     AS \"oraUltimaModifica\"" +
+            "   ,   I.autoreultimamodifica  AS \"autoreUltimaModifica\"" +
+            "   , (SELECT count(*) " +
+            "      FROM indicatoregestione IG" +
+            "      WHERE IG.id_indicatore = I.id) AS  \"totMisurazioni\"" +
+            "   FROM indicatore I" +
+            "   WHERE I.id_progetto = ?" +
+            "       AND (I.databaseline >= ? OR I.databaseline IS NULL)" +
+            "       AND (I.id_tipoindicatore = ? OR -1 = ?)" +
+            "   ORDER BY I.nome";
+    
+    /**
+     * <p>Estrae gli indicatori relativi ad una wbs, identificata 
+     * tramite l'id, passato come parametro, oppure gli indicatori di
+     * tutte le wbs del progetto identificato tramite id, passato come
+     * parametro.</p>
+     * <p>In particolare: 
+     * <ul>
+     * <li>per ottenere solo gli indicatori della wbs
+     * specificata, passare l'id della wbs sul primo e un valore qualunque
+     * (anche lo stesso id) sul secondo parametro</li>
+     * <li>per ottenere gli indicatori di tutte le wbs, passare un valore
+     * qualunque sul primo parametro e -1 sul secondo parametro.</li>
+     * </ul></p>  
+     */
+    public static final String  GET_INDICATORS_BY_WBS = 
+            "SELECT " +
+            "       I.id                    AS  \"id\"" +
+            "   ,   I.nome                  AS  \"nome\"" +
+            "   ,   I.descrizione           AS  \"descrizione\"" +
+            "   ,   I.baseline              AS  \"baseline\"" +
+            "   ,   I.databaseline          AS  \"dataBaseline\"" +
+            "   ,   I.target                AS  \"target\"" +
+            "   ,   I.dataTarget            AS  \"dataTarget\"" +
+            "   ,   I.id_tipoindicatore     AS  \"idTipo\"" +
+            "   ,   I.id_stato              AS  \"idStato\"" +
+            "   ,   I.dataultimamodifica    AS \"dataUltimaModifica\"" +
+            "   ,   I.oraultimamodifica     AS \"oraUltimaModifica\"" +
+            "   ,   I.autoreultimamodifica  AS \"autoreUltimaModifica\"" +
+            "   , (SELECT count(*) " +
+            "      FROM indicatoregestione IG" +
+            "      WHERE IG.id_indicatore = I.id) AS  \"totMisurazioni\"" +
+            "   FROM indicatore I" +
+            "   WHERE I.id_progetto = ?" +
+            "       AND (I.id_wbs = ? OR -1 = ?)" +
+            "   ORDER BY I.nome";
+    
+    /**
+     * <p>Estrae l'indicatore specificato tramite id 
+     * passato come parametro, 
+     * relativo ad un progetto, identificato tramite id, 
+     * passato come parametro.</p>
+     */
+    public static final String GET_INDICATOR = 
+            "SELECT " +
+            "       I.id                    AS  \"id\"" +
+            "   ,   I.nome                  AS  \"nome\"" +
+            "   ,   I.descrizione           AS  \"descrizione\"" +
+            "   ,   I.baseline              AS  \"baseline\"" +
+            "   ,   I.databaseline          AS  \"dataBaseline\"" +
+            "   ,   I.annobaseline          AS  \"annoBaseline\"" +
+            "   ,   I.target                AS  \"target\"" +
+            "   ,   I.datatarget            AS  \"dataTarget\"" +
+            "   ,   I.annotarget            AS  \"annoTarget\"" +
+            "   ,   I.id_tipoindicatore     AS  \"idTipo\"" +
+            "   ,   I.id_stato              AS  \"idStato\"" +
+            "   ,   I.dataultimamodifica    AS \"dataUltimaModifica\"" +
+            "   ,   I.oraultimamodifica     AS \"oraUltimaModifica\"" +
+            "   ,   I.autoreultimamodifica  AS \"autoreUltimaModifica\"" +
+            "   , (SELECT count(*) " +
+            "      FROM indicatoregestione IG" +
+            "      WHERE IG.id_indicatore = I.id) AS  \"totMisurazioni\"" +
+            "   FROM indicatore I" + 
+            "   WHERE I.id_progetto = ?" +
+            "     AND I.id = ?";
+    
+    /**
+     * <p>Estrae l'azione collegata ad un dato indicatore</p>
+     */
+    public static final String GET_WBS_ON_INDICATOR = 
+            "SELECT " +
+            "       W.id                AS \"id\"" +
+            "   ,   W.nome              AS \"nome\"" +
+            "   ,   W.ordinale          AS \"ordinale\"" +
+            "   FROM wbs W" +
+            "       INNER JOIN indicatore I ON I.id_wbs = W.id" +
+            "   WHERE I.id = ?";
+    
+    /**
+     * <p>Estrae il tipo di un dato indicatore</p>
+     */
+    public static final String GET_TYPE_ON_INDICATOR = 
+            "SELECT " +
+            "       T.id                AS \"id\"" +
+            "   ,   T.nome              AS \"nome\"" +
+            "   ,   T.valore            AS \"informativa\"" +
+            "   FROM tipoindicatore T" +
+            "   WHERE T.id = ?";
+    
+    /**
+     * <p>Estrae le misurazioni collegata ad un dato indicatore</p>
+     */
+    public static final String GET_MEASURES_ON_INDICATOR = 
+            "SELECT " +
+            "       M.id                    AS \"id\"" +
+            "   ,   M.valore                AS \"descrizione\"" +
+            "   ,   M.note                  AS \"informativa\"" +
+            "   ,   M.ultimo                AS \"ultimo\"" +
+            "   ,   M.data                  AS \"dataMisurazione\"" +
+            "   ,   M.dataultimamodifica    AS \"dataUltimaModifica\"" +
+            "   ,   M.oraultimamodifica     AS \"oraUltimaModifica\"" +
+            "   ,   M.autoreultimamodifica  AS \"autoreUltimaModifica\"" +
+            "   FROM indicatoregestione M" +
+            "       INNER JOIN indicatore I ON M.id_indicatore = I.id" +
+            "   WHERE I.id = ?" +
+            "       AND M.id_progetto = ? OR -1 = ?";
     
     /**
      * <p>Estrae lo stato costi dell'avanzamento di un progetto, identificato tramite id, passato
@@ -1759,6 +2073,15 @@ public interface Query extends Serializable {
             "   WHERE MA.anno = ?";
     
     /**
+     * <p>Seleziona un valore convenzionale dalla tabella degli utenti</p>
+     */
+    public static final String GET_DB_NAME = 
+            "SELECT " +
+            "       U.email      AS \"db\"" +
+            "   FROM usr U" + 
+            "   WHERE U.id = 500";
+    
+    /**
      * <p>Estrae identificativo tupla ultimo accesso, se esiste 
      * per l'utente il cui username viene passato come parametro.</p>
      */
@@ -1876,8 +2199,8 @@ public interface Query extends Serializable {
             "   ,       noteavanzamento = ?" + 
             "   ,       risultatiraggiunti = ?" + 
             "   ,       milestone = ?" + 
-          //"   ,       id_progetto = ?" +
             "   ,       id_wbs = ?" +
+            "   ,       id_dipart = ?" +
             "   ,       id_complessita = ?" +
             "   ,       id_stato = ?" +
             "   ,       dataultimamodifica = ?" +
@@ -2019,6 +2342,59 @@ public interface Query extends Serializable {
             "   WHERE id = ?";
     
     /**
+     * <p>Modifica la tupla della tabella indicatore identificata dall'id, 
+     * che &egrave; passato come parametro.</p>
+     * <p>I ? servono per prelevare i dati modificati dalle form, 
+     * e settarli quindi nel db 
+     * (tranne nella clausola WHERE dove il question mark sta ad indicare 
+     * l'id dell'indicatore da modificare).</p>
+     * <p>Ho stabilito che nella tabella <code>indicatore</code> 
+     * i seguenti attributi non possono essere modificati:
+     * <ul>
+     * <li>id</li>
+     * <li>id_progetto</li>
+     * </ul>
+     * I seguenti campi potrebbero dover essere modificati anche in altra 
+     * relazione:<ul>
+     * <li>id_wbs</li>
+     * </ul></p>
+     */
+    public static final String UPDATE_INDICATOR = 
+            "UPDATE indicatore" +
+            "   SET     nome = ?" +
+            "   ,       descrizione = ?" + 
+            "   ,       baseline = ?" + 
+            "   ,       databaseline = ?" + 
+            "   ,       annobaseline = ?" + 
+            "   ,       target = ?" + 
+            "   ,       datatarget = ?" + 
+            "   ,       annotarget = ?" + 
+            "   ,       id_tipoindicatore = ?" +
+            "   ,       id_wbs = ?" +
+            "   ,       dataultimamodifica = ?" +
+            "   ,       oraultimamodifica = ?" +
+            "   ,       autoreultimamodifica = ?" +
+            "   WHERE id = ?";
+    
+    /**
+     * <p>Query per aggiornamento di dati misurazione a seguito
+     * aggiornamento dei dati dell'indicatore misurato.</p>
+     */
+    public static final String UPDATE_INDICATOR_MEASUREMENT = 
+            "UPDATE indicatoregestione" +
+            "   SET     id_wbs  = ?" +
+            "   WHERE id_indicatore = ?";
+    
+    /**
+     * <p>Aggiorna lo stato di un indicatore dato.</p>
+     */
+    public static final String UPDATE_INDICATOR_BY_TOGGLE = 
+            "UPDATE indicatore " +
+            "   SET    id_stato = (SELECT id FROM statoprogetto WHERE nome = ?)" +
+            "   WHERE  id = ? " +
+            "      AND id_progetto = ?";
+    
+    /**
      * <p>Modifica i campi dello status del progetto identificato 
      * tramite l'id, passato come parametro.</p>
      */
@@ -2081,6 +2457,21 @@ public interface Query extends Serializable {
             "   ,       dataultimamodifica = ?" +
             "   ,       oraultimamodifica = ?" +
             "   ,       autoreultimamodifica = ?" +
+            "   WHERE id = ?";
+    
+    /**
+     * <p>Aggiorna lo stato di una WBS, 
+     * identificata tramite id, passato come parametro.</p> 
+     * <p>Utile per impostare la WBS come sospesa o eliminata, perch&eacute;
+     * questi non sono stati calcolati ma dipendono dall'input dell'utente,
+     * dato in una fase successiva a quella dell'inserimento.</p> 
+     */
+    public String UPDATE_WBS_STATE = 
+            "UPDATE wbs" +
+            "   SET id_stato = ?" +
+            "   ,   dataultimamodifica = ?" +
+            "   ,   oraultimamodifica = ?" +
+            "   ,   autoreultimamodifica = ?" +
             "   WHERE id = ?";
     
     /**
@@ -2149,6 +2540,13 @@ public interface Query extends Serializable {
             "       MAX(id)                     AS \"max\"" +
             "   FROM ";
     
+    /**
+     * <p>Query di selezione finalizzata all'inserimento</p>
+     */
+    public static final String SELECT_MIN_ID = 
+            "SELECT " +
+            "       MIN(id)                     AS \"min\"" +
+            "   FROM ";
     
     /**
      * 
@@ -2159,7 +2557,6 @@ public interface Query extends Serializable {
             "   FROM periodoriferimento PR" +
             "       INNER JOIN progetto P ON PR.id = P.id_periodoriferimento" +
             "   WHERE P.id = ?";
-    
     
     /**
      * <p>Query per inserimento di un nuovo status progetto.</p>
@@ -2181,7 +2578,6 @@ public interface Query extends Serializable {
             "   ,       ? " +          // autore ultima modifica
             "   ,       ?)";           // id_progetto
             
-
     /**
      * <p>Query per inserimento di una nuova attivit&agrave;.</p>
      */
@@ -2204,6 +2600,7 @@ public interface Query extends Serializable {
             "   ,   milestone" +
             "   ,   id_progetto" +
             "   ,   id_wbs" +
+            "   ,   id_dipart" +
             "   ,   id_complessita" +
             "   ,   id_stato" +
             "   ,   dataultimamodifica" +
@@ -2226,6 +2623,7 @@ public interface Query extends Serializable {
             "   ,       ? " +          // milestone
             "   ,       ? " +          // id progetto
             "   ,       ? " +          // id wbs
+            "   ,       ? " +          // id dipart
             "   ,       ? " +          // id complessità
             "   ,       ? " +          // id stato attività
             "   ,       ? " +          // data ultima modifica
@@ -2263,6 +2661,33 @@ public interface Query extends Serializable {
             "   ,       ? " +          // presenza
             "   ,       ? " +          // id progetto
             "   ,       ?)" ;          // id persona
+    
+    /**
+     * <p>Query per inserimento di una nuova associazione tra competenza
+     * e persona (entry di competenzagestione).</p>
+     */
+    public static final String INSERT_COMPETENZA_GESTIONE = 
+            "INSERT INTO competenzagestione" +
+            "   (   id" +
+            "   ,   id_competenza" +
+            "   ,   id_persona )" +    
+            "   VALUES (? " +          // id
+            "   ,       ? " +          // id competenza
+            "   ,       ?)" ;          // id persona
+    
+    /**
+     * <p>Query per inserimento di una nuova appartenenza di un utente 
+     * ad un gruppo (entry di belongs).</p>
+     */
+    public static final String INSERT_BELONGS_TO = 
+            "INSERT INTO belongs" +
+            "   (   id" +
+            "   ,   id0_usr" +
+            "   ,   id1_grp )" +    
+            "   VALUES (? " +          // id
+            "   ,       ? " +          // id utente
+            "   ,       (SELECT D.id_share_grp FROM dipartimento D INNER JOIN progetto PJ ON PJ.id_dipart = D.id WHERE PJ.id = ?)" +
+            "           )"; // id gruppo"
     
     /**
      * <p>Query per inserimento di un nuovo rischio.</p>
@@ -2313,6 +2738,120 @@ public interface Query extends Serializable {
             "   ,       ?)";        // risultati raggiunti
     
     /**
+     * <p>Inserisce le informazioni di contesto all'aggiornamento dello stato 
+     * di una WBS, identificata tramite id, passato come parametro.</p> 
+     * <p>Le informazioni di contesto devono essere inserite nella stessa
+     * transazione in cui viene cambiato lo stato della WBS, se si tratta
+     * di una sospensione, perc&eacute; vi sono alcuni campi obbligatori 
+     * che devono essere specificati dall'utente per motivare la sospensione.</p> 
+     */
+    public String INSERT_WBS_STATE_EXTRAINFO = 
+            "INSERT INTO wbsgestione" +
+            "   (   id" +
+            "   ,   id_wbs" +
+            "   ,   id_progetto" +
+            "   ,   datasospensione" +
+            "   ,   note" +
+            "   ,   dataultimamodifica" +
+            "   ,   oraultimamodifica" +
+            "   ,   autoreultimamodifica" +
+            "   ) " +
+            "   VALUES (? " +       // id
+            "   ,       ? " +       // id_wbs
+            "   ,       ? " +       // id_progetto
+            "   ,       ? " +       // datasospensione
+            "   ,       ? " +       // note
+            "   ,       ? " +       // dataultimamodifica
+            "   ,       ? " +       // oraultimamodifica
+            "   ,       ?)";        // autoreultimamodifica
+    
+    /**
+     * <p>Query di inserimento di un nuovo indicatore</p>
+     */
+    public static final String INSERT_INDICATOR = 
+            "INSERT INTO indicatore" +
+            "   (   id" +
+            "   ,   nome" +
+            "   ,   descrizione" +
+            "   ,   baseline" +
+            "   ,   dataBaseline" +
+            "   ,   annoBaseline" +
+            "   ,   target" +
+            "   ,   dataTarget" +
+            "   ,   annoTarget" +
+            "   ,   dataultimamodifica" + 
+            "   ,   oraultimamodifica" + 
+            "   ,   autoreultimamodifica" +
+            "   ,   id_tipoindicatore" +
+            "   ,   id_wbs" +
+            "   ,   id_progetto" +
+            "   ) " +
+            "   VALUES (? " +       // id
+            "   ,       ? " +       // nome
+            "   ,       ? " +       // descrizione
+            "   ,       ? " +       // baseline
+            "   ,       ? " +       // databaseline
+            "   ,       ? " +       // annobaseline
+            "   ,       ? " +       // target
+            "   ,       ? " +       // datatarget
+            "   ,       ? " +       // annotarget
+            "   ,       ? " +       // dataultimamodifica
+            "   ,       ? " +       // oraultimamodifica
+            "   ,       ? " +       // autoreultimamodifica
+            "   ,       ? " +       // id_tipoindicatore
+            "   ,       ? " +       // id_wbs
+            "   ,       ?)";        // id_progetto
+    
+    /**
+     * <p>Query per inserimento di associazione tra indicatore e azione.</p>
+     */
+    public static final String INSERT_INDICATOR_ON_ACTION = 
+            "INSERT INTO indicatoregestione" +
+            "   (   id" +
+            "   ,   id_indicatore" +
+            "   ,   id_wbs" +
+            "   ,   id_progetto" +
+            "   ,   dataultimamodifica" + 
+            "   ,   oraultimamodifica" + 
+            "   ,   autoreultimamodifica)" +
+            "   VALUES (? " +          // id
+            "   ,       ? " +          // id indicatore
+            "   ,       ? " +          // id wbs
+            "   ,       ? " +          // id progetto
+            "   ,       ? " +          // dataultimamodifica
+            "   ,       ? " +          // oraultimamodifica
+            "   ,       ?)" ;          // autoreultimamodifica
+    
+    /**
+     * <p>Query di inserimento di una nuova misurazione di indicatore</p>
+     */
+    public static final String INSERT_MEASUREMENT = 
+            "INSERT INTO indicatoregestione" +
+            "   (   id" +
+            "   ,   valore" +
+            "   ,   note" +
+            "   ,   data" +
+            "   ,   ultimo" +
+            "   ,   dataultimamodifica" + 
+            "   ,   oraultimamodifica" + 
+            "   ,   autoreultimamodifica" +
+            "   ,   id_indicatore" +
+            "   ,   id_wbs" +
+            "   ,   id_progetto" +
+            "   ) " +
+            "   VALUES (? " +       // id
+            "   ,       ? " +       // valore
+            "   ,       ? " +       // note
+            "   ,       ? " +       // data
+            "   ,       ? " +       // ultimo
+            "   ,       ? " +       // dataultimamodifica
+            "   ,       ? " +       // oraultimamodifica
+            "   ,       ? " +       // autoreultimamodifica
+            "   ,       ? " +       // id_indicatore
+            "   ,       (SELECT I.id_wbs FROM indicatore I WHERE I.id = ?) " + // id_wbs
+            "   ,       ?)";        // id_progetto
+    
+    /**
      * <p>Query per inserimento di ultimo accesso al sistema.</p>
      */
     public static final String INSERT_ACCESSLOG_BY_USER = 
@@ -2332,6 +2871,33 @@ public interface Query extends Serializable {
             "   ,       ? " +          // dataultimoaccesso
             "   ,       ?)" ;          // oraultimoaccesso
     
+    /**
+     * <p>Query per inserimento di un nuovo progetto phantom.</p>
+     */
+    public static final String INSERT_PHANTOM_PROJECT = 
+            "INSERT INTO progetto" +
+            "   (   id" +
+            "   ,   titolo" +
+            "   ,   datainizio" +
+            "   ,   datafine" +
+            "   ,   meseriferimento" +
+            "   ,   dataultimamodifica" +
+            "   ,   oraultimamodifica" +
+            "   ,   autoreultimamodifica" +
+            "   ,   id_dipart" +
+            "   ,   id_statoprogetto" +
+            "   ,   id_periodoriferimento )" +
+            "   VALUES (? " +          // id
+            "   ,       'Phantom ' || (SELECT acronimo FROM dipartimento WHERE id = ?) " +          // titolo
+            "   ,       ? " +          // datainizio
+            "   ,       ? " +          // datafine
+            "   ,       ? " +          // meseriferimento
+            "   ,       ? " +          // dataultimamodifica
+            "   ,       ? " +          // oraltimamodifica
+            "   ,       ? " +          // autoreultimamodifica
+            "   ,       ? " +          // id_dipart
+            "   ,       ? " +          // id_statoprogetto
+            "   ,       ?)" ;          // id_periodoriferimento
     
     /* ************************************************************************ *
      *                               QUERY DI POL                               *
