@@ -1,16 +1,15 @@
 /*
- *   Alma on Line: Applicazione WEB per la visualizzazione 
- *   delle schede di indagine su popolazione dell'ateneo,
- *   della gestione dei progetti on line (POL) 
- *   e della preparazione e del monitoraggio delle informazioni riguardanti 
- *   l'offerta formativa che hanno ricadute sulla valutazione della didattica 
- *   (questionari on line - QOL).
+ *   Alma on Line: 
+ *   Applicazione WEB per la gestione dei progetti on line (POL)
+ *   coerentemente con le linee-guida del project management,
+ *   e per la visualizzazione delle schede di indagine 
+ *   su popolazione dell'ateneo.
  *   
- *   Copyright (C) 2018 Giovanroberto Torre<br />
- *   Alma on Line (aol), Projects on Line (pol), Questionnaire on Line (qol);
- *   web applications to publish, and manage, students evaluation,
- *   projects, students and degrees information.
- *   Copyright (C) renewed 2018 Universita' degli Studi di Verona, 
+ *   Copyright (C) 2018-2020 Giovanroberto Torre<br />
+ *   Alma on Line (aol), Projects on Line (pol);
+ *   web applications to publish, and manage, projects
+ *   according to the Project Management paradigm (PM).
+ *   Copyright (C) renewed 2020 Giovanroberto Torre, 
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify 
@@ -132,13 +131,9 @@ public class SkillBean extends CodeBean implements Serializable {
      * ********************************************************** */
     /**
      * Restituisce lista delle persone che hanno/condividono la competenza.
-     * @return <code>Vector&lt;PersonBean&gt;</code> - elenco delle persone a cui si riferisce la competenza
-     * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e le persone non sono state valorizzate (&egrave; un dato obbligatorio) 
+     * @return <code>Vector&lt;PersonBean&gt;</code> - elenco delle persone a cui si riferisce la competenza 
      */
-    public Vector<PersonBean> getPersone() throws AttributoNonValorizzatoException {
-        if (personale == null) {
-            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo personale non valorizzato!");
-        }
+    public Vector<PersonBean> getPersone() {
         return personale;
     }
 
