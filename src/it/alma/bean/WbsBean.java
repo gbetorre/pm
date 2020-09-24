@@ -1,16 +1,15 @@
 /*
- *   Alma on Line: Applicazione WEB per la visualizzazione 
- *   delle schede di indagine su popolazione dell'ateneo,
- *   della gestione dei progetti on line (POL) 
- *   e della preparazione e del monitoraggio delle informazioni riguardanti 
- *   l'offerta formativa che hanno ricadute sulla valutazione della didattica 
- *   (questionari on line - QOL).
+ *   Alma on Line: 
+ *   Applicazione WEB per la gestione dei progetti on line (POL)
+ *   coerentemente con le linee-guida del project management,
+ *   e per la visualizzazione delle schede di indagine 
+ *   su popolazione dell'ateneo.
  *   
- *   Copyright (C) 2018 Giovanroberto Torre<br />
- *   Alma on Line (aol), Projects on Line (pol), Questionnaire on Line (qol);
- *   web applications to publish, and manage, students evaluation,
- *   projects, students and degrees information.
- *   Copyright (C) renewed 2018 Universita' degli Studi di Verona, 
+ *   Copyright (C) 2018-2020 Giovanroberto Torre<br />
+ *   Alma on Line (aol), Projects on Line (pol);
+ *   web applications to publish, and manage, projects
+ *   according to the Project Management paradigm (PM).
+ *   Copyright (C) renewed 2020 Giovanroberto Torre, 
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify 
@@ -87,6 +86,8 @@ public class WbsBean extends CodeBean implements Serializable {
     private String noteAvanzamento;
     /** Risultati raggiunti da questa WBS */
     private String risultatiRaggiunti;
+    /** Stato esatto in cui si trova la WBS */
+    private MeasurementBean stato;
     /* ******************************************************** *
      *          Dati descrittivi dell'ultima modifica           *
      * ******************************************************** */
@@ -110,6 +111,7 @@ public class WbsBean extends CodeBean implements Serializable {
 		wbsFiglie = null;
 		attivita = null;
 		noteAvanzamento = risultatiRaggiunti = null;
+        stato = null;
 		dataUltimaModifica = new Date(0);
         oraUltimaModifica = null;
         autoreUltimaModifica = null;
@@ -314,6 +316,33 @@ public class WbsBean extends CodeBean implements Serializable {
     public void setRisultatiRaggiunti(String risultatiRaggiunti) {
         this.risultatiRaggiunti = risultatiRaggiunti;
     }
+    
+    
+    /* ********************************************************* *
+     *          Metodi getter e setter per lo stato              *
+     * ********************************************************* */
+    /**
+     * <p>Restituisce lo stato per la wbs, come presente da db;
+     * una WBS pu&ograve; trovarsi, al momento, solo in stato APERTO (1)
+     * oppure SOSPESO (3); di default una WBS viene messa in stato 1 
+     * ma l'utente pu&ograve; decidere di sospenderla (stato 3).
+     * Gli identificativi di questi stati sono quelli della tabella 
+     * statoprogetto.</p>
+     * 
+     * @return <code>MeasurementBean</code> - oggetto rappresentante lo stato della WBS
+     */
+    public MeasurementBean getStato() {
+        return stato;
+    }
+
+    /**
+     * <p>Imposta lo stato relativo all'attivit&agrave;</p>
+     * 
+     * @param stato - stato da impostare
+     */
+    public void setStato(MeasurementBean stato) {
+        this.stato = stato;
+    }   
     
     
     /* *********************************************************** *
