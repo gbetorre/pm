@@ -12,8 +12,12 @@
   </c:if>
 </c:forEach>
 <c:set var="superuser" value="${false}" scope="page" />
+<c:set var="pmo" value="${false}" scope="page" />
 <c:if test="${(ruolo eq 'PMOATE') or (ruolo eq 'PMODIP') or (ruolo eq 'PM') or (ruolo eq 'TL')}">
   <c:set var="superuser" value="${true}" scope="page" />
+</c:if>
+<c:if test="${(ruolo eq 'PMOATE') or (ruolo eq 'PMODIP')}">
+  <c:set var="pmo" value="${true}" scope="page" />
 </c:if>
 <c:choose>
   <c:when test="${pageScope.superuser}">
@@ -41,6 +45,11 @@
       <c:when test="${param['q'] eq 'wbs'}">
         <c:choose>
           <c:when test="${not empty param['p']}">
+          <c:choose>
+          <c:when test="${param['p'] eq 'sus'}">
+            <button type="submit" class="btn btn-danger" id="btn-susWbs" value="Sospendi"><i class="fas fa-pause"></i> Sospendi</button>
+          </c:when>
+          <c:otherwise>
           <div class="row">
             <div class="col-1">
               <button type="submit" id="btnSave" class="btn btn-success" value="Salva" disabled>
@@ -51,6 +60,8 @@
           </div>
           <br />
           <hr class="separatore" />
+          </c:otherwise>
+          </c:choose>
           </c:when>
           <c:otherwise>
           <div class="alert alert-warning">
@@ -92,6 +103,41 @@
         </c:when>
         <c:otherwise>
           <a href="${addAct}${p.id}" class="btn btn-success">
+            <i class="fas fa-plus"></i>
+            Aggiungi
+          </a>
+        </c:otherwise>
+      </c:choose>
+      </c:when>
+      <c:when test="${param['q'] eq 'ind'}">
+      <c:choose>
+        <c:when test="${param['p'] eq 'mod' or param['p'] eq 'add'}">
+        <div class="row">
+          <div>&nbsp;
+          <c:if test="${pageScope.pmo}">
+            <button type="submit" id="btnSave" class="btn btn-success" value="Salva" disabled>
+              <i class="far fa-save"></i>
+              Salva
+            </button>
+          </c:if>
+          <c:if test="${param['p'] eq 'mod'}">
+            <a href="<c:out value="${monInd}${requestScope.progetto.id}&idi=${requestScope.indicatore.id}" escapeXml="false" />" id='btn-mon' class="btn btn-success"><i class="fas fa-stopwatch"></i> Misura</a>
+          </c:if>
+          </div>
+        </div>
+        </c:when>
+        <c:when test="${param['p'] eq 'mon'}">
+        <div class="row">
+          <div class="col-1">
+            <button type="submit" id="btnSave" class="btn btn-success" value="Salva">
+              <i class="far fa-save"></i>
+              Salva
+            </button>
+          </div>
+        </div>
+        </c:when>
+        <c:otherwise>
+          <a href="${addInd}${p.id}" class="btn btn-success">
             <i class="fas fa-plus"></i>
             Aggiungi
           </a>
