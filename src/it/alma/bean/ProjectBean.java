@@ -37,6 +37,7 @@
 package it.alma.bean;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 
 import it.alma.Query;
@@ -123,7 +124,7 @@ public class ProjectBean implements Serializable {
     /** Stakeholder chiave del progetto */
     private String stakeholderChiave;
     /* ************************************************************************ *  
-     *                      Dati descrittivi del progetto                       *
+     *            Altri attributi del progetto, o ad esso associati             *
      * ************************************************************************ */
     /** Deliverable del progetto */
     private String deliverable;
@@ -137,6 +138,8 @@ public class ProjectBean implements Serializable {
     private String vincoli;
     /** Etichetta di classificazione sottoprogetto */
     private String tag;
+    /** Etichetta di classificazione tipo sottoprogetto */
+    private String tipo;
     /** Id del dipartimento del progetto*/
     private int idDipart;
     /** Dipartimento del progetto */
@@ -147,6 +150,8 @@ public class ProjectBean implements Serializable {
     private CodeBean statoProgetto;
     /** Periodo base di cadenza del progetto */
     private float periodoBase;
+    /** Competenze associate al progetto */ 
+    private ArrayList<SkillBean> competenze;
     
     
     /**
@@ -169,12 +174,13 @@ public class ProjectBean implements Serializable {
     	fornitoriChiaveInterni =  fornitoriChiaveEsterni = null;
     	serviziAteneo = null; 
     	vincoli = null;
-    	tag = null;
+    	tag = tipo = null;
     	idDipart = -2;
     	dipart = null;
     	idStatoProgetto = -2;
     	statoProgetto = null;
     	periodoBase = -2;
+    	competenze = null;
     }
 
     
@@ -937,6 +943,27 @@ public class ProjectBean implements Serializable {
     }
     
     
+    /* ************************************************* *
+     *     Metodi getter e setter per etichetta tipo     *
+     *   (e.g.: 'E' = Eccellenza | 'P' = Performance)    *
+     * ************************************************* */
+    /**
+     * Restituisce il tipo del progetto
+     * @return <code>tag</code> - tipo del progetto
+     */
+    public String getTipo() {
+        return tipo;
+    }
+
+    /**
+     * Imposta etichetta classificatoria del tipo del progetto
+     * @param tipo - etichetta del progetto da impostare
+     */
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+    
+    
 	/* ************************************************** *
      *         Metodi getter e setter per idDipart        *
      * ************************************************** */
@@ -1064,5 +1091,32 @@ public class ProjectBean implements Serializable {
         this.periodoBase = periodoBase;
     }
 	
+    
+    /* *************************************************** *
+     *        Metodi getter e setter per competenze        *
+     * *************************************************** */
+    /**
+     * Restituisce una lista di competenze che sono state definite 
+     * per il progetto; solleva un'eccezione se questo attributo &egrave;
+     * non significativo (un progetto senza competenze non &egrave; operativo).
+     * 
+     * @return <code>competenze</code> - lista di skill del progetto
+     * @throws it.alma.exception.AttributoNonValorizzatoException  eccezione che viene sollevata se questo oggetto viene usato e questo attributo non &egrave; stato valorizzato (&egrave; un dato obbligatorio) 
+     */
+    public ArrayList<SkillBean> getCompetenze() throws AttributoNonValorizzatoException {
+        if(competenze == null) {
+            throw new AttributoNonValorizzatoException(FOR_NAME + "Attributo competenze non valorizzato!");
+        }
+        return competenze;
+    }
+
+    /**
+     * Imposta le competenze di un progetto.
+     * 
+     * @param competenze - competenze di progetto da impostare
+     */
+    public void setCompetenze(ArrayList<SkillBean> competenze) {
+        this.competenze = competenze;
+    }
     
 }
