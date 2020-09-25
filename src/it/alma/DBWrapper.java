@@ -2934,7 +2934,7 @@ public class DBWrapper implements Query {
                                                int getAll,
                                                boolean getMeasuresToo) 
                                         throws WebStorageException {
-        ResultSet rs, rs1, rs2, rs3 = null;
+        ResultSet rs, rs1, rs2, rs3, rs4 = null;
         Connection con = null;
         PreparedStatement pst = null;
         IndicatorBean indicatore = null;
@@ -2998,6 +2998,20 @@ public class DBWrapper implements Query {
                         misurazioni.add(m);
                     }
                     indicatore.setMisurazioni(misurazioni);
+                }
+                // Cerca eventuali revisioni fatte al target
+                pst = null;
+                pst = con.prepareStatement(GET_UPDATES_ON_INDICATOR);
+                pst.clearParameters();
+                pst.setInt(1, indicatore.getId());
+                rs4 = pst.executeQuery();
+                if (rs4.next()) {
+                    MeasurementBean target = new MeasurementBean();
+                    BeanUtil.populate(target, rs4);
+                    indicatore.setTargetRivisto(target.getNome());
+                    indicatore.setNoteRevisione(target.getDescrizione());
+                    indicatore.setDataRevisione(target.getDataMisurazione());
+                    indicatore.setAutoreUltimaRevisione(target.getAutoreUltimaModifica());
                 }
                 indicatori.add(indicatore);
                 // Let's engage the Garbage Collector
@@ -7394,6 +7408,147 @@ public class DBWrapper implements Query {
                 String msg = FOR_NAME + "Si e\' verificato un qualcosa.\n" + t.getMessage();
                 LOG.severe(msg);
                 throw new WebStorageException(msg, t);
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto Bean non valorizzato; problema nel codice SQL.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Imposta un'attivit&agrave; in uno stato di sospensione logica 
+     * (attivit&agrave; sospesa o eliminata) il cui identificativo 
+     * viene desunto dal valore di un parametro di navigazione 
+     * passato come argomento.</p>
+     * <p>Gestisce anche la riattivazione di un'attivit&agrave; precedentemente
+     * sospesa, ricalcolandone lo stato aggiornato e reimpostandolo.</p>
+     * 
+     * @param idProj    identificativo del progetto nell'ambito del quale operare 
+     * @param idWbs     identificativo della WBS da aggiornare
+     * @param part      parametro di navigazione in base a cui si identifica se bisogna aggiornare la WBS in uno stato sospeso o (ri)attivo
+     * @param user      persona corrispondente all'utente loggato
+     * @param params    lista di parametri recuperati dalla form inviata in POST
+     * @throws WebStorageException se si verifica un problema in sql, nel recupero di valori, nella conversione di tipi o in qualche puntamento
+     */
+    @SuppressWarnings({ "null" })
+    public void insertFurtherInformation(int idProj,
+                                         int idInd,
+                                         PersonBean user,
+                                         Vector<ProjectBean> projectsWritableByUser,
+                                         HashMap<String, String>params) 
+                        throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst, pst1 = null;
+        try {
+            // Ottiene la connessione
+            con = pol_manager.getConnection();
+            /* ===  Controlla anzitutto che l'id progetto sulla querystring === *
+             * ===  corrisponda all'id progetto nel campo hidden della form === */
+            int idProjForm = Integer.parseInt(params.get("prj-id"));
+            if (idProj != idProjForm) {
+                String msg = FOR_NAME + "Attenzione: l\'identificativo di progetto sulla querystring non corrisponde a quello passato dalla form!\n";
+                LOG.severe(msg + "Problema durante il tentativo di inserire informazioni aggiuntive all\'indicatore.\n");
+                throw new WebStorageException(msg);
+            }
+            /* ===  Controlla quindi che l'id progetto sulla querystring    === *
+             * ===  corrisponda a un id dei progetti scrivibili dall'utente === */
+            try {
+                if (!userCanWrite(idProj, projectsWritableByUser)) {
+                    String msg = FOR_NAME + "Attenzione: l'utente ha tentato di inserire una misurazione legata ad un progetto su cui non ha i diritti di scrittura!\n";
+                    LOG.severe(msg + "Problema durante il tentativo di inserire informazioni aggiuntive all\'indicatore.\n");
+                    throw new WebStorageException(msg);
+                }
+            } catch (WebStorageException wse) {
+                String msg = FOR_NAME + "Problema nel tentativo di capire se l\'utente ha o non ha i diritti di scrittura!\n";
+                LOG.severe(msg + "Problema durante il tentativo di inserire informazioni aggiuntive all\'indicatore.\n");
+                throw new WebStorageException(msg);
+            }
+            /* ===  Controlla poi che l'id indicatore sulla querystring === *
+             * ===  corrisponda all'id progetto nel campo hidden della form === */
+            int idIndForm = Integer.parseInt(params.get("ind-id"));
+            if (idInd != idIndForm) {
+                String msg = FOR_NAME + "Attenzione: l\'identificativo di indicatore sulla querystring non corrisponde a quello passato dalla form!\n";
+                LOG.severe(msg + "Problema durante il tentativo di inserire un nuovo target.\n");
+                throw new WebStorageException(msg);
+            }
+            /* === Se siamo qui vuol dire che sono stati superati tutti i controlli   === */ 
+            // Deve fare un inserimento
+            // Begin: ==>
+            con.setAutoCommit(false);
+            pst = con.prepareStatement(INSERT_INDICATOR_EXTRAINFO);
+            pst.clearParameters();
+             // Prepara i parametri per l'inserimento
+            try {
+                // Definisce un contatore per l'indice del parametro
+                int nextParam = 0;
+                // Ottiene l'id
+                int maxExtId = getMax("indicatoreaggiornamento") + 1;
+                /* === Id === */
+                pst.setInt(++nextParam, maxExtId);
+                /* === Id indicatore === */
+                pst.setInt(++nextParam, Integer.parseInt(params.get("ind-id")));
+                /* === Id Progetto === */
+                pst.setInt(++nextParam, Integer.parseInt(params.get("prj-id")));
+                /* === Motivazione === */
+                pst.setString(++nextParam, params.get("ext-note"));
+                /* === Target === */
+                pst.setString(++nextParam, params.get("ext-target"));
+                /* === Data Target === */
+                java.util.Date dataTarget = Utils.format(params.get("ext-datatarget"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
+                pst.setDate(++nextParam, Utils.convert(dataTarget)); // non accetta una data gg/mm/aaaa, ma java.sql.Date
+                /* === Anno Target === */
+                String at = null;
+                if (!params.get("ext-annotarget").equals(Utils.VOID_STRING)) {
+                    at = new String(params.get("ext-annotarget"));
+                    pst.setString(++nextParam, at);
+                } else {
+                    // dato facoltativo non inserito
+                    pst.setNull(++nextParam, Types.NULL);
+                }
+                /* === Data Inserimento === */
+                // === Ignora il dato passato dalla form e imposta la data corrente  === 
+                // Data Corrente inserita automaticamente, tanto l'aggiornamento target è sempre in data corrente
+                // Inoltre è più sicuro forzare la data corrente anziché basarsi sul form, che potrebbe essere compromesso
+                pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate())));
+                /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
+                pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+                pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
+                pst.setString(++nextParam, user.getCognome() + String.valueOf(Utils.BLANK_SPACE) + user.getNome());
+                // End: <==
+                pst.executeUpdate();
+                con.commit();
+            } catch (CommandException ce) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di date.\n" + ce.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, ce);
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Probabile problema nel recupero dei dati dell\'autore ultima modifica.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che inserisce il nuovo target.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } catch (NumberFormatException nfe) {
+                String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che inserisce il nuovo target.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + nfe.getMessage(), nfe);
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che inserisce il nuovo target.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage(), npe);
             }
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto Bean non valorizzato; problema nel codice SQL.\n";
