@@ -1,13 +1,15 @@
 /*
- *   Alma on Line: Applicazione WEB per la visualizzazione 
- *   delle schede di indagine su popolazione dell'ateneo,
- *   della gestione dei progetti on line (POL).
+ *   Alma on Line: 
+ *   Applicazione WEB per la gestione dei progetti on line (POL)
+ *   coerentemente con le linee-guida del project management,
+ *   e per la visualizzazione delle schede di indagine 
+ *   su popolazione dell'ateneo.
  *   
- *   Copyright (C) 2020 Giovanroberto Torre<br />
+ *   Copyright (C) 2018-2020 Giovanroberto Torre<br />
  *   Alma on Line (aol), Projects on Line (pol);
- *   web applications to publish, and manage, projects according to the
- *   Project Management Paradigm.
- *   Copyright (C) renewed 2020 Universita' degli Studi di Verona, 
+ *   web applications to publish, and manage, projects
+ *   according to the Project Management paradigm (PM).
+ *   Copyright (C) renewed 2020 Giovanroberto Torre, 
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify 
@@ -50,7 +52,6 @@ import it.alma.DBWrapper;
 import it.alma.Main;
 import it.alma.Query;
 import it.alma.Utils;
-import it.alma.bean.ActivityBean;
 import it.alma.bean.CodeBean;
 import it.alma.bean.IndicatorBean;
 import it.alma.bean.ItemBean;
@@ -104,24 +105,10 @@ public class IndicatorCommand extends ItemBean implements Command {
      */
     protected static Logger LOG = Logger.getLogger(Main.class.getName());
     /**
-     * Numero che difficilmente sar&agrave; designato come identificatore 
-     * di progetto UNIVR (esistono gli identificatori negativi, e sono tanti 
-     * quanti sono quelli positivi)
-     */
-    public static final int VERY_UNLIKELY_ID = -1000;
-    /**
-     * Pagina a cui la command reindirizza per mostrare la lista delle attivit&agrave; del progetto
+     * Pagina a cui la command reindirizza per mostrare la lista 
+     * degli indicatori del progetto
      */
     private static final String nomeFileElenco = "/jsp/projIndicators.jsp";
-    /**
-     * Pagina a cui la command reindirizza per mostrare il grafico delle attivit&agrave; del progetto
-     */
-    //private static final String nomeFileGrafico = "/jsp/projActivitiesGrafico.jsp";
-    /**
-     * Pagina a cui la command fa riferimento per mostrare la lista delle 
-     * attivit&agrave; del progetto nel contesto del Project Charter
-     */
-    //private static final String nomeFileMilestone = "/jsp/pcMilestone.jsp";
     /**
      * Pagina a cui la command fa riferimento per permettere l'aggiunta 
      * di un nuovo indicatore al progetto, o la modifica di uno esistente
@@ -133,10 +120,21 @@ public class IndicatorCommand extends ItemBean implements Command {
      */
     private static final String nomeFileReport = "/jsp/projIndicatorsReport.jsp";
     /**
-     * Pagina a cui la command fa riferimento per visualizzare 
-     * l'elenco degli indicatori relativi ad una WBS (o azione) del progetto
+     * Pagina a cui la command fa riferimento per visualizzare la lista delle 
+     * misurazioni degli indicatori relativi ad una WBS (o azione) del progetto
+     */
+    private static final String nomeFileMeasures = "/jsp/projMeasurement.jsp";
+    /**
+     * Pagina a cui la command fa riferimento per permettere l'aggiunta 
+     * di una nuova misurazione a un indicatore esistente
      */
     private static final String nomeFileGathering = "/jsp/pcMeasurement.jsp";
+    /**
+     * Pagina a cui la command fa riferimento per permettere l'aggiunta
+     * di un nuovo target che va a integrare (si aggiunge) quello 
+     * precedentemente stabilito per un dato indicatore esistente
+     */
+    private static final String nomeFileExtraInfo = "/jsp/pcIndicatorUpdate.jsp";
     /**
      * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutti gli attributi del progetto
      */    
@@ -179,7 +177,7 @@ public class IndicatorCommand extends ItemBean implements Command {
         nomeFile.put(Query.MODIFY_PART, nomeFileIndicator);
         nomeFile.put(Query.PART_REPORT, nomeFileReport);
         nomeFile.put(Query.MONITOR_PART, nomeFileGathering);
-        //nomeFile.put(Query.TRASH_PART, nomeFileElenco);
+        nomeFile.put(Query.EXTRAINFO_PART, nomeFileExtraInfo);
         nomeFile.put(Query.PART_PROJECT, this.getPaginaJsp());
     }
   
@@ -362,6 +360,16 @@ public class IndicatorCommand extends ItemBean implements Command {
                             //    redirectAsStringBuffer.append("&idw=" + idWbs);
                             //}
                             redirect = String.valueOf(redirectAsStringBuffer);
+                        } else if (part.equals(Query.EXTRAINFO_PART)) {
+                            /* ************************************************ *
+                             *  INSERT Further Information about an indicator   *
+                             * ************************************************ */
+                            loadParams(part, parser, params);
+                            db.insertFurtherInformation(idPrj, idInd, user, writablePrj, params.get(Query.EXTRAINFO_PART));
+                            //if (idWbs > Utils.DEFAULT_ID) {
+                            //    redirectAsStringBuffer.append("&idw=" + idWbs);
+                            //}
+                            redirect = String.valueOf(redirectAsStringBuffer);
                         }
                         /* ************************************************ *
                          *  Aggiorna gli indicatori dell'utente in sessione *
@@ -398,7 +406,7 @@ public class IndicatorCommand extends ItemBean implements Command {
                             //complexity = HomePageCommand.getComplessita();
                             //states = HomePageCommand.getStatiAttivita();
                             //d = db.getDeparts();
-                        } else if (part.equals(Query.MODIFY_PART)) {
+                        } else if (part.equals(Query.MODIFY_PART) || part.equals(Query.EXTRAINFO_PART)) {
                             /* ************************************************ *
                              *        Effettua le selezioni che servono         * 
                              *      all'aggiornamento di un dato indicatore     *
@@ -434,20 +442,9 @@ public class IndicatorCommand extends ItemBean implements Command {
                         fileJspT = nomeFile.get(part);
                     }
                 } else {
-                    // Se il parametro 'p' non è presente, controlla se c'è il parametro 'idw', ovvero "id wbs"
-                    if (idWbs > Utils.DEFAULT_ID) {
-                        // Se c'è idWBS deve recuperare gli indicatori di quella wbs
-                        //vIndicators = db.getIndicatorsByWbs(idWbs, idPrj, user);
-                        // Recupera anche la wbs stessa a fini etichette etc.
-                        WbsBean wP = db.getWbsInstance(idPrj, idWbs, user);
-                        //workPackage = new Vector<WbsBean>(1);
-                        //workPackage.add(wP);
-                        //fileJspT = nomeFileIndicatorByWbs;
-                    } else {
-                        // Se il parametro 'p' non è presente, e il parametro 'idw' nemmeno, deve solo mostrare l'elenco degli indicatori per quel progetto
-                        vIndicators = db.getIndicators(idPrj, user, Utils.convert(Utils.getUnixEpoch()), Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE, !Query.GET_ALL);
-                        fileJspT = nomeFileElenco;
-                    }
+                    // Se il parametro 'p' non è presente, deve solo mostrare l'elenco degli indicatori per quel progetto
+                    vIndicators = db.getIndicators(idPrj, user, Utils.convert(Utils.getUnixEpoch()), Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE, !Query.GET_ALL);
+                    fileJspT = nomeFileElenco;
                 }
             } else {
                 // Se siamo qui vuol dire che l'id del progetto non è > zero, il che è un guaio
@@ -508,26 +505,10 @@ public class IndicatorCommand extends ItemBean implements Command {
         if (types != null) {
             // Imposta nella request elenco tipi associabili
             req.setAttribute("tipi", types);
-        }/*
-        if (vWbsAncestors != null) {
-            // Imposta nella request la gerarchia delle wbs + attività
-            req.setAttribute("wbsHierarchy", vWbsAncestors);
         }
-        if (complexity != null) {
-            // Imposta nella request elenco wbs associabili
-            req.setAttribute("complessita", complexity);
-        }
-        if (states != null) {
-            // Imposta nella request elenco wbs associabili
-            req.setAttribute("statiAttivita", states);
-        }*/
         if (indicator != null) {
             // Indicatore che l'utente vul visualizzare nei dettagli, e/o modificare
             req.setAttribute("indicatore", indicator);
-            /*if (wbs != null) {
-                // WorkPackage o gerarchia di WBS da mostrare
-                req.setAttribute("w", wbs);
-            }*/
         }
         if (redirect != null) {
             req.setAttribute("redirect", redirect);
@@ -602,6 +583,23 @@ public class IndicatorCommand extends ItemBean implements Command {
             ind.put("mon-data",         parser.getStringParameter("mon-data", dateAsString));
             ind.put("mon-milestone",    parser.getStringParameter("mon-milestone", Utils.VOID_STRING));
             formParams.put(Query.MONITOR_PART, ind);
+        }
+        /* ******************************************************** *
+         *  Ramo di INSERT di ulteriori informazioni da aggiungere  *
+         *      a un Indicatore (p.es.: target rivisto, etc.)        *
+         * ******************************************************** */
+        else if (part.equalsIgnoreCase(Query.EXTRAINFO_PART)) {
+            GregorianCalendar date = Utils.getUnixEpoch();
+            String dateAsString = Utils.format(date, Query.DATA_SQL_PATTERN);
+            HashMap<String, String> ind = new HashMap<String, String>();
+            ind.put("ind-id",           parser.getStringParameter("ind-id", Utils.VOID_STRING));
+            ind.put("prj-id",           parser.getStringParameter("prj-id", Utils.VOID_STRING));
+            ind.put("ext-target",       parser.getStringParameter("ext-target", Utils.VOID_STRING));
+            ind.put("ext-datatarget",   parser.getStringParameter("ext-datatarget", dateAsString));
+            ind.put("ext-annotarget",   parser.getStringParameter("ext-annotarget",  Utils.VOID_STRING));
+            ind.put("ext-note",         parser.getStringParameter("ext-note", Utils.VOID_STRING));
+            ind.put("ext-data",         parser.getStringParameter("ext-data", dateAsString));
+            formParams.put(Query.EXTRAINFO_PART, ind);
         }
     }
 
