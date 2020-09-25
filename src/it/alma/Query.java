@@ -1,16 +1,15 @@
 /*
- *   Alma on Line: Applicazione WEB per la visualizzazione 
- *   delle schede di indagine su popolazione dell'ateneo,
- *   della gestione dei progetti on line (POL) 
- *   e della preparazione e del monitoraggio delle informazioni riguardanti 
- *   l'offerta formativa che hanno ricadute sulla valutazione della didattica 
- *   (questionari on line - QOL).
+ *   Alma on Line: 
+ *   Applicazione WEB per la gestione dei progetti on line (POL)
+ *   coerentemente con le linee-guida del project management,
+ *   e per la visualizzazione delle schede di indagine 
+ *   su popolazione dell'ateneo.
  *   
- *   Copyright (C) 2018 Giovanroberto Torre<br />
- *   Alma on Line (aol), Projects on Line (pol), Questionnaire on Line (qol);
- *   web applications to publish, and manage, students evaluation,
- *   projects, students and degrees information.
- *   Copyright (C) renewed 2018 Universita' degli Studi di Verona, 
+ *   Copyright (C) 2018-2020 Giovanroberto Torre<br />
+ *   Alma on Line (aol), Projects on Line (pol);
+ *   web applications to publish, and manage, projects
+ *   according to the Project Management paradigm (PM).
+ *   Copyright (C) renewed 2020 Giovanroberto Torre, 
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify 
@@ -200,6 +199,10 @@ public interface Query extends Serializable {
      * <p>Costante per il parametro identificante la parte di ripresa di una attivit&agrave; precedentemente sospesa.</p>
      */
     public static final String RESUME_PART                      = "res";
+    /**
+     * <p>Costante per il parametro identificante la parte inserimento ulteriori informazioni.</p>
+     */
+    public static final String EXTRAINFO_PART                   = "ext";
     /**
      * <p>Costante per il parametro identificante la sezione dove vengono mostrate occorrenze marcate come eliminate.</p>
      */
@@ -1789,6 +1792,21 @@ public interface Query extends Serializable {
             "       AND M.id_progetto = ? OR -1 = ?";
     
     /**
+     * <p>Estrae tutti i target revisionati di un dato indicatore</p>
+     */
+    public static final String GET_UPDATES_ON_INDICATOR = 
+            "SELECT " +
+            "       U.id                    AS \"id\"" +
+            "   ,   U.target                AS \"nome\"" +
+            "   ,   U.motivazione           AS \"descrizione\"" +
+            "   ,   U.dataaggiornamento     AS \"dataMisurazione\"" +
+            "   ,   U.autoreultimamodifica  AS \"autoreUltimaModifica\"" +
+            "   FROM indicatoreaggiornamento U" +
+            "       INNER JOIN indicatore I ON U.id_indicatore = I.id" +
+            "   WHERE U.id_indicatore = ?" +
+            "   ORDER BY U.dataaggiornamento DESC";
+    
+    /**
      * <p>Estrae lo stato costi dell'avanzamento di un progetto, identificato tramite id, passato
      * come parametro.</p>
      */
@@ -2850,6 +2868,43 @@ public interface Query extends Serializable {
             "   ,       ? " +       // id_indicatore
             "   ,       (SELECT I.id_wbs FROM indicatore I WHERE I.id = ?) " + // id_wbs
             "   ,       ?)";        // id_progetto
+    
+    /**
+     * <p>Inserisce informazioni di aggiornamento al campo target di un indicatore 
+     * identificato tramite id passato come parametro.</p> 
+     * <p>L'aggiornamento di un target di un indicatore effettuato in questo
+     * modo permette di cambiare il valore del target in modo non distruttivo
+     * perch&eacute; la nuova informazione si aggiunge alla precedente, non
+     * la sostituisce; inoltre, vi sono ulteriori informaizioni che devono 
+     * essere specificate dall'utente per motivare l'aggiornamento, e che
+     * richiedono quindi la valorizzazione in una tabella a parte rispetto
+     * a quella dell'indicatore stesso.</p> 
+     */
+    public String INSERT_INDICATOR_EXTRAINFO = 
+            "INSERT INTO indicatoreaggiornamento" +
+            "   (   id" +
+            "   ,   id_indicatore" +
+            "   ,   id_progetto" +
+            "   ,   motivazione" +           
+            "   ,   target" +            
+            "   ,   datatarget" +
+            "   ,   annotarget" +
+            "   ,   dataaggiornamento" +
+            "   ,   dataultimamodifica" +
+            "   ,   oraultimamodifica" +
+            "   ,   autoreultimamodifica" +
+            "   ) " +
+            "   VALUES (? " +       // id
+            "   ,       ? " +       // id_indicatore
+            "   ,       ? " +       // id_progetto
+            "   ,       ? " +       // motivazione
+            "   ,       ? " +       // target
+            "   ,       ? " +       // datatarget
+            "   ,       ? " +       // annotarget
+            "   ,       ? " +       // dataaggiornamento
+            "   ,       ? " +       // dataultimamodifica
+            "   ,       ? " +       // oraultimamodifica
+            "   ,       ?)";        // autoreultimamodifica
     
     /**
      * <p>Query per inserimento di ultimo accesso al sistema.</p>
