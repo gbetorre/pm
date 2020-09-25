@@ -67,7 +67,20 @@
             <fmt:formatDate value="${ind.dataBaseline}" pattern="dd/MM/yyyy" />
           </td>
           <td scope="row">
-            <c:out value="${ind.target}" />
+          <c:choose>
+            <c:when test="${empty ind.targetRivisto}">
+              <c:out value="${ind.target}" />
+            </c:when>
+            <c:otherwise>
+            <fmt:formatDate var="lastReview" value="${ind.dataRevisione}" pattern="dd/MM/yyyy" />
+            <span class="badge badge-warning" title="Attenzione: il target &egrave; stato modificato il ${lastReview} da ${ind.autoreUltimaRevisione}!">
+              <c:out value="${ind.targetRivisto}" />
+            </span>
+            </c:otherwise>
+          </c:choose>
+            <a href="<c:out value="${extInd}${p.id}&idi=${ind.id}" escapeXml="false" />" id='btn-tar'>
+              <button type="button" class="btn btn-sm btn-outline-primary">Modifica</button>
+            </a>
           </td>
           <td scope="row">
             <fmt:formatDate value="${ind.dataTarget}" pattern="dd/MM/yyyy" />
