@@ -190,6 +190,11 @@
   <c:param name="p" value="mon" />
   <c:param name="id" value="" />
 </c:url>
+<c:url var="extInd" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="ind" />
+  <c:param name="p" value="ext" />
+  <c:param name="id" value="" />
+</c:url>
 <c:url var="credits" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="pol" />
   <c:param name="p" value="credits" />
