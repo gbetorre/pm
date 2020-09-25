@@ -124,9 +124,9 @@
           </div>
           <br />
           <div class="row">
-            <div class="col-sm-5">Risultati conseguiti</div>
+            <div class="col-sm-5 mandatory">Risultati conseguiti</div>
             <div class="col-sm-5">
-              <textarea class="form-control" name="mon-descr" placeholder="Inserisci risultati conseguiti (raccomandato)"></textarea>
+              <textarea class="form-control" name="mon-descr" id="mon-descr" placeholder="Inserisci risultati conseguiti (obbligatorio)"></textarea>
               <div class="charNum"></div>
             </div>
           </div>
@@ -184,41 +184,29 @@
 
       <script type="text/javascript">
         var offsetcharacter = 5;
-        // Variabili per formattazione stringhe
-        var limNoteTitleOpen = "\n - ";
-        var limNoteTitleClose = " -\n";
-        var newLine = "\n";
-        var separatore = "\n================================\n";
         $(document).ready(function () {
           $('#mon_form').validate ({
             rules: {
               'mon-nome': {
                 required: true
               },
+              'mon-descr': {
+                required: true,
+                minlength: offsetcharacter
+              },
             }, 
             messages: {
-              'mon-nome': "Inserire il valore della misurazione"
+              'mon-nome': "Inserire il valore della misurazione",
+              'mon-descr': "Inserire i risultati conseguiti"
             },
             submitHandler: function (form) {
               return true;
             }
           });
         
-          $('textarea:not(#wbs-descnote):not(#wbs-descresult)').keyup(function (e) {
+          $('#mon-descr').keyup(function (e) {
             var len = $(this).val().length;
             var dblength = 8104;
-            if(len >= dblength) {
-              this.value = this.value.substring(0, dblength);
-              $(this).next('div').text(' &egrave; stato raggiunto il limite di caratteri');
-            } else {
-              var chars = dblength - len;
-              $(this).next('div').text(chars + ' caratteri rimanenti');
-            }
-          });
-          
-          $('#wbs-name').keyup(function (e) {
-            var len = $(this).val().length;
-            var dblength = 1024;
             if(len >= dblength) {
               this.value = this.value.substring(0, dblength);
               $(this).next('div').text(' &egrave; stato raggiunto il limite di caratteri');
