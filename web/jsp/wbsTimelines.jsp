@@ -72,7 +72,13 @@
       </ul>
       <hr class="separatore" />
       <div class="row">
-        <div class="col-3 avvisiTot"><label for="">Seleziona il workpackage da visualizzare:</label></div>
+        <div class="col-3 avvisiTot">
+          <label for="">
+            <a href="javascript:popupWindow('Note','popup1',true,'Vengono mostrate solo le WBS di tipo Workpackage <strong class=\'alert-danger\'>che hanno attivit&agrave; collegate</strong>, in quanto il report di timelines viene prodotto in base alle date delle attivit&agrave; stesse.');" class="helpInfo" id="helpAct1">
+              Seleziona il workpackage da visualizzare:
+            </a>
+          </label>
+        </div>
         <div class="col-3">
           <select class="form-control" id="wpId" onChange="createGraph(this.options[this.selectedIndex].value, this.options[this.selectedIndex].text);">
               <option value="void">Nessun workpackage selezionato</option>
@@ -91,3 +97,4 @@
         </p>
       </div>
     </form>
+    <%@ include file="subPopup.jspf" %>
