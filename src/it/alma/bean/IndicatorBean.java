@@ -1,13 +1,15 @@
 /*
- *   Alma on Line: Applicazione WEB per la visualizzazione 
- *   delle schede di indagine su popolazione dell'ateneo,
- *   della gestione dei progetti on line (POL).
+ *   Alma on Line: 
+ *   Applicazione WEB per la gestione dei progetti on line (POL)
+ *   coerentemente con le linee-guida del project management,
+ *   e per la visualizzazione delle schede di indagine 
+ *   su popolazione dell'ateneo.
  *   
- *   Copyright (C) 2020 Giovanroberto Torre<br />
+ *   Copyright (C) 2018-2020 Giovanroberto Torre<br />
  *   Alma on Line (aol), Projects on Line (pol);
- *   web applications to publish, and manage, projects according to the
- *   Project Management Paradigm.
- *   Copyright (C) renewed 2020 Universita' degli Studi di Verona, 
+ *   web applications to publish, and manage, projects
+ *   according to the Project Management paradigm (PM).
+ *   Copyright (C) renewed 2020 Giovanroberto Torre, 
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify 
@@ -109,6 +111,14 @@ public class IndicatorBean extends CodeBean implements Serializable {
     private int totMisurazioni;
     /** Elenco di misurazioni presenti per l'indicatore */
     private Vector<MeasurementBean> misurazioni;
+    /** Target revisionato */
+    private String targetRivisto;
+    /** Motivi dell'aggiornamento */
+    private String noteRevisione;
+    /** Data ultima revisione */
+    private Date dataRevisione;
+    /** Autore ultima revisione */
+    private String autoreUltimaRevisione;
     
 	
     /**
@@ -120,12 +130,13 @@ public class IndicatorBean extends CodeBean implements Serializable {
 		baseline = null;
 		annoBaseline = null;
 		dataBaseline = dataTarget = new Date(0);
-		target = null;
+		target = targetRivisto = null;
 		annoTarget = null;
 		wbs = null;
-		dataUltimaModifica = new Date(0);
+		dataUltimaModifica = dataRevisione = new Date(0);
         oraUltimaModifica = null;
-        autoreUltimaModifica = null;
+        autoreUltimaModifica = autoreUltimaRevisione = null;
+        noteRevisione = null;
         setIdTipo(-2);
         tipo = null;
         idStato = -2;
@@ -205,6 +216,31 @@ public class IndicatorBean extends CodeBean implements Serializable {
      */
     public void setTarget(String target) {
         this.target = target;
+    }
+    
+    
+    /* ********************************************************* *
+     *      Metodi getter e setter per target revisionato        *
+     * ********************************************************* */
+    /**
+     * Restituisce il valore revisionato dei risultati attesi per l'indicatore
+     * 
+     * @return <code>String</code> - target revisionato per l'indicatore
+     */
+    public String getTargetRivisto() {
+        return targetRivisto;
+    }
+
+    /**
+     * <p>Imposta un target revisionato per l'indicatore.</p>
+     * <p>Non sempre le cose vanno come previsto (v. ad esempio Covid&ndash;19)
+     * e quindi &egrave; necessario rivedere, generalmente al ribasso,
+     * le proprie aspettative.</p>
+     * 
+     * @param targetRivisto il valore revisionato del target dell'indicatore, da impostare
+     */
+    public void setTargetRivisto(String targetRivisto) {
+        this.targetRivisto = targetRivisto;
     }
     
     
@@ -389,6 +425,70 @@ public class IndicatorBean extends CodeBean implements Serializable {
      */
     public void setAutoreUltimaModifica(String autoreUltimaModifica) {
         this.autoreUltimaModifica = autoreUltimaModifica;
+    }
+    
+    
+    /* *********************************************************** *
+     *       Metodi getter e setter per data ultima revisione      *
+     * *********************************************************** */
+    /**
+     * Restituisce la data dell'ultima revisione 
+     * 
+     * @return <code>java.util.Date</code> - data dell'ultima revisione
+     */
+    public Date getDataRevisione() {
+        return dataRevisione;
+    }
+
+    /**
+     * Imposta la data dell'ultima revisione
+     * 
+     * @param dataRevisione data ultima revisione da impostare
+     */
+    public void setDataRevisione(Date dataRevisione) {
+        this.dataRevisione = dataRevisione;
+    }
+
+    
+    /* ************************************************************** *
+     *      Metodi getter e setter per autore ultima revisione        *
+     * ************************************************************** */
+    /**
+     * Restituisce l'autore dell'ultima revisione 
+     * 
+     * @return <code>String</code> - autore ultima revisione
+     */
+    public String getAutoreUltimaRevisione() {
+        return autoreUltimaRevisione;
+    }
+
+    /**
+     * Imposta l'autore dell'ultima revisione
+     * 
+     * @param autoreUltimaRevisione autore ultima revisione da impostare
+     */
+    public void setAutoreUltimaRevisione(String autoreUltimaRevisione) {
+        this.autoreUltimaRevisione = autoreUltimaRevisione;
+    }
+    
+    
+    /* ********************************************************* *
+     *        Metodi getter e setter per note revisione          *
+     * ********************************************************* */
+    /**
+     * Restituisce i motivi che hanno portato all'aggiornamento di un indicatore 
+     * @return <code>noteRevisione</code> - descrizione dei motivi dell'aggiornamento
+     */
+    public String getNoteRevisione() {
+        return noteRevisione;
+    }
+
+    /**
+     * Imposta la descrizione dei motivi che hanno portato all'aggiornamento di un indicatore
+     * @param noteRevisione - note revisione da settare
+     */
+    public void setNoteRevisione(String noteRevisione) {
+        this.noteRevisione = noteRevisione;
     }
 
 
