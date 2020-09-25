@@ -1,16 +1,15 @@
 /*
- *   Alma on Line: Applicazione WEB per la visualizzazione 
- *   delle schede di indagine su popolazione dell'ateneo,
- *   della gestione dei progetti on line (POL) 
- *   e della preparazione e del monitoraggio delle informazioni riguardanti 
- *   l'offerta formativa che hanno ricadute sulla valutazione della didattica 
- *   (questionari on line - QOL).
+ *   Alma on Line: 
+ *   Applicazione WEB per la gestione dei progetti on line (POL)
+ *   coerentemente con le linee-guida del project management,
+ *   e per la visualizzazione delle schede di indagine 
+ *   su popolazione dell'ateneo.
  *   
- *   Copyright (C) 2018 Giovanroberto Torre<br />
- *   Alma on Line (aol), Projects on Line (pol), Questionnaire on Line (qol);
- *   web applications to publish, and manage, students evaluation,
- *   projects, students and degrees information.
- *   Copyright (C) renewed 2018 Universita' degli Studi di Verona, 
+ *   Copyright (C) 2018-2020 Giovanroberto Torre<br />
+ *   Alma on Line (aol), Projects on Line (pol);
+ *   web applications to publish, and manage, projects
+ *   according to the Project Management paradigm (PM).
+ *   Copyright (C) renewed 2020 Giovanroberto Torre, 
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify 
@@ -386,9 +385,12 @@ public class ProjectCommand extends ItemBean implements Command {
                      *         Implementazione per grafico timelines di wp           *
                      * ************************************************************* */
                     else if (part.equals(Query.PART_TIMELINES)) {
-                        workPackagesOfProj = WbsCommand.retrieveWorkPackages(idPrj, db, user);
+                        workPackagesOfProj = WbsCommand.purge(WbsCommand.retrieveWorkPackages(idPrj, db, user));
                     }
-                }                
+                }/*
+                else if (idDip > 0) {
+                    
+                }*/
                 fileJspT = nomeFile.get(part);
             } else {
                 m = db.getProjectsByDepart(user.getId());
@@ -624,11 +626,13 @@ public class ProjectCommand extends ItemBean implements Command {
     
     
     /**
-     * <p>Restituisce 'true' se almeno uno dei dipartimenti il cui identificativo
+     * <p>Restituisce:<dl> 
+     * <dt>'true'</dt> <dd>se almeno uno dei dipartimenti, il cui identificativo
      * viene usato come chiave di una mappa sincronizzata passata come 
-     * argomento ha progetti associati per l'utente loggato. 'False' 
-     * se neanche un dipartimento di cui sopra ha almeno 
-     * un progetto associato per l'utente loggato.</p>
+     * argomento, ha progetti associati per l'utente loggato.</dd> 
+     * <dt>'False'</dt> 
+     * <dd>se neanche un dipartimento di cui sopra ha almeno 
+     * un progetto associato per l'utente loggato.</dd></dl></p>
      * <p>Attenzione: 'false' di questo metodo non significa che nessun 
      * dipartimento ha alcun progetto, cio&egrave; che non esistono progetti,
      * ma semplicemente che l'utente che si &egrave; loggato (in base al
