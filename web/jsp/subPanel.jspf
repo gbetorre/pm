@@ -126,7 +126,7 @@
           </div>
         </div>
         </c:when>
-        <c:when test="${param['p'] eq 'mon'}">
+        <c:when test="${param['p'] eq 'mon' or param['p'] eq 'ext'}">
         <div class="row">
           <div class="col-1">
             <button type="submit" id="btnSave" class="btn btn-success" value="Salva">
