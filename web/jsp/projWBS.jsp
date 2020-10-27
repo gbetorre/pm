@@ -64,9 +64,17 @@
                   <tr>
                     <td scope="col" id="nameColumn">
                       <input type="hidden" id="wbs-id${status}" name="wbs-id${status}" value="<c:out value="${wbsInstance.id}"/>">
+                    <c:choose>
+                      <c:when test="${wbsInstance.stato.id eq 3}">
+                        <c:out value="${wbsInstance.nome}" />
+                        <em>(sospeso)</em>
+                      </c:when>
+                      <c:otherwise>
                       <a href="${modWbs}${p.id}&idw=${wbsInstance.id}">
                         <c:out value="${wbsInstance.nome}" />
                       </a>
+                      </c:otherwise>
+                    </c:choose>
                     </td>
                     <td scope="col" class="small">
                       <small><c:out value="${wbsInstance.noteAvanzamento}" /></small>
@@ -102,7 +110,7 @@
                       <a href="${act}${p.id}&idw=${wbsInstance.id}" class="ico" id="lightTable">
                         <img src="${initParam.urlDirectoryImmagini}/${icoAct}" class="btn-del" alt="Link a lista attivita" title="${txtAct}" />
                       </a>
-                    <!-- Suspend WBS Padre -->
+                    <%-- Suspend WBS Padre -->
                       <c:set var="pauseico" value="/ico-pause.png" scope="page" />
                       <c:set var="pausetxt" value="Sospendi" scope="page" />
                       <c:set var="pauseurl" value="${susWbs}${p.id}&idw=${wbsInstance.id}" scope="page" />
@@ -114,7 +122,7 @@
                       <a href="${pauseurl}" id="sus-wbs" class="ico">
                         <img id="aboutSus${wbsInstance.id}" src="${initParam.urlDirectoryImmagini}${pauseico}" class="btn-del" alt="Gestione sospensione WBS" title="${pausetxt} WBS/Azione" />
                       </a>
-                    <!-- End Suspend Padre -->
+                    <!-- End Suspend Padre --%>
                       <a href="#del-form${wbsInstance.id}" class="ico" id="del-wbs" rel="modal:open">
                         <img src="${initParam.urlDirectoryImmagini}/ico-del-outline.png" class="btn-del" alt="Elimina" title="Elimina" />
                       </a>
@@ -243,9 +251,17 @@
                             <tr>
                               <td scope="col" id="nameColumn">
                                 <input type="hidden" id="wbs-id${status}" name="wbs-id${status}" value="<c:out value="${wbsFiglio.id}"/>">
-                                <a href="${modWbs}${p.id}&idw=${wbsFiglio.id}">
-                                  <c:out value="${wbsFiglio.nome}" />
-                                </a>
+                                <c:choose>
+                                  <c:when test="${wbsFiglio.stato.id eq 3}">
+                                    <c:out value="${wbsFiglio.nome}" />
+                                    <em>(sospeso)</em>
+                                  </c:when>
+                                  <c:otherwise>
+                                  <a href="${modWbs}${p.id}&idw=${wbsFiglio.id}">
+                                    <c:out value="${wbsFiglio.nome}" />
+                                  </a>
+                                  </c:otherwise>
+                                </c:choose>
                                 <c:if test="${not empty wbsFiglio.wbsFiglie}">
                                   <div class="moduleThin">
                                     <p class="bg-warning"><strong>Sottoelenco (Livello 3)</strong></p>
@@ -697,7 +713,7 @@
                                 <a href="${act}${p.id}&idw=${wbsFiglio.id}" class="ico" id="wbsActLev2">
                                   <img src="${initParam.urlDirectoryImmagini}/${icoAct}" class="btn-del" alt="Link a lista attivita" title="${txtAct}" />
                                 </a>
-                                <!-- Suspend WBS Figlia -->
+                                <%-- Suspend WBS Figlia -->
                                   <c:set var="pauseico" value="/ico-pause.png" scope="page" />
                                   <c:set var="pausetxt" value="Sospendi" scope="page" />
                                   <c:set var="pauseurl" value="${susWbs}${p.id}&idw=${wbsFiglio.id}" scope="page" />
@@ -709,7 +725,7 @@
                                   <a href="${pauseurl}" id="sus-wbs" class="ico">
                                     <img id="aboutSus${wbsFiglio.id}" src="${initParam.urlDirectoryImmagini}${pauseico}" class="btn-del" alt="Gestione sospensione WBS" title="${pausetxt} WBS/Azione" />
                                   </a>
-                                <!-- End Suspend Figlia -->
+                                <!-- End Suspend Figlia --%>
                                 <a href="#del-form${wbsFiglio.id}" class="ico" id="del-wbs" rel="modal:open">
                                   <img src="${initParam.urlDirectoryImmagini}/ico-del-outline.png" class="btn-del" alt="Elimina" title="Elimina" />
                                 </a>
