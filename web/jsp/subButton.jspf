@@ -76,7 +76,8 @@
             <div class="alert alert-warning">
               <p>
                 <span class="ui-icon ui-icon-alert"></span>
-                &nbsp;Il tuo ruolo nel progetto consente solo la visualizzazione degli indicatori esistenti.
+                &nbsp; Viene consentita solo la visualizzazione degli indicatori esistenti.
+                In caso di errori rilevati o necessit&agrave; di aggiornamento, rivolgersi al <a href="mailto:reporting@ateneo.univr.it">PMO di Ateneo</a>. 
               </p>
             </div>
           </c:otherwise>
