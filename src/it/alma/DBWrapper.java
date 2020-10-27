@@ -2192,8 +2192,8 @@ public class DBWrapper implements Query {
                 if (rs1.next()) {
                     depart = new DepartmentBean();
                     BeanUtil.populate(depart, rs1);
+                    attivita.setDipartimento(depart);
                 }
-                attivita.setDipartimento(depart);
                 attivita.setWbs(wp);
                 activities.add(attivita);
             }
@@ -3067,7 +3067,7 @@ public class DBWrapper implements Query {
      * @param user utente loggato
      * @param idWbs identificativo della wbs di cui si vogliono recuperare tutti gli indicatori
      * @param getAll -1 se si vogliono ottenere tutti gli indicatori del progetto corrente, indipendentemente dalla wbs; un valore qualunque se non si vuole che il secondo parametro abbia effetto
-     * @return <code>Vector&lt;IndicatorBean&gt;</code> - IndicatorBean rappresentante l'indicatore del progetto.
+     * @return <code>Vector&lt;IndicatorBean&gt;</code> - Vector di IndicatorBean rappresentante l'elenco di indicatori del progetto.
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
      */
     @SuppressWarnings({ "null" })
@@ -3185,7 +3185,7 @@ public class DBWrapper implements Query {
                                       int indicatorId,
                                       PersonBean user) 
                                throws WebStorageException {
-        ResultSet rs, rs1, rs2 = null;
+        ResultSet rs, rs1, rs2, rs3 = null;
         Connection con = null;
         PreparedStatement pst = null;
         IndicatorBean indicator = null;
@@ -3227,6 +3227,20 @@ public class DBWrapper implements Query {
                     BeanUtil.populate(action, rs2);
                     indicator.setWbs(action);
                 }
+                // Cerca eventuali revisioni fatte al target dell'indicatore
+                pst = null;
+                pst = con.prepareStatement(GET_UPDATES_ON_INDICATOR);
+                pst.clearParameters();
+                pst.setInt(1, indicator.getId());
+                rs3 = pst.executeQuery();
+                if (rs3.next()) {
+                    MeasurementBean target = new MeasurementBean();
+                    BeanUtil.populate(target, rs3);
+                    indicator.setTargetRivisto(target.getNome());
+                    indicator.setNoteRevisione(target.getDescrizione());
+                    indicator.setDataRevisione(target.getDataMisurazione());
+                    indicator.setAutoreUltimaRevisione(target.getAutoreUltimaModifica());
+                }
             }
             return indicator;
         } catch (AttributoNonValorizzatoException anve) {
@@ -3235,6 +3249,86 @@ public class DBWrapper implements Query {
             throw new WebStorageException(msg + anve.getMessage(), anve);
         } catch (SQLException sqle) {
             String msg = FOR_NAME + "Oggetto Bean non valorizzato; problema nella query dell\'indicatore.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce un Vector di MeasurementBean rappresentante &ndash; a 
+     * seconda dei valori dei flag passati come parametri &ndash; parte o tutte
+     * le misurazioni del progetto attuale o di tutti i progetti, corredate di 
+     * tutte le relative informazioni (indicatore di appartenenza, wbs, etc.).</p>
+     * <p>Pu&ograve; essere usato per recuperare tutte le misurazioni di
+     * tutti gli indicatori o di uno specifico indicatore, o di tutti i 
+     * progetti o di uno specifico progetto, a seconda dei flag passati
+     * come parametri.</p>
+     * 
+     * @param projId  id del progetto di cui estrarre le misurazioni
+     * @param user utente loggato
+     * @param date data misurazionie a partire dalla quale recuperare le misurazioni; se si vogliono recuperare le misurazioni di qualsivoglia data passare una data antidiluviana
+     * @param indicatorId identificativo indicatore di cui si vogliono recuperare le misurazioni
+     * @param indicatorFlag se si vogliono recuperare tutte le misurazioni di tutti gli indicatori basta passare -1 su questo parametro; altrimenti bisogna passare l'id indicatore su entrambi
+     * @param projFlag se si vogliono recuperare tutte le misurazioni di tutti i progetti basta passare -1 su questo parametro, indipendentemente dal valore di projId
+     * @return <code>Vector&lt;MeasurementBean&gt;</code> - Vector di MeasurementBean rappresentante le misurazioni cercate.
+     * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
+     */
+    @SuppressWarnings({ "null" })
+    public Vector<MeasurementBean> getMeasures(int projId,
+                                               PersonBean user,
+                                               Date date,
+                                               int indicatorId,
+                                               int indicatorFlag,
+                                               int projFlag) 
+                                        throws WebStorageException {
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        MeasurementBean m = null;
+        IndicatorBean indicator = null;
+        Vector<MeasurementBean> measures = new Vector<MeasurementBean>();
+        int nextParam = 0;
+        try {
+            con = pol_manager.getConnection();
+            // Per prima cosa verifica che l'utente abbia i diritti di accesso al progetto
+            if (!userCanRead(projId, user.getId())) {
+                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id progetto non valido!.\n";
+                LOG.severe(msg + "E\' presente il parametro \"id\" - cioe\' id progetto - NON significativo!\n");
+                throw new WebStorageException("Attenzione: indirizzo richiesto non valido!\n");
+            }
+            pst = con.prepareStatement(GET_MEASURES);
+            pst.clearParameters();
+            pst.setInt(++nextParam, indicatorId);
+            pst.setInt(++nextParam, indicatorFlag);
+            pst.setInt(++nextParam, projId);
+            pst.setInt(++nextParam, projFlag);
+            pst.setDate(++nextParam, Utils.convert(date));
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                m = new MeasurementBean();
+                BeanUtil.populate(m, rs);
+                indicator = getIndicator(projId, m.getOrdinale(), user);
+                m.setIndicatore(indicator);
+                measures.add(m);
+            }
+            return measures;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Oggetto non valorizzato; problema nella query delle misurazioni.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema SQL nella query delle misurazioni.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + sqle.getMessage(), sqle);
         } finally {
@@ -7428,17 +7522,17 @@ public class DBWrapper implements Query {
     
     
     /**
-     * <p>Imposta un'attivit&agrave; in uno stato di sospensione logica 
-     * (attivit&agrave; sospesa o eliminata) il cui identificativo 
-     * viene desunto dal valore di un parametro di navigazione 
-     * passato come argomento.</p>
-     * <p>Gestisce anche la riattivazione di un'attivit&agrave; precedentemente
-     * sospesa, ricalcolandone lo stato aggiornato e reimpostandolo.</p>
+     * <p>Imposta ulteriori informazioni relative ad un indicatore 
+     * il cui identificativo viene desunto dal valore di un parametro 
+     * di navigazione passato come argomento.</p>
+     * <p>Queste ulteriori informazioni vengono inserite a posteriori
+     * dall'utente e sostanzialmente consistono in un ridimensionamento
+     * del target dell'indicatore.</p>
      * 
      * @param idProj    identificativo del progetto nell'ambito del quale operare 
-     * @param idWbs     identificativo della WBS da aggiornare
-     * @param part      parametro di navigazione in base a cui si identifica se bisogna aggiornare la WBS in uno stato sospeso o (ri)attivo
+     * @param idInd     identificativo dell'indicatore a corredo del quale si vuole inserire un valore ulteriore del target
      * @param user      persona corrispondente all'utente loggato
+     * @param projectsWritableByUser lista di progetti scrivibili dall'utente
      * @param params    lista di parametri recuperati dalla form inviata in POST
      * @throws WebStorageException se si verifica un problema in sql, nel recupero di valori, nella conversione di tipi o in qualche puntamento
      */
@@ -7450,7 +7544,7 @@ public class DBWrapper implements Query {
                                          HashMap<String, String>params) 
                         throws WebStorageException {
         Connection con = null;
-        PreparedStatement pst, pst1 = null;
+        PreparedStatement pst = null;
         try {
             // Ottiene la connessione
             con = pol_manager.getConnection();
