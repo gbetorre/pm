@@ -14,7 +14,7 @@
     </span>
     <ul class="nav nav-tabs responsive" role="tablist" id="tabs-0">
       <li class="nav-item"><a class="nav-link active tabactive" data-toggle="tab" href="#">Indicatori</a></li>
-      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="">Misurazioni</a></li>
+      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${monInd}${p.id}">Misurazioni</a></li>
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${repInd}${p.id}">Report</a></li>
     </ul>
     <hr class="separatore" />
@@ -73,14 +73,16 @@
             </c:when>
             <c:otherwise>
             <fmt:formatDate var="lastReview" value="${ind.dataRevisione}" pattern="dd/MM/yyyy" />
-            <span class="badge badge-warning" title="Attenzione: il target &egrave; stato modificato il ${lastReview} da ${ind.autoreUltimaRevisione}!">
+            <span class="badge badge-warning" title="Attenzione: Il target &egrave; stato modificato il ${lastReview} da ${ind.autoreUltimaRevisione} con la seguente motivazione: '${ind.noteRevisione}'">
               <c:out value="${ind.targetRivisto}" />
             </span>
             </c:otherwise>
           </c:choose>
+          <%--
             <a href="<c:out value="${extInd}${p.id}&idi=${ind.id}" escapeXml="false" />" id='btn-tar'>
               <button type="button" class="btn btn-sm btn-outline-primary">Modifica</button>
             </a>
+          --%>
           </td>
           <td scope="row">
             <fmt:formatDate value="${ind.dataTarget}" pattern="dd/MM/yyyy" />
@@ -93,7 +95,7 @@
             <td scope="row" class="bgcolorgreen">
               <div class="form-check text-center">
                 <span>
-                  SI
+                  <a href="${monInd}${p.id}" title="Clicca per visualizzare le misurazioni">SI</a>
                   <span class="badge badge-dark">
                     <c:out value="${ind.totMisurazioni}" />
                   </span>
@@ -119,7 +121,7 @@
     <div class="alert alert-danger">
       <p>
         Non &egrave; stato trovato alcun indicatore gi&agrave; associato all'obiettivo strategico.<br />
-        Per problemi o necessit&agrave; di aggiornamento dati, si prega di rivolgersi al <a href="mailto:stefano.fedeli@univr.it">PMO di Ateneo</a>.
+        Per problemi o necessit&agrave; di aggiornamento dati, si prega di rivolgersi al <a href="mailto:reporting@ateneo.univr.it">PMO di Ateneo</a>.
       </p>
     </div>
     </c:otherwise>
