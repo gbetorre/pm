@@ -23,7 +23,7 @@
           <h5><label for="pcr-chiaveesterni">Fornitori chiave esterni:</label></h5>
           <textarea name="pcr-chiaveesterni" class="form-control" aria-label="With textarea" maxlength="1024" readonly>${p.fornitoriChiaveEsterni}</textarea>
           <div class="charNum"></div>
-          <br><br>
+          <br />
           <h5><label for="pcr-serviziateneo">Servizi di ateneo:</label></h5>
           <textarea name="pcr-serviziateneo" class="form-control" aria-label="With textarea" maxlength="1024" readonly>${p.serviziAteneo}</textarea>
           <div class="charNum"></div>
