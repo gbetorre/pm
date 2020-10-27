@@ -10,6 +10,7 @@
       <description>Servlet centrale dell'applicazione Almalaurea</description>        
       <servlet-name>main</servlet-name>
       <servlet-class>it.alma.Main</servlet-class>
+      <load-on-startup>5</load-on-startup>
    </servlet>
  
     <servlet>
