@@ -787,6 +787,7 @@ public interface Query extends Serializable {
             "   ,   PJ.id_statoprogetto         AS \"idStatoProgetto\"" + 
             "   ,   PJ.sottotipo                AS \"tag\"" +
             "   ,   PJ.tipo                     AS \"tipo\"" +
+            "   ,   RG.id_ruolo                 AS \"descrizioneStatoCorrente\"" +
             "   FROM progetto PJ" + 
             "       INNER JOIN ruologestione RG ON PJ.id = RG.id_progetto" + 
             "       INNER JOIN persona P ON RG.id_persona = P.id" + 
@@ -1790,6 +1791,28 @@ public interface Query extends Serializable {
             "       INNER JOIN indicatore I ON M.id_indicatore = I.id" +
             "   WHERE I.id = ?" +
             "       AND M.id_progetto = ? OR -1 = ?";
+    
+    /**
+     * <p>Estrae le misurazioni collegata ad un dato 
+     * progetto/obiettivo strategico</p>
+     */
+    public static final String GET_MEASURES = 
+            "SELECT " +
+            "       M.id                    AS \"id\"" +
+            "   ,   M.valore                AS \"descrizione\"" +
+            "   ,   M.note                  AS \"informativa\"" +
+            "   ,   M.ultimo                AS \"ultimo\"" +
+            "   ,   M.data                  AS \"dataMisurazione\"" +
+            "   ,   M.dataultimamodifica    AS \"dataUltimaModifica\"" +
+            "   ,   M.oraultimamodifica     AS \"oraUltimaModifica\"" +
+            "   ,   M.autoreultimamodifica  AS \"autoreUltimaModifica\"" +
+            "   ,   M.id_indicatore         AS \"ordinale\"" +
+            "   FROM indicatoregestione M" +
+            "       INNER JOIN indicatore I ON M.id_indicatore = I.id" +
+            "   WHERE (I.id = ? OR -1 = ?)" +
+            "       AND (M.id_progetto = ? OR -1 = ?)" +
+            "       AND (M.data >= ?)" +
+            "   ORDER BY M.data DESC";
     
     /**
      * <p>Estrae tutti i target revisionati di un dato indicatore</p>
