@@ -42,8 +42,15 @@
           <th scope="col" width="*">Nome Attivit&agrave;</th>
           <th scope="col" width="10%">Data inizio</th>
           <th scope="col" width="10%">Data fine</th>
-          <th scope="col" width="20%">Stato effettivo</th>
-          <th scope="col" width="4%"><div class="text-center">Milestone</div></th>
+          <th scope="col" width="18%">Stato effettivo</th>
+        <c:choose>
+          <c:when test="${p.tipo eq 'P'}">
+            <th scope="col" width="14%"><div class="text-center">Struttura Gregaria</div></th>  
+          </c:when>
+          <c:otherwise>
+            <th scope="col" width="4%"><div class="text-center">Milestone</div></th>  
+          </c:otherwise>
+        </c:choose>
         <c:if test="${not isTrash}">
           <th scope="col" width="4%"><div class="text-center">Funzioni</div></th>
         </c:if>
@@ -84,19 +91,26 @@
             </a>
           </td>
           <td scope="row">
-            <input type="hidden" value="${act.milestone}" />
-            <c:choose>
-              <c:when test="${act.milestone}">
-                <div class="form-check text-center">
-                  <input type="checkbox" class="form-check-input" id="act-milestone${status}" name="act-milestone${status}" checked disabled>
-                </div>
-              </c:when>
-              <c:otherwise>
-                <div class="form-check text-center">
-                  <input type="checkbox" class="form-check-input" id="act-milestone${status}" name="act-milestone${status}" disabled>
-                </div>
-              </c:otherwise>
-            </c:choose>
+          <c:choose>
+            <c:when test="${p.tipo eq 'P'}">
+              ${act.dipartimento.nome}
+            </c:when>
+            <c:otherwise>
+              <input type="hidden" value="${act.milestone}" />
+              <c:choose>
+                <c:when test="${act.milestone}">
+                  <div class="form-check text-center">
+                    <input type="checkbox" class="form-check-input" id="act-milestone${status}" name="act-milestone${status}" checked disabled>
+                  </div>
+                </c:when>
+                <c:otherwise>
+                  <div class="form-check text-center">
+                    <input type="checkbox" class="form-check-input" id="act-milestone${status}" name="act-milestone${status}" disabled>
+                  </div>
+                </c:otherwise>
+              </c:choose>
+            </c:otherwise>
+          </c:choose>
           </td>
         <c:if test="${not isTrash}">
           <td scope="row">
