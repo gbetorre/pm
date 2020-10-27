@@ -55,6 +55,7 @@ import it.alma.Utils;
 import it.alma.bean.CodeBean;
 import it.alma.bean.IndicatorBean;
 import it.alma.bean.ItemBean;
+import it.alma.bean.MeasurementBean;
 import it.alma.bean.PersonBean;
 import it.alma.bean.ProjectBean;
 import it.alma.bean.WbsBean;
@@ -123,7 +124,7 @@ public class IndicatorCommand extends ItemBean implements Command {
      * Pagina a cui la command fa riferimento per visualizzare la lista delle 
      * misurazioni degli indicatori relativi ad una WBS (o azione) del progetto
      */
-    private static final String nomeFileMeasures = "/jsp/projMeasurement.jsp";
+    private static final String nomeFileMeasures = "/jsp/projMeasurements.jsp";
     /**
      * Pagina a cui la command fa riferimento per permettere l'aggiunta 
      * di una nuova misurazione a un indicatore esistente
@@ -219,8 +220,8 @@ public class IndicatorCommand extends ItemBean implements Command {
         java.util.Date today = Utils.convert(Utils.getCurrentDate());
         // Indicatore da modificare, se l'utente ha scelto questa specifica funzionalità
         IndicatorBean indicator = null;
-        // Wbs a cui l'indicatore è collegato
-        WbsBean wbs = null;
+        // Misurazioni a cui l'indicatore è collegato
+        Vector<MeasurementBean> vMeasures = null;
         /* ******************************************************************** *
          *                    Recupera parametri e attributi                    *
          * ******************************************************************** */
@@ -230,6 +231,8 @@ public class IndicatorCommand extends ItemBean implements Command {
         int idWbs = parser.getIntParameter("idw", Utils.DEFAULT_ID);
         // Recupera o inizializza 'id attività' (da modificare)
         int idInd = parser.getIntParameter("idi", Utils.DEFAULT_ID);
+        // Recupera o inizializza 'id misurazione' (da visualizzare)
+        int idMis = parser.getIntParameter("idm", Utils.DEFAULT_ID);
         // Recupera o inizializza 'tipo pagina'   
         String part = parser.getStringParameter("p", Utils.DASH);
         // Flag di scrittura
@@ -356,9 +359,7 @@ public class IndicatorCommand extends ItemBean implements Command {
                              * ************************************************ */
                             loadParams(part, parser, params);
                             db.insertMeasurement(idPrj, user, writablePrj, params.get(Query.MONITOR_PART));
-                            //if (idWbs > Utils.DEFAULT_ID) {
-                            //    redirectAsStringBuffer.append("&idw=" + idWbs);
-                            //}
+                            redirectAsStringBuffer = new StringBuffer("q=" + Query.PART_INDICATOR + "&p=" + Query.MONITOR_PART + "&id=" + idPrj);
                             redirect = String.valueOf(redirectAsStringBuffer);
                         } else if (part.equals(Query.EXTRAINFO_PART)) {
                             /* ************************************************ *
@@ -382,6 +383,8 @@ public class IndicatorCommand extends ItemBean implements Command {
                         ses.removeAttribute("writableIndicators");
                         ses.setAttribute("writableIndicators", userWritableIndicatorsByProjectId);
                     } else {    // Ramo delle selezioni (ramo di lettura) <==
+                        // Imposta il valore di default (= salvo sovrascritture) della pagina
+                        fileJspT = nomeFile.get(part);
                         /* **************************************************** *
                          *                 SELECT Indicator/s                   d*
                          * **************************************************** */
@@ -402,10 +405,6 @@ public class IndicatorCommand extends ItemBean implements Command {
                              * ************************************************ */
                             types = db.getIndicatorTypes(Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE);
                             actions = db.getWbs(runtimeProject.getId(), user, Query.WBS_GET_ALL);
-
-                            //complexity = HomePageCommand.getComplessita();
-                            //states = HomePageCommand.getStatiAttivita();
-                            //d = db.getDeparts();
                         } else if (part.equals(Query.MODIFY_PART) || part.equals(Query.EXTRAINFO_PART)) {
                             /* ************************************************ *
                              *        Effettua le selezioni che servono         * 
@@ -415,8 +414,8 @@ public class IndicatorCommand extends ItemBean implements Command {
                             if (idInd == Utils.DEFAULT_ID) {
                                 HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
                                 ses.invalidate();
-                                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id attivita\' non valida!.\n";
-                                LOG.severe(msg + "E\' presente il parametro \'p=mod\' ma non un valore \'ida\' - cioe\' id attivita\' - significativo!\n");
+                                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id indicatore non valido!.\n";
+                                LOG.severe(msg + "E\' presente il parametro \'p=mod\' ma non un valore \'idi\' - cioe\' id indicatore - significativo!\n");
                                 throw new CommandException("Attenzione: indirizzo richiesto non valido!\n");
                             }
                             types = db.getIndicatorTypes(Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE);
@@ -424,22 +423,23 @@ public class IndicatorCommand extends ItemBean implements Command {
                             indicator = db.getIndicator(idPrj, idInd, user);
                         } else if (part.equals(Query.MONITOR_PART)) {
                             /* ************************************************ *
-                             *        Effettua le selezioni che servono         * 
-                             *      all'aggiornamento di un dato indicatore     *
+                             *  Effettua le selezioni relative ai monitoraggi   * 
                              * ************************************************ */
-                            // Se siamo qui (p=mod) e l'id dell'indicatore non è significativo c'è qualcosa che non va...
-                            if (idInd == Utils.DEFAULT_ID) {
-                                HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
-                                ses.invalidate();
-                                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id attivita\' non valida!.\n";
-                                LOG.severe(msg + "E\' presente il parametro \'p=mod\' ma non un valore \'ida\' - cioe\' id attivita\' - significativo!\n");
-                                throw new CommandException("Attenzione: indirizzo richiesto non valido!\n");
+                            if (idInd != Utils.DEFAULT_ID) {
+                                // Se siamo qui (p=mon) e l'id dell'indicatore c'è vuol dire che vuole solo inserire una nuova misurazione
+                                // All'uopo, recupera i valori dell'indicatore da misurare, da mostrare sotto forma di riepilogo
+                                indicator = db.getIndicator(idPrj, idInd, user);
+                            } else if (idMis != Utils.DEFAULT_ID) {
+                                // Se siamo qui (p=mon) e l'id dell'indicatore non c'è, ma c'è l'id della misurazione,
+                                // vuol dire che vuol mostrare i dettagli della misurazione inserita. All'uopo, recupera la misurazione
+                                // measurement = getMeasurement
+                                // fileJspT = nomeFile.get(part); pagina misurazione
+                            } else {
+                                // Se siamo qui, e non c'è né indicatore, né misurazione, vuol vedere la lista delle misurazioni
+                                vMeasures = db.getMeasures(idPrj, user, Utils.convert(Utils.getUnixEpoch()), Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE, idPrj);
+                                fileJspT = nomeFileMeasures;
                             }
-                            //types = db.getIndicatorTypes(Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE);
-                            //actions = db.getWbs(runtimeProject.getId(), user, Query.WBS_WP_ONLY);
-                            indicator = db.getIndicator(idPrj, idInd, user);
-                        } 
-                        fileJspT = nomeFile.get(part);
+                        }
                     }
                 } else {
                     // Se il parametro 'p' non è presente, deve solo mostrare l'elenco degli indicatori per quel progetto
@@ -488,8 +488,6 @@ public class IndicatorCommand extends ItemBean implements Command {
         req.setAttribute("footer", isFooter);
         // Imposta nella request dettaglio progetto
         req.setAttribute("progetto", runtimeProject);
-        // Imposta nella request elenco attivita del progetto
-        req.setAttribute("indicatori", vIndicators);
         // Imposta nella request data di oggi 
         req.setAttribute("now", today);
         // Imposta la Pagina JSP di forwarding
@@ -505,6 +503,14 @@ public class IndicatorCommand extends ItemBean implements Command {
         if (types != null) {
             // Imposta nella request elenco tipi associabili
             req.setAttribute("tipi", types);
+        }
+        if (vIndicators != null) {
+            // Imposta nella request elenco indicatori del progetto
+            req.setAttribute("indicatori", vIndicators);
+        }
+        if (vMeasures != null) {
+            // Imposta nella request elenco misurazioni del progetto
+            req.setAttribute("misurazioni", vMeasures);
         }
         if (indicator != null) {
             // Indicatore che l'utente vul visualizzare nei dettagli, e/o modificare
@@ -579,7 +585,7 @@ public class IndicatorCommand extends ItemBean implements Command {
             ind.put("ind-id",           parser.getStringParameter("ind-id", Utils.VOID_STRING));
             ind.put("prj-id",           parser.getStringParameter("prj-id", Utils.VOID_STRING));
             ind.put("mon-nome",         parser.getStringParameter("mon-nome", Utils.VOID_STRING));
-            ind.put("mon-descr",        parser.getStringParameter("mon-note", Utils.VOID_STRING));
+            ind.put("mon-descr",        parser.getStringParameter("mon-descr", Utils.VOID_STRING));
             ind.put("mon-data",         parser.getStringParameter("mon-data", dateAsString));
             ind.put("mon-milestone",    parser.getStringParameter("mon-milestone", Utils.VOID_STRING));
             formParams.put(Query.MONITOR_PART, ind);
