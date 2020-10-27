@@ -2,7 +2,6 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"  %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <c:set var="indicatore" value="${requestScope.indicatore}" scope="page" />
-<c:set var="types" value="${requestScope.tipi}" scope="page" />
 <c:catch var="exception">
 <c:choose>
   <c:when test="${not empty indicatore}" >
@@ -109,18 +108,69 @@
               <cite>N. Misurazioni trovate:</cite>
             </div>
             <div class="col-sm-5">
-              <c:out value="${indicatore.totMisurazioni}" />
+              <a href="${monInd}${p.id}"><c:out value="${indicatore.totMisurazioni}" /></a>
             </div>
           </div>
           </small>
           </div>
           <hr class="riga" />
           <div class="row">
+          <c:choose>
+            <c:when test="${indicatore.tipo.id eq 1}">
+            <script>
+              function saveVal(val) {
+                var hiddenValue = document.getElementById("mon-nome");
+                hiddenValue.value = val + '%';
+              }
+            </script>
+            <div class="col-sm-5 mandatory">Valore Misurazione</div>
+            <div class="col-sm-5">
+              <select class="form-custom" id="mon-value" name="mon-value" onchange="saveVal(this.value)">
+                <option value="OFF" selected>Off</option>
+                <option value="ON">On</option>
+              </select>
+              <input type="hidden" class="form-control" id="mon-nome" name="mon-nome" value="OFF">
+            </div>
+            </c:when>
+            <c:when test="${indicatore.tipo.id eq 2}">
+            <div class="col-sm-5 mandatory">
+              <a href="javascript:popupWindow('Help sul formato','popup1',true,'Sono ammesse cifre decimali: utilizzare il punto come separatore dei decimali.<br><cite>(Esempio: 3.65)</cite>');" class="helpInfo" id="milestone">
+              Valore Misurazione
+              </a>
+            </div>
+            <div class="col-sm-5">
+              <input type="text" class="form-custom" id="mon-nome" name="mon-nome" value="" placeholder="Inserisci un numero">
+            </div>
+            </c:when>
+            <c:when test="${indicatore.tipo.id eq 3}">
+            <script>
+              function saveVal(val) {
+                var hiddenValue = document.getElementById("mon-nome");
+                hiddenValue.value = val + '%';
+              }
+              function reset(val) {
+                var showValue = document.getElementById("mon-value");
+                showValue.value = val;
+              }
+            </script>
+            <div class="col-sm-5 mandatory">
+              <a href="javascript:popupWindow('Help sul formato','popup1',true,'Inserire un valore compreso tra 0 e 100 (senza il simbolo di percentuale).<br>Sono ammesse cifre decimali: utilizzare il punto come separatore dei decimali.<br><cite>(Esempio: 3.65, diventer&agrave; 3.65%)</cite>');" class="helpInfo" id="milestone">
+              Valore Misurazione
+              </a>
+            </div>
+            <div class="col-sm-5">
+              <input type="text" class="form-custom" id="mon-value" name="mon-value" value="" placeholder="Inserisci una percentuale" onblur="saveVal(this.value)">%
+              <i class="fa fa-arrow-right"></i>
+              <input type="text" class="form-control-custom" id="mon-nome" name="mon-nome" value="" readonly onclick="reset('')">
+            </div>
+            </c:when>
+            <c:otherwise>
             <div class="col-sm-5 mandatory">Valore Misurazione</div>
             <div class="col-sm-5">
               <input type="text" class="form-control" id="mon-nome" name="mon-nome" value="" placeholder="Inserisci valore misurazione (obbligatorio)">
-              <div class="charNum"></div> 
             </div>
+            </c:otherwise>
+          </c:choose>
           </div>
           <br />
           <div class="row">
@@ -138,7 +188,7 @@
               </a>
             </div>
             <div class="col-sm-5">
-              <input type="text" class="form-control calendarData" id="mon-data" name="mon-data" value="<fmt:formatDate value='${requestScope.now}' pattern='dd/MM/yyyy' />" placeholder="Inserisci data valore baseline" readonly>
+              <input type="text" class="form-custom calendarData" id="mon-data" name="mon-data" value="<fmt:formatDate value='${requestScope.now}' pattern='dd/MM/yyyy' />" placeholder="Inserisci data valore baseline" readonly disabled>
             </div>
           </div>
           <br />
@@ -187,7 +237,17 @@
         $(document).ready(function () {
           $('#mon_form').validate ({
             rules: {
+              'mon-value': {
+                <c:if test="${indicatore.tipo.id eq 3}">
+                number: true,
+                range: [0, 100],
+                required: true
+                </c:if>
+              },
               'mon-nome': {
+                <c:if test="${indicatore.tipo.id eq 2}">
+                number: true,
+                </c:if>
                 required: true
               },
               'mon-descr': {
@@ -196,7 +256,7 @@
               },
             }, 
             messages: {
-              'mon-nome': "Inserire il valore della misurazione",
+              'mon-nome': "Inserire un valore corretto per la misurazione",
               'mon-descr': "Inserire i risultati conseguiti"
             },
             submitHandler: function (form) {
@@ -217,10 +277,8 @@
           });
         });
       </script> 
-    
         </c:otherwise>
       </c:choose>
-    
   </c:when>
   <c:otherwise>
     <div class="errorPwd">
