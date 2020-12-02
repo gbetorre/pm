@@ -129,13 +129,24 @@ public class IndicatorCommand extends ItemBean implements Command {
      * Pagina a cui la command fa riferimento per permettere l'aggiunta 
      * di una nuova misurazione a un indicatore esistente
      */
-    private static final String nomeFileGathering = "/jsp/pcMeasurement.jsp";
+    private static final String nomeFileMeasure = "/jsp/pcMeasurement.jsp";
+    /**
+     * Pagina a cui la command fa riferimento per permettere l'aggiunta 
+     * di una nuova misurazione a un indicatore esistente
+     */
+    private static final String nomeFileGathering = "/jsp/pcGathering.jsp";
     /**
      * Pagina a cui la command fa riferimento per permettere l'aggiunta
      * di un nuovo target che va a integrare (si aggiunge) quello 
      * precedentemente stabilito per un dato indicatore esistente
      */
     private static final String nomeFileExtraInfo = "/jsp/pcIndicatorUpdate.jsp";
+    /**
+     * Pagina a cui la command fa riferimento per permettere l'aggiunta
+     * di un nuovo target che va a integrare (si aggiunge) quello 
+     * precedentemente stabilito per un dato indicatore esistente
+     */
+    private static final String nomeFileExtraInfoMod = "/jsp/pcIndicatorUpdateMod.jsp";
     /**
      * Struttura contenente le pagina a cui la command fa riferimento per mostrare tutti gli attributi del progetto
      */    
@@ -179,6 +190,7 @@ public class IndicatorCommand extends ItemBean implements Command {
         nomeFile.put(Query.PART_REPORT, nomeFileReport);
         nomeFile.put(Query.MONITOR_PART, nomeFileGathering);
         nomeFile.put(Query.EXTRAINFO_PART, nomeFileExtraInfo);
+        nomeFile.put(Query.UPDATE_PART, nomeFileExtraInfoMod);
         nomeFile.put(Query.PART_PROJECT, this.getPaginaJsp());
     }
   
@@ -210,18 +222,20 @@ public class IndicatorCommand extends ItemBean implements Command {
         boolean isFooter = true;
         // Utente loggato
         PersonBean user = null;
-        // Dichiara elenco di attività
+        // Dichiara elenco di indicatori
         Vector<IndicatorBean> vIndicators = new Vector<IndicatorBean>();
         // Dichiara struttura di WBS (azioni) che possono essere misurate da un indicatore
         Vector<WbsBean> actions = null;
         // Dichiara lista di tipi di indicatori
         LinkedList<CodeBean> types = null;
-        // Data di oggi sotto forma di oggetto Date
-        java.util.Date today = Utils.convert(Utils.getCurrentDate());
         // Indicatore da modificare, se l'utente ha scelto questa specifica funzionalità
         IndicatorBean indicator = null;
         // Misurazioni a cui l'indicatore è collegato
         Vector<MeasurementBean> vMeasures = null;
+        // Misurazione da modificare, o comunque di cui si vogliono visualizzare i dettagli
+        MeasurementBean measurement = null;
+        // Data di oggi sotto forma di oggetto Date
+        java.util.Date today = Utils.convert(Utils.getCurrentDate());
         /* ******************************************************************** *
          *                    Recupera parametri e attributi                    *
          * ******************************************************************** */
@@ -354,11 +368,22 @@ public class IndicatorCommand extends ItemBean implements Command {
                             }
                             redirect = String.valueOf(redirectAsStringBuffer);
                         } else if (part.equals(Query.MONITOR_PART)) {
-                            /* ************************************************ *
-                             *                INSERT New Gathering              *
-                             * ************************************************ */
                             loadParams(part, parser, params);
-                            db.insertMeasurement(idPrj, user, writablePrj, params.get(Query.MONITOR_PART));
+                            // Se non c'è l'id della misurazione, bisogna inserirla
+                            if (idMis == Utils.DEFAULT_ID) {
+                                /* ******************************************** *
+                                 *              INSERT New Gathering            *
+                                 * ******************************************** */
+                                
+                                db.insertMeasurement(idPrj, user, writablePrj, params.get(Query.MONITOR_PART));
+                            } else if (idMis > Utils.DEFAULT_ID && user.isPmoAteneo()) { // Altrimenti, bisogna aggiornarla (funzionalità solo di PMOate)
+                                /* ******************************************** *
+                                 *           UPDATE Existent Gathering          *
+                                 * ******************************************** */
+                                //loadParams(part, parser, params);
+                                db.updateMeasurement(idPrj, user, writablePrj, idMis, params.get(Query.MONITOR_PART));
+                            }
+                            // Comportamento comune ai due rami
                             redirectAsStringBuffer = new StringBuffer("q=" + Query.PART_INDICATOR + "&p=" + Query.MONITOR_PART + "&id=" + idPrj);
                             redirect = String.valueOf(redirectAsStringBuffer);
                         } else if (part.equals(Query.EXTRAINFO_PART)) {
@@ -367,9 +392,13 @@ public class IndicatorCommand extends ItemBean implements Command {
                              * ************************************************ */
                             loadParams(part, parser, params);
                             db.insertFurtherInformation(idPrj, idInd, user, writablePrj, params.get(Query.EXTRAINFO_PART));
-                            //if (idWbs > Utils.DEFAULT_ID) {
-                            //    redirectAsStringBuffer.append("&idw=" + idWbs);
-                            //}
+                            redirect = String.valueOf(redirectAsStringBuffer);
+                        } else if (part.equals(Query.UPDATE_PART)) {
+                            /* ************************************************ *
+                             *  UPDATE Further Information about an indicator   *
+                             * ************************************************ */
+                            loadParams(part, parser, params);
+                            db.updateFurtherInformation(idPrj, idInd, user, writablePrj, params.get(Query.UPDATE_PART));
                             redirect = String.valueOf(redirectAsStringBuffer);
                         }
                         /* ************************************************ *
@@ -386,7 +415,7 @@ public class IndicatorCommand extends ItemBean implements Command {
                         // Imposta il valore di default (= salvo sovrascritture) della pagina
                         fileJspT = nomeFile.get(part);
                         /* **************************************************** *
-                         *                 SELECT Indicator/s                   d*
+                         *                 SELECT Indicator/s                   *
                          * **************************************************** */
                         if (part.equals(Query.PART_PROJECT_CHARTER_DELIVERABLE)) {
                             /* ************************************************ *
@@ -405,7 +434,7 @@ public class IndicatorCommand extends ItemBean implements Command {
                              * ************************************************ */
                             types = db.getIndicatorTypes(Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE);
                             actions = db.getWbs(runtimeProject.getId(), user, Query.WBS_GET_ALL);
-                        } else if (part.equals(Query.MODIFY_PART) || part.equals(Query.EXTRAINFO_PART)) {
+                        } else if (part.equals(Query.MODIFY_PART) || part.equals(Query.EXTRAINFO_PART) || part.equals(Query.UPDATE_PART)) {
                             /* ************************************************ *
                              *        Effettua le selezioni che servono         * 
                              *      all'aggiornamento di un dato indicatore     *
@@ -432,8 +461,8 @@ public class IndicatorCommand extends ItemBean implements Command {
                             } else if (idMis != Utils.DEFAULT_ID) {
                                 // Se siamo qui (p=mon) e l'id dell'indicatore non c'è, ma c'è l'id della misurazione,
                                 // vuol dire che vuol mostrare i dettagli della misurazione inserita. All'uopo, recupera la misurazione
-                                // measurement = getMeasurement
-                                // fileJspT = nomeFile.get(part); pagina misurazione
+                                measurement = db.getMeasure(idPrj, idMis, user);
+                                fileJspT = nomeFileMeasure;
                             } else {
                                 // Se siamo qui, e non c'è né indicatore, né misurazione, vuol vedere la lista delle misurazioni
                                 vMeasures = db.getMeasures(idPrj, user, Utils.convert(Utils.getUnixEpoch()), Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE, idPrj);
@@ -516,6 +545,10 @@ public class IndicatorCommand extends ItemBean implements Command {
             // Indicatore che l'utente vul visualizzare nei dettagli, e/o modificare
             req.setAttribute("indicatore", indicator);
         }
+        if (measurement != null) {
+            // Misurazione che l'utente vul visualizzare nei dettagli, e/o modificare
+            req.setAttribute("misurazione", measurement);
+        }
         if (redirect != null) {
             req.setAttribute("redirect", redirect);
         }
@@ -592,7 +625,7 @@ public class IndicatorCommand extends ItemBean implements Command {
         }
         /* ******************************************************** *
          *  Ramo di INSERT di ulteriori informazioni da aggiungere  *
-         *      a un Indicatore (p.es.: target rivisto, etc.)        *
+         *      a un Indicatore (p.es.: target rivisto, etc.)       *
          * ******************************************************** */
         else if (part.equalsIgnoreCase(Query.EXTRAINFO_PART)) {
             GregorianCalendar date = Utils.getUnixEpoch();
@@ -606,6 +639,23 @@ public class IndicatorCommand extends ItemBean implements Command {
             ind.put("ext-note",         parser.getStringParameter("ext-note", Utils.VOID_STRING));
             ind.put("ext-data",         parser.getStringParameter("ext-data", dateAsString));
             formParams.put(Query.EXTRAINFO_PART, ind);
+        }
+        /* ******************************************************** *
+         *  Ramo di UPDATE di ulteriori informazioni da aggiungere  *
+         *      a un Indicatore (p.es.: target rivisto, etc.)       *
+         * ******************************************************** */
+        else if (part.equalsIgnoreCase(Query.UPDATE_PART)) {
+            GregorianCalendar date = Utils.getUnixEpoch();
+            String dateAsString = Utils.format(date, Query.DATA_SQL_PATTERN);
+            HashMap<String, String> ind = new HashMap<String, String>();
+            ind.put("ind-id",           parser.getStringParameter("ind-id", Utils.VOID_STRING));
+            ind.put("prj-id",           parser.getStringParameter("prj-id", Utils.VOID_STRING));
+            ind.put("ext-target",       parser.getStringParameter("modext-target", Utils.VOID_STRING));
+            ind.put("ext-datatarget",   parser.getStringParameter("ext-datatarget", dateAsString));
+            ind.put("ext-annotarget",   parser.getStringParameter("ext-annotarget",  Utils.VOID_STRING));
+            ind.put("ext-note",         parser.getStringParameter("modext-note", Utils.VOID_STRING));
+            ind.put("modext-auto",      parser.getStringParameter("modext-auto", dateAsString));
+            formParams.put(Query.UPDATE_PART, ind);
         }
     }
 
