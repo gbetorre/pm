@@ -80,7 +80,9 @@
             </small>
           </td>
           <td scope="row">
-            <c:out value="${mis.descrizione}" />
+            <a href="${monInd}${p.id}&idm=${mis.id}">
+              <c:out value="${mis.descrizione}" />
+            </a>
           </td>
           <td scope="row" class="small">
             <small><c:out value="${mis.informativa}" /></small>
