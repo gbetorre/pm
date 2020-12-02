@@ -111,6 +111,12 @@
       </c:when>
       <c:when test="${param['q'] eq 'ind'}">
       <c:choose>
+        <c:when test="${empty param['p']}">
+          <a href="${addInd}${p.id}" class="btn btn-success">
+            <i class="fas fa-plus"></i>
+            Aggiungi
+          </a>
+        </c:when>
         <c:when test="${param['p'] eq 'mod' or param['p'] eq 'add'}">
         <div class="row">
           <div>&nbsp;
@@ -136,12 +142,16 @@
           </div>
         </div>
         </c:when>
-        <c:otherwise>
-          <a href="${addInd}${p.id}" class="btn btn-success">
-            <i class="fas fa-plus"></i>
-            Aggiungi
-          </a>
-        </c:otherwise>
+        <c:when test="${param['p'] eq 'mon' and param['idm'] gt zero and pageScope.pmo}">
+        <div class="row">
+          <div class="col-1">
+            <button type="submit" id="btnSave" class="btn btn-success" value="Salva">
+              <i class="far fa-save"></i>
+              Salva
+            </button>
+          </div>
+        </div>
+        </c:when>
       </c:choose>
       </c:when>
     </c:choose>    
