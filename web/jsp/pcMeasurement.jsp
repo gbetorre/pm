@@ -1,11 +1,15 @@
 <%@ include file="pcURL.jspf" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"  %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<c:set var="indicatore" value="${requestScope.indicatore}" scope="page" />
+<c:set var="misurazione" value="${requestScope.misurazione}" scope="page" />
+<c:set var="indicatore" value="${misurazione.indicatore}" scope="page" />
+<c:if test="${misurazione.ultimo}">
+  <c:set var="checked" value="checked" scope="page" />
+</c:if>
 <c:catch var="exception">
 <c:choose>
   <c:when test="${not empty indicatore}" >
-    <c:set var="tP" value="Effettua una nuova misurazione per ${indicatore.nome}" scope="page" />
+    <c:set var="tP" value="Visualizza una misurazione esistente per ${indicatore.nome}" scope="page" />
     <c:set var="open" value="${false}" scope="page" />
     <c:if test="${indicatore.idStato eq 1}">
       <c:set var="open" value="${true}" scope="page" />
@@ -18,21 +22,11 @@
       <c:choose>
         <c:when test="${not open}">
         <div class="errorPwd">
-          Questo indicatore &egrave; chiuso!<br />
+          <a href="javascript:popupWindow('Note','popup1',true,'Indicatore in stato &quot;Chiuso&quot; implica che non possono essere aggiunte ulteriori misurazioni.');" class="helpInfo" id="info" title="Che significa? Clicca per scoprirlo">
+            Questo indicatore &egrave; chiuso!
+          </a>
         </div>
         <hr class="separatore" />
-        <div class="alert alert-warning">
-          <span class="ui-icon ui-icon-alert"></span>
-          Non &egrave; possibile aggiungere misurazioni a: <cite>&quot;${indicatore.nome}&quot;</cite>,
-          n&eacute; modificarlo, in quanto si trova in stato 'chiuso'.<br />
-          Se ritieni che la chiusura dell'indicatore sia avvenuta per errore o hai bisogno di altre informazioni, rivolgiti al <a href="mailto:stefano.fedeli@univr.it">PMO di Ateneo</a>.
-        </div>
-        <hr class="separatore" />
-        <div class="row">
-          <div class="col-sm-5">
-            <a id="btnBack" class="btn btnNav" onclick="goBack()"><i class="fas fa-chevron-left"></i> Indietro</a>
-          </div>
-        </div>
         </c:when>
         <c:otherwise>
         <div class="successPwd">
@@ -40,7 +34,9 @@
             Questo indicatore &egrave; aperto
           </a>
         </div>
-        <hr class="riga" />
+        <hr class="separatore" />
+        </c:otherwise>
+      </c:choose>
         <c:choose>
         <c:when test="${empty indicatore.wbs}">
         <div class="alert alert-warning">
@@ -61,59 +57,66 @@
       <form id="mon_form" action="" method="post">
         <input type="hidden" id="ind-id" name="ind-id" value="${indicatore.id}" />
         <input type="hidden" id="prj-id" name="prj-id" value="${p.id}" />
-        <div class="row bg-warning" style="padding-left:1%;padding-top:1%;padding-bottom:1%;margin:0.1%">
-        <h4>Dati dell'indicatore misurato:</h4>
-        <small>
-          <hr class="riga" />
-          <div class="row">
-            <div class="col-sm-5 initialism"><cite>Nome Indicatore</cite></div>
-            <div class="col-sm-5">
-              <c:out value="${indicatore.nome}" />
+        <h4 class="heading">Dati dell'indicatore:</h4>
+        <div class="bgcolor1 text-dark" style="padding-left:1%;padding-top:1%;padding-bottom:1%;margin:0.1%">
+            <hr class="separatore" />
+            <div class="row">
+              <div class="col-sm-5 initialism"><cite>Nome WBS</cite></div>
+              <div class="col-sm-5">
+                <c:out value="${indicatore.wbs.nome}" />
+              </div>
+            </div>
+            <hr class="riga" />
+            <div class="row">
+              <div class="col-sm-5 initialism"><cite>Nome Indicatore</cite></div>
+              <div class="col-sm-5">
+                <c:out value="${indicatore.nome}" />
+              </div>
+            </div>
+            <hr class="riga" />
+            <div class="row">
+              <div class="col-sm-5 initialism">
+                <cite>Tipo indicatore:</cite>
+              </div>
+              <div class="col-sm-5">
+                <c:out value="${indicatore.tipo.nome}" />
+              </div>
+            </div>
+            <hr class="riga" />
+            <div class="row">
+              <div class="col-sm-5 initialism"><cite>Descrizione</cite></div>
+              <div class="col-sm-5">
+                <c:out value="${fn:substring(indicatore.descrizione, 0, 80)}" />...
+                <div class="charNum"></div>
+              </div>
+            </div>
+            <hr class="riga" />
+            <div class="row">
+              <div class="col-sm-5 initialism"><cite>Baseline</cite></div>
+              <div class="col-sm-5">
+                <c:out value="${indicatore.baseline}" /> <em>(<fmt:formatDate value="${indicatore.dataBaseline}" pattern="dd/MM/yyyy" />)</em>
+              </div>
+            </div>
+            <hr class="riga" />
+            <div class="row">
+              <div class="col-sm-5 initialism"><cite>Target</cite></div>
+              <div class="col-sm-5">
+                <c:out value="${indicatore.target}" /> <em>(<fmt:formatDate value="${indicatore.dataTarget}" pattern="dd/MM/yyyy" />)</em>
+              </div>
+            </div>
+            <hr class="riga" />
+            <div class="row">
+              <div class="col-sm-5 initialism">
+                <cite>N. Misurazioni trovate:</cite>
+              </div>
+              <div class="col-sm-5">
+                <a href="${monInd}${p.id}" class="btn btn-spacer text-secondary"><c:out value="${indicatore.totMisurazioni}" /></a>
+              </div>
             </div>
           </div>
           <hr class="riga" />
-          <div class="row">
-            <div class="col-sm-5 initialism">
-              <cite>Tipo indicatore:</cite>
-            </div>
-            <div class="col-sm-5">
-              <c:out value="${indicatore.tipo.nome}" />
-            </div>
-          </div>
-          <hr class="riga" />
-          <div class="row">
-            <div class="col-sm-5 initialism"><cite>Descrizione</cite></div>
-            <div class="col-sm-5">
-              <c:out value="${fn:substring(indicatore.descrizione, 0, 20)}" />...
-              <div class="charNum"></div>
-            </div>
-          </div>
-          <hr class="riga" />
-          <div class="row">
-            <div class="col-sm-5 initialism"><cite>Baseline</cite></div>
-            <div class="col-sm-5">
-              <c:out value="${indicatore.baseline}" /> <em>(<fmt:formatDate value="${indicatore.dataBaseline}" pattern="dd/MM/yyyy" />)</em>
-            </div>
-          </div>
-          <hr class="riga" />
-          <div class="row">
-            <div class="col-sm-5 initialism"><cite>Target</cite></div>
-            <div class="col-sm-5">
-              <c:out value="${indicatore.target}" /> <em>(<fmt:formatDate value="${indicatore.dataTarget}" pattern="dd/MM/yyyy" />)</em>
-            </div>
-          </div>
-          <hr class="riga" />
-          <div class="row">
-            <div class="col-sm-5 initialism">
-              <cite>N. Misurazioni trovate:</cite>
-            </div>
-            <div class="col-sm-5">
-              <a href="${monInd}${p.id}"><c:out value="${indicatore.totMisurazioni}" /></a>
-            </div>
-          </div>
-          </small>
-          </div>
-          <hr class="riga" />
+          <h4 class="heading">Dati della misurazione:</h4>
+          <hr class="separatore" />
           <div class="row">
           <c:choose>
             <c:when test="${indicatore.tipo.id eq 1}">
@@ -123,23 +126,30 @@
                 hiddenValue.value = val + '%';
               }
             </script>
-            <div class="col-sm-5 mandatory">Valore Misurazione</div>
+            <c:set var="onSelected" value="" scope="page" />
+            <c:set var="offSelected" value="" scope="page" />
+            <c:set var="valore" value="${fn:toLowerCase(misurazione.descrizione)}" scope="page" />
+            <c:choose>
+            <c:when test="${valore eq 'on'}">
+              <c:set var="onSelected" value="selected" scope="page" />
+            </c:when>
+            <c:when test="${valore eq 'off'}">
+              <c:set var="offSelected" value="selected" scope="page" />
+            </c:when>
+            </c:choose>
+            <div class="col-sm-5">Valore Misurazione</div>
             <div class="col-sm-5">
               <select class="form-custom" id="mon-value" name="mon-value" onchange="saveVal(this.value)">
-                <option value="OFF" selected>Off</option>
-                <option value="ON">On</option>
+                <option value="OFF" ${offSelected}>Off</option>
+                <option value="ON" ${onSelected}>On</option>
               </select>
               <input type="hidden" class="form-control" id="mon-nome" name="mon-nome" value="OFF">
             </div>
             </c:when>
             <c:when test="${indicatore.tipo.id eq 2}">
-            <div class="col-sm-5 mandatory">
-              <a href="javascript:popupWindow('Help sul formato','popup1',true,'Sono ammesse cifre decimali: utilizzare il punto come separatore dei decimali.<br><cite>(Esempio: 3.65)</cite>');" class="helpInfo" id="milestone">
-              Valore Misurazione
-              </a>
-            </div>
+            <div class="col-sm-5">Valore Misurazione</div>
             <div class="col-sm-5">
-              <input type="text" class="form-custom" id="mon-nome" name="mon-nome" value="" placeholder="Inserisci un numero">
+              <input type="text" class="form-custom" id="mon-nome" name="mon-nome" value="${misurazione.descrizione}">
             </div>
             </c:when>
             <c:when test="${indicatore.tipo.id eq 3}">
@@ -153,11 +163,7 @@
                 showValue.value = val;
               }
             </script>
-            <div class="col-sm-5 mandatory">
-              <a href="javascript:popupWindow('Help sul formato','popup1',true,'Inserire un valore compreso tra 0 e 100 (senza il simbolo di percentuale).<br>Sono ammesse cifre decimali: utilizzare il punto come separatore dei decimali.<br><cite>(Esempio: 3.65, diventer&agrave; 3.65%)</cite>');" class="helpInfo" id="milestone">
-              Valore Misurazione
-              </a>
-            </div>
+            <div class="col-sm-5">Valore Misurazione</div>
             <div class="col-sm-5">
               <input type="text" class="form-custom" id="mon-value" name="mon-value" value="" placeholder="Inserisci una percentuale" onblur="saveVal(this.value)">%
               <i class="fa fa-arrow-right"></i>
@@ -165,7 +171,7 @@
             </div>
             </c:when>
             <c:otherwise>
-            <div class="col-sm-5 mandatory">Valore Misurazione</div>
+            <div class="col-sm-5">Valore Misurazione</div>
             <div class="col-sm-5">
               <input type="text" class="form-control" id="mon-nome" name="mon-nome" value="" placeholder="Inserisci valore misurazione (obbligatorio)">
             </div>
@@ -174,27 +180,35 @@
           </div>
           <br />
           <div class="row">
-            <div class="col-sm-5 mandatory">Risultati conseguiti</div>
+            <div class="col-sm-5">Risultati conseguiti</div>
             <div class="col-sm-5">
-              <textarea class="form-control" name="mon-descr" id="mon-descr" placeholder="Inserisci risultati conseguiti (obbligatorio)"></textarea>
+              <textarea class="form-control" name="mon-descr" id="mon-descr">${misurazione.informativa}</textarea>
               <div class="charNum"></div>
             </div>
           </div>
           <br />
           <div class="row">
-            <div class="col-sm-5 mandatory">
-              <a href="javascript:popupWindow('Note','popup1',true,'La data della misurazione &egrave; la data in cui viene fatta la misurazione e non pu&ograve; essere modificata.');" class="helpInfo" id="data-note">
+            <div class="col-sm-5">
+              <a href="javascript:popupWindow('Note','popup1',true,'La data della misurazione &egrave; la data in cui &egrave; stata fatta la misurazione.');" class="helpInfo" id="data-note">
                 Data Misurazione
               </a>
             </div>
             <div class="col-sm-5">
-              <input type="text" class="form-custom calendarData" id="mon-data" name="mon-data" value="<fmt:formatDate value='${requestScope.now}' pattern='dd/MM/yyyy' />" placeholder="Inserisci data valore baseline" readonly disabled>
+              <input type="text" class="form-custom calendarData" id="mon-data" name="mon-data" value="<fmt:formatDate value='${misurazione.dataMisurazione}' pattern='dd/MM/yyyy' />" readonly disabled>
+            </div>
+          </div>
+          <br />
+          <div class="row">
+            <div class="col-sm-5">Autore della misurazione</div>
+            <div class="col-sm-5">
+              <input type="text" class="form-control" name="mon-auth" id="mon-auth" value="${misurazione.autoreUltimaModifica}" readonly>
+              <div class="charNum"></div>
             </div>
           </div>
           <br />
           <div class="row">
             <div class="col-sm-5">
-              <a href="javascript:popupWindow('Attenzione','popup1',true,'Il flag &quot;Ultima Misurazione&quot; indica che l\'indicatore misurato sar&agrave; chiuso e non sar&agrave; possibile effettuare ulteriori misurazioni su di esso.');" class="helpInfo" id="milestone">
+              <a href="javascript:popupWindow('Attenzione','popup1',true,'Il flag &quot;Ultima Misurazione&quot; indica che la misurazione &egrave; stata contrassegnata come tale e non si aveva intenzione di effettuare ulteriori misurazioni sullo specifico indicatore.');" class="helpInfo" id="milestone">
                 Ultima Misurazione
               </a>
             </div>
@@ -209,18 +223,7 @@
               <a href="<c:out value="${ind}${requestScope.progetto.id}" escapeXml="false" />" id='btn-close' class="btn btnNav"><i class="fas fa-ruler"></i> Indicatori</a>
             </div>
             <div class="col-sm-5">
-            <c:choose>
-              <c:when test="${not open}">
-              <div class="alert alert-warning">
-                <span class="ui-icon ui-icon-alert"></span>
-                Non &egrave; possibile aggiungere misurazioni a questo indicatore,
-                n&eacute; modificarlo, in quanto si trova in stato 'chiuso'.<br />
-              </div>
-              </c:when>
-              <c:otherwise>
-                <%@ include file="subPanel.jspf" %>
-              </c:otherwise>
-            </c:choose>
+              <%@ include file="subPanel.jspf" %>
             </div>
           </div>
           <hr class="separatore" />
@@ -277,8 +280,7 @@
           });
         });
       </script> 
-        </c:otherwise>
-      </c:choose>
+
   </c:when>
   <c:otherwise>
     <div class="errorPwd">
