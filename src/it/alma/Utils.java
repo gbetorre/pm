@@ -1,16 +1,15 @@
 /*
- *   Alma on Line: Applicazione WEB per la visualizzazione 
- *   delle schede di indagine su popolazione dell'ateneo,
- *   della gestione dei progetti on line (POL) 
- *   e della preparazione e del monitoraggio delle informazioni riguardanti 
- *   l'offerta formativa che hanno ricadute sulla valutazione della didattica 
- *   (questionari on line - QOL).
+ *   Alma on Line: 
+ *   Applicazione WEB per la gestione dei progetti on line (POL)
+ *   coerentemente con le linee-guida del project management,
+ *   e per la visualizzazione delle schede di indagine 
+ *   su popolazione dell'ateneo.
  *   
- *   Copyright (C) 2018 Giovanroberto Torre<br />
- *   Alma on Line (aol), Projects on Line (pol), Questionnaire on Line (qol);
- *   web applications to publish, and manage, students evaluation,
- *   projects, students and degrees information.
- *   Copyright (C) renewed 2018 Universita' degli Studi di Verona, 
+ *   Copyright (C) 2018-2020 Giovanroberto Torre<br />
+ *   Alma on Line (aol), Projects on Line (pol);
+ *   web applications to publish, and manage, projects
+ *   according to the Project Management paradigm (PM).
+ *   Copyright (C) renewed 2020 Giovanroberto Torre, 
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify 
@@ -381,6 +380,23 @@ public class Utils {
         int month = calendar.get(Calendar.MONTH);
         int year = calendar.get(Calendar.YEAR);
         GregorianCalendar dateConverted = new GregorianCalendar(year + shift, month, day);
+        return dateConverted;
+    }
+    
+    
+    /**
+     * <p>Dato un anno in input, restituisce la data del 31 dicembre dell'
+     * anno stesso sotto forma di 
+     * <a href="http://docs.oracle.com/javase/6/docs/api/java/util/GregorianCalendar.html">
+     * GregorianCalendar</a>.</p>
+     * 
+     * @param year intero corrispondente a un anno
+     * @return <code>GregorianCalendar</code> - la data corrispondente al 31 dicembre di quell'anno
+     */
+    public static GregorianCalendar getLastDayOfYear(int year) {
+        // Costruisce l'ultimo giorno dell'anno passato, sotto forma di GregorianCalendar
+        GregorianCalendar dateConverted = new GregorianCalendar(year, 11, 31);
+        // Restituisce al chiamante la data di default
         return dateConverted;
     }
     
