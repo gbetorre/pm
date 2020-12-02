@@ -4,6 +4,10 @@
 <c:url var="project" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="pol" />
 </c:url>
+<c:url var="projects" context="${initParam.appName}" value="/" scope="page">
+  <c:param name="q" value="pol" />
+  <c:param name="y" value="" />
+</c:url>
 <c:url var="utente" context="${initParam.appName}" value="/" scope="page">
   <c:param name="q" value="home" />
   <c:param name="p" value="usr" />
