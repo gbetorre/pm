@@ -188,6 +188,10 @@ public interface Query extends Serializable {
      */
     public static final String MODIFY_PART                      = "mod";
     /**
+     * <p>Costante per il parametro identificante la pagina di aggiornamento di una entit&agrave;.</p>
+     */
+    public static final String UPDATE_PART                      = "upd";
+    /**
      * <p>Costante per il parametro identificante la parte di eliminazione di una entit&agrave;.</p>
      */
     public static final String DELETE_PART                      = "del";
@@ -797,6 +801,54 @@ public interface Query extends Serializable {
             "       AND PJ.id_dipart = ?" +
             "       AND PJ.id > 0" + 
             "       AND PJ.id_statoprogetto < 5" +
+            "   ORDER BY PJ.titolo ASC";
+    
+    /**
+     * <p>Estrae i progetti dell'utente 
+     * avente identificativo passato come parametro
+     * appartenenti al dipartimento avente identificativo 
+     * passato come parametro, 
+     * e che non si trovano in stato 'ELIMINATO'.
+     * Oltre a questi criteri, ne sono stati aggiunti a fini di 
+     * storicizzazione e per avere una vista dei soli obiettivi strategici
+     * di un desiderato piano integrato delle performance:
+     * <ul>
+     * <li>la data di fine deve essere maggiore o uguale al 31/12 dell'anno passato
+     * come parametro</li>
+     * <li>e deve essere minore o uguale al 31/12 dell'anno passato + 2 anni</li>
+     * <li>a meno che il mese riferimento sia inferiore, allora vale quello ai
+     * fini della scadenza</li>
+     * <li>e a meno che lo stato progetto sia IN PROGRESS (2); in tal caso
+     * il progetto non scade mai.</li></ul>
+     * </p>
+     */
+    public static final String GET_PROJECTS_BY_DEPART_AND_YEAR = 
+            "SELECT " +
+            "       PJ.id           " + 
+            "   ,   PJ.id_dipart                AS \"idDipart\"" + 
+            "   ,   PJ.titolo                   AS \"titolo\"" + 
+            "   ,   PJ.descrizione              AS \"descrizione\"" + 
+            "   ,   PJ.datainizio               AS \"dataInizio\"" + 
+            "   ,   PJ.datafine                 AS \"dataFine\"" + 
+            "   ,   PJ.id_statoprogetto         AS \"idStatoProgetto\"" + 
+            "   ,   PJ.sottotipo                AS \"tag\"" +
+            "   ,   PJ.tipo                     AS \"tipo\"" +
+            "   ,   RG.id_ruolo                 AS \"descrizioneStatoCorrente\"" +
+            "   FROM progetto PJ" + 
+            "       INNER JOIN ruologestione RG ON PJ.id = RG.id_progetto" + 
+            "       INNER JOIN persona P ON RG.id_persona = P.id" + 
+            "       INNER JOIN identita I ON P.id = I.id1_persona" + 
+            "       INNER JOIN usr U ON I.id0_usr = U.id" + 
+            "   WHERE   P.id = ?" +                 // clausola utente
+            "       AND PJ.id_dipart = ?" +         // clausola dipartimento
+            "       AND PJ.id > 0" +                // clausola no phantom
+            "       AND PJ.id_statoprogetto < 5" +  // clausola no eliminati
+            "       AND ( ( " +
+            "               (PJ.datafine >= ? AND PJ.datafine <= ?)" +
+            "               AND PJ.meseriferimento >= ?" +
+            "              )" +
+            "             OR PJ.id_statoprogetto = ?" +
+            "           )" +
             "   ORDER BY PJ.titolo ASC";
     
     /**
@@ -1815,6 +1867,28 @@ public interface Query extends Serializable {
             "   ORDER BY M.data DESC";
     
     /**
+     * <p>Estrae la misurazione di id passato come parametro collegata ad un dato 
+     * progetto/obiettivo strategico il cui id viene passato come parametro
+     * (pleonastico).</p>
+     */
+    public static final String GET_MEASURE = 
+            "SELECT " +
+            "       M.id                    AS \"id\"" +
+            "   ,   M.valore                AS \"descrizione\"" +
+            "   ,   M.note                  AS \"informativa\"" +
+            "   ,   M.ultimo                AS \"ultimo\"" +
+            "   ,   M.data                  AS \"dataMisurazione\"" +
+            "   ,   M.dataultimamodifica    AS \"dataUltimaModifica\"" +
+            "   ,   M.oraultimamodifica     AS \"oraUltimaModifica\"" +
+            "   ,   M.autoreultimamodifica  AS \"autoreUltimaModifica\"" +
+            "   ,   M.id_indicatore         AS \"ordinale\"" +
+            "   FROM indicatoregestione M" +
+            "       INNER JOIN indicatore I ON M.id_indicatore = I.id" +
+            "   WHERE   M.id = ?" +
+            "       AND M.id_progetto = ?" +
+            "   ORDER BY M.data DESC";
+    
+    /**
      * <p>Estrae tutti i target revisionati di un dato indicatore</p>
      */
     public static final String GET_UPDATES_ON_INDICATOR = 
@@ -2434,6 +2508,77 @@ public interface Query extends Serializable {
             "   SET    id_stato = (SELECT id FROM statoprogetto WHERE nome = ?)" +
             "   WHERE  id = ? " +
             "      AND id_progetto = ?";
+
+    /**
+     * <p>Modifica la tupla della tabella indicatoreaggiornamento 
+     * identificata dall'id dell'indicatore, passato come parametro,
+     * e dall'id del progetto, passato come parametro.</p>
+     * <p>Siccome le modifiche del target possono essere molteplici, anche
+     * se vale solo l'ultima, nell'aggiornamento bisogna sincerarsi di 
+     * aggiornare solo l'ultima modifica esistente nel set di risultati
+     * individuati dalla coppia: id_indicatore, id_progetto. Infatti,
+     * nell'aggiornamento non viene identificato un id indicatoreaggiornamento,
+     * e quindi bisogna inferire la tupla su cui intervenire tramite
+     * queste altre informazioni, che incrociate tra loro rendono comunque
+     * l'identificazione altrettanto univoca.</p> 
+     * <p>I ? servono per prelevare i dati modificati dalle form, 
+     * e settarli quindi nel db 
+     * (tranne nella clausola WHERE dove il question mark sta ad indicare 
+     * le coordinate necessarie a identificare l'aggiornamento da modificare).</p>
+     */
+    public static final String UPDATE_INDICATOR_EXTRAINFO = 
+        "UPDATE     indicatoreaggiornamento" +
+        "   SET     motivazione = ?" +
+        "   ,       target = ?" + 
+        "   ,       datatarget = ?" + 
+        "   ,       annotarget = ?" + 
+        "   ,       dataaggiornamento = ?" + 
+        "   ,       dataultimamodifica = ?" +
+        "   ,       oraultimamodifica = ?" +
+        "   ,       autoreultimamodifica = ?" +
+        "   WHERE   id_indicatore = ?" +
+        "       AND id_progetto = ?" +
+        "       AND dataultimamodifica = (SELECT max(dataultimamodifica) FROM indicatoreaggiornamento WHERE id_indicatore = ? AND id_progetto = ?)" +
+        "       AND dataaggiornamento =  (SELECT max(dataaggiornamento) FROM indicatoreaggiornamento WHERE id_indicatore = ? AND id_progetto = ?)";   
+    
+    /**
+     * <p>Modifica solo target e motivazione nella tupla della tabella 
+     * indicatoreaggiornamento identificata dall'id dell'indicatore, 
+     * passato come parametro, e dall'id del progetto, passato come parametro.</p>
+     * <p>Siccome le modifiche del target possono essere molteplici, anche
+     * se vale solo l'ultima, nell'aggiornamento bisogna sincerarsi di 
+     * aggiornare solo l'ultima modifica esistente nel set di risultati
+     * individuati dalla coppia: id_indicatore, id_progetto. Infatti,
+     * nell'aggiornamento non viene identificato un id indicatoreaggiornamento,
+     * e quindi bisogna inferire la tupla su cui intervenire tramite
+     * queste altre informazioni, che incrociate tra loro rendono comunque
+     * l'identificazione altrettanto univoca.</p> 
+     */
+    public static final String UPDATE_INDICATOR_EXTRAINFO_LITE = 
+        "UPDATE     indicatoreaggiornamento" +
+        "   SET     motivazione = ?" +
+        "   ,       target = ?" +
+        "   WHERE   id_indicatore = ?" +
+        "       AND id_progetto = ?" +
+        "       AND dataultimamodifica = (SELECT max(dataultimamodifica) FROM indicatoreaggiornamento WHERE id_indicatore = ? AND id_progetto = ?)" +
+        "       AND dataaggiornamento =  (SELECT max(dataaggiornamento) FROM indicatoreaggiornamento WHERE id_indicatore = ? AND id_progetto = ?)";  
+    
+    /**
+     * <p>Query di aggiornamento di una misurazione esistente 
+     * il cui identificativo viene passato come parametro.</p>
+     * <p>Possono essere aggiornati solo i campi descrittivi della misurazione
+     * (valore, note) e il campo "ultima misurazione", e solo da parte di 
+     * utenti con elevati privilegi che intervengono per effettuare correzioni
+     * richieste dagli utenti. Per questo motivo, i campi automatici
+     * non vengono aggiornati, altrimenti si perderebbe traccia dell'utente
+     * che originariamente ha effettuato la misurazione, dato di rilievo.</p>
+     */
+    public static final String UPDATE_MEASUREMENT = 
+        "UPDATE     indicatoregestione" +
+        "   SET     valore = ?" +
+        "   ,       note = ?" +
+        "   ,       ultimo = ?" +
+        "   WHERE   id = ?";
     
     /**
      * <p>Modifica i campi dello status del progetto identificato 
