@@ -66,8 +66,13 @@
                       <input type="hidden" id="wbs-id${status}" name="wbs-id${status}" value="<c:out value="${wbsInstance.id}"/>">
                     <c:choose>
                       <c:when test="${wbsInstance.stato.id eq 3}">
+                        <c:set var="strToSubst" value="'" scope="page" />
+                        <c:set var="note" value="${fn:replace(wbsInstance.stato.descrizione, strToSubst, '&rsquo;')}" scope="page" />
+                        <c:set var="content" value="${fn:substring(note, 0, 200)} ..." scope="page" />
                         <c:out value="${wbsInstance.nome}" />
-                        <em>(sospeso)</em>
+                        <a href="javascript:popupWindow('Motivazione','popup1',true,'<cite>${content}</cite>');" class="helpInfo" id="Parentreason" title="${wbsInstance.stato.descrizione}">
+                          <em>(sospeso)</em>
+                        </a>
                       </c:when>
                       <c:otherwise>
                       <a href="${modWbs}${p.id}&idw=${wbsInstance.id}">
@@ -254,7 +259,13 @@
                                 <c:choose>
                                   <c:when test="${wbsFiglio.stato.id eq 3}">
                                     <c:out value="${wbsFiglio.nome}" />
-                                    <em>(sospeso)</em>
+                                    <c:set var="strToSubst" value="'" scope="page" />
+                                    <c:set var="note" value="${fn:replace(wbsFiglio.stato.descrizione, strToSubst, '&rsquo;')}" scope="page" />
+                                    <c:set var="content" value="${fn:substring(note, 0, 200)} ..." scope="page" />
+                                    <c:out value="${wbsInstance.nome}" />
+                                    <a href="javascript:popupWindow('Motivazione','popup1',true,'<cite>${content}</cite>');" class="helpInfo" id="Childreason" title="${wbsFiglio.stato.descrizione}">
+                                      <em>(sospeso)</em>
+                                    </a>
                                   </c:when>
                                   <c:otherwise>
                                   <a href="${modWbs}${p.id}&idw=${wbsFiglio.id}">
@@ -877,6 +888,7 @@
       </c:if>
       </div>
     </div>
+    <%@ include file="subPopup.jspf" %>
     <script type="text/javascript"> 
       function DoPost(idWbs){
         $("#aboutSus"+idWbs).attr("src","${initParam.urlDirectoryImmagini}/spacer.gif");
