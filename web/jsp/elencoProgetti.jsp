@@ -1,8 +1,6 @@
 <%@ include file="pcURL.jspf" %>
 <c:choose>
   <c:when test="${requestScope.checkThisOut}">
-    <br />
-    <h3>Elenco dei sottoprogetti di ${sessionScope.usr.nome} ${sessionScope.usr.cognome}</h3>
     <c:set var="deptsWithPrj" value="${0}" scope="page" />
     <c:set var="totPrj" value="${0}" scope="page" />
     <c:set var="totPPPrj" value="${0}" scope="page" />
@@ -11,23 +9,61 @@
         <c:set var="deptsWithPrj" value="${deptsWithPrj + 1}" scope="page" />
       </c:if>
     </c:forEach>
-  <c:catch var="exception">
-  <c:choose>
-    <c:when test="${deptsWithPrj > 4}">
-      <ul class="nav nav-pills">
-      <c:forEach var="entry" items="${requestScope.progetti}">
-        <c:if test="${not empty entry.value}">
-          <c:set var="key" value="${entry.key}" scope="page" />
-          <c:set var="d" value="${requestScope.dipart.get(key)}" />
-          <li class="nav-item small"><a class="smooth nav-link" href="#${d.acronimo}" title="${d.nome}"><c:out value="${d.acronimo}" /></a></li>
-        </c:if>
-      </c:forEach>
-      </ul>
-    </c:when>
-    <c:otherwise>
-      <br />
-    </c:otherwise>
-  </c:choose>
+    <c:catch var="exception">
+    <c:choose>
+      <c:when test="${deptsWithPrj > 4}">
+        <ul class="nav nav-pills">
+        <c:forEach var="entry" items="${requestScope.progetti}">
+          <c:if test="${not empty entry.value}">
+            <c:set var="key" value="${entry.key}" scope="page" />
+            <c:set var="d" value="${requestScope.dipart.get(key)}" />
+            <li class="nav-item small"><a class="smooth nav-link" href="#${d.acronimo}" title="${d.nome}"><c:out value="${d.acronimo}" /></a></li>
+          </c:if>
+        </c:forEach>
+        </ul>
+        <hr class="riga" />
+      </c:when>
+    </c:choose>
+    <div class="row">
+        <div class="col-10">
+          <h3>Elenco degli obiettivi di ${sessionScope.usr.nome} ${sessionScope.usr.cognome}</h3>
+        </div>
+        <div class="col-2 form-row">
+        <c:set var="active21" value="" scope="page" />
+        <c:set var="active22" value="" scope="page" />
+        <c:set var="active23" value="" scope="page" />
+        <c:choose>
+          <c:when test="${param['y'] eq 2021}">
+            <c:set var="active21" value="selected" scope="page" />
+          </c:when>
+          <c:when test="${param['y'] eq 2022}">
+            <c:set var="active22" value="selected" scope="page" />
+          </c:when>
+          <c:when test="${param['y'] eq 2023}">
+            <c:set var="active23" value="selected" scope="page" />
+          </c:when>
+          <c:when test="${param['y'] eq 2024}">
+            <c:set var="active24" value="selected" scope="page" />
+          </c:when>
+        </c:choose>
+          <select id="myPlans" onchange="viewPlan()">
+            <option value="2020">2020</option>
+            <option value="2021" ${active21}>2021</option>
+            <option value="2022" ${active22}>2022</option>
+            <option value="2023" ${active23}>2023</option>
+            <option value="2024" ${active24}>2024</option>
+          </select>
+        <%-- 
+          <select id="myPlans" onchange="viewPlan()">
+            <option value="2020">2020-2022</option>
+            <option value="2021" ${active21}>2021-2023</option>
+            <option value="2022" ${active22}>2022-2024</option>
+            <option value="2023" ${active23}>2023-2025</option>
+            <option value="2024" ${active24}>2024-2026</option>
+          </select>
+        --%>
+      </div>
+    </div>
     <c:forEach var="entry" items="${requestScope.progetti}">
       <c:if test="${not empty entry.value}">
       <div class="module">
@@ -35,6 +71,18 @@
         <c:set var="d" value="${requestScope.dipart.get(key)}" />
         <section id="${d.acronimo}">
           <h4>${d.prefisso} ${d.nome}</h4>
+          <div class="avvisiTot text-right">
+          <c:set var="totObj" value="" scope="page" />
+          <c:choose>
+            <c:when test="${entry.value.size() eq 1}">
+              <c:set var="totObj" value="1 obiettivo" scope="page" />
+            </c:when>
+            <c:when test="${entry.value.size() gt 1}">
+              <c:set var="totObj" value="${entry.value.size()} obiettivi" scope="page" />
+            </c:when>
+          </c:choose>
+            <c:out value="${totObj}" />
+          </div>
         </section>
         <table class="table table-hover">
           <thead class="thead-light">
@@ -85,6 +133,13 @@
       <c:set var="totPrj" value="${0}" scope="page" />
       <c:set var="totPPPrj" value="${0}" scope="page" />
     </c:forEach>
+    <script>
+    function viewPlan() {
+      var y = document.getElementById("myPlans");
+      //y.value = x.value.toUpperCase();
+      window.self.location.href = '${projects}' + y.value;
+    }
+    </script>
   </c:catch>
     <c:if test= "${not empty exception}">
       <div class= "alert alert-danger alert-dismissible" role= "alert">
@@ -104,7 +159,10 @@
           <c:out value="${sessionScope.usr.nome}" />
           <c:out value="${sessionScope.usr.cognome}" />!<br />
         </strong>
-        <p>Non sono stati trovati progetti a te associati.</p>
+        <p>
+          Non sono stati trovati progetti a te associati nel triennio ${param['y']}&ndash;${param['y']+2}.<br />
+          <a href="${project}"><i class="fas fa-home"></i> Torna alla home</a>
+        </p>
       </div>
   </c:otherwise>
 </c:choose>
