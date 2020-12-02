@@ -3,7 +3,7 @@
 <%@ include file="pcURL.jspf" %>
     <h4>
       Indicatori dell'obiettivo strategico <br />
-      <strong><c:out value="${p.titolo}" /></strong>
+      <strong><c:out value="${p.titolo}" escapeXml="false" /></strong>
     </h4>
     <hr class="separatore" />
     <span class="float-right">
