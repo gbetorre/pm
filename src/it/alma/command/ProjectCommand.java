@@ -180,6 +180,8 @@ public class ProjectCommand extends ItemBean implements Command {
         String part = parser.getStringParameter("p", Utils.DASH);
         // Recupera o inizializza 'data visualizzazione report'
         String selectionDate = parser.getStringParameter("d", Utils.format(Utils.getCurrentDate()));
+        // Recupera o inizializza parametro opzionale identificante l'anno di consultazione
+        int yearOfTheCut = parser.getIntParameter("y", Utils.getCurrentYearAsInt());
         // Flag di scrittura
         boolean write = (boolean) req.getAttribute("w");
         // Dichiara la pagina a cui reindirizzare
@@ -393,7 +395,7 @@ public class ProjectCommand extends ItemBean implements Command {
                 }*/
                 fileJspT = nomeFile.get(part);
             } else {
-                m = db.getProjectsByDepart(user.getId());
+                m = db.getProjectsByDepart(user.getId(), yearOfTheCut);
                 d = db.getDeparts();
                 checkThisOut = decant(m);
                 fileJspT = nomeFileElenco;
