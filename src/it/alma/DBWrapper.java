@@ -1,16 +1,15 @@
 /*
- *   Alma on Line: Applicazione WEB per la visualizzazione 
- *   delle schede di indagine su popolazione dell'ateneo,
- *   della gestione dei progetti on line (POL) 
- *   e della preparazione e del monitoraggio delle informazioni riguardanti 
- *   l'offerta formativa che hanno ricadute sulla valutazione della didattica 
- *   (questionari on line - QOL).
+ *   Alma on Line: 
+ *   Applicazione WEB per la gestione dei progetti on line (POL)
+ *   coerentemente con le linee-guida del project management,
+ *   e per la visualizzazione delle schede di indagine 
+ *   su popolazione dell'ateneo.
  *   
- *   Copyright (C) 2018 Giovanroberto Torre<br />
- *   Alma on Line (aol), Projects on Line (pol), Questionnaire on Line (qol);
- *   web applications to publish, and manage, students evaluation,
- *   projects, students and degrees information.
- *   Copyright (C) renewed 2019 Universita' degli Studi di Verona, 
+ *   Copyright (C) 2018-2020 Giovanroberto Torre<br />
+ *   Alma on Line (aol), Projects on Line (pol);
+ *   web applications to publish, and manage, projects
+ *   according to the Project Management paradigm (PM).
+ *   Copyright (C) renewed 2020 Giovanroberto Torre, 
  *   all right reserved
  *
  *   This program is free software; you can redistribute it and/or modify 
@@ -1276,6 +1275,108 @@ public class DBWrapper implements Query {
                 pst.clearParameters();
                 pst.setInt(1, userId);
                 pst.setInt(2, idDipart);
+                rs1 = pst.executeQuery();
+                while (rs1.next()) {
+                    project = new ProjectBean();
+                    BeanUtil.populate(project, rs1);
+                    // Recupera statoprogetto del progetto
+                    idStatoProgetto = project.getIdStatoProgetto();
+                    pst = con.prepareStatement(GET_STATOPROGETTO);
+                    pst.clearParameters();
+                    pst.setInt(1, idStatoProgetto);
+                    rs2 = pst.executeQuery();
+                    if (rs2.next()) {
+                        statoProgetto = new CodeBean();
+                        BeanUtil.populate(statoProgetto, rs2);
+                        project.setStatoProgetto(statoProgetto);
+                    }
+                    // Aggiunge il progetto valorizzato all'elenco
+                    v.add(project);
+                }
+                // Aggiunge la lista progetti del dipartimento e la chiave id dipartimento
+                projects.put(key, v);
+            }
+            return projects;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Oggetto ProjectBean.idDipart non valorizzato; problema nella query dei progetti.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto ProjectBean non valorizzato; problema nella query dei progetti.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce una mappa sincronizzata contenente 
+     * i progetti visibili dall'utente loggato, indicizzati 
+     * per identificativo del dipartimento e aventi data di fine
+     * compresa tra l'anno passato come parametro ed i due anni
+     * successivi (per un totale di un triennio).<br />
+     * Inoltre, ulteriori filtri possono essere applicati in base 
+     * alla data anticipata di scadenza (campo 'meseriferimento') ed
+     * allo stato del progetto (progetti in stato ELIMINATO vengono
+     * scartati, progetti in stato IN PROGRESS vengono mostrati indipendentemente
+     * dalle date).<br />
+     * L'identificativo del dipartimento &egrave incapsulato 
+     * in un oggetto Wrapper di tipo primitivo, a causa dell'implementazione
+     * delle mappe di Java, che accettano solo oggetti come chiavi.</p>
+     * 
+     * @param userId identificativo della persona di cui si vogliono recuperare i progetti
+     * @param year anno iniziale di un triennio entro il quale deve trovarsi la data di scadenza del progetto
+     * @return <code>Vector&lt;ProjectBean&gt;</code> - ProjectBean rappresentante i progetti dell'utente loggato
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    @SuppressWarnings({ "null", "static-method" })
+    public ConcurrentHashMap<Integer, Vector<ProjectBean>> getProjectsByDepart(int userId,
+                                                                               int year)
+                                                                        throws WebStorageException {
+        ResultSet rs, rs1, rs2 = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        ProjectBean project = null;
+        DepartmentBean dipart = null;
+        CodeBean statoProgetto = null;
+        int idDipart = -1;
+        int idStatoProgetto = -1;
+        Integer key = null;
+        Vector<ProjectBean> v = null;
+        ConcurrentHashMap<Integer, Vector<ProjectBean>> projects = new ConcurrentHashMap<Integer, Vector<ProjectBean>>();
+        try {
+            con = pol_manager.getConnection();
+            pst = con.prepareStatement(GET_DIPART);
+            pst.clearParameters();
+            pst.setInt(1, -1);
+            pst.setInt(2, -1);            
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                dipart = new DepartmentBean();
+                v = new Vector<ProjectBean>();
+                BeanUtil.populate(dipart, rs);
+                idDipart = dipart.getId();
+                key = new Integer(idDipart);
+                // Recupera progetti del dipartimento
+                int nextParam = 0;
+                pst = con.prepareStatement(GET_PROJECTS_BY_DEPART_AND_YEAR);
+                pst.clearParameters();
+                pst.setInt(++nextParam, userId);
+                pst.setInt(++nextParam, idDipart);
+                pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getLastDayOfYear(year))));
+                pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getLastDayOfYear(year + 2))));
+                pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getLastDayOfYear(year))));
+                pst.setInt(++nextParam, Query.IN_PROGRESS);
                 rs1 = pst.executeQuery();
                 while (rs1.next()) {
                     project = new ProjectBean();
@@ -3323,6 +3424,73 @@ public class DBWrapper implements Query {
                 measures.add(m);
             }
             return measures;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Oggetto non valorizzato; problema nella query delle misurazioni.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Problema SQL nella query delle misurazioni.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce un MeasurementBean rappresentante una misurazione
+     * avente id passato come parametro.</p>
+     * <p>Pu&ograve; essere usato per recuperare tutte le misurazioni di
+     * tutti gli indicatori o di uno specifico indicatore, o di tutti i 
+     * progetti o di uno specifico progetto, a seconda dei flag passati
+     * come parametri.</p>
+     * 
+     * @param projId  id cui la misurazione cercata deve afferire
+     * @param measureId identificativo della misurazione cercata
+     * @param user utente loggato
+     * @return <code>MeasurementBean</code> - misurazione cercata.
+     * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
+     */
+    @SuppressWarnings({ "null" })
+    public MeasurementBean getMeasure(int projId,
+                                      int measureId,
+                                      PersonBean user) 
+                               throws WebStorageException {
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        MeasurementBean m = null;
+        IndicatorBean indicator = null;
+        int nextParam = 0;
+        try {
+            con = pol_manager.getConnection();
+            // Per prima cosa verifica che l'utente abbia i diritti di accesso al progetto
+            if (!userCanRead(projId, user.getId())) {
+                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id progetto non valido!.\n";
+                LOG.severe(msg + "E\' presente il parametro \"id\" - cioe\' id progetto - NON significativo!\n");
+                throw new WebStorageException("Attenzione: indirizzo richiesto non valido!\n");
+            }
+            pst = con.prepareStatement(GET_MEASURE);
+            pst.clearParameters();
+            pst.setInt(++nextParam, measureId);
+            pst.setInt(++nextParam, projId);
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                m = new MeasurementBean();
+                BeanUtil.populate(m, rs);
+                indicator = getIndicator(projId, m.getOrdinale(), user);
+                m.setIndicatore(indicator);
+            }
+            return m;
         } catch (AttributoNonValorizzatoException anve) {
             String msg = FOR_NAME + "Oggetto non valorizzato; problema nella query delle misurazioni.\n";
             LOG.severe(msg); 
@@ -5806,6 +5974,291 @@ public class DBWrapper implements Query {
             String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema di puntamento a un valore nullo.\n";
             LOG.severe(msg); 
             throw new WebStorageException(msg + npe.getMessage(), npe);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Metodo per fare l'aggiornamento di una misurazione esistente 
+     * (di indicatore).</p>
+     * 
+     * @param idProj    identificativo del progetto, al contesto del quale la misurazione fa riferimento
+     * @param user      utente loggato
+     * @param projectsWritableByUser    Vector contenente tutti i progetti scrivibili dall'utente; la misurazione deve essere agganciata ad undicatore di uno di questi
+     * @param idMeasure identificativo della misurazione da aggiornare
+     * @param params    tabella contenente tutti i valori che l'utente inserisce per l'aggiornamento della misurazione
+     * @throws WebStorageException se si verifica un problema nel cast da String a Date, nell'esecuzione della query, nell'accesso al db o in qualche puntamento
+     */
+    @SuppressWarnings({ "null" })
+    public void updateMeasurement(int idProj,
+                                  PersonBean user, 
+                                  Vector<ProjectBean> projectsWritableByUser,
+                                  int idMeasure,
+                                  HashMap<String, String> params) 
+                           throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        try {
+            // Effettua la connessione
+            con = pol_manager.getConnection();
+            /* ===  Controlla anzitutto che l'id progetto sulla querystring === *
+             * ===  corrisponda all'id progetto nel campo hidden della form === */
+            int idProjForm = Integer.parseInt(params.get("prj-id"));
+            if (idProj != idProjForm) {
+                String msg = FOR_NAME + "Attenzione: l\'identificativo di progetto sulla querystring non corrisponde a quello passato dalla form!\n";
+                LOG.severe(msg + "Problema durante il tentativo di inserire una nuova misurazione.\n");
+                throw new WebStorageException(msg);
+            }
+            /* ===  Controlla quindi che l'id progetto sulla querystring    === *
+             * ===  corrisponda a un id dei progetti scrivibili dall'utente === */
+            try {
+                if (!userCanWrite(idProj, projectsWritableByUser)) {
+                    String msg = FOR_NAME + "Attenzione: l'utente ha tentato di inserire una misurazione legata ad un progetto su cui non ha i diritti di scrittura!\n";
+                    LOG.severe(msg + "Problema durante il tentativo di inserire una nuova misurazione.\n");
+                    throw new WebStorageException(msg);
+                }
+            } catch (WebStorageException wse) {
+                String msg = FOR_NAME + "Problema nel tentativo di capire se l\'utente ha o non ha i diritti di scrittura!\n";
+                LOG.severe(msg + "Problema durante il tentativo di inserire una nuova misurazione.\n");
+                throw new WebStorageException(msg);
+            }
+            /* === Se siamo qui vuol dire che l'id del progetto su cui si   === * 
+             * === deve aggiungere un'attivita' e' scrivibile dall'utente   === */
+            // Deve fare un inserimento
+            // Begin: ==>
+            con.setAutoCommit(false);
+            pst = con.prepareStatement(UPDATE_MEASUREMENT);
+            pst.clearParameters();
+            // Definisce un contatore per l'indice del parametro
+            int nextParam = 0;
+             // Prepara i parametri per l'inserimento
+            try {
+                /* === Valore === */
+                pst.setString(++nextParam, params.get("mon-nome"));
+                /* === Note === */
+                String descr = null;
+                if (!params.get("mon-descr").equals(Utils.VOID_STRING)) {
+                    descr = new String(params.get("mon-descr"));
+                    pst.setString(++nextParam, descr);
+                } else {
+                    // La motivazione è stata annullata 
+                    pst.setNull(++nextParam, Types.NULL);
+                    // (un po' strano...)
+                    LOG.severe("Attenzione: nell\'effettuare l\'aggiornamento della misurazione di id " + idMeasure + " il campo descrizione e\' stato sbiancato.");
+                }
+                // Flag di ultima misurazione
+                // Definisce un valore boolean in funzione del checkbox
+                boolean last = params.get("mon-milestone").equals("on") ? true : false;
+                // Chiude l'indicatore misurato se la misurazione è l'ultima
+                if (last) {
+                    // Set the Indicator in an inactive state
+                    updateIndicatorState(idProj, Integer.parseInt(params.get("ind-id")), Query.STATI_PROGETTO_AS_LIST.get(3));
+                } else {
+                    // Set the Indicator in the active state
+                    updateIndicatorState(idProj, Integer.parseInt(params.get("ind-id")), Query.STATI_PROGETTO_AS_LIST.get(0));
+                }
+                pst.setBoolean(++nextParam, last);
+                /* === Id misurazione aggiornata === */
+                pst.setInt(++nextParam, idMeasure);
+                // End: <==
+                pst.executeUpdate();
+                con.commit();
+            } catch (NumberFormatException nfe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di interi.\n" + nfe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, nfe);
+            } catch (ClassCastException cce) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di tipo.\n" + cce.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, cce);
+            } catch (ArrayIndexOutOfBoundsException aiobe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nello scorrimento di liste.\n" + aiobe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, aiobe);
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Si e\' verificato un problema in un puntamento a null.\n" + npe.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, npe);
+            } catch (Exception e) {
+                String msg = FOR_NAME + "Si e\' verificato un problema.\n" + e.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, e);
+            } catch (Throwable t) { // A scopo didattico
+                String msg = FOR_NAME + "Si e\' verificato un qualcosa.\n" + t.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, t);
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto Bean non valorizzato; problema nel codice SQL.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+
+    /**
+     * <p>Aggiorna ulteriori informazioni relative ad un indicatore 
+     * il cui identificativo viene desunto dal valore di un parametro 
+     * di navigazione passato come argomento.</p>
+     * <p>Queste ulteriori informazioni vengono aggiornate a posteriori
+     * su un aggiornamento fatto al target di un indicatore, generalmente
+     * consistente in un ridimensionamento del target dell'indicatore.</p>
+     * 
+     * @param idProj    identificativo del progetto nell'ambito del quale operare 
+     * @param idInd     identificativo dell'indicatore a corredo del quale si vuole inserire un valore ulteriore del target
+     * @param user      persona corrispondente all'utente loggato
+     * @param projectsWritableByUser lista di progetti scrivibili dall'utente
+     * @param params    lista di parametri recuperati dalla form inviata in POST
+     * @throws WebStorageException se si verifica un problema in sql, nel recupero di valori, nella conversione di tipi o in qualche puntamento
+     */
+    @SuppressWarnings({ "null" })
+    public void updateFurtherInformation(int idProj,
+                                         int idInd,
+                                         PersonBean user,
+                                         Vector<ProjectBean> projectsWritableByUser,
+                                         HashMap<String, String>params) 
+                        throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        try {
+            // Ottiene la connessione
+            con = pol_manager.getConnection();
+            /* ===  Controlla anzitutto che l'id progetto sulla querystring === *
+             * ===  corrisponda all'id progetto nel campo hidden della form === */
+            int idProjForm = Integer.parseInt(params.get("prj-id"));
+            if (idProj != idProjForm) {
+                String msg = FOR_NAME + "Attenzione: l\'identificativo di progetto sulla querystring non corrisponde a quello passato dalla form!\n";
+                LOG.severe(msg + "Problema durante il tentativo di inserire informazioni aggiuntive all\'indicatore.\n");
+                throw new WebStorageException(msg);
+            }
+            /* ===  Controlla quindi che l'id progetto sulla querystring    === *
+             * ===  corrisponda a un id dei progetti scrivibili dall'utente === */
+            try {
+                if (!userCanWrite(idProj, projectsWritableByUser)) {
+                    String msg = FOR_NAME + "Attenzione: l'utente ha tentato di inserire una misurazione legata ad un progetto su cui non ha i diritti di scrittura!\n";
+                    LOG.severe(msg + "Problema durante il tentativo di inserire informazioni aggiuntive all\'indicatore.\n");
+                    throw new WebStorageException(msg);
+                }
+            } catch (WebStorageException wse) {
+                String msg = FOR_NAME + "Problema nel tentativo di capire se l\'utente ha o non ha i diritti di scrittura!\n";
+                LOG.severe(msg + "Problema durante il tentativo di inserire informazioni aggiuntive all\'indicatore.\n");
+                throw new WebStorageException(msg);
+            }
+            /* ===  Controlla poi che l'id indicatore sulla querystring === *
+             * ===  corrisponda all'id progetto nel campo hidden della form === */
+            int idIndForm = Integer.parseInt(params.get("ind-id"));
+            if (idInd != idIndForm) {
+                String msg = FOR_NAME + "Attenzione: l\'identificativo di indicatore sulla querystring non corrisponde a quello passato dalla form!\n";
+                LOG.severe(msg + "Problema durante il tentativo di inserire un nuovo target.\n");
+                throw new WebStorageException(msg);
+            }
+            /* === Se siamo qui vuol dire che sono stati superati tutti i controlli   === */ 
+            // Definisce un contatore per l'indice del parametro
+            int nextParam = 0;
+            // Begin: ==>
+            con.setAutoCommit(false);
+            try {
+                // Ottiene l'id dell'indicatore (non conosce l'id dell'aggiornamento da aggiornare, quindi si deve basare sull'id indicatore e altri parametri)
+                int ind = Integer.parseInt(params.get("ind-id"));
+                // Definisce un valore boolean in funzione della checkbox
+                boolean auto = params.get("modext-auto").equals("on") ? true : false;
+                // In base al valore della checkbox, capisce quale query eseguire
+                if (auto) {
+                    pst = con.prepareStatement(UPDATE_INDICATOR_EXTRAINFO);
+                    pst.clearParameters();
+                     // Prepara i parametri per l'inserimento
+                    /* === Motivazione === */
+                    pst.setString(++nextParam, params.get("ext-note"));
+                    /* === Target === */
+                    pst.setString(++nextParam, params.get("ext-target"));
+                    /* === Data Target === */
+                    java.util.Date dataTarget = Utils.format(params.get("ext-datatarget"), "dd/MM/yyyy", Query.DATA_SQL_PATTERN);
+                    pst.setDate(++nextParam, Utils.convert(dataTarget)); // non accetta una data gg/mm/aaaa, ma java.sql.Date
+                    /* === Anno Target === */
+                    String at = null;
+                    if (!params.get("ext-annotarget").equals(Utils.VOID_STRING)) {
+                        at = new String(params.get("ext-annotarget"));
+                        pst.setString(++nextParam, at);
+                    } else {
+                        // dato facoltativo non inserito
+                        pst.setNull(++nextParam, Types.NULL);
+                    }
+                    /* === Data Inserimento === */
+                    // Data Corrente inserita automaticamente, tanto l'aggiornamento target è sempre in data corrente
+                    pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate())));
+                    /* === Campi automatici: id utente, ora ultima modifica, data ultima modifica === */
+                    pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getCurrentDate()))); // non accetta un GregorianCalendar né una data java.util.Date, ma java.sql.Date
+                    pst.setTime(++nextParam, Utils.getCurrentTime());   // non accetta una Stringa, ma un oggetto java.sql.Time
+                    pst.setString(++nextParam, user.getCognome() + String.valueOf(Utils.BLANK_SPACE) + user.getNome());
+                } else {
+                    pst = con.prepareStatement(UPDATE_INDICATOR_EXTRAINFO_LITE);
+                    pst.clearParameters();
+                     // Prepara i parametri per l'inserimento
+                    /* === Motivazione === */
+                    pst.setString(++nextParam, params.get("ext-note"));
+                    /* === Target === */
+                    pst.setString(++nextParam, params.get("ext-target"));
+                }
+                /* === Id indicatore === */
+                pst.setInt(++nextParam, ind);
+                /* === Id Progetto === */
+                pst.setInt(++nextParam, Integer.parseInt(params.get("prj-id")));
+                /* === Id indicatore === */
+                pst.setInt(++nextParam, ind);
+                /* === Id Progetto === */
+                pst.setInt(++nextParam, Integer.parseInt(params.get("prj-id")));
+                /* === Id indicatore === */
+                pst.setInt(++nextParam, ind);
+                /* === Id Progetto === */
+                pst.setInt(++nextParam, Integer.parseInt(params.get("prj-id")));
+            // End: <==
+            pst.executeUpdate();
+            con.commit();
+            } catch (CommandException ce) {
+                String msg = FOR_NAME + "Si e\' verificato un problema nella conversione di date.\n" + ce.getMessage();
+                LOG.severe(msg);
+                throw new WebStorageException(msg, ce);
+            } catch (AttributoNonValorizzatoException anve) {
+                String msg = FOR_NAME + "Probabile problema nel recupero dei dati dell\'autore ultima modifica.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + anve.getMessage(), anve);
+            } catch (SQLException sqle) {
+                String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il nuovo target.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + sqle.getMessage(), sqle);
+            } catch (NumberFormatException nfe) {
+                String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il nuovo target.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + nfe.getMessage(), nfe);
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Tupla non aggiornata correttamente; problema nella query che aggiorna il nuovo target.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage(), npe);
+            }
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto Bean non valorizzato; problema nel codice SQL.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
         } finally {
             try {
                 con.close();
