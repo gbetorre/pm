@@ -22,7 +22,7 @@
                 </a>&nbsp;
                 <a class="btn btn-outline-danger" href="${initParam.appName}/auth?q=logout" ><i class="fas fa-sign-out-alt"></i> Esci</a>
               </span>
-              <c:if test="${pageContext.servletContext.getContextPath() eq '/almalaurea'}">
+              <c:if test="${pageContext.servletContext.getContextPath() eq '/almalaurea' or pageContext.servletContext.getContextPath() eq '/pol'}">
                 <c:if test="${fn:endsWith(applicationScope.db, 'pol')}">
                   <c:set var="bg" value="bg-danger" scope="page" />
                 </c:if>
