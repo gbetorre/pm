@@ -82,15 +82,8 @@
               <td>&nbsp;</td>
                <td scope="row" id="nameColumn" class="success bgAct${mis.ultimo} bgFade">
                 <span class="monospace"><c:out value="${innerStatus}" /></span>&nbsp;
-                <a href="${modInd}${p.id}&idm=${mis.id}" title="${mis.descrizione}">
-                <c:choose>
-                  <c:when test="${fn:length(mis.descrizione) gt 35}">
-                    <c:out value="${fn:substring(mis.descrizione, 0, 35)} ..." />
-                  </c:when>
-                  <c:otherwise>
-                    <c:out value="${mis.descrizione}" />
-                  </c:otherwise>
-                </c:choose>
+                <a href="${monInd}${p.id}&idm=${mis.id}" title="${fn:substring(mis.informativa, 0, 180)}...">
+                  <c:out value="${mis.descrizione}" />
                 </a>
               </td>
               <td><c:if test="${ind.baseline gt zero}">${ind.baseline}</c:if></td>
