@@ -305,9 +305,11 @@ public class Main extends HttpServlet {
         /*
          * Attiva la connessione al database
          */
+        log.info("==>" + getServletContext().getRealPath("/") + "<==");
         // Prima deve capire su quale database deve insistere
         // Di default va in produzione, ma se siamo in locale deve andare in locale
-        if (getServletContext().getRealPath("/").contains("\\Programs\\apache-tomcat-8.5.31\\webapps\\almalaurea\\")) {
+        if ( getServletContext().getRealPath("/").contains("\\Programs\\apache-tomcat-8.5.31\\webapps\\almalaurea\\") || 
+             getServletContext().getRealPath("/").contains("/Programs/apache-tomcat-8.5.60/webapps/pol/")	) {
             contextDbName = new StringBuffer("java:comp/env/jdbc/poldev");
         }
         try {
