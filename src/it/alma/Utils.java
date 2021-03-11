@@ -383,6 +383,23 @@ public class Utils {
         return dateConverted;
     }
     
+
+    /**
+     * <p>Dato un anno in input, restituisce la data del 1° gennaio dell'
+     * anno stesso sotto forma di 
+     * <a href="http://docs.oracle.com/javase/6/docs/api/java/util/GregorianCalendar.html">
+     * GregorianCalendar</a>.</p>
+     * 
+     * @param year intero corrispondente a un anno
+     * @return <code>GregorianCalendar</code> - la data corrispondente al primo giorno di quell'anno
+     */
+    public static GregorianCalendar getFirstDayOfYear(int year) {
+        // Costruisce l'ultimo giorno dell'anno passato, sotto forma di GregorianCalendar
+        GregorianCalendar dateConverted = new GregorianCalendar(year, 0, 1);
+        // Restituisce al chiamante la data di default
+        return dateConverted;
+    }
+    
     
     /**
      * <p>Dato un anno in input, restituisce la data del 31 dicembre dell'
@@ -697,6 +714,22 @@ public class Utils {
         Calendar rightNow = Calendar.getInstance();
         int year = rightNow.get(yearPosition);
         return year;
+    }
+    
+    
+    /**
+     * <p>Restituisce l'anno scorso sotto forma di intero primitivo.</p>
+     * <p>Questo metodo pu&ograve; essere utilizzato in tutti i casi in cui
+     * una visualizzazione di default prevede di mostrare non la situazione
+     * dell'anno in corso ma la situazione dell'anno immediatamente precedente
+     * a quello in corso, ad esempio perch&eacute; l'anno in corso non &egrave;
+     * ancora chiuso (da un punto di vista consuntivo).</p>
+     * 
+     * @return <code>String</code> - l'anno corrente sotto forma di intero primitivo
+     */
+    public static int getPreviousYearAsInt() {
+        int currentYear = getCurrentYearAsInt();
+        return --currentYear;
     }
     
     
