@@ -181,7 +181,7 @@ public class ProjectCommand extends ItemBean implements Command {
         // Recupera o inizializza 'data visualizzazione report'
         String selectionDate = parser.getStringParameter("d", Utils.format(Utils.getCurrentDate()));
         // Recupera o inizializza parametro opzionale identificante l'anno di consultazione
-        int yearOfTheCut = parser.getIntParameter("y", Utils.getCurrentYearAsInt());
+        int yearOfTheCut = parser.getIntParameter("y", Utils.getPreviousYearAsInt());
         // Flag di scrittura
         boolean write = (boolean) req.getAttribute("w");
         // Dichiara la pagina a cui reindirizzare
