@@ -524,7 +524,17 @@ public interface Query extends Serializable {
      * <p>Contiene la formattazione che deve avere una data all'interno dell'applicazione.</p>
      */
     public static final SimpleDateFormat DATA_FORMAT = new SimpleDateFormat(DATA_SQL_PATTERN);
-    
+    /* ************************************************************************ *
+     *          Costanti parlanti per identificativi di tipo progetto           *
+     * ************************************************************************ */
+    /**
+     * Progetto di tipo "Eccellenza"
+     */
+    public static final String ECCELLENZA = "E";
+    /**
+     * Progetto di tipo "Performance"
+     */
+    public static final String PERFORMANCE = "P";
     /* ************************************************************************ *
      *                   Query comuni a tutte le applicazioni                   *
      * ************************************************************************ */
@@ -764,6 +774,7 @@ public interface Query extends Serializable {
     		"	,	PJ.fornitorichiaveesterni	AS \"fornitoriChiaveEsterni\"" + 
     		"	,	PJ.serviziateneo			AS \"serviziAteneo\"" + 
     		"	,	PJ.vincoli					AS \"vincoli\"" + 
+            "   ,   PJ.tipo                     AS \"tipo\"" +
     		"	FROM progetto PJ" + 
     		"		INNER JOIN ruologestione RG ON PJ.id = RG.id_progetto" + 
     		"		INNER JOIN persona P ON RG.id_persona = P.id" + 
@@ -1111,8 +1122,32 @@ public interface Query extends Serializable {
             "   FROM wbs W" + 
             "   WHERE W.id_progetto = ?" +
             "       AND W.id_wbs = ?" + 
-            "   ORDER BY W.ordinale, W.nome, W.dataultimamodifica DESC"; 
+            "   ORDER BY W.ordinale, W.nome, W.dataultimamodifica DESC";
     
+    /*
+     * <p>Estrae le wbs figlie data una wbs padre, 
+     * identificata tramite l'id, passato come parametro
+     * ed aventi collegate attivit&agrave; con data di fine maggiore
+     * di una data passata come parametro, senza considerare le attivit&agrave;
+     * che si trovano in stato eliminato.</p>
+     *
+    public static final String GET_WBS_FIGLIE_BY_YEAR = 
+            "SELECT " +
+            "       W.id                    AS \"id\"" +
+            "   ,   W.nome                  AS \"nome\"" +
+            "   ,   W.ordinale              AS \"ordinale\"" +
+            "   ,   W.descrizione           AS \"descrizione\"" +
+            "   ,   W.workpackage           AS \"workPackage\"" + 
+            "   ,   W.noteavanzamento       AS \"noteAvanzamento\"" +
+            "   ,   W.risultatiraggiunti    AS \"risultatiRaggiunti\"" +
+            "   FROM wbs W" + 
+            "       INNER JOIN attivita A ON A.id_wbs = W.id" +
+            "   WHERE W.id_progetto = ?" +
+            "       AND W.id_wbs = ?" + 
+            "       AND (COALESCE(A.datafineeffettiva, A.datafine) >= ?)" +
+            "       AND A.id_stato <> 12" +
+            "   ORDER BY W.ordinale, W.nome, W.dataultimamodifica DESC";
+    */
     /**
      * <p>Estrae le wbs che non sono workpackage di un progetto,
      * identificato tramite l'id, passato come parametro</p>
@@ -1171,6 +1206,33 @@ public interface Query extends Serializable {
             "       AND W.id_wbs IS NULL" +
             "   ORDER BY W.ordinale, W.nome, W.dataultimamodifica ASC";
     
+    /*
+     * <p>Estrae le wbs di primo livello (= che non hanno padri) 
+     * relative ad un progetto, identificato tramite id, passato come parametro
+     * ed aventi collegate attivit&agrave; con data di fine maggiore
+     * di una data passata come parametro, senza considerare le attivit&agrave;
+     * che si trovano in stato eliminato.</p>
+     *
+    public static final String GET_TOP_WBS_BY_PROJECT_AND_YEAR =
+            "SELECT DISTINCT" +
+            "       W.id                    AS \"id\"" + 
+            "   ,   W.nome                  AS \"nome\"" + 
+            "   ,   W.ordinale              AS \"ordinale\"" +
+            "   ,   W.descrizione           AS \"descrizione\"" + 
+            "   ,   W.workpackage           AS \"workPackage\"" + 
+            "   ,   W.noteavanzamento       AS \"noteAvanzamento\"" +
+            "   ,   W.risultatiraggiunti    AS \"risultatiRaggiunti\"" +
+            "   ,   W.dataultimamodifica    AS \"dataUltimaModifica\"" +
+            "   ,   W.oraultimamodifica     AS \"oraUltimaModifica\"" +
+            "   ,   W.autoreultimamodifica  AS \"autoreUltimaModifica\"" +
+            "   FROM wbs W" +
+            "       INNER JOIN attivita A ON A.id_wbs = W.id" +
+            "   WHERE W.id_progetto = ?" + 
+            "       AND W.id_wbs IS NULL" +
+            "       AND (COALESCE(A.datafineeffettiva, A.datafine) >= ?)" +
+            "       AND A.id_stato <> 12" +
+            "   ORDER BY W.ordinale, W.nome, W.dataultimamodifica ASC";
+    */
     /**
      * <p>Estrae i workpackage relative ad un progetto, identificato tramite id, passato come parametro</p>
      */
@@ -1556,6 +1618,39 @@ public interface Query extends Serializable {
             "   ORDER BY A.nome, A.dataultimamodifica";
     
     /**
+     * <p>Estrae le attivit&agrave; di una specifica WBS,
+     * identificata tramite id, passato come parametro, relativa ad 
+     * un progetto, identificato tramite id, passato come parametro
+     * ed aventi data di fine maggiore di una data passata come parametro.</p>
+     */
+    public static final String GET_ACTIVITIES_BY_WBS_AND_YEAR =
+            "SELECT " + 
+            "       A.id                    AS  \"id\"" + 
+            "   ,   A.nome                  AS  \"nome\"" + 
+            "   ,   A.descrizione           AS  \"descrizione\"" + 
+            "   ,   A.datainizio            AS  \"dataInizio\"" + 
+            "   ,   A.datafine              AS  \"dataFine\"" + 
+            "   ,   A.datainizioattesa      AS  \"dataInizioAttesa\"" + 
+            "   ,   A.datafineattesa        AS  \"dataFineAttesa\"" + 
+            "   ,   A.datainizioeffettiva   AS  \"dataInizioEffettiva\"" + 
+            "   ,   A.datafineeffettiva     AS  \"dataFineEffettiva\"" + 
+            "   ,   A.guprevisti            AS  \"guPrevisti\"" + 
+            "   ,   A.gueffettivi           AS  \"guEffettivi\"" + 
+            "   ,   A.gurimanenti           AS  \"guRimanenti\"" + 
+            "   ,   A.noteavanzamento       AS  \"noteAvanzamento\"" + 
+            "   ,   A.risultatiraggiunti    AS  \"risultatiRaggiunti\"" +
+            "   ,   A.milestone             AS  \"milestone\"" + 
+            "   ,   A.id_wbs                AS  \"idWbs\"" + 
+            "   ,   A.id_stato              AS  \"idStato\"" + 
+            "   ,   A.id_complessita        AS  \"idComplessita\"" + 
+            "   FROM attivita A" + 
+            "   WHERE A.id_progetto = ?" + 
+            "     AND A.id_wbs = ?" +
+            "     AND (COALESCE(A.datafineeffettiva, A.datafine) >= ?)" +
+            "     AND A.id_stato <> 12" +
+            "   ORDER BY A.nome, A.dataultimamodifica";
+    
+    /**
      * <p>Estrae il numero di tuple presenti nella tabella attivit&agrave;
      * con l'id della wbs selezionata dall'utente, identificata tramite id.</p>
      */
@@ -1564,6 +1659,19 @@ public interface Query extends Serializable {
             "   FROM attivita A" +
             "   WHERE id_progetto = ?" +
             "     AND id_wbs = ?" +
+            "     AND A.id_stato <> " + ELIMINATA;
+    
+    /**
+     * <p>Estrae il numero di tuple presenti nella tabella attivit&agrave;
+     * con l'id della wbs selezionata dall'utente, identificata tramite id
+     * ed aventi data di fine maggiore di una data passata come parametro.</p>
+     */
+    public static final String GET_ACTIVITIES_COUNT_BY_WBS_AND_YEAR =
+            "SELECT count(*)" +
+            "   FROM attivita A" +
+            "   WHERE id_progetto = ?" +
+            "     AND id_wbs = ?" +
+            "     AND (COALESCE(A.datafineeffettiva, A.datafine) >= ?)" +
             "     AND A.id_stato <> " + ELIMINATA;
     
     /**
