@@ -29,10 +29,15 @@
           <h3>Elenco degli obiettivi di ${sessionScope.usr.nome} ${sessionScope.usr.cognome}</h3>
         </div>
         <div class="col-2 form-row">
+        <c:set var="active20" value="" scope="page" />
         <c:set var="active21" value="" scope="page" />
         <c:set var="active22" value="" scope="page" />
         <c:set var="active23" value="" scope="page" />
+        <c:set var="active24" value="" scope="page" />
         <c:choose>
+          <c:when test="${param['y'] eq 2020}">
+            <c:set var="active20" value="selected" scope="page" />
+          </c:when>
           <c:when test="${param['y'] eq 2021}">
             <c:set var="active21" value="selected" scope="page" />
           </c:when>
@@ -45,9 +50,12 @@
           <c:when test="${param['y'] eq 2024}">
             <c:set var="active24" value="selected" scope="page" />
           </c:when>
+          <c:otherwise>
+            <c:set var="active20" value="selected" scope="page" />
+          </c:otherwise>
         </c:choose>
           <select id="myPlans" onchange="viewPlan()">
-            <option value="2020">2020</option>
+            <option value="2020" ${active20}>2020</option>
             <option value="2021" ${active21}>2021</option>
             <option value="2022" ${active22}>2022</option>
             <option value="2023" ${active23}>2023</option>
@@ -104,8 +112,12 @@
               <!-- <td scope="row"><c:out value="${prj.statoProgetto.nome}" escapeXml="false" /></td> -->
               <td width="45%" scope="row">
                 <a href="<c:out value= "${vision}${prj.id}" />" class="btn ${btnColor} btn-spacer"><i class="fas fa-file-invoice"></i> Project Charter</a>
-                <a href="<c:out value= "${lastStatus}${prj.id}" />" class="btn ${btnColor} btn-spacer"><i class="far fa-clock"></i> Status</a>            
-                <a href="<c:out value= "${urlWbs}${prj.id}" />" class="btn ${btnColor} btn-spacer"><i class="fas fa-sitemap"></i> WBS</a>
+                <a href="<c:out value= "${lastStatus}${prj.id}" />" class="btn ${btnColor} btn-spacer"><i class="far fa-clock"></i> Status</a>
+                <c:set var="wbsURI" value="${urlWbs}${prj.id}" scope="page" />
+                <c:if test="${(prj.tipo eq 'P') and (not empty param['y'])}">
+                  <c:set var="wbsURI" value="${urlWbs}${prj.id}&y=${param['y']}" scope="page" />
+                </c:if>
+                <a href="<c:out value= "${wbsURI}" />" class="btn ${btnColor} btn-spacer"><i class="fas fa-sitemap"></i> WBS</a>
                 <a href="<c:out value= "${act}${prj.id}" />" class="btn ${btnColor} btn-spacer"><i class="fas fa-bars"></i> Attivit&agrave;</a>              
                 <a href="<c:out value= "${report}${prj.id}" />" class="btn ${btnColor} btn-spacer"><i class="fas fa-chart-line"></i> Report</a>
               <c:if test="${prj.tipo eq 'P'}">
