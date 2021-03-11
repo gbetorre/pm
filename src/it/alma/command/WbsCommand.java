@@ -121,7 +121,7 @@ public class WbsCommand extends ItemBean implements Command {
      * Crea una nuova istanza di WbsCommand 
      */
     public WbsCommand() {
-        /*;*/   // It doesn't anything
+        /*;*/   // It doesn't do jack at this point
     }
   
     
@@ -210,6 +210,8 @@ public class WbsCommand extends ItemBean implements Command {
         int idWbs = parser.getIntParameter("idw", Utils.DEFAULT_ID);
         // Recupera o inizializza 'id wbs padre' (per aggiunta wbs figlia)
         int idWbsP = parser.getIntParameter("idwp", Utils.DEFAULT_ID);
+        // Recupera o inizializza parametro opzionale identificante l'anno di consultazione
+        int yearOfTheCut = parser.getIntParameter("y", Utils.getPreviousYearAsInt());
         // Recupera o inizializza 'tipo pagina'   
         String part = parser.getStringParameter("p", "-");
         // Flag di scrittura
@@ -362,8 +364,11 @@ public class WbsCommand extends ItemBean implements Command {
                         fileJspT = nomeFile.get(part);
                     } else {
                         // Se il parametro 'p' non è presente, deve solo selezionare tutte le wbs
-                        // vWbs = db.getWbs(idPrj, Query.WBS_GET_ALL);
-                        vWbsAncestors = db.getWbsHierarchy(idPrj, user);
+                        if (runtimeProject.getTipo() != null && runtimeProject.getTipo().equals(Query.PERFORMANCE)) {
+                            vWbsAncestors = db.getWbsHierarchy(idPrj, user, yearOfTheCut);
+                        } else {
+                            vWbsAncestors = db.getWbsHierarchy(idPrj, user);
+                        }
                         fileJspT = nomeFileElenco;
                     }
                 }
