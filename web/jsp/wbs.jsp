@@ -198,7 +198,17 @@
                 <fmt:formatDate value='${ind.dataBaseline}' pattern='yyyy' />
               </div>
               <div class="col-sm-1">
-                &nbsp;<c:out value="${ind.target}" />
+              <c:choose>
+                <c:when test="${empty ind.targetRivisto}">
+                  <c:out value="${ind.target}" />
+                </c:when>
+                <c:otherwise>
+                <fmt:formatDate var="lastReview" value="${ind.dataRevisione}" pattern="dd/MM/yyyy" />
+                <span class="bg-warning" title="Attenzione: Il target &egrave; stato modificato il ${lastReview} da ${ind.autoreUltimaRevisione} con la seguente motivazione: '${ind.noteRevisione}'">
+                  <c:out value="${ind.targetRivisto}" />
+                </span>
+                </c:otherwise>
+              </c:choose>
               </div>
               <div class="col-sm-1">
                 <fmt:formatDate value='${ind.dataTarget}' pattern='yyyy' />
