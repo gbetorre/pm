@@ -2464,6 +2464,79 @@ public class DBWrapper implements Query {
     }
     
     
+    /** <p>Restituisce un oggetto Vector&lt;ActivityBean&gt; 
+     * contenente tutte le attivit&agrave; che appartengono ad una WBS, 
+     * identificata tramite id, passato come parametro, di un progetto, 
+     * identificato tramite id, passato come parametro</p>
+     * 
+     * @param idWbs identificativo della WBS 
+     * @param idProj identificativo del progetto corrente
+     * @param user  utente loggato
+     * @param year  anno entro cui deve trovarsi la data di fine di almeno un'attività della WBS il cui id viene passato come parametro
+     * @return <code>Vector&lt;AttivitaBean&gt;</code> - Vector contenente la lista delle attivit&agrave; della WBS
+     * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
+     */
+    @SuppressWarnings({ "null" })
+    private Vector<ActivityBean> getActivitiesByWbsAndYear(int idWbs,
+                                                          int idProj, 
+                                                          PersonBean user,
+                                                          int year)
+                                                   throws WebStorageException {
+        ResultSet rs = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        ActivityBean activity = null;
+        Vector<ActivityBean> activities = new Vector<ActivityBean>();
+        int nextParam = 0;
+        try {
+            con = pol_manager.getConnection();
+            // Per prima cosa verifica che l'utente abbia i diritti di accesso al progetto
+            if (!userCanRead(idProj, user.getId())) {
+                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id progetto non valido!.\n";
+                LOG.severe(msg + "E\' presente il parametro \"q=act\" ma non un valore \"id\" - cioe\' id progetto - significativo!\n");
+                throw new WebStorageException("Attenzione: indirizzo richiesto non valido!\n");
+            }
+            pst = con.prepareStatement(GET_ACTIVITIES_BY_WBS_AND_YEAR);
+            pst.clearParameters();
+            pst.setInt(++nextParam, idProj);
+            pst.setInt(++nextParam, idWbs);
+            pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getFirstDayOfYear(year))));
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                // Per ogni attività crea un oggetto vuoto
+                activity = new ActivityBean();
+                // Lo valorizza
+                BeanUtil.populate(activity, rs);
+                // Ne calcola lo stato
+                computeActivityState(activity, Utils.convert(Utils.getCurrentDate()));
+                // Ne calcola i giorni uomo
+                computeDays(activity, Utils.convert(Utils.getCurrentDate()));
+                // Lo aggiunge all'elenco
+                activities.add(activity);
+            }
+            return activities;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Attributo non valorizzato; problema nella query delle attivita\'.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto ActivityBean non valorizzato; problema nella query dell\'attivita\'.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
     /**
      * <p>Restituisce il numero di attivit&agrave; presenti all'interno di una data wbs, 
      * identificata tramite id, passato come parametro.</p>
@@ -2495,6 +2568,67 @@ public class DBWrapper implements Query {
             pst = con.prepareStatement(GET_ACTIVITIES_COUNT_BY_WBS);
             pst.setInt(++nextParam, idProj);
             pst.setInt(++nextParam, idWbs);
+            rs = pst.executeQuery();
+            if (rs.next()) {
+                amountActivities = rs.getInt(1);
+            }
+            return amountActivities;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "Attributo non valorizzato; problema nella query delle attivita\'.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Errore nella query che estrae il numero di attivit&agrave; presenti in una data wbs.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce il numero di attivit&agrave; presenti all'interno di una data wbs, 
+     * identificata tramite id, passato come parametro.</p>
+     * 
+     * @param idProj              id del progetto a cui appartengono la wbs e le attivit&agrave;
+     * @param idWbs               id della wbs a cui appartengono le attivit&agrave;
+     * @param user                utente loggato
+     * @param year                anno entro cui deve trovarsi la data di fine di almeno un'attività della WBS il cui id viene passato come parametro
+     * @return <code>int</code> - intero che rappresenta il numero di istanze di attivit&agrave; sottostanti alla wbs data
+     * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    @SuppressWarnings({ "null" })
+    public int getActivitiesAmountByWbsAndYear(int idProj, 
+                                               int idWbs, 
+                                               PersonBean user,
+                                               int year) 
+                                        throws WebStorageException {
+        Connection con = null;
+        PreparedStatement pst = null;
+        ResultSet rs = null;
+        int amountActivities = 0;
+        int nextParam = 0;
+        try {
+            con = pol_manager.getConnection();
+            // Per prima cosa verifica che l'utente abbia i diritti di accesso al progetto
+            if (!userCanRead(idProj, user.getId())) {
+                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id progetto non valido!.\n";
+                LOG.severe(msg + "E\' presente il parametro \"q=act\" ma non un valore \"id\" - cioe\' id progetto - significativo!\n");
+                throw new WebStorageException("Attenzione: indirizzo richiesto non valido!\n");
+            }
+            pst = con.prepareStatement(GET_ACTIVITIES_COUNT_BY_WBS_AND_YEAR);
+            pst.setInt(++nextParam, idProj);
+            pst.setInt(++nextParam, idWbs);
+            pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getFirstDayOfYear(year))));
             rs = pst.executeQuery();
             if (rs.next()) {
                 amountActivities = rs.getInt(1);
@@ -3163,6 +3297,9 @@ public class DBWrapper implements Query {
      * 4   Indicatore per D.2.1
      * 5   PerCent
      * 6   PerCent2</pre></p>
+     * <p>Inoltre, se &egrave; presente una revisione del target,
+     * recupera anche quella, per mostrarla al posto del (o insieme al)
+     * target originale.</p>
      * 
      * @param projId  id del progetto di cui estrarre gli indicatori
      * @param user utente loggato
@@ -3178,7 +3315,7 @@ public class DBWrapper implements Query {
                                                     int idWbs,
                                                     int getAll) 
                                              throws WebStorageException {
-        ResultSet rs, rs1, rs2, rs3 = null;
+        ResultSet rs, rs1, rs2, rs3, rs4 = null;
         Connection con = null;
         PreparedStatement pst = null;
         IndicatorBean indicatore = null;
@@ -3242,6 +3379,20 @@ public class DBWrapper implements Query {
                     misurazioni.add(m);
                 }
                 indicatore.setMisurazioni(misurazioni);
+                // Cerca eventuali revisioni fatte al target
+                pst = null;
+                pst = con.prepareStatement(GET_UPDATES_ON_INDICATOR);
+                pst.clearParameters();
+                pst.setInt(1, indicatore.getId());
+                rs4 = pst.executeQuery();
+                if (rs4.next()) {
+                    MeasurementBean target = new MeasurementBean();
+                    BeanUtil.populate(target, rs4);
+                    indicatore.setTargetRivisto(target.getNome());
+                    indicatore.setNoteRevisione(target.getDescrizione());
+                    indicatore.setDataRevisione(target.getDataMisurazione());
+                    indicatore.setAutoreUltimaRevisione(target.getAutoreUltimaModifica());
+                }
                 indicatori.add(indicatore);
                 // Let's engage the Garbage Collector
                 pst = null;
@@ -3771,6 +3922,184 @@ public class DBWrapper implements Query {
                 }
                 wbsP.setWbsFiglie(vWbsF);
                 Vector<ActivityBean> wbsAct = new Vector<ActivityBean>(getActivitiesAmountByWbs(idProj, wbsP.getId(), user));
+                wbsP.setAttivita(wbsAct);
+                MeasurementBean statoWbs = getWbsState(idProj, wbsP.getId());
+                wbsP.setStato(statoWbs);
+                vWbsP.add(wbsP);
+            }
+            return vWbsP;
+        } catch (AttributoNonValorizzatoException anve) {
+            String msg = FOR_NAME + "id WBS padre non valorizzato; problema nella query delle WBS figlie.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + anve.getMessage(), anve);
+        } catch (SQLException sqle) {
+            String msg = FOR_NAME + "Oggetto PersonBean non valorizzato; problema nella query dell\'utente.\n";
+            LOG.severe(msg); 
+            throw new WebStorageException(msg + sqle.getMessage(), sqle);
+        } finally {
+            try {
+                con.close();
+            } catch (NullPointerException npe) {
+                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
+                LOG.severe(msg); 
+                throw new WebStorageException(msg + npe.getMessage());
+            } catch (SQLException sqle) {
+                throw new WebStorageException(FOR_NAME + sqle.getMessage());
+            }
+        }
+    }
+    
+    
+    /**
+     * <p>Restituisce un vector contenente tutte le Wbs padri di un dato progetto,
+     * ciascuna contenente tutte le proprie wbs figlie, con la condizione che
+     * ogni WBS abbia collegata almeno un'attivit&agrave; con data fine
+     * (effettiva o prevista, in cascata) maggiore del 1° gennaio di un anno
+     * passato come parametro.</p>
+     * <p>In dettaglio: il metodo recupera le WBS top livello (root dell'albero
+     * ovvero nodo 0) e le esamina subito (comportamento greedy):<ul> 
+     * <li>se la WBS root &egrave; un WorkPackage allora: 
+     * <ul>
+     *  <li>o non ha attivit&agrave; collegate, e in tal caso va tenuta</li>
+     *  <li>o ha attivit&agrave; collegate, e in tal caso va valutato se
+     * almeno una di queste attivit&agrave; ha un punto di contatto con l'anno
+     * passato come parametro. Un &quot;punto di contatto&quot; vuol dire
+     * che l'attivit&agrave; si &egrave; svolta almeno per un giorno durante
+     * l'anno desiderato.
+     *  <ul>
+     *      <li>se almeno un'attivit&agrave; ha un punto di contatto con l'anno
+     * passato come parametro, allora la WBS va tenuta</li>
+     *      <li>se neanche un'attivit&agrve; ha un punto di contatto con l'anno
+     * in questione, allora la WBS va scartata</li>
+     *  </ul>
+     * </ul>
+     * <li>se la WBS root non &egrave; un WorkPackage allora &egrave; una WBS
+     * padre e va tenuta, a meno che nessuno dei suoi figli abbia almeno
+     * un motivo per essere presente (v. criteri sopra).</li></ul>
+     * 
+     * @param idProj    id del progetto di cui caricare le wbs
+     * @param user      utente loggato
+     * @param year      anno entro cui deve trovarsi la data di fine di almeno un'attività della WBS affinche' la WBS stessa sia visibile
+     * @return vectorWbs - vettore contenente tutte la gerarchia di Wbs di un progetto
+     * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
+     */
+    @SuppressWarnings({ "null" })
+    public Vector<WbsBean> getWbsHierarchy(int idProj,
+                                           PersonBean user,
+                                           int year) 
+                           throws WebStorageException {
+        ResultSet rs, rs1, rs2, rs3, rs4 = null;
+        Connection con = null;
+        PreparedStatement pst = null;
+        WbsBean wbsP, wbsF, wbsN, wbsPN, wbsPPN = null;
+        Vector<WbsBean> vWbsP = new Vector<WbsBean>();
+        Vector<WbsBean> vWbsF = null;
+        Vector<WbsBean> vWbsN = null;
+        Vector<WbsBean> vWbsPN = null;
+        Vector<WbsBean> vWbsPPN = null;
+        try {
+            con = pol_manager.getConnection();
+            // Per prima cosa verifica che l'utente abbia i diritti di accesso al progetto
+            if (!userCanRead(idProj, user.getId())) {
+                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id progetto non valido!.\n";
+                LOG.severe(msg + "E\' presente il parametro \"q=act\" ma non un valore \"id\" - cioe\' id progetto - significativo!\n");
+                throw new WebStorageException("Attenzione: indirizzo richiesto non valido!\n");
+            }
+            pst = con.prepareStatement(GET_TOP_WBS_BY_PROJECT);
+            pst.clearParameters();
+            pst.setInt(1, idProj);
+            rs = pst.executeQuery();
+            // Valorizza lista padri
+            while (rs.next()) {
+                wbsP = new WbsBean();
+                BeanUtil.populate(wbsP, rs);
+                vWbsF = new Vector<WbsBean>();
+                pst = null;
+                pst = con.prepareStatement(GET_WBS_FIGLIE);
+                pst.clearParameters();
+                pst.setInt(1, idProj);
+                pst.setInt(2, wbsP.getId());
+                rs1 = pst.executeQuery();
+                // Valorizza lista figli
+                while (rs1.next()) {
+                    wbsF = new WbsBean();
+                    BeanUtil.populate(wbsF, rs1);
+                    wbsF.setWbsPadre(wbsP);
+                    vWbsN = new Vector<WbsBean>();
+                    pst = null;
+                    pst = con.prepareStatement(GET_WBS_FIGLIE);
+                    pst.clearParameters();
+                    pst.setInt(1, idProj);
+                    pst.setInt(2, wbsF.getId());
+                    rs2 = pst.executeQuery();
+                    // Valorizza lista nipoti
+                    while (rs2.next()) {
+                        wbsN = new WbsBean();
+                        BeanUtil.populate(wbsN, rs2);
+                        wbsN.setWbsPadre(wbsF);
+                        vWbsPN = new Vector<WbsBean>();
+                        pst = null;
+                        pst = con.prepareStatement(GET_WBS_FIGLIE);
+                        pst.clearParameters();
+                        pst.setInt(1, idProj);
+                        pst.setInt(2, wbsN.getId());
+                        rs3 = pst.executeQuery();
+                        // Valorizza lista pronipoti
+                        while (rs3.next()) {
+                            wbsPN = new WbsBean();
+                            BeanUtil.populate(wbsPN, rs3);
+                            wbsPN.setWbsPadre(wbsN);
+                            vWbsPPN = new Vector<WbsBean>();
+                            pst = null;
+                            pst = con.prepareStatement(GET_WBS_FIGLIE);
+                            pst.clearParameters();
+                            pst.setInt(1, idProj);
+                            pst.setInt(2, wbsPN.getId());
+                            rs4 = pst.executeQuery();
+                            // Valorizza lista propronipoti
+                            while (rs4.next()) {
+                                wbsPPN = new WbsBean();
+                                BeanUtil.populate(wbsPPN, rs4);
+                                wbsPPN.setWbsPadre(wbsPN);
+                                Vector<ActivityBean> wbsAct = new Vector<ActivityBean>(getActivitiesAmountByWbsAndYear(idProj, wbsPPN.getId(), user, year));
+                                // Se non ci sono attività e la WBS è un WorkPackage, di che parliamo?
+                                if (wbsAct.capacity() == 0 && wbsPPN.isWorkPackage()) {
+                                    continue;
+                                }
+                                wbsPPN.setAttivita(wbsAct);
+                                vWbsPPN.add(wbsPPN);
+                            }
+                            wbsPN.setWbsFiglie(vWbsPPN);
+                            Vector<ActivityBean> wbsAct = new Vector<ActivityBean>(getActivitiesAmountByWbsAndYear(idProj, wbsPN.getId(), user, year));
+                            if (wbsAct.capacity() == 0 && wbsPN.isWorkPackage()) {
+                                continue;
+                            }
+                            wbsPN.setAttivita(wbsAct);
+                            vWbsPN.add(wbsPN);
+                        }
+                        wbsN.setWbsFiglie(vWbsPN);
+                        Vector<ActivityBean> wbsAct = new Vector<ActivityBean>(getActivitiesAmountByWbsAndYear(idProj, wbsN.getId(), user, year));
+                        if (wbsAct.capacity() == 0 && wbsN.isWorkPackage()) {
+                            continue;
+                        }
+                        wbsN.setAttivita(wbsAct);
+                        vWbsN.add(wbsN);
+                    }
+                    wbsF.setWbsFiglie(vWbsN);
+                    Vector<ActivityBean> wbsAct = new Vector<ActivityBean>(getActivitiesAmountByWbsAndYear(idProj, wbsF.getId(), user, year));
+                    if (wbsAct.capacity() == 0 && wbsF.isWorkPackage()) {
+                        continue;
+                    }
+                    wbsF.setAttivita(wbsAct);
+                    MeasurementBean statoWbs = getWbsState(idProj, wbsF.getId());
+                    wbsF.setStato(statoWbs);
+                    vWbsF.add(wbsF);
+                }
+                wbsP.setWbsFiglie(vWbsF);
+                Vector<ActivityBean> wbsAct = new Vector<ActivityBean>(getActivitiesAmountByWbsAndYear(idProj, wbsP.getId(), user, year));
+                if (wbsAct.capacity() == 0 && wbsP.isWorkPackage()) {
+                    continue;
+                }
                 wbsP.setAttivita(wbsAct);
                 MeasurementBean statoWbs = getWbsState(idProj, wbsP.getId());
                 wbsP.setStato(statoWbs);
