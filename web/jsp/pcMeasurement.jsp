@@ -123,7 +123,7 @@
             <script>
               function saveVal(val) {
                 var hiddenValue = document.getElementById("mon-nome");
-                hiddenValue.value = val + '%';
+                hiddenValue.value = val;
               }
             </script>
             <c:set var="onSelected" value="" scope="page" />

@@ -127,7 +127,7 @@
             <script>
               function saveVal(val) {
                 var hiddenValue = document.getElementById("mon-nome");
-                hiddenValue.value = val + '%';
+                hiddenValue.value = val;
               }
             </script>
             <div class="col-sm-5 mandatory">Valore Misurazione</div>
