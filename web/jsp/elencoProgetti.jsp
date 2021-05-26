@@ -51,7 +51,7 @@
             <c:set var="active24" value="selected" scope="page" />
           </c:when>
           <c:otherwise>
-            <c:set var="active20" value="selected" scope="page" />
+            <c:set var="active21" value="selected" scope="page" />
           </c:otherwise>
         </c:choose>
           <select id="myPlans" onchange="viewPlan()">
