@@ -211,7 +211,7 @@ public class WbsCommand extends ItemBean implements Command {
         // Recupera o inizializza 'id wbs padre' (per aggiunta wbs figlia)
         int idWbsP = parser.getIntParameter("idwp", Utils.DEFAULT_ID);
         // Recupera o inizializza parametro opzionale identificante l'anno di consultazione
-        int yearOfTheCut = parser.getIntParameter("y", Utils.getPreviousYearAsInt());
+        int yearOfTheCut = parser.getIntParameter("y", Utils.getCurrentYearAsInt());
         // Recupera o inizializza 'tipo pagina'   
         String part = parser.getStringParameter("p", "-");
         // Flag di scrittura
