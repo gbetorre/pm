@@ -1369,12 +1369,22 @@ public class DBWrapper implements Query {
                 key = new Integer(idDipart);
                 // Recupera progetti del dipartimento
                 int nextParam = 0;
+                /* il seguente codice va bene se si vuol  mostrare sempre un triennio
                 pst = con.prepareStatement(GET_PROJECTS_BY_DEPART_AND_YEAR);
                 pst.clearParameters();
                 pst.setInt(++nextParam, userId);
                 pst.setInt(++nextParam, idDipart);
                 pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getLastDayOfYear(year))));
                 pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getLastDayOfYear(year + 2))));
+                pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getLastDayOfYear(year))));
+                pst.setInt(++nextParam, Query.IN_PROGRESS);
+                // il seguente codice invece si basa in modo stretto sulle date del progetto: */
+                pst = con.prepareStatement(GET_PROJECTS_BY_DEPART_AND_DATE);
+                pst.clearParameters();
+                pst.setInt(++nextParam, userId);
+                pst.setInt(++nextParam, idDipart);
+                pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getFirstDayOfYear(year))));
+                pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getLastDayOfYear(year))));
                 pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getLastDayOfYear(year))));
                 pst.setInt(++nextParam, Query.IN_PROGRESS);
                 rs1 = pst.executeQuery();
@@ -1392,8 +1402,19 @@ public class DBWrapper implements Query {
                         BeanUtil.populate(statoProgetto, rs2);
                         project.setStatoProgetto(statoProgetto);
                     }
-                    // Aggiunge il progetto valorizzato all'elenco
-                    v.add(project);
+                    // Effettua un controllo per scartare dalla visualizzazione i progetti delle Performance senza WBS visualizzabili
+                    if (project.getTipo() != null && project.getTipo().equals(Query.PERFORMANCE)) {
+                        PersonBean user = new PersonBean();
+                        user.setId(userId);
+                        Vector<WbsBean> vWbsAncestors = getWbsHierarchy(project.getId(), user, year);
+                        // Solo se sono state trovate WBS aggiunge il progetto alla lista
+                        if (!vWbsAncestors.isEmpty()) {
+                            v.add(project);
+                        }
+                    } else {
+                        // Se il progetto non è delle Performance lo aggiunge a prescindere dalla presenza di WBS
+                        v.add(project);                        
+                    }
                 }
                 // Aggiunge la lista progetti del dipartimento e la chiave id dipartimento
                 projects.put(key, v);
@@ -2428,79 +2449,6 @@ public class DBWrapper implements Query {
             pst.clearParameters();
             pst.setInt(++nextParam, idProj);
             pst.setInt(++nextParam, idWbs);
-            rs = pst.executeQuery();
-            while (rs.next()) {
-                // Per ogni attività crea un oggetto vuoto
-                activity = new ActivityBean();
-                // Lo valorizza
-                BeanUtil.populate(activity, rs);
-                // Ne calcola lo stato
-                computeActivityState(activity, Utils.convert(Utils.getCurrentDate()));
-                // Ne calcola i giorni uomo
-                computeDays(activity, Utils.convert(Utils.getCurrentDate()));
-                // Lo aggiunge all'elenco
-                activities.add(activity);
-            }
-            return activities;
-        } catch (AttributoNonValorizzatoException anve) {
-            String msg = FOR_NAME + "Attributo non valorizzato; problema nella query delle attivita\'.\n";
-            LOG.severe(msg); 
-            throw new WebStorageException(msg + anve.getMessage(), anve);
-        } catch (SQLException sqle) {
-            String msg = FOR_NAME + "Oggetto ActivityBean non valorizzato; problema nella query dell\'attivita\'.\n";
-            LOG.severe(msg); 
-            throw new WebStorageException(msg + sqle.getMessage(), sqle);
-        } finally {
-            try {
-                con.close();
-            } catch (NullPointerException npe) {
-                String msg = FOR_NAME + "Ooops... problema nella chiusura della connessione.\n";
-                LOG.severe(msg); 
-                throw new WebStorageException(msg + npe.getMessage());
-            } catch (SQLException sqle) {
-                throw new WebStorageException(FOR_NAME + sqle.getMessage());
-            }
-        }
-    }
-    
-    
-    /** <p>Restituisce un oggetto Vector&lt;ActivityBean&gt; 
-     * contenente tutte le attivit&agrave; che appartengono ad una WBS, 
-     * identificata tramite id, passato come parametro, di un progetto, 
-     * identificato tramite id, passato come parametro</p>
-     * 
-     * @param idWbs identificativo della WBS 
-     * @param idProj identificativo del progetto corrente
-     * @param user  utente loggato
-     * @param year  anno entro cui deve trovarsi la data di fine di almeno un'attività della WBS il cui id viene passato come parametro
-     * @return <code>Vector&lt;AttivitaBean&gt;</code> - Vector contenente la lista delle attivit&agrave; della WBS
-     * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
-     */
-    @SuppressWarnings({ "null" })
-    private Vector<ActivityBean> getActivitiesByWbsAndYear(int idWbs,
-                                                          int idProj, 
-                                                          PersonBean user,
-                                                          int year)
-                                                   throws WebStorageException {
-        ResultSet rs = null;
-        Connection con = null;
-        PreparedStatement pst = null;
-        ActivityBean activity = null;
-        Vector<ActivityBean> activities = new Vector<ActivityBean>();
-        int nextParam = 0;
-        try {
-            con = pol_manager.getConnection();
-            // Per prima cosa verifica che l'utente abbia i diritti di accesso al progetto
-            if (!userCanRead(idProj, user.getId())) {
-                String msg = FOR_NAME + "Qualcuno ha tentato di inserire un indirizzo nel browser avente un id progetto non valido!.\n";
-                LOG.severe(msg + "E\' presente il parametro \"q=act\" ma non un valore \"id\" - cioe\' id progetto - significativo!\n");
-                throw new WebStorageException("Attenzione: indirizzo richiesto non valido!\n");
-            }
-            pst = con.prepareStatement(GET_ACTIVITIES_BY_WBS_AND_YEAR);
-            pst.clearParameters();
-            pst.setInt(++nextParam, idProj);
-            pst.setInt(++nextParam, idWbs);
-            pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getFirstDayOfYear(year))));
             rs = pst.executeQuery();
             while (rs.next()) {
                 // Per ogni attività crea un oggetto vuoto
