@@ -863,6 +863,54 @@ public interface Query extends Serializable {
             "   ORDER BY PJ.titolo ASC";
     
     /**
+     * <p>Estrae i progetti dell'utente 
+     * avente identificativo passato come parametro
+     * appartenenti al dipartimento avente identificativo 
+     * passato come parametro, 
+     * e che non si trovano in stato 'ELIMINATO'.
+     * Oltre a questi criteri, ne sono stati aggiunti a fini di 
+     * storicizzazione e per avere una vista dei soli obiettivi strategici
+     * di un desiderato piano integrato delle performance:
+     * <ul>
+     * <li>la data di INIZIO deve essere maggiore o uguale al 1°/1 dell'anno passato
+     * come parametro</li>
+     * <li>e deve essere minore o uguale al 31/12 dell'anno passato come parametro</li>
+     * <li>a meno che il mese riferimento sia inferiore, allora vale quello ai
+     * fini della scadenza</li>
+     * <li>e a meno che lo stato progetto sia IN PROGRESS (2); in tal caso
+     * il progetto non scade mai.</li></ul>
+     * </p>
+     */
+    public static final String GET_PROJECTS_BY_DEPART_AND_DATE = 
+            "SELECT " +
+            "       PJ.id           " + 
+            "   ,   PJ.id_dipart                AS \"idDipart\"" + 
+            "   ,   PJ.titolo                   AS \"titolo\"" + 
+            "   ,   PJ.descrizione              AS \"descrizione\"" + 
+            "   ,   PJ.datainizio               AS \"dataInizio\"" + 
+            "   ,   PJ.datafine                 AS \"dataFine\"" + 
+            "   ,   PJ.id_statoprogetto         AS \"idStatoProgetto\"" + 
+            "   ,   PJ.sottotipo                AS \"tag\"" +
+            "   ,   PJ.tipo                     AS \"tipo\"" +
+            "   ,   RG.id_ruolo                 AS \"descrizioneStatoCorrente\"" +
+            "   FROM progetto PJ" + 
+            "       INNER JOIN ruologestione RG ON PJ.id = RG.id_progetto" + 
+            "       INNER JOIN persona P ON RG.id_persona = P.id" + 
+            "       INNER JOIN identita I ON P.id = I.id1_persona" + 
+            "       INNER JOIN usr U ON I.id0_usr = U.id" + 
+            "   WHERE   P.id = ?" +                 // clausola utente
+            "       AND PJ.id_dipart = ?" +         // clausola dipartimento
+            "       AND PJ.id > 0" +                // clausola no phantom
+            "       AND PJ.id_statoprogetto < 5" +  // clausola no eliminati
+            "       AND ( ( " +
+            "               (PJ.datainizio <= ? AND PJ.datafine >= ?)" +
+            "               AND PJ.meseriferimento >= ?" +
+            "              )" +
+            "             OR PJ.id_statoprogetto = ?" +
+            "           )" +
+            "   ORDER BY PJ.titolo ASC";
+    
+    /**
      * <p>Estrae il primo progetto con id negativo, 
      * dato in input l'id del dipartimento.</p>
      */
