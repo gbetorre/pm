@@ -1137,8 +1137,8 @@ public interface Query extends Serializable {
             "   ORDER BY W.dataultimamodifica ASC";
     
     /**
-     * <p>Estrae lo stato di una wbs dato il suo identificativo, 
-     * passato come parametro.</p>
+     * <p>Estrae gli stati di una wbs dato il suo identificativo, 
+     * passato come parametro, ordinandoli per data ultima modifica.</p>
      */
     public static final String GET_WBS_STATE = 
             "SELECT " +
@@ -1152,7 +1152,8 @@ public interface Query extends Serializable {
             "   FROM wbs W" + 
             "       INNER JOIN wbsgestione WS ON WS.id_wbs = W.id" +
             "   WHERE WS.id_progetto = ?" +
-            "       AND WS.id_wbs = ?";
+            "       AND WS.id_wbs = ?" +
+            "   ORDER BY WS.dataultimamodifica DESC";
     
     /**
      * <p>Estrae le wbs figlie data una wbs padre, 
@@ -1611,6 +1612,43 @@ public interface Query extends Serializable {
     
     /**
      * <p>Estrae le attivit&agrave; relative ad un progetto, identificato 
+     * tramite l'id, passato come parametro che non sono state cancellate
+     * logicamente.</p>
+     * <p>Il nome della query fa riferimento al fatto che l'estrazione &egrave;
+     * parametrizzata per:
+     * <ul>
+     * <li>DATE - data fine attivit&agrave; a partire dalla quale vengono estratte 
+     * le attivit&agrave;; per estrarle tutte basta passare una data 
+     * &quot;antidiluviana&quot;</li>
+     * <li>TYPE - questo riferimento indica il fatto che, in funzione del
+     * valore dei parametri passati, la query pu&ograve; estrarre le sole
+     * attivit&agrave; di tipo milestone oppure tutte le attivit&agrave;
+     * indipendentemente dal loro &quot;tipo&quot;</li>
+     * </ul></p>  
+     */
+    public static final String  GET_ACTIVITIES_BY_ENDDATE_AND_TYPE = 
+            "SELECT " +
+            "       A.id                    AS  \"id\"" +
+            "   ,   A.nome                  AS  \"nome\"" +
+            "   ,   A.descrizione           AS  \"descrizione\"" +
+            "   ,   A.datainizio            AS  \"dataInizio\"" +
+            "   ,   A.datafine              AS  \"dataFine\"" +
+            "   ,   A.datainizioeffettiva   AS  \"dataInizioEffettiva\"" +
+            "   ,   A.datafineeffettiva     AS  \"dataFineEffettiva\"" +
+            "   ,   A.noteavanzamento       AS  \"noteAvanzamento\"" +
+            "   ,   A.risultatiraggiunti    AS  \"risultatiRaggiunti\"" +
+            "   ,   A.milestone             AS  \"milestone\"" +
+            "   ,   A.id_wbs                AS  \"idWbs\"" +
+            "   ,   A.id_stato              AS  \"idStato\"" +
+            "   FROM attivita A" + 
+            "   WHERE A.id_progetto = ?" +
+            "       AND A.id_stato <> 12" +
+            "       AND (A.datafine >= ?)" +
+            "       AND (A.milestone = ? OR ?)" +
+            "   ORDER BY A.nome";
+    
+    /**
+     * <p>Estrae le attivit&agrave; relative ad un progetto, identificato 
      * tramite l'id, passato come parametro, e che si trovano in stato
      * di dato valore, il cui identificativo viene passato come parametro.</p>
      */
@@ -1712,15 +1750,29 @@ public interface Query extends Serializable {
     /**
      * <p>Estrae il numero di tuple presenti nella tabella attivit&agrave;
      * con l'id della wbs selezionata dall'utente, identificata tramite id
-     * ed aventi data di fine maggiore di una data passata come parametro.</p>
+     * ed aventi data di fine maggiore di una data passata come parametro e...</p>TODO
      */
     public static final String GET_ACTIVITIES_COUNT_BY_WBS_AND_YEAR =
-            "SELECT count(*)" +
+            "(SELECT A.id" +
             "   FROM attivita A" +
-            "   WHERE id_progetto = ?" +
-            "     AND id_wbs = ?" +
-            "     AND (COALESCE(A.datafineeffettiva, A.datafine) >= ?)" +
-            "     AND A.id_stato <> " + ELIMINATA;
+            "   WHERE A.id_progetto = ?" +
+            "     AND A.id_wbs = ?" +
+            "     AND (COALESCE(A.datainizioeffettiva, A.datainizio) BETWEEN ? AND ?)" +
+            "     OR A.id IN (" +
+            "                   SELECT AT.id FROM attivita AT" +
+            "                       WHERE   AT.id_progetto = ? " +
+            "                           AND AT.id_wbs = ? " +
+            "                           AND AT.id_stato <> " + ELIMINATA + 
+            "                           AND AT.datainizio = ? AND AT.datafine = ?" +
+            "                )" +
+            "     AND A.id_stato <> " + ELIMINATA +
+            ") UNION (" +
+            "   SELECT A.id" +
+            "   FROM attivita A" +
+            "   WHERE A.id_progetto = ?" +
+            "     AND A.id_wbs = ?" +
+            "     AND (COALESCE(A.datafineeffettiva, A.datafine) BETWEEN ? AND ?)" +
+            "     AND A.id_stato <> " + ELIMINATA + ")";
     
     /**
      * <p>Estrae l'attivit&agrave; specificata tramite id 
