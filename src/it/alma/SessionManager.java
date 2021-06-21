@@ -295,7 +295,7 @@ public class SessionManager extends HttpServlet {
                 session.setAttribute("writableRisks", userWritableARisksByProject);
                 session.setAttribute("writableIndicators", userWritableIndicatorsByProject);
                 session.setAttribute("menu", vO);
-                res.sendRedirect(res.encodeRedirectURL(getServletContext().getInitParameter("appName") + "/?q=pol"));
+                res.sendRedirect(res.encodeRedirectURL(getServletContext().getInitParameter("appName") + "/?q=pol&y=" + Utils.getCurrentYearAsInt()));
             }
         } catch (IllegalStateException ise) {
             throw new ServletException("Impossibile redirigere l'output. Verificare se la risposta e\' stata gia\' committata.\n" + ise.getMessage(), ise);
