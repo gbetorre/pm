@@ -1320,7 +1320,7 @@ public class DBWrapper implements Query {
     
     
     /**
-     * <p>Restituisce una mappa sincronizzata contenente 
+     * <p>Restituisce una mappa con insertion order contenente 
      * i progetti visibili dall'utente loggato, indicizzati 
      * per identificativo del dipartimento e aventi data di fine
      * compresa tra l'anno passato come parametro ed i due anni
@@ -1340,9 +1340,9 @@ public class DBWrapper implements Query {
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
     @SuppressWarnings({ "null", "static-method" })
-    public ConcurrentHashMap<Integer, Vector<ProjectBean>> getProjectsByDepart(int userId,
-                                                                               int year)
-                                                                        throws WebStorageException {
+    public LinkedHashMap<Integer, Vector<ProjectBean>> getProjectsByDepart(int userId,
+                                                                           int year)
+                                                                    throws WebStorageException {
         ResultSet rs, rs1, rs2 = null;
         Connection con = null;
         PreparedStatement pst = null;
@@ -1353,7 +1353,7 @@ public class DBWrapper implements Query {
         int idStatoProgetto = -1;
         Integer key = null;
         Vector<ProjectBean> v = null;
-        ConcurrentHashMap<Integer, Vector<ProjectBean>> projects = new ConcurrentHashMap<Integer, Vector<ProjectBean>>();
+        LinkedHashMap<Integer, Vector<ProjectBean>> projects = new LinkedHashMap<Integer, Vector<ProjectBean>>();
         try {
             con = pol_manager.getConnection();
             pst = con.prepareStatement(GET_DIPART);
@@ -2285,6 +2285,7 @@ public class DBWrapper implements Query {
         //Vector<PersonBean> people = new Vector<PersonBean>();
         Vector<ActivityBean> activities = new Vector<ActivityBean>();
         int nextParam = 0;
+        String query = (date.after(Utils.convert(Utils.getUnixEpoch())) ? GET_ACTIVITIES_BY_ENDDATE_AND_TYPE : GET_ACTIVITIES_BY_DATE_AND_TYPE);
         try {
             // La connessione è gestita dal finally
             con = pol_manager.getConnection();
@@ -2294,7 +2295,7 @@ public class DBWrapper implements Query {
                 LOG.severe(msg + "E\' presente il parametro \"q=act\" ma non un valore \"id\" - cioe\' id progetto - significativo!\n");
                 throw new WebStorageException("Attenzione: indirizzo richiesto non valido!\n");
             }
-            pst = con.prepareStatement(GET_ACTIVITIES_BY_DATE_AND_TYPE);
+            pst = con.prepareStatement(query);
             pst.clearParameters();
             pst.setInt(++nextParam, projId);
             pst.setDate(++nextParam, Utils.convert(date));
@@ -2341,7 +2342,7 @@ public class DBWrapper implements Query {
         }
     }
     
-    
+        
     /**
      * <p>Restituisce un Vector di ActivityBean rappresentante 
      * le attivit&agrave; in un dato stato, il cui identificativo viene
@@ -2577,9 +2578,18 @@ public class DBWrapper implements Query {
             pst.setInt(++nextParam, idProj);
             pst.setInt(++nextParam, idWbs);
             pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getFirstDayOfYear(year))));
+            pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getLastDayOfYear(year))));
+            pst.setInt(++nextParam, idProj);
+            pst.setInt(++nextParam, idWbs);
+            pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getFirstDayOfYear(year - 1))));
+            pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getLastDayOfYear(year + 1))));
+            pst.setInt(++nextParam, idProj);
+            pst.setInt(++nextParam, idWbs);
+            pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getFirstDayOfYear(year))));
+            pst.setDate(++nextParam, Utils.convert(Utils.convert(Utils.getLastDayOfYear(year))));
             rs = pst.executeQuery();
-            if (rs.next()) {
-                amountActivities = rs.getInt(1);
+            while (rs.next()) {
+                ++amountActivities;
             }
             return amountActivities;
         } catch (AttributoNonValorizzatoException anve) {
@@ -4011,7 +4021,7 @@ public class DBWrapper implements Query {
                                 wbsPPN.setWbsPadre(wbsPN);
                                 Vector<ActivityBean> wbsAct = new Vector<ActivityBean>(getActivitiesAmountByWbsAndYear(idProj, wbsPPN.getId(), user, year));
                                 // Se non ci sono attività e la WBS è un WorkPackage, di che parliamo?
-                                if (wbsAct.capacity() == 0 && wbsPPN.isWorkPackage()) {
+                                if (wbsAct.capacity() == NOTHING && wbsPPN.isWorkPackage()) {
                                     continue;
                                 }
                                 wbsPPN.setAttivita(wbsAct);
@@ -4019,7 +4029,7 @@ public class DBWrapper implements Query {
                             }
                             wbsPN.setWbsFiglie(vWbsPPN);
                             Vector<ActivityBean> wbsAct = new Vector<ActivityBean>(getActivitiesAmountByWbsAndYear(idProj, wbsPN.getId(), user, year));
-                            if (wbsAct.capacity() == 0 && wbsPN.isWorkPackage()) {
+                            if (wbsAct.capacity() == NOTHING && wbsPN.isWorkPackage()) {
                                 continue;
                             }
                             wbsPN.setAttivita(wbsAct);
@@ -4027,7 +4037,7 @@ public class DBWrapper implements Query {
                         }
                         wbsN.setWbsFiglie(vWbsPN);
                         Vector<ActivityBean> wbsAct = new Vector<ActivityBean>(getActivitiesAmountByWbsAndYear(idProj, wbsN.getId(), user, year));
-                        if (wbsAct.capacity() == 0 && wbsN.isWorkPackage()) {
+                        if (wbsAct.capacity() == NOTHING && wbsN.isWorkPackage()) {
                             continue;
                         }
                         wbsN.setAttivita(wbsAct);
@@ -4035,7 +4045,7 @@ public class DBWrapper implements Query {
                     }
                     wbsF.setWbsFiglie(vWbsN);
                     Vector<ActivityBean> wbsAct = new Vector<ActivityBean>(getActivitiesAmountByWbsAndYear(idProj, wbsF.getId(), user, year));
-                    if (wbsAct.capacity() == 0 && wbsF.isWorkPackage()) {
+                    if (wbsAct.capacity() == NOTHING && wbsF.isWorkPackage()) {
                         continue;
                     }
                     wbsF.setAttivita(wbsAct);
@@ -4045,7 +4055,7 @@ public class DBWrapper implements Query {
                 }
                 wbsP.setWbsFiglie(vWbsF);
                 Vector<ActivityBean> wbsAct = new Vector<ActivityBean>(getActivitiesAmountByWbsAndYear(idProj, wbsP.getId(), user, year));
-                if (wbsAct.capacity() == 0 && wbsP.isWorkPackage()) {
+                if (wbsAct.capacity() == NOTHING && wbsP.isWorkPackage()) {
                     continue;
                 }
                 wbsP.setAttivita(wbsAct);

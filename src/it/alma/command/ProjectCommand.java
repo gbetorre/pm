@@ -186,8 +186,8 @@ public class ProjectCommand extends ItemBean implements Command {
         boolean write = (boolean) req.getAttribute("w");
         // Dichiara la pagina a cui reindirizzare
         String fileJspT = null;
-        // Dichiara elenco di progetti
-        ConcurrentHashMap<Integer, Vector<ProjectBean>> m = new ConcurrentHashMap<Integer, Vector<ProjectBean>>();
+        // Dichiara elenco di progetti indicizzati per identificativo dipartimento/struttura
+        LinkedHashMap<Integer, Vector<ProjectBean>> m = new LinkedHashMap<Integer, Vector<ProjectBean>>();
         // Dichiara mappa di dipartimenti indicizzata per id
         HashMap<Integer, DepartmentBean> d = null;
         // Dichiara lista di valori di stati avanzamento
@@ -647,11 +647,11 @@ public class ProjectCommand extends ItemBean implements Command {
      * pagina JSP con ${not empty map} non funziona: perch&eacute; in effetti 
      * la map non &egrave; empty!).</p>
      * 
-     * @param map una mappa sincronizzata contenente i progetti indicizzati per Wrapper di identificativo dipartimentale
+     * @param map una mappa ordinata contenente i progetti indicizzati per Wrapper di identificativo dipartimentale
      * @return <code>boolean</code> - true se e' stato estratto almeno un progetto in uno dei possibili dipartimenti, false altrimenti
      * @throws CommandException se si verifica un problema nello scorrimento di liste o in qualche tipo di puntmaneto
      */
-    private static boolean decant(ConcurrentHashMap<Integer, Vector<ProjectBean>> map) 
+    private static boolean decant(LinkedHashMap<Integer, Vector<ProjectBean>> map) 
                            throws CommandException {
         try {
             Iterator<Map.Entry<Integer, Vector<ProjectBean>>> it = map.entrySet().iterator();

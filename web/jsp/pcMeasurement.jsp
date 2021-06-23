@@ -236,7 +236,7 @@
       <c:out value="${exception}" />
 
       <script type="text/javascript">
-        var offsetcharacter = 5;
+        var offsetcharacter = 300;
         $(document).ready(function () {
           $('#mon_form').validate ({
             rules: {
@@ -260,7 +260,7 @@
             }, 
             messages: {
               'mon-nome': "Inserire un valore corretto per la misurazione",
-              'mon-descr': "Inserire i risultati conseguiti"
+              'mon-descr': "Inserire almeno " + offsetcharacter + " caratteri."
             },
             submitHandler: function (form) {
               return true;
