@@ -205,9 +205,17 @@
                 Ultima Misurazione
               </a>
             </div>
-            <div class="col-sm-5 marginLeft">
+            <div class="col-sm-3 marginLeft">
               <input type="checkbox" class="form-check-input" id="mon-milestone" name="mon-milestone" <c:out value='${checked}' />>
             </div>
+            <%--
+            <div class="col-sm-2 marginRight">
+              <a href="#all-form" class="ico" id="add-all" rel="modal:open">
+                <img src="${initParam.urlDirectoryImmagini}/ico-add.png" class="btn-del addElement" alt="Link ad aggiunta documento allegato" title="Aggiungi un Allegato" />
+              </a>
+              <span id="add-label">Aggiungi Allegato</span>
+            </div>
+            --%>
           </div>
           <br />
           <div class="row">
@@ -236,11 +244,43 @@
       </c:choose>
       </div>
     </div>
+    <form id="all-form" method="post" action="file?q=ind&p=mon&id=${requestScope.progetto.id}&idi=${indicatore.id}" enctype="multipart/form-data" class="modal">
+      <input type="hidden" id="mon-id" name="mon-id" value="${m.id}" />
+      <h3 class="heading">Aggiungi un allegato</h3>
+      <br />
+      <div class="row">
+        <div class="col-sm-5">
+          <strong>
+            Titolo Documento
+            <sup>&#10039;</sup>:
+          </strong>
+        </div>
+        <div class="col-sm-5">  
+          <input type="text" class="form-control" id="doc-name" name="doc-name" value="" placeholder="Inserisci un titolo documento">
+        </div>
+      </div>
+      <hr class="separatore" />
+      <div class="row">
+        <div class="col-sm-5">
+          <strong>
+            Seleziona un file da caricare
+            <sup>&#10039;</sup>:
+          </strong>
+        </div>
+        <div class="col-sm-5">  
+          <input type="file" name="file" size="60" placeholder="Inserisci un file da caricare"><br /><br /> 
+        </div>
+      </div>
+      <hr class="separatore" />
+      <div class="row">
+        <button type="submit" class="btn btn-warning" value="Upload"><i class="fas fa-file-upload"></i> Upload</button>
+      </div>
+    </form>
     <%@ include file="subPopup.jspf" %>
       <c:out value="${exception}" />
 
       <script type="text/javascript">
-        var offsetcharacter = 5;
+        var offsetcharacter = 300;
         $(document).ready(function () {
           $('#mon_form').validate ({
             rules: {
@@ -264,7 +304,7 @@
             }, 
             messages: {
               'mon-nome': "Inserire un valore corretto per la misurazione",
-              'mon-descr': "Inserire i risultati conseguiti"
+              'mon-descr': "Inserire almeno " + offsetcharacter + " caratteri."
             },
             submitHandler: function (form) {
               return true;
