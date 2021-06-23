@@ -218,6 +218,8 @@ public class ActivityCommand extends ItemBean implements Command {
         int idWbs = parser.getIntParameter("idw", Utils.DEFAULT_ID);
         // Recupera o inizializza 'id attività' (da modificare)
         int idAct = parser.getIntParameter("ida", Utils.DEFAULT_ID);
+        // Recupera o inizializza parametro opzionale identificante l'anno di consultazione
+        int yearOfTheCut = parser.getIntParameter("y", Utils.getCurrentYearAsInt());
         // Recupera o inizializza 'tipo pagina'   
         String part = parser.getStringParameter("p", Utils.DASH);
         // Flag di scrittura
@@ -281,6 +283,7 @@ public class ActivityCommand extends ItemBean implements Command {
                         // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
                         HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
                         // Recupera i progetti su cui l'utente ha diritti di scrittura
+                        @SuppressWarnings("unchecked")
                         Vector<ProjectBean> writablePrj = (Vector<ProjectBean>) ses.getAttribute("writableProjects"); // I'm confident about the types...
                         // Se non ci sono progetti scrivibili e il flag "write" è true c'è qualcosa che non va...
                         if (writablePrj == null) {
@@ -290,6 +293,7 @@ public class ActivityCommand extends ItemBean implements Command {
                             throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
                         }
                         // Recupera dalla sessione le attività su cui l'utente ha diritti di scrittura
+                        @SuppressWarnings("unchecked")
                         LinkedHashMap<Integer, Vector<ActivityBean>> userWritableActivitiesByProjectId = (LinkedHashMap<Integer, Vector<ActivityBean>>) ses.getAttribute("writableActivity");
                         // Trasforma un Vector di progetti scrivibili dall'utente loggato in un dictionary degli stessi
                         HashMap<Integer, ProjectBean> writableProjects = ProjectCommand.decant(writablePrj);
@@ -495,7 +499,11 @@ public class ActivityCommand extends ItemBean implements Command {
                         fileJspT = nomeFileActivityByWbs;
                     } else {
                         // Se il parametro 'p' non è presente, e il parametro 'idw' nemmeno, deve solo mostrare l'elenco delle attività per quel progetto
-                        vActivities = db.getActivities(idPrj, user, Utils.convert(Utils.getUnixEpoch()), !Query.GET_MILESTONES_ONLY, Query.GET_ALL);
+                        if (runtimeProject.getTipo() != null && runtimeProject.getTipo().equals(Query.PERFORMANCE)) {
+                            vActivities = db.getActivities(idPrj, user, Utils.convert(Utils.getFirstDayOfYear(yearOfTheCut)), !Query.GET_MILESTONES_ONLY, Query.GET_ALL);
+                        } else {
+                            vActivities = db.getActivities(idPrj, user, Utils.convert(Utils.getUnixEpoch()), !Query.GET_MILESTONES_ONLY, Query.GET_ALL);
+                        }
                         fileJspT = nomeFileElenco;
                     }
                 }
