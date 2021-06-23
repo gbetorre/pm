@@ -722,44 +722,10 @@ public class PersonBean implements Serializable {
      * @param sesso New value of property sesso.
      */
     public void setSesso(String sesso) {
-        // lun giu 13 15:37:39 CEST 2005
-        // NO BUONO: non mettere i controlli nel bean altrimenti nel debug
-        // si impazzisce (in genere non si va a pensare a inizializzazioni
-        // fatte nei bean).
-        // Nel caso specifico, nel database i valori NON sono 1 e 0 ma 
-        // m ed f. Come mai qui e' stato messo questo controllo di 
-        // inizializzazione?
-        
-        /* if (sesso == '1' ) this.sesso = 'M'; else this.sesso = 'F'; */
-        
         if (!sesso.equals("M") && !sesso.equals("F") && !sesso.equals("m") && !sesso.equals("f"))  
             this.sesso = "m";
         else
             this.sesso = sesso;
-    }
-    
-   
-    /**
-     * Holds value of property creditiInsegnati.
-     */
-    private String creditiInsegnati;
-
-    /**
-     * Getter for property creditiInsegnati.
-     * @return Value of property creditiInsegnati.
-     */
-    public String getCreditiInsegnati() {
-
-        return this.creditiInsegnati;
-    }
-
-    /**
-     * Setter for property creditiInsegnati.
-     * @param creditiInsegnati New value of property creditiInsegnati.
-     */
-    public void setCreditiInsegnati(String creditiInsegnati) {
-
-        this.creditiInsegnati = creditiInsegnati;
     }
     
     /**
