@@ -1339,7 +1339,7 @@ public class DBWrapper implements Query {
      * @return <code>Vector&lt;ProjectBean&gt;</code> - ProjectBean rappresentante i progetti dell'utente loggato
      * @throws WebStorageException se si verifica un problema nell'esecuzione della query, nell'accesso al db o in qualche tipo di puntamento
      */
-    @SuppressWarnings({ "null", "static-method" })
+    @SuppressWarnings({ "null" })
     public LinkedHashMap<Integer, Vector<ProjectBean>> getProjectsByDepart(int userId,
                                                                            int year)
                                                                     throws WebStorageException {
@@ -3479,7 +3479,8 @@ public class DBWrapper implements Query {
      * <p>Restituisce un Vector di MeasurementBean rappresentante &ndash; a 
      * seconda dei valori dei flag passati come parametri &ndash; parte o tutte
      * le misurazioni del progetto attuale o di tutti i progetti, corredate di 
-     * tutte le relative informazioni (indicatore di appartenenza, wbs, etc.).</p>
+     * tutte le relative informazioni (indicatore di appartenenza, wbs, allegati,
+     * etc.).</p>
      * <p>Pu&ograve; essere usato per recuperare tutte le misurazioni di
      * tutti gli indicatori o di uno specifico indicatore, o di tutti i 
      * progetti o di uno specifico progetto, a seconda dei flag passati
@@ -3508,6 +3509,7 @@ public class DBWrapper implements Query {
         MeasurementBean m = null;
         IndicatorBean indicator = null;
         Vector<MeasurementBean> measures = new Vector<MeasurementBean>();
+        Vector<FileDocBean> attachments = null;
         int nextParam = 0;
         try {
             con = pol_manager.getConnection();
@@ -3530,6 +3532,15 @@ public class DBWrapper implements Query {
                 BeanUtil.populate(m, rs);
                 indicator = getIndicator(projId, m.getOrdinale(), user);
                 m.setIndicatore(indicator);
+                // Recupera gli allegati
+                try {
+                    attachments = getFileDoc("indicatoregestione", "all", m.getId(), NOTHING);
+                    m.setAllegati(attachments);
+                } catch (AttributoNonValorizzatoException anve) {
+                    String msg = FOR_NAME + "Oggetto MeasurementBean.id non valorizzato; problema nella query che recupera l\'allegato della misurazione attraverso l\'id.\n";
+                    LOG.severe(msg); 
+                    throw new WebStorageException(msg + anve.getMessage(), anve);
+                }
                 measures.add(m);
             }
             return measures;
@@ -3556,12 +3567,9 @@ public class DBWrapper implements Query {
     
     
     /**
-     * <p>Restituisce un MeasurementBean rappresentante una misurazione
-     * avente id passato come parametro.</p>
-     * <p>Pu&ograve; essere usato per recuperare tutte le misurazioni di
-     * tutti gli indicatori o di uno specifico indicatore, o di tutti i 
-     * progetti o di uno specifico progetto, a seconda dei flag passati
-     * come parametri.</p>
+     * <p>Restituisce esattamente un MeasurementBean, rappresentante 
+     * una misurazione avente id passato come parametro, e corredato
+     * degli eventuali allegati.</p>
      * 
      * @param projId  id cui la misurazione cercata deve afferire
      * @param measureId identificativo della misurazione cercata
@@ -3579,6 +3587,7 @@ public class DBWrapper implements Query {
         PreparedStatement pst = null;
         MeasurementBean m = null;
         IndicatorBean indicator = null;
+        Vector<FileDocBean> attachments = null;
         int nextParam = 0;
         try {
             con = pol_manager.getConnection();
@@ -3598,6 +3607,15 @@ public class DBWrapper implements Query {
                 BeanUtil.populate(m, rs);
                 indicator = getIndicator(projId, m.getOrdinale(), user);
                 m.setIndicatore(indicator);
+                // Recupero e settaggio degli allegati alla misurazione
+                try {
+                    attachments = getFileDoc("indicatoregestione", "all", m.getId(), NOTHING);
+                    m.setAllegati(attachments);
+                } catch (AttributoNonValorizzatoException anve) {
+                    String msg = FOR_NAME + "Oggetto MeasurementBean.id non valorizzato; problema nella query che recupera l\'allegato della misurazione attraverso l\'id.\n";
+                    LOG.severe(msg); 
+                    throw new WebStorageException(msg + anve.getMessage(), anve);
+                }
             }
             return m;
         } catch (AttributoNonValorizzatoException anve) {
