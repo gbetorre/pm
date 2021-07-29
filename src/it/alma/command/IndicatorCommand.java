@@ -448,7 +448,8 @@ public class IndicatorCommand extends ItemBean implements Command {
                                 throw new CommandException("Attenzione: indirizzo richiesto non valido!\n");
                             }
                             types = db.getIndicatorTypes(Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE);
-                            actions = db.getWbs(runtimeProject.getId(), user, Query.WBS_WP_ONLY);
+                            // Se quando l'indicatore è stato aggiunto si vedevano tutte le WBS, si devono vedere anche quando l'indicatore viene modificato
+                            actions = db.getWbs(runtimeProject.getId(), user, Query.WBS_GET_ALL);
                             indicator = db.getIndicator(idPrj, idInd, user);
                         } else if (part.equals(Query.MONITOR_PART)) {
                             /* ************************************************ *
