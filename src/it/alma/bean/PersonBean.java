@@ -763,11 +763,11 @@ public class PersonBean implements Serializable {
         esterno = b;
     }
     
-    public void setFoto(Vector fotoFileDoc) {
+    public void setFoto(Vector<FileDocBean> fotoFileDoc) {
         foto = fotoFileDoc;
     }
     
-    public Vector getFoto() {
+    public Vector<FileDocBean> getFoto() {
         return foto;
     }
 
@@ -807,14 +807,14 @@ public class PersonBean implements Serializable {
 	/**
 	 * @return the currFileDoc
 	 */
-	public Vector getCurrFileDoc() {
+	public Vector<FileDocBean> getCurrFileDoc() {
 		return currFileDoc;
 	}
 
 	/**
 	 * @param currFileDoc the currFileDoc to set
 	 */
-	public void setCurrFileDoc(Vector currFileDoc) {
+	public void setCurrFileDoc(Vector<FileDocBean> currFileDoc) {
 		this.currFileDoc = currFileDoc;
 	}
 

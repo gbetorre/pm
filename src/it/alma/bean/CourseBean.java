@@ -830,14 +830,14 @@ public class CourseBean implements Serializable, Comparable<CourseBean> {
     /**
      * Metodo per assegnare un vector di CorsoStudi a cui l'occorrenza appartiene
      */
-    public void setCorsiStudi(Vector c) {
+    public void setCorsiStudi(Vector<DegreeBean> c) {
         corsiStudi = c;
     }
 
     /**
      * Metodo che restituisce un vector di CorsoStudi a cui l'occorrenza apprtiene
      */
-    public Vector getCorsiStudi() {
+    public Vector<DegreeBean> getCorsiStudi() {
         return corsiStudi;
     }
 
@@ -1044,7 +1044,7 @@ public class CourseBean implements Serializable, Comparable<CourseBean> {
      * 
      * @return Value of property Periodi.
      */
-    public Vector getPeriodi() throws AttributoNonValorizzatoException {
+    public Vector<CodeBean> getPeriodi() throws AttributoNonValorizzatoException {
         if (periodi == null) {
             throw new AttributoNonValorizzatoException("CourseBean: attributo Periodi non valorizzato!");
         } else {
@@ -1057,7 +1057,7 @@ public class CourseBean implements Serializable, Comparable<CourseBean> {
      * 
      * @param linguaProgramma New value of property Periodi.
      */
-    public void setPeriodi(Vector periodi) {
+    public void setPeriodi(Vector<CodeBean> periodi) {
         this.periodi = periodi;
     }
     
