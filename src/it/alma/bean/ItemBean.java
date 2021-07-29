@@ -36,6 +36,7 @@
 
 package it.alma.bean;
 
+import java.io.Serializable;
 
 /**
  * <p>Classe che serve a rappresentare oggetti generici (p.es. link in un menu,
@@ -46,8 +47,15 @@ package it.alma.bean;
  * 
  * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
  */
-public class ItemBean implements Comparable<ItemBean> {
+public class ItemBean implements Serializable, Comparable<ItemBean> {
     /**
+     * La serializzazione necessita di dichiarare una costante di tipo long
+     * identificativa della versione seriale. 
+     * (Se questo dato non fosse inserito, verrebbe calcolato in maniera automatica
+     * dalla JVM, e questo potrebbe portare a errori riguardo alla serializzazione). 
+     */
+	private static final long serialVersionUID = -3158453443828208051L;
+	/**
      *  Nome di questa classe
      */
     private final String FOR_NAME = "\n" + this.getClass().getName() + ": "; //$NON-NLS-1$
