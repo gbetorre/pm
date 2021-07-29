@@ -1,6 +1,7 @@
 <%@ include file="pcURL.jspf" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"  %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<c:set var="localDocumentRoot" value="${initParam.urlDirectoryDocumenti}/upload/indicatoregestione_all/${p.id}" scope="page" />
 <c:set var="misurazione" value="${requestScope.misurazione}" scope="page" />
 <c:set var="indicatore" value="${misurazione.indicatore}" scope="page" />
 <c:if test="${misurazione.ultimo}">
@@ -216,6 +217,58 @@
               <input type="checkbox" class="form-check-input" id="mon-milestone" name="mon-milestone" <c:out value='${checked}' />>
             </div>
           </div>
+          <hr class="riga" />
+          <c:if test="${not empty misurazione.allegati}">
+          <c:catch var="exception">
+          <hr class="separatore" />
+          <div class="row">
+	          <div class="col-sm-5">&nbsp;</div>
+	          <div class="col-sm-5">
+	            <div class="lightTable">
+	              <div class="row">
+	                <div class="col bordo"><strong>Allegati della misurazione</strong></div>
+	              </div>
+	              <hr class="separatore" />
+	              <ul class="list-unstyled">
+	              <c:forEach var="all" items="${misurazione.allegati}" varStatus="loop">
+	                <c:set var="ext" value="${fn:substring(all.estensione, 1, fn:length(all.estensione))}" scope="page" />
+	                <li>
+	                  <span>
+	                    <img src="${initParam.urlDirectoryImmagini}ico_${ext}.png" border="0" alt="${all.estensione}">
+	                  </span>
+	                  <a href="${localDocumentRoot}/${all.file}${all.estensione}" class="transition">
+	                    <c:out value="${all.titolo}" escapeXml="false" />
+	                  </a>
+	                  <span class="file-data">
+	                    (<c:out value="${ext}" />,&nbsp;<fmt:formatNumber type="number" value="${all.dimensione/1024}" maxFractionDigits ="2" />&nbsp;KB,&nbsp;<fmt:formatDate value="${all.data}" pattern="dd/MM/yyyy" />)
+	                  </span>
+	                </li>
+	              </c:forEach>
+	              </ul>
+	            </div>
+	          </div>
+          </div>
+          </c:catch>
+          <c:out value="${exception}" />
+          </c:if>
+          <br />
+          <section id="Allegati">
+          <div class="row">
+            <div class="col-sm-5">
+              &nbsp;
+            </div>
+            <div class="col-sm-5 ">
+              <a href="#all-form" class="ico" id="add-all" rel="modal:open">
+                <img src="${initParam.urlDirectoryImmagini}/ico-add.png" class="btn-del addElement" alt="Link ad aggiunta documento allegato" title="Aggiungi un Allegato" />
+              </a>
+              <span id="add-label">
+                <a href="javascript:popupWindow('Note','popup1',true,'Gli allegati sono utili per caricare informazioni aggiuntive riguardo alla misurazione e/o all\'indicatore.<br>Clicca sul <strong>+</strong> per aggiungere un allegato.');" class="helpInfo" id="all-note">
+                Aggiungi Allegato
+                </a>
+              </span>
+            </div>
+          </div> 
+          </section>         
           <br />
           <div class="row">
             <div class="col-sm-5">
@@ -232,6 +285,39 @@
       </c:choose>
       </div>
     </div>
+    <form id="all-form" method="post" action="file?q=ind&p=mon&id=${requestScope.progetto.id}&idi=${indicatore.id}" enctype="multipart/form-data" class="modal">
+      <input type="hidden" id="prj-id" name="prj-id" value="${requestScope.progetto.id}" />
+      <input type="hidden" id="mis-id" name="mis-id" value="${misurazione.id}" />
+      <h3 class="heading">Aggiungi un allegato</h3>
+      <br />
+      <div class="row">
+        <div class="col-sm-5">
+          <strong>
+            Titolo Documento
+            <sup>&#10039;</sup>:
+          </strong>
+        </div>
+        <div class="col-sm-5">  
+          <input type="text" class="form-control" id="doc-name" name="doc-name" value="" placeholder="Inserisci un titolo documento">
+        </div>
+      </div>
+      <hr class="separatore" />
+      <div class="row">
+        <div class="col-sm-5">
+          <strong>
+            Seleziona un file da caricare
+            <sup>&#10039;</sup>:
+          </strong>
+        </div>
+        <div class="col-sm-5">  
+          <input type="file" name="file" id="file" size="60" placeholder="Inserisci un file da caricare"><br /><br /> 
+        </div>
+      </div>
+      <hr class="separatore" />
+      <div class="row">
+        <button type="submit" class="btn btn-warning" value="Upload"><i class="fas fa-file-upload"></i> Upload</button>
+      </div>
+    </form>
     <%@ include file="subPopup.jspf" %>
       <c:out value="${exception}" />
 
@@ -261,6 +347,24 @@
             messages: {
               'mon-nome': "Inserire un valore corretto per la misurazione",
               'mon-descr': "Inserire almeno " + offsetcharacter + " caratteri."
+            },
+            submitHandler: function (form) {
+              return true;
+            }
+          });
+          
+          $('#all-form').validate ({
+            rules: {
+              'doc-name': {
+                required: true
+              },
+              'file': {
+                  required: true
+              },
+            }, 
+            messages: {
+              'doc-name': "Inserire il titolo del documento",
+              'file': "Scegliere un file da caricare!"
             },
             submitHandler: function (form) {
               return true;
