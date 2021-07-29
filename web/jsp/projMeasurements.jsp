@@ -80,8 +80,11 @@
             </small>
           </td>
           <td scope="row">
-            <a href="${monInd}${p.id}&idm=${mis.id}">
+            <a href="${monInd}${p.id}&idm=${mis.id}" title="Consulta la misurazione">
               <c:out value="${mis.descrizione}" />
+            </a>
+            <a class="smooth" href="${monInd}${p.id}&idm=${mis.id}#Allegati">
+              <span class="badge badge-primary" id="add-label" title="Clicca per aggiungere un Allegato alla misurazione (attualmente: ${mis.allegati.size()})"><i class="fas fa-plus"></i> Allegato</span>
             </a>
           </td>
           <td scope="row" class="small">
