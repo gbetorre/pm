@@ -65,6 +65,7 @@
       <url-pattern>/documenti/upload/monitoraggio_d7/*</url-pattern>
       <url-pattern>/documenti/upload/monitoraggio_d8/*</url-pattern>
       <url-pattern>/documenti/upload/monitoraggio_all/*</url-pattern>
+      <url-pattern>/documenti/upload/indicatoregestione_all/*</url-pattern>
    </servlet-mapping>
 
    <!-- Note: Custom Error Pages -->
@@ -250,7 +251,7 @@
             Container
         </res-auth>
     </resource-ref>
-    
+    <!-- 
     <resource-ref>
         <description>
             Resource reference to a factory for java.sql.Connection
@@ -267,4 +268,5 @@
             Container
         </res-auth>
     </resource-ref>
+    -->
 </web-app>
