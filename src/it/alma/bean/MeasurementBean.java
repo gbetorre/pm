@@ -38,6 +38,7 @@ package it.alma.bean;
 import java.io.Serializable;
 import java.sql.Time;
 import java.util.Date;
+import java.util.Vector;
 
 import it.alma.exception.AttributoNonValorizzatoException;
 
@@ -81,6 +82,14 @@ public class MeasurementBean extends CodeBean implements Serializable {
     private Time oraUltimaModifica;
     /** Autore ultima modifica */
     private String autoreUltimaModifica;
+    /* *******************************************************  *
+     *                         Allegati                         *
+     * ******************************************************** */
+    /**
+     * Vector di fileset, ciascuno rappresentante 
+     * un riferimento logico ad un allegato fisico
+     */
+    private Vector<FileDocBean> allegati;
     
 	
     /**
@@ -95,6 +104,7 @@ public class MeasurementBean extends CodeBean implements Serializable {
         dataUltimaModifica = new Date(0);
         oraUltimaModifica = null;
         autoreUltimaModifica = null;
+        allegati = null;
 	}
 
 
@@ -249,6 +259,30 @@ public class MeasurementBean extends CodeBean implements Serializable {
      */
     public void setAutoreUltimaModifica(String autoreUltimaModifica) {
         this.autoreUltimaModifica = autoreUltimaModifica;
+    }
+    
+    
+    /* ************************************************************** *
+     *              Metodi getter e setter per allegati               *
+     * ************************************************************** */
+    /**
+     * Restituisce l'elenco dei riferimenti logici agli allegati fisici
+     * in precedenza caricati per la misurazione corrente 
+     * 
+     * @return <code>Vector&lt;FileDocBean&gt;</code> - elenco di riferimenti logici ad allegati fisici
+     */
+    public Vector<FileDocBean> getAllegati() {
+        return allegati;
+    }
+
+    /**
+     * Imposta l'elenco dei riferimenti logici agli allegati fisici
+     * caricati per la misurazione corrente
+     * 
+     * @param allegati Vector di FileDocBean da impostare
+     */
+    public void setAllegati(Vector<FileDocBean> allegati) {
+        this.allegati = allegati;
     }
 
 }
