@@ -110,15 +110,18 @@
               <td scope="row"><a href="<c:out value="${progetto}${prj.id}" />"><c:out value="${prj.titolo}" escapeXml="false" /></a></td>
               <!-- <td scope="row"><c:out value="${prj.statoProgetto.nome}" escapeXml="false" /></td> -->
               <td width="45%" scope="row">
+            <c:if test="${prj.tipo ne 'P'}">
                 <a href="<c:out value= "${vision}${prj.id}" />" class="btn ${btnColor} btn-spacer"><i class="fas fa-file-invoice"></i> Project Charter</a>
                 <a href="<c:out value= "${lastStatus}${prj.id}" />" class="btn ${btnColor} btn-spacer"><i class="far fa-clock"></i> Status</a>
+            </c:if>
                 <a href="<c:out value= "${wbsURI}" />" class="btn ${btnColor} btn-spacer"><i class="fas fa-sitemap"></i> WBS</a>
                 <a href="<c:out value= "${actURI}" />" class="btn ${btnColor} btn-spacer"><i class="fas fa-bars"></i> Attivit&agrave;</a>              
-                <a href="<c:out value= "${report}${prj.id}" />" class="btn ${btnColor} btn-spacer"><i class="fas fa-chart-line"></i> Report</a>
               <c:if test="${prj.tipo eq 'P'}">
                 <a href="<c:out value= "${ind}${prj.id}" />" class="btn ${btnColor} btn-spacer"><i class="fas fa-ruler"></i> Indicatori</a>
+                <a href="<c:out value= "${monInd}${prj.id}" />" class="btn ${btnColor} btn-spacer"><i class="fas fa-weight"></i> Misurazioni</a>&nbsp;
                 <c:set var="totPPPrj" value="${totPPPrj + 1}" scope="page" />
               </c:if>
+              <a href="<c:out value= "${report}${prj.id}" />" class="btn ${btnColor} btn-spacer"><i class="fas fa-chart-line"></i> Report</a>
               </td>
               <td><cite><c:out value="${prj.tag}" /></cite></td>
             </tr>
