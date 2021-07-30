@@ -14,7 +14,7 @@
         <input type="hidden" id="wbs-id" name="wbs-id" value="${wbsId}" />
         <div class="panel-heading bgWbs">
           <div class="noHeader">
-            <em>Riepilogo WBS: &nbsp;<strong><c:out value="${wbsInstance.nome}" escapeXml="false" /></strong></em>
+            <em>Sospensione WBS: &nbsp;<strong><c:out value="${wbsInstance.nome}" escapeXml="false" /></strong></em>
           </div>
         </div>
         <hr class="separatore" />
@@ -72,9 +72,13 @@
           </div>
           <hr class="riga" />
           <div class="row">
-            <div class="col-sm-5 mandatory">Motivazioni della sospensione</div>
+            <div class="col-sm-5 mandatory">
+              <a href="javascript:popupWindow('Note','popup1',true,'Inserisci le motivazioni della sospensione (campo obbligatorio), quindi scorri in fondo alla pagina e clicca sul bottone \'Sospendi\'.');" class="helpInfo" id="sus-note">
+                Motivazioni della sospensione
+              </a> 
+            </div>
             <div class="col-sm-5">
-              <textarea class="form-control" id="sus-descr" name="sus-descr" placeholder="Inserisci i motivi per cui hai deciso di sospendere il progetto"></textarea>
+              <textarea class="form-control bg-warning" id="sus-descr" name="sus-descr" placeholder="Inserisci i motivi per cui hai deciso di sospendere il progetto"></textarea>
               <div class="charNum"></div>
             </div>
           </div>
