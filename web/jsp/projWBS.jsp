@@ -17,6 +17,7 @@
     <c:if test="${(ruolo eq 'PMOATE') or (ruolo eq 'PMODIP')  or (ruolo eq 'PM') or (ruolo eq 'TL')}">
       <c:set var="superuser" value="${true}" scope="page" />
     </c:if>
+    <c:set var="openSeason" value="true" scope="page" />
     <h4>WBS del sotto progetto <strong><c:out value="${p.titolo}" /></strong></h4>
     <hr class="separatore" />
     <span class="float-right">
@@ -115,7 +116,8 @@
                       <a href="${act}${p.id}&idw=${wbsInstance.id}" class="ico" id="lightTable">
                         <img src="${initParam.urlDirectoryImmagini}/${icoAct}" class="btn-del" alt="Link a lista attivita" title="${txtAct}" />
                       </a>
-                    <%-- Suspend WBS Padre -->
+                    <c:if test="${openSeason}">
+                    <!-- Suspend WBS Padre -->
                       <c:set var="pauseico" value="/ico-pause.png" scope="page" />
                       <c:set var="pausetxt" value="Sospendi" scope="page" />
                       <c:set var="pauseurl" value="${susWbs}${p.id}&idw=${wbsInstance.id}" scope="page" />
@@ -127,7 +129,8 @@
                       <a href="${pauseurl}" id="sus-wbs" class="ico">
                         <img id="aboutSus${wbsInstance.id}" src="${initParam.urlDirectoryImmagini}${pauseico}" class="btn-del" alt="Gestione sospensione WBS" title="${pausetxt} WBS/Azione" />
                       </a>
-                    <!-- End Suspend Padre --%>
+                    <!-- End Suspend Padre -->
+                    </c:if>
                       <a href="#del-form${wbsInstance.id}" class="ico" id="del-wbs" rel="modal:open">
                         <img src="${initParam.urlDirectoryImmagini}/ico-del-outline.png" class="btn-del" alt="Elimina" title="Elimina" />
                       </a>
@@ -724,7 +727,8 @@
                                 <a href="${act}${p.id}&idw=${wbsFiglio.id}" class="ico" id="wbsActLev2">
                                   <img src="${initParam.urlDirectoryImmagini}/${icoAct}" class="btn-del" alt="Link a lista attivita" title="${txtAct}" />
                                 </a>
-                                <%-- Suspend WBS Figlia -->
+                                <c:if test="${openSeason}">
+                                <!-- Suspend WBS Figlia -->
                                   <c:set var="pauseico" value="/ico-pause.png" scope="page" />
                                   <c:set var="pausetxt" value="Sospendi" scope="page" />
                                   <c:set var="pauseurl" value="${susWbs}${p.id}&idw=${wbsFiglio.id}" scope="page" />
@@ -736,7 +740,8 @@
                                   <a href="${pauseurl}" id="sus-wbs" class="ico">
                                     <img id="aboutSus${wbsFiglio.id}" src="${initParam.urlDirectoryImmagini}${pauseico}" class="btn-del" alt="Gestione sospensione WBS" title="${pausetxt} WBS/Azione" />
                                   </a>
-                                <!-- End Suspend Figlia --%>
+                                <!-- End Suspend Figlia -->
+                                </c:if>
                                 <a href="#del-form${wbsFiglio.id}" class="ico" id="del-wbs" rel="modal:open">
                                   <img src="${initParam.urlDirectoryImmagini}/ico-del-outline.png" class="btn-del" alt="Elimina" title="Elimina" />
                                 </a>
