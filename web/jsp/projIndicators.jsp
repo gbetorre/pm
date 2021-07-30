@@ -1,12 +1,19 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"  %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ include file="pcURL.jspf" %>
+<c:set var="openSeason" value="true" scope="page" />
     <h4>
       Indicatori dell'obiettivo strategico <br />
       <strong><c:out value="${p.titolo}" escapeXml="false" /></strong>
     </h4>
     <hr class="separatore" />
-    <span class="float-right">
+    <span class="float-right form-row">
+      <select id="myIndicatorState" onchange="viewSome()">
+        <option value="Aperti" ${active20}>Aperti</option>
+        <option value="Chiusi" ${active21}>Chiusi</option>
+        <option value="Tutti" selected>Tutti</option>
+      </select>
+      &nbsp;
       <a class="btn btnNav" href="${project}">
         <i class="fas fa-home"></i>
         Progetti
@@ -25,10 +32,15 @@
         <tr>
           <th scope="col" width="20%">Azione (Progetto)</th>
           <th scope="col" width="*">Nome Indicatore</th>
-          <th scope="col" width="5%">Baseline</th>
-          <th scope="col" width="10%">Data Baseline</th>
-          <th scope="col" width="5%">Target</th>
-          <th scope="col" width="10%">Data Target</th>
+          <th scope="col" width="6%">Baseline</th>
+          <th scope="col" width="9%">Data Baseline</th>
+          <th scope="col" width="6%">
+            Target 
+            <c:if test="${openSeason}">
+              <span class="bg-warning" title="In questa fase del monitoraggio il target e' modificabile. Clicca sul bottone 'Modifica' in corrispondenza di un Target per andare alla pagina di modifica di quel target.">*</span>
+            </c:if>
+          </th>
+          <th scope="col" width="9%">Data Target</th>
           <th scope="col" width="5%">Tipo Indicatore</th>
           <th scope="col" width="5%"><div class="text-center">Misurato</div></th>
         </tr>
@@ -78,11 +90,11 @@
             </span>
             </c:otherwise>
           </c:choose>
-          <%--
+          <c:if test="${openSeason}"> 
             <a href="<c:out value="${extInd}${p.id}&idi=${ind.id}" escapeXml="false" />" id='btn-tar'>
-              <button type="button" class="btn btn-sm btn-outline-primary">Modifica</button>
+              <button type="button" class="btn btn-sm badge-warning" title="In questa fase del monitoraggio il target di questo indicatore è modificabile. Clicca per andare alla pagina di modifica di questo target.">Modifica</button>
             </a>
-          --%>
+          </c:if>
           </td>
           <td scope="row">
             <fmt:formatDate value="${ind.dataTarget}" pattern="dd/MM/yyyy" />
