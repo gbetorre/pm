@@ -6,14 +6,14 @@
 <c:catch var="exception">
 <c:choose>
   <c:when test="${not empty indicatore}" >
-    <c:set var="tP" value="Inserisce ulteriori informazioni per ${indicatore.nome}" scope="page" />
+    <c:set var="tP" value="Modifica target per: ${indicatore.nome}" scope="page" />
     <c:set var="open" value="${false}" scope="page" />
     <c:if test="${indicatore.idStato eq 1}">
       <c:set var="open" value="${true}" scope="page" />
     </c:if>
      <div id="ind" class="panel">
-      <div class="panel-heading bgMis">
-        <div class="noHeader text-white"><em><c:out value="${pageScope.tP}" escapeXml="false" /></em></div>
+      <div class="panel-heading bg-warning">
+        <div class="noHeader text-black"><em><c:out value="${pageScope.tP}" escapeXml="false" /></em></div>
       </div>
       <div class="panel-body">
       <c:choose>
@@ -62,13 +62,14 @@
       <form id="ext_form" action="" method="post">
         <input type="hidden" id="ind-id" name="ind-id" value="${indicatore.id}" />
         <input type="hidden" id="prj-id" name="prj-id" value="${p.id}" />
-        <div class="row bg-note" style="padding-left:1%;padding-top:1%;padding-bottom:1%;margin:0.1%">
-        <h4>Dati dell'indicatore misurato:</h4>
+        <div class="row lightTable" style="padding-left:1%;padding-top:1%;padding-bottom:1%;margin:0.1%">
+        <h4 class="bordo">Dati dell'indicatore:</h4>
         <small>
+          <br />
           <hr class="riga" />
           <div class="row">
             <div class="col-sm-5 initialism"><cite>Nome Indicatore</cite></div>
-            <div class="col-sm-5">
+            <div class="col-sm-6">
               <c:out value="${indicatore.nome}" />
             </div>
           </div>
@@ -77,14 +78,14 @@
             <div class="col-sm-5 initialism">
               <cite>Tipo indicatore:</cite>
             </div>
-            <div class="col-sm-5">
+            <div class="col-sm-6">
               <c:out value="${indicatore.tipo.nome}" />
             </div>
           </div>
           <hr class="riga" />
           <div class="row">
             <div class="col-sm-5 initialism"><cite>Descrizione</cite></div>
-            <div class="col-sm-5">
+            <div class="col-sm-6">
               <c:out value="${fn:substring(indicatore.descrizione, 0, 20)}" />...
               <div class="charNum"></div>
             </div>
@@ -92,14 +93,14 @@
           <hr class="riga" />
           <div class="row">
             <div class="col-sm-5 initialism"><cite>Baseline</cite></div>
-            <div class="col-sm-5">
+            <div class="col-sm-6">
               <c:out value="${indicatore.baseline}" /> <em>(<fmt:formatDate value="${indicatore.dataBaseline}" pattern="dd/MM/yyyy" />)</em>
             </div>
           </div>
           <hr class="riga" />
           <div class="row">
             <div class="col-sm-5 initialism"><cite>Target</cite></div>
-            <div class="col-sm-5">
+            <div class="col-sm-6">
               <c:out value="${indicatore.target}" /> <em>(<fmt:formatDate value="${indicatore.dataTarget}" pattern="dd/MM/yyyy" />)</em>
             </div>
           </div>
@@ -108,7 +109,7 @@
             <div class="col-sm-5 initialism">
               <cite>N. Misurazioni trovate:</cite>
             </div>
-            <div class="col-sm-5">
+            <div class="col-sm-6">
               <c:out value="${indicatore.totMisurazioni}" />
             </div>
           </div>
