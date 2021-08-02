@@ -1910,6 +1910,14 @@ public interface Query extends Serializable {
     /**
      * <p>Estrae gli indicatori relativi ad un progetto, identificato 
      * tramite l'id, passato come parametro.</p>
+     * <p>Ricava anche, contestualmente, il numero delle misurazioni 
+     * e le espone come campo.</p>
+     * <p>Infine, recupera gli indicatori in uno stato specifico (p.es. tutti
+     * quelli in stato 'APERTO' o in stato 'CONCLUSO') o in tutti gli stati:
+     * se si vuole che il filtro per stato abbia effetto, passare il nome
+     * dello stato sul V parametro e il suo id sul VI parametro, mentre se
+     * si vuole estrarre tutti gli indicatori indipendentemente dallo stato
+     * passare una stringa qualunque sul V parametro e -1 sul VI parametro.</p>
      * <p>Il nome della query fa riferimento al fatto che l'estrazione &egrave;
      * parametrizzata per:
      * <ul>
@@ -1921,7 +1929,9 @@ public interface Query extends Serializable {
      * indicatori di un dato tipo, il cui identificativo viene passato
      * come parametro, oppure tutti gli indicatori
      * indipendentemente dal loro &quot;tipo&quot;</li>
-     * </ul></p>  
+     * </ul>
+     * <small>(In realt&agrave; &egrave; anche parametrizzata per stato ma il nome
+     * sarebbe diventato troppo verboso).</small></p>
      */
     public static final String  GET_INDICATORS_BY_DATE_AND_TYPE = 
             "SELECT " +
@@ -1934,9 +1944,9 @@ public interface Query extends Serializable {
             "   ,   I.dataTarget            AS  \"dataTarget\"" +
             "   ,   I.id_tipoindicatore     AS  \"idTipo\"" +
             "   ,   I.id_stato              AS  \"idStato\"" +
-            "   ,   I.dataultimamodifica    AS \"dataUltimaModifica\"" +
-            "   ,   I.oraultimamodifica     AS \"oraUltimaModifica\"" +
-            "   ,   I.autoreultimamodifica  AS \"autoreUltimaModifica\"" +
+            "   ,   I.dataultimamodifica    AS 	\"dataUltimaModifica\"" +
+            "   ,   I.oraultimamodifica     AS 	\"oraUltimaModifica\"" +
+            "   ,   I.autoreultimamodifica  AS 	\"autoreUltimaModifica\"" +
             "   , (SELECT count(*) " +
             "      FROM indicatoregestione IG" +
             "      WHERE IG.id_indicatore = I.id) AS  \"totMisurazioni\"" +
@@ -1944,6 +1954,7 @@ public interface Query extends Serializable {
             "   WHERE I.id_progetto = ?" +
             "       AND (I.databaseline >= ? OR I.databaseline IS NULL)" +
             "       AND (I.id_tipoindicatore = ? OR -1 = ?)" +
+            "       AND (I.id_stato IN (SELECT id FROM statoprogetto WHERE nome = ?  OR -1 = ?))" +
             "   ORDER BY I.nome";
     
     /**
