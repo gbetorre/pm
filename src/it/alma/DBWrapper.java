@@ -3114,6 +3114,8 @@ public class DBWrapper implements Query {
      * @param user utente loggato
      * @param date data baseline a partire dalla quale recuperare gli indicatori; se si vogliono recuperare indicatori di qualsivoglia data passare una data antidiluviana
      * @param getSpecificType tipo specifico di indicatore che si vuol recuperare
+     * @param getSpecificState String specificante eventuale stato in cui si vogliono recuperare gli indicatori (p.es. 'APERTO' o 'CONCLUSO'); puo' essere usata dalla query per recuperare il relativo id
+     * @param getAllState valore intero che, se vale -1, baipassa la selezione effettuata in base al nome dello stato passato tramite la String getSpecificState
      * @param getAll se si vogliono recuperare gli indicatori di tutti i tipi bisogna passare -1 sia sul parametro precedente che su questo; altrimenti bisogna passare l'id tipo su entrambi
      * @param getMeasuresToo flag specificante se bisogna recuperare anche le misurazioni di ogni indicatore (true) o non interessa (false)
      * @return <code>Vector&lt;IndicatorBean&gt;</code> - IndicatorBean rappresentante l'indicatore del progetto.
@@ -3124,6 +3126,8 @@ public class DBWrapper implements Query {
                                                PersonBean user,
                                                Date date,
                                                int getSpecificType,
+                                               String getSpecificState,
+                                               int getAllState,
                                                int getAll,
                                                boolean getMeasuresToo) 
                                         throws WebStorageException {
@@ -3148,6 +3152,8 @@ public class DBWrapper implements Query {
             pst.setDate(++nextParam, Utils.convert(date));
             pst.setInt(++nextParam, getSpecificType);
             pst.setInt(++nextParam, getAll);
+            pst.setString(++nextParam, getSpecificState);
+            pst.setInt(++nextParam, getAllState);
             rs = pst.executeQuery();
             while (rs.next()) {
                 indicatore = new IndicatorBean();
@@ -3175,7 +3181,7 @@ public class DBWrapper implements Query {
                     indicatore.setTipo(tipo);
                 }
                 if (getMeasuresToo) {
-                    // Recupera le misurazioni dell'indicatore
+                    // Recupera tutte le misurazioni dell'indicatore, complete dei valori
                     Vector<MeasurementBean> misurazioni = new Vector<MeasurementBean>();
                     pst = null;
                     nextParam = 0;
