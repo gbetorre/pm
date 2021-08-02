@@ -97,6 +97,16 @@ import it.alma.exception.WebStorageException;
 public class IndicatorCommand extends ItemBean implements Command {
     
     /**
+     * La serializzazione necessita di dichiarare una costante di tipo long
+     * identificativa della versione seriale. 
+     * (Se questo dato non fosse inserito, verrebbe calcolato in maniera automatica
+     * dalla JVM, e questo potrebbe portare a errori riguardo alla serializzazione).
+     * &Egrave; diventato necessario gestire la serializzazione nelle Command
+     * perch&eacute; l'oggetto ItemBean, che le Command estendono, &egrave;
+     * stato serializzato.
+	 */
+	private static final long serialVersionUID = 6835998883902360953L;
+	/**
      *  Nome di questa classe 
      *  (utilizzato per contestualizzare i messaggi di errore)
      */
@@ -172,7 +182,8 @@ public class IndicatorCommand extends ItemBean implements Command {
 	 * @param voceMenu la VoceMenuBean pari alla Command presente.
 	 * @throws it.alma.exception.CommandException se l'attributo paginaJsp di questa command non e' stato valorizzato.
      */
-    public void init(ItemBean voceMenu) throws CommandException {
+    @Override
+	public void init(ItemBean voceMenu) throws CommandException {
         this.setId(voceMenu.getId());
         this.setNome(voceMenu.getNome());
         this.setLabelWeb(voceMenu.getLabelWeb());
@@ -203,7 +214,8 @@ public class IndicatorCommand extends ItemBean implements Command {
      * @param req la HttpServletRequest contenente la richiesta del client
      * @throws CommandException se si verifica un problema, tipicamente nell'accesso a campi non accessibili o in qualche altro tipo di puntamento 
      */
-    public void execute(HttpServletRequest req) 
+    @Override
+	public void execute(HttpServletRequest req) 
                  throws CommandException {
         /* ******************************************************************** *
          *              Dichiara e inizializza variabili locali                 *
@@ -241,14 +253,16 @@ public class IndicatorCommand extends ItemBean implements Command {
          * ******************************************************************** */
         // Recupera o inizializza 'id progetto'
         int idPrj = parser.getIntParameter("id", Utils.DEFAULT_ID);
-        // Recupera o inizializza 'id wbs (WorkPackate) delle attività' (da mostrare)
+        // Recupera o inizializza 'id wbs' (da mostrare)
         int idWbs = parser.getIntParameter("idw", Utils.DEFAULT_ID);
-        // Recupera o inizializza 'id attività' (da modificare)
+        // Recupera o inizializza 'id indicatore' (da modificare)
         int idInd = parser.getIntParameter("idi", Utils.DEFAULT_ID);
         // Recupera o inizializza 'id misurazione' (da visualizzare)
         int idMis = parser.getIntParameter("idm", Utils.DEFAULT_ID);
         // Recupera o inizializza 'tipo pagina'   
         String part = parser.getStringParameter("p", Utils.DASH);
+        // Recupera o inizializza flag di visualizzazione indicatori per stato 
+        String filter = parser.getStringParameter("v", "a");
         // Flag di scrittura
         boolean write = (boolean) req.getAttribute("w");
         /* ******************************************************************** *
@@ -310,7 +324,8 @@ public class IndicatorCommand extends ItemBean implements Command {
                         // Recupera la sessione creata e valorizzata per riferimento nella req dal metodo authenticate
                         HttpSession ses = req.getSession(Query.IF_EXISTS_DONOT_CREATE_NEW);
                         // Recupera i progetti su cui l'utente ha diritti di scrittura
-                        Vector<ProjectBean> writablePrj = (Vector<ProjectBean>) ses.getAttribute("writableProjects"); // I'm confident about the types...
+                        @SuppressWarnings("unchecked")	// I'm confident about the types...
+						Vector<ProjectBean> writablePrj = (Vector<ProjectBean>) ses.getAttribute("writableProjects"); 
                         // Se non ci sono progetti scrivibili e il flag "write" è true c'è qualcosa che non va...
                         if (writablePrj == null) {
                             ses.invalidate();
@@ -319,7 +334,8 @@ public class IndicatorCommand extends ItemBean implements Command {
                             throw new CommandException("Attenzione: controllare di essere autenticati nell\'applicazione!\n");
                         }
                         // Recupera dalla sessione le attività su cui l'utente ha diritti di scrittura
-                        LinkedHashMap<Integer, Vector<IndicatorBean>> userWritableIndicatorsByProjectId = (LinkedHashMap<Integer, Vector<IndicatorBean>>) ses.getAttribute("writableIndicators");
+                        @SuppressWarnings("unchecked")
+						LinkedHashMap<Integer, Vector<IndicatorBean>> userWritableIndicatorsByProjectId = (LinkedHashMap<Integer, Vector<IndicatorBean>>) ses.getAttribute("writableIndicators");
                         // Trasforma un Vector di progetti scrivibili dall'utente loggato in un dictionary degli stessi
                         HashMap<Integer, ProjectBean> writableProjects = ProjectCommand.decant(writablePrj);
                         // Redirect dinamico
@@ -339,9 +355,6 @@ public class IndicatorCommand extends ItemBean implements Command {
                              * ************************************************ */
                             loadParams(part, parser, params);
                             db.insertIndicator(idPrj, user, writablePrj, params.get(Query.ADD_TO_PROJECT));
-                            //if (idWbs > Utils.DEFAULT_ID) {
-                            //    redirectAsStringBuffer.append("&idw=" + idWbs);
-                            //}
                             redirect = String.valueOf(redirectAsStringBuffer);
                         } else if (part.equalsIgnoreCase(Query.MODIFY_PART)) {
                             if (HomePageCommand.isParameter(req, "start") && user.isPmoAteneo()) {
@@ -421,12 +434,12 @@ public class IndicatorCommand extends ItemBean implements Command {
                             /* ************************************************ *
                              *        Recupera gli indicatori di progetto       *
                              * ************************************************ */
-                            vIndicators = db.getIndicators(idPrj, user, Utils.convert(Utils.getUnixEpoch()), Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE, !Query.GET_ALL);
+                            vIndicators =  retrieveIndicators(db, idPrj, user, Utils.convert(Utils.getUnixEpoch()), Query.GET_ALL_BY_CLAUSE, filter, Query.GET_ALL_BY_CLAUSE, !Query.GET_ALL); // db.getIndicators(idPrj, user, Utils.convert(Utils.getUnixEpoch()), Query.GET_ALL_BY_CLAUSE, view, Query.GET_ALL_BY_CLAUSE, !Query.GET_ALL);
                         } else if (part.equalsIgnoreCase(Query.PART_REPORT)) {
                             /* ************************************************ *
                              *   Recupera gli indicatori di wbs a fini report   *
                              * ************************************************ */
-                            vIndicators = retrieveIndicators(db, idPrj, user, Utils.convert(Utils.getUnixEpoch()), Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE, Query.GET_ALL);
+                            vIndicators = retrieveIndicators(db, idPrj, user, Utils.convert(Utils.getUnixEpoch()), Query.GET_ALL_BY_CLAUSE, filter, Query.GET_ALL_BY_CLAUSE, Query.GET_ALL);
                         } else if (part.equals(Query.ADD_TO_PROJECT)) {
                             /* ************************************************ *
                              *        Effettua le selezioni che servono         * 
@@ -473,7 +486,7 @@ public class IndicatorCommand extends ItemBean implements Command {
                     }
                 } else {
                     // Se il parametro 'p' non è presente, deve solo mostrare l'elenco degli indicatori per quel progetto
-                    vIndicators = db.getIndicators(idPrj, user, Utils.convert(Utils.getUnixEpoch()), Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE, !Query.GET_ALL);
+                    vIndicators = retrieveIndicators(db, idPrj, user, Utils.convert(Utils.getUnixEpoch()), Query.GET_ALL_BY_CLAUSE, filter, Query.GET_ALL_BY_CLAUSE, !Query.GET_ALL);
                     fileJspT = nomeFileElenco;
                 }
             } else {
@@ -663,15 +676,23 @@ public class IndicatorCommand extends ItemBean implements Command {
 
     /**
      * <p>Restituisce un Vector di tutti gli indicatori appartenenti al progetto
-     * il cui identificativo viene passato come argomento; ciascuno degli
-     * indicatori contiene al proprio interno la lista di misurazioni 
-     * valorizzate, ciascuna a sua volta contenente i propri attributi.</p>
+     * il cui identificativo viene passato come argomento, eventualmente filtrati
+     * per tipo o per stato; ciascuno degli indicatori contiene al proprio interno 
+     * la lista di misurazioni valorizzate, ciascuna a sua volta contenente i 
+     * propri attributi.</p>
+     * <p>In funzione del parametro della querystring passato come argomento
+     * restituisce:<ul>
+     * <li>tutti gli indicatori in stato 'APERTO' se il parametro vale 'o'</li>
+     * <li>tutti gli indicatori in stato 'CHIUSO' se il parametro vale 'c'</li>
+     * <li>tutti gli indicatori indipendentemente dallo stato se il parametro
+     * vale una qualunque altra String</li></ul>
      * 
      * @param idPrj identificativo del progetto corrente
      * @param db    WebStorage per l'accesso ai dati
      * @param user  utente loggato; viene passato ai metodi del DBWrapper per controllare che abbia i diritti di fare quello che vuol fare
      * @param from  data baseline a partire dalla quale cercare gli indicatori. Se non interessa, passare una data molto antica (tipo UNIX_EPOCH)
      * @param typeId tipo specifico di indicatore che si vuol recuperare; per recuperare tutti i tipi, v. argomento successivo
+     * @param getByState parametro della querystring identificatnte stato specifico in cui devono trovarsi gli indicatori recuperati
      * @param getAll se si vogliono recuperare gli indicatori di tutti i tipi bisogna passare -1 sia sul parametro precedente che su questo; altrimenti bisogna passare l'id tipo su entrambi
      * @param measuresToo flag specificante se bisogna recuperare anche le misurazioni di ogni indicatore (true) o non interessa (false)
      * @return <code>Vector&lt;WbsBean&gt;</code> - lista di work packages recuperati 
@@ -682,13 +703,29 @@ public class IndicatorCommand extends ItemBean implements Command {
                                                            PersonBean user,
                                                            Date from,
                                                            int typeId,
+                                                           String getByState,
                                                            int getAll,
                                                            boolean measuresToo)
                                                     throws CommandException {
-        Vector<IndicatorBean> vIndicators = new Vector<IndicatorBean>();
+        // Prepara la lista degli indicatori da restituire
+    	Vector<IndicatorBean> vIndicators = new Vector<IndicatorBean>();
+    	// Identificativo dello stato, resta -1 se si vogliono tutti gli indicatori
+        int wantedState = Query.GET_ALL_BY_CLAUSE;
+        // Valore dello stato; può essere utilizzato a valle per filtrare gli indicatori
+        StringBuffer wantedStateAsStringBuffer = new StringBuffer("ALL");
+       // In base al parametro ricevuto dalla pagina, determina quale stringa usare
+        if (getByState.equalsIgnoreCase("o")) {
+        	// Deve recuperare solo gli indicatori in stato aperto
+        	wantedState = 0;
+        	wantedStateAsStringBuffer = new StringBuffer(Query.STATI_PROGETTO[wantedState]);
+        } else if (getByState.equalsIgnoreCase("c")) {
+        	// Deve recuperare solo gli indicatori in stato chiuso
+        	wantedState = 3;
+        	wantedStateAsStringBuffer = new StringBuffer(Query.STATI_PROGETTO[wantedState]);
+        }
+        // Prova a recuperare gli indicatori in base allo stato richiesto negli argomenti
         try {
-            // Fa la stessa query usata nella execute()
-            vIndicators = db.getIndicators(idPrj, user, from, typeId, getAll, measuresToo);
+            vIndicators = db.getIndicators(idPrj, user, from, typeId, String.valueOf(wantedStateAsStringBuffer), wantedState, getAll, measuresToo);
         } catch (WebStorageException wse) {
             String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di work packages.\n";
             LOG.severe(msg);
