@@ -117,7 +117,7 @@
                 <a href="<c:out value= "${wbsURI}" />" class="btn ${btnColor} btn-spacer"><i class="fas fa-sitemap"></i> WBS</a>
                 <a href="<c:out value= "${actURI}" />" class="btn ${btnColor} btn-spacer"><i class="fas fa-bars"></i> Attivit&agrave;</a>              
               <c:if test="${prj.tipo eq 'P'}">
-                <a href="<c:out value= "${ind}${prj.id}" />" class="btn ${btnColor} btn-spacer"><i class="fas fa-ruler"></i> Indicatori</a>
+                <a href="<c:out value= "${ind}${prj.id}&v=o" />" class="btn ${btnColor} btn-spacer"><i class="fas fa-ruler"></i> Indicatori</a>
                 <a href="<c:out value= "${monInd}${prj.id}" />" class="btn ${btnColor} btn-spacer"><i class="fas fa-weight"></i> Misurazioni</a>&nbsp;
                 <c:set var="totPPPrj" value="${totPPPrj + 1}" scope="page" />
               </c:if>

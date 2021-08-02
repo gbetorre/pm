@@ -13,7 +13,7 @@
       </a>
     </span>
     <ul class="nav nav-tabs responsive" role="tablist" id="tabs-0">
-      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${ind}${p.id}">Indicatori</a></li>
+      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${ind}${p.id}&v=o">Indicatori</a></li>
       <li class="nav-item"><a class="nav-link active tabactive" data-toggle="tab" href="#">Misurazioni</a></li>
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${repInd}${p.id}">Report</a></li>
     </ul>

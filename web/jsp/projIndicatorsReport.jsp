@@ -5,7 +5,7 @@
     <h4>Report degli Indicatori dell'obiettivo strategico<br /> 
     <strong><c:out value="${prj.titolo}" /></strong></h4>
     <span class="float-right">
-      <a class="btn btnNav" href="${ind}${prj.id}">
+      <a class="btn btnNav" href="${ind}${prj.id}&v=o">
         <i class="fas fa-undo"></i> Indicatori
       </a>
       <a class="btn btnNav" href="${project}">
@@ -14,7 +14,7 @@
       </a>
     </span>
     <ul class="nav nav-tabs responsive" role="tablist" id="tabs-0">
-      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${ind}${prj.id}">Indicatori</a></li>
+      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${ind}${prj.id}&v=o">Indicatori</a></li>
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${monInd}${p.id}">Misurazioni</a></li>
       <li class="nav-item"><a class="nav-link active tabactive" data-toggle="tab" href="#">Report</a></li>
     </ul>
@@ -103,7 +103,7 @@
         <div class="row">
           <div class="col-4">
             <span class="float-left">
-              <a class="btn btnNav" href="${ind}${prj.id}">
+              <a class="btn btnNav" href="${ind}${prj.id}&v=o">
                 <i class="fas fa-undo"></i> Indicatori
               </a>
               <a class="btn btnNav" href="${project}">
