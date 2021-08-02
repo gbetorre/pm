@@ -2,16 +2,36 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ include file="pcURL.jspf" %>
 <c:set var="openSeason" value="true" scope="page" />
+<c:set var="labelResult" value="" scope="page" />
     <h4>
       Indicatori dell'obiettivo strategico <br />
       <strong><c:out value="${p.titolo}" escapeXml="false" /></strong>
     </h4>
     <hr class="separatore" />
     <span class="float-right form-row">
-      <select id="myIndicatorState" onchange="viewSome()">
-        <option value="Aperti" ${active20}>Aperti</option>
-        <option value="Chiusi" ${active21}>Chiusi</option>
-        <option value="Tutti" selected>Tutti</option>
+      <c:set var="activeOpe" value="" scope="page" />
+      <c:set var="activeClo" value="" scope="page" />
+      <c:set var="activeAll" value="" scope="page" />
+      <c:choose>
+        <c:when test="${param['v'] eq 'o'}">
+          <c:set var="activeOpe" value="selected" scope="page" />
+          <c:set var="labelResult" value="aperti" scope="page" />
+        </c:when>
+        <c:when test="${param['v'] eq 'c'}">
+          <c:set var="activeClo" value="selected" scope="page" />
+          <c:set var="labelResult" value="chiusi" scope="page" />
+        </c:when>
+        <c:when test="${param['v'] eq 'a'}">
+          <c:set var="activeAll" value="selected" scope="page" />
+        </c:when>
+        <c:otherwise>
+          <c:set var="activeAll" value="selected" scope="page" />
+        </c:otherwise>
+      </c:choose>
+      <select id="indicatorSelection" onchange="viewSome()">
+        <option value="o" ${activeOpe}>Aperti</option>
+        <option value="c" ${activeClo}>Chiusi</option>
+        <option value="a" ${activeAll}>Tutti</option>
       </select>
       &nbsp;
       <a class="btn btnNav" href="${project}">
@@ -47,16 +67,16 @@
       </thead>
       <tbody>
       <c:set var="status" value="" scope="page" />
-      <c:forEach var="ind" items="${requestScope.indicatori}" varStatus="loop">
+      <c:forEach var="in" items="${requestScope.indicatori}" varStatus="loop">
         <c:set var="status" value="${loop.index}" scope="page" />
-        <fmt:formatDate var="lastModified" value="${ind.dataUltimaModifica}" pattern="dd/MM/yyyy" />
-        <input type="hidden" id="ind-id${status}" name="ind-id${status}" value="<c:out value="${ind.id}"/>">
+        <fmt:formatDate var="lastModified" value="${in.dataUltimaModifica}" pattern="dd/MM/yyyy" />
+        <input type="hidden" id="ind-id${status}" name="ind-id${status}" value="<c:out value="${in.id}"/>">
         <tr>
           <td scope="row">
         <c:choose>
-          <c:when test="${not empty ind.wbs}">
-            <a href="${modWbs}${p.id}&idw=${ind.wbs.id}">
-              <c:out value="${ind.wbs.nome}"/>
+          <c:when test="${not empty in.wbs}">
+            <a href="${modWbs}${p.id}&idw=${in.wbs.id}">
+              <c:out value="${in.wbs.nome}"/>
             </a>
           </c:when>
           <c:otherwise>
@@ -64,52 +84,52 @@
           </c:otherwise>
         </c:choose>
           </td>
-          <td scope="row" id="nameColumn" class="success bgAct${ind.tipo.id} bgFade">
-            <a href="${modInd}${p.id}&idi=${ind.id}" title="Modificato:${lastModified} ${fn:substring(ind.oraUltimaModifica,0,5)}">
-              <c:out value="${ind.nome}"/>
+          <td scope="row" id="nameColumn" class="success bgAct${in.tipo.id} bgFade">
+            <a href="${modInd}${p.id}&idi=${in.id}" title="Modificato:${lastModified} ${fn:substring(in.oraUltimaModifica,0,5)}">
+              <c:out value="${in.nome}"/>
             </a>
-            <c:if test="${ind.idStato eq 4}">
+            <c:if test="${in.idStato eq 4}">
             <span class="badge badge-secondary">Chiuso</span>
             </c:if>
           </td>
           <td scope="row">
-            <c:out value="${ind.baseline}" />
+            <c:out value="${in.baseline}" />
           </td>
           <td scope="row">
-            <fmt:formatDate value="${ind.dataBaseline}" pattern="dd/MM/yyyy" />
+            <fmt:formatDate value="${in.dataBaseline}" pattern="dd/MM/yyyy" />
           </td>
           <td scope="row">
           <c:choose>
-            <c:when test="${empty ind.targetRivisto}">
-              <c:out value="${ind.target}" />
+            <c:when test="${empty in.targetRivisto}">
+              <c:out value="${in.target}" />
             </c:when>
             <c:otherwise>
-            <fmt:formatDate var="lastReview" value="${ind.dataRevisione}" pattern="dd/MM/yyyy" />
-            <span class="badge badge-warning" title="Attenzione: Il target &egrave; stato modificato il ${lastReview} da ${ind.autoreUltimaRevisione} con la seguente motivazione: '${ind.noteRevisione}'">
-              <c:out value="${ind.targetRivisto}" />
+            <fmt:formatDate var="lastReview" value="${in.dataRevisione}" pattern="dd/MM/yyyy" />
+            <span class="badge badge-warning" title="Attenzione: Il target &egrave; stato modificato il ${lastReview} da ${in.autoreUltimaRevisione} con la seguente motivazione: '${in.noteRevisione}'">
+              <c:out value="${in.targetRivisto}" />
             </span>
             </c:otherwise>
           </c:choose>
           <c:if test="${openSeason}"> 
-            <a href="<c:out value="${extInd}${p.id}&idi=${ind.id}" escapeXml="false" />" id='btn-tar'>
+            <a href="<c:out value="${extInd}${p.id}&idi=${in.id}" escapeXml="false" />" id='btn-tar'>
               <button type="button" class="btn btn-sm badge-warning" title="In questa fase del monitoraggio il target di questo indicatore è modificabile. Clicca per andare alla pagina di modifica di questo target.">Modifica</button>
             </a>
           </c:if>
           </td>
           <td scope="row">
-            <fmt:formatDate value="${ind.dataTarget}" pattern="dd/MM/yyyy" />
+            <fmt:formatDate value="${in.dataTarget}" pattern="dd/MM/yyyy" />
           </td>
           <td scope="row">
-            <c:out value="${ind.tipo.nome}"/>
+            <c:out value="${in.tipo.nome}"/>
           </td>
         <c:choose>
-          <c:when test="${ind.totMisurazioni gt 0}">
+          <c:when test="${in.totMisurazioni gt 0}">
             <td scope="row" class="bgcolorgreen">
               <div class="form-check text-center">
                 <span>
                   <a href="${monInd}${p.id}" title="Clicca per visualizzare le misurazioni">SI</a>
                   <span class="badge badge-dark">
-                    <c:out value="${ind.totMisurazioni}" />
+                    <c:out value="${in.totMisurazioni}" />
                   </span>
                 </span>
               </div>
@@ -127,13 +147,13 @@
       </c:forEach>
       </tbody>
     </table>
-    <div class="avvisiTot"><c:out value="${fn:length(requestScope.indicatori)} risultati" /></div>
+    <div class="avvisiTot"><c:out value="${fn:length(requestScope.indicatori)} indicatori " /><c:out value="${labelResult}" /></div>
     </c:when>
     <c:otherwise>
     <div class="alert alert-danger">
       <p>
-        Non &egrave; stato trovato alcun indicatore gi&agrave; associato all'obiettivo strategico.<br />
-        Per problemi o necessit&agrave; di aggiornamento dati, si prega di rivolgersi al <a href="mailto:reporting@ateneo.univr.it">PMO di Ateneo</a>.
+        Non sono stati trovati indicatori <strong><c:out value="${labelResult}" /></strong> associati all'obiettivo strategico.<br />
+        Se si ritiene che ci&ograve; sia un errore, &egrave; possibile rivolgersi al <a href="mailto:reporting@ateneo.univr.it">PMO di Ateneo</a>.
       </p>
     </div>
     </c:otherwise>
@@ -154,6 +174,13 @@
       </div>
     </div>
     <%@ include file="subPopup.jspf" %>
+    <script>
+    function viewSome() {
+      var v = document.getElementById("indicatorSelection");
+      //y.value = x.value.toUpperCase();
+      window.self.location.href = '${ind}${p.id}&v=' + v.value;
+    }
+    </script>
     <script type="text/javascript">
       $(document).ready(function() {
         $('#listInd').DataTable({
