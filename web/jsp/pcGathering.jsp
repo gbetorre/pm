@@ -53,7 +53,7 @@
         <div class="row">
           <div class="col-sm-5">
             <a id="btnBack" class="btn btnNav" onclick="goBack()"><i class="fas fa-chevron-left"></i> Indietro</a>
-            <a href="<c:out value="${ind}${requestScope.progetto.id}" escapeXml="false" />" id='btn-close' class="btn btnNav"><i class="fas fa-ruler"></i> Indicatori</a>
+            <a href="<c:out value="${ind}${requestScope.progetto.id}&v=o" escapeXml="false" />" id='btn-close' class="btn btnNav"><i class="fas fa-ruler"></i> Indicatori</a>
           </div>
         </div>
         </c:when>
@@ -213,7 +213,7 @@
           <div class="row">
             <div class="col-sm-5">
               <a id="btnBack" class="btn btnNav" onclick="goBack()"><i class="fas fa-chevron-left"></i> Indietro</a>
-              <a href="<c:out value="${ind}${requestScope.progetto.id}" escapeXml="false" />" id='btn-close' class="btn btnNav"><i class="fas fa-ruler"></i> Indicatori</a>
+              <a href="<c:out value="${ind}${requestScope.progetto.id}&v=o" escapeXml="false" />" id='btn-close' class="btn btnNav"><i class="fas fa-ruler"></i> Indicatori</a>
             </div>
             <div class="col-sm-5">
             <c:choose>
