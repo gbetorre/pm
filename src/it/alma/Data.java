@@ -192,7 +192,8 @@ public class Data extends HttpServlet {
      * @param config ServletConfig utilizzato per inizializzazione da superclasse
      * @throws ServletException java.lang.Throwable.Exception.ServletException che viene sollevata se manca un parametro di configurazione considerato obbligatorio o per via di qualche altro problema di puntamento
      */
-    public void init(ServletConfig config) 
+    @Override
+	public void init(ServletConfig config) 
               throws ServletException {
         /*
          *  Inizializzazione da superclasse
@@ -287,7 +288,8 @@ public class Data extends HttpServlet {
     /** (non-Javadoc)
      * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
-    protected void doGet(HttpServletRequest req, HttpServletResponse res)
+    @Override
+	protected void doGet(HttpServletRequest req, HttpServletResponse res)
                   throws ServletException, IOException {
         // Utente loggato
         PersonBean usr = null;
@@ -520,7 +522,7 @@ public class Data extends HttpServlet {
             try {
                 ProjectBean p = db.getProject(idPrj, usr.getId());
                 Vector<MeasurementBean> measuresByIndicator = new Vector<MeasurementBean>(); 
-                Vector<IndicatorBean> listIndicator = IndicatorCommand.retrieveIndicators(db, idPrj, usr, Utils.convert(Utils.getUnixEpoch()), Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE, Query.GET_ALL);
+                Vector<IndicatorBean> listIndicator = IndicatorCommand.retrieveIndicators(db, idPrj, usr, Utils.convert(Utils.getUnixEpoch()), Query.GET_ALL_BY_CLAUSE, Query.PERFORMANCE, Query.GET_ALL_BY_CLAUSE, Query.GET_ALL);
                 // Scrittura file CSV
                 out.println("N." + SEPARATOR +
                             "Indicatore" + SEPARATOR +
