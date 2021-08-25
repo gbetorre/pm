@@ -1400,7 +1400,7 @@ public class CourseBean implements Serializable, Comparable<CourseBean> {
      * @param dipartimentoScuola the dipartimentoScuola to set
      */
     public void setDipartimentoScuola(String dipartimentoScuola) {
-        dipartimentoScuola = dipartimentoScuola;
+        this.dipartimentoScuola = dipartimentoScuola;
     }
 
 
@@ -1416,7 +1416,7 @@ public class CourseBean implements Serializable, Comparable<CourseBean> {
      * @param sedePrimariaCDS the sedePrimariaCDS to set
      */
     public void setSedePrimariaCDS(String sedePrimariaCDS) {
-        sedePrimariaCDS = sedePrimariaCDS;
+        this.sedePrimariaCDS = sedePrimariaCDS;
     }
 
 
