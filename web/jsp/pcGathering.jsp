@@ -263,7 +263,7 @@
               },
             }, 
             messages: {
-              'mon-nome': "Inserire un valore corretto per la misurazione",
+              'mon-nome': "Inserire un valore corretto per la misurazione (i valori decimali vanno separati con il punto. Esempio: 4.82)",
               'mon-descr': "Inserire almeno " + offsetcharacter + " caratteri."
             },
             submitHandler: function (form) {
