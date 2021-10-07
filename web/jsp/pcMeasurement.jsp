@@ -58,7 +58,7 @@
       <form id="mon_form" action="" method="post">
         <input type="hidden" id="ind-id" name="ind-id" value="${indicatore.id}" />
         <input type="hidden" id="prj-id" name="prj-id" value="${p.id}" />
-        <h4 class="heading">Dati dell'indicatore:</h4>
+        <h4 class="heading">Dati dell'indicatore a cui la misurazione &egrave; relativa:</h4>
         <div class="bgcolor1 text-dark" style="padding-left:1%;padding-top:1%;padding-bottom:1%;margin:0.1%">
             <hr class="separatore" />
             <div class="row">
@@ -111,73 +111,18 @@
                 <cite>N. Misurazioni trovate:</cite>
               </div>
               <div class="col-sm-5">
-                <a href="${monInd}${p.id}" class="btn btn-spacer text-secondary"><c:out value="${indicatore.totMisurazioni}" /></a>
+                <a href="${monInd}${p.id}&v=a" class="btn btn-spacer text-secondary"><c:out value="${indicatore.totMisurazioni}" /></a>
               </div>
             </div>
           </div>
           <hr class="riga" />
-          <h4 class="heading">Dati della misurazione:</h4>
+          <h4 class="heading">Dati della misurazione inserita:</h4>
           <hr class="separatore" />
           <div class="row">
-          <c:choose>
-            <c:when test="${indicatore.tipo.id eq 1}">
-            <script>
-              function saveVal(val) {
-                var hiddenValue = document.getElementById("mon-nome");
-                hiddenValue.value = val;
-              }
-            </script>
-            <c:set var="onSelected" value="" scope="page" />
-            <c:set var="offSelected" value="" scope="page" />
-            <c:set var="valore" value="${fn:toLowerCase(misurazione.descrizione)}" scope="page" />
-            <c:choose>
-            <c:when test="${valore eq 'on'}">
-              <c:set var="onSelected" value="selected" scope="page" />
-            </c:when>
-            <c:when test="${valore eq 'off'}">
-              <c:set var="offSelected" value="selected" scope="page" />
-            </c:when>
-            </c:choose>
             <div class="col-sm-5">Valore Misurazione</div>
             <div class="col-sm-5">
-              <select class="form-custom" id="mon-value" name="mon-value" onchange="saveVal(this.value)">
-                <option value="OFF" ${offSelected}>Off</option>
-                <option value="ON" ${onSelected}>On</option>
-              </select>
-              <input type="hidden" class="form-control" id="mon-nome" name="mon-nome" value="OFF">
+              <input type="text" class="form-custom" id="mon-nome" name="mon-nome" value="${misurazione.descrizione}" readonly disabled>
             </div>
-            </c:when>
-            <c:when test="${indicatore.tipo.id eq 2}">
-            <div class="col-sm-5">Valore Misurazione</div>
-            <div class="col-sm-5">
-              <input type="text" class="form-custom" id="mon-nome" name="mon-nome" value="${misurazione.descrizione}">
-            </div>
-            </c:when>
-            <c:when test="${indicatore.tipo.id eq 3}">
-            <script>
-              function saveVal(val) {
-                var hiddenValue = document.getElementById("mon-nome");
-                hiddenValue.value = val + '%';
-              }
-              function reset(val) {
-                var showValue = document.getElementById("mon-value");
-                showValue.value = val;
-              }
-            </script>
-            <div class="col-sm-5">Valore Misurazione</div>
-            <div class="col-sm-5">
-              <input type="text" class="form-custom" id="mon-value" name="mon-value" value="" placeholder="Inserisci una percentuale" onblur="saveVal(this.value)">%
-              <i class="fa fa-arrow-right"></i>
-              <input type="text" class="form-control-custom" id="mon-nome" name="mon-nome" value="" readonly onclick="reset('')">
-            </div>
-            </c:when>
-            <c:otherwise>
-            <div class="col-sm-5">Valore Misurazione</div>
-            <div class="col-sm-5">
-              <input type="text" class="form-control" id="mon-nome" name="mon-nome" value="" placeholder="Inserisci valore misurazione (obbligatorio)">
-            </div>
-            </c:otherwise>
-          </c:choose>
           </div>
           <br />
           <div class="row">
