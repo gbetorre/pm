@@ -89,7 +89,7 @@ import it.alma.exception.WebStorageException;
  * <tr><td>Attivit&agrave;</td><td>Attivit&agrave;</td>
  * </table>
  * 
- * <p>Created on luned&iacute; 25 maggio 2020 17:50
+ * <p>Created on luned&iacute; 25 maggio 2020 17:50<br />
  * <small>life is still beautiful</small></p>
  * 
  * @author <a href="mailto:giovanroberto.torre@univr.it">Giovanroberto Torre</a>
@@ -479,7 +479,7 @@ public class IndicatorCommand extends ItemBean implements Command {
                                 fileJspT = nomeFileMeasure;
                             } else {
                                 // Se siamo qui, e non c'è né indicatore, né misurazione, vuol vedere la lista delle misurazioni
-                                vMeasures = db.getMeasures(idPrj, user, Utils.convert(Utils.getUnixEpoch()), Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE, idPrj);
+                                vMeasures = retrieveMeasurements(db, idPrj, user, Utils.convert(Utils.getUnixEpoch()), filter);
                                 fileJspT = nomeFileMeasures;
                             }
                         }
@@ -692,7 +692,7 @@ public class IndicatorCommand extends ItemBean implements Command {
      * @param user  utente loggato; viene passato ai metodi del DBWrapper per controllare che abbia i diritti di fare quello che vuol fare
      * @param from  data baseline a partire dalla quale cercare gli indicatori. Se non interessa, passare una data molto antica (tipo UNIX_EPOCH)
      * @param typeId tipo specifico di indicatore che si vuol recuperare; per recuperare tutti i tipi, v. argomento successivo
-     * @param getByState parametro della querystring identificatnte stato specifico in cui devono trovarsi gli indicatori recuperati
+     * @param getByState parametro della querystring identificante stato specifico in cui devono trovarsi gli indicatori recuperati
      * @param getAll se si vogliono recuperare gli indicatori di tutti i tipi bisogna passare -1 sia sul parametro precedente che su questo; altrimenti bisogna passare l'id tipo su entrambi
      * @param measuresToo flag specificante se bisogna recuperare anche le misurazioni di ogni indicatore (true) o non interessa (false)
      * @return <code>Vector&lt;WbsBean&gt;</code> - lista di work packages recuperati 
@@ -727,7 +727,7 @@ public class IndicatorCommand extends ItemBean implements Command {
         try {
             vIndicators = db.getIndicators(idPrj, user, from, typeId, String.valueOf(wantedStateAsStringBuffer), wantedState, getAll, measuresToo);
         } catch (WebStorageException wse) {
-            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di work packages.\n";
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di indicatori.\n";
             LOG.severe(msg);
             throw new CommandException(msg + wse.getMessage(), wse);
         } catch (NullPointerException npe) {
@@ -740,6 +740,67 @@ public class IndicatorCommand extends ItemBean implements Command {
             throw new CommandException(msg + e.getMessage(), e);
         }
         return vIndicators;
+    }
+    
+    
+    /**
+     * <p>Restituisce un Vector di tutte le misurazioni afferenti agli indicatori 
+     * appartenenti al progetto il cui identificativo viene passato come argomento, 
+     * eventualmente filtrate per stato indicatore.</p>
+     * <p>In funzione del parametro della querystring passato come argomento
+     * restituisce:<ul>
+     * <li>tutte le misurazioni degli indicatori in stato 'APERTO' se il parametro vale 'o'</li>
+     * <li>tutte le misurazioni degli indicatori in stato 'CHIUSO' se il parametro vale 'c'</li>
+     * <li>tutte le misurazioni indipendentemente dallo stato del loro indicatore 
+     * se il parametro vale una qualunque altra String</li></ul>
+     * 
+     * @param db    WebStorage per l'accesso ai dati
+     * @param idPrj identificativo del progetto corrente
+     * @param user  utente loggato; viene passato ai metodi del DBWrapper per controllare che abbia i diritti di fare quello che vuol fare
+     * @param from  data baseline a partire dalla quale cercare gli indicatori. Se non interessa, passare una data molto antica (tipo UNIX_EPOCH)
+     * @param getByState parametro della querystring identificante stato specifico in cui devono trovarsi gli indicatori recuperati
+     * @return <code>Vector&lt;WbsBean&gt;</code> - lista di work packages recuperati 
+     * @throws CommandException se si verifica un problema nell'estrazione dei dati, o in qualche tipo di puntamento
+     */
+    public static Vector<MeasurementBean> retrieveMeasurements(DBWrapper db,
+                                                               int idPrj,
+                                                               PersonBean user,
+                                                               Date from,
+                                                               String getByState)
+                                                        throws CommandException {
+        // Prepara la lista delle misurazioni da restituire
+        Vector<MeasurementBean> vMeasurements = new Vector<MeasurementBean>();
+        // Identificativo dello stato, resta -1 se si vogliono misurazioni di tutti gli indicatori indipendentemente dal loro stato
+        int wantedState = Query.GET_ALL_BY_CLAUSE;
+        // Valore dello stato; può essere utilizzato a valle per filtrare gli indicatori
+        StringBuffer wantedStateAsStringBuffer = new StringBuffer("ALL");
+       // In base al parametro ricevuto dalla pagina, determina quale stringa usare
+        if (getByState.equalsIgnoreCase("o")) {
+            // Deve recuperare solo gli indicatori in stato aperto
+            wantedState = 0;
+            wantedStateAsStringBuffer = new StringBuffer(Query.STATI_PROGETTO[wantedState]);
+        } else if (getByState.equalsIgnoreCase("c")) {
+            // Deve recuperare solo gli indicatori in stato chiuso
+            wantedState = 3;
+            wantedStateAsStringBuffer = new StringBuffer(Query.STATI_PROGETTO[wantedState]);
+        }
+        // Prova a recuperare gli indicatori in base allo stato richiesto negli argomenti
+        try {
+            vMeasurements = db.getMeasures(idPrj, user, Utils.convert(Utils.getUnixEpoch()), Query.GET_ALL_BY_CLAUSE, Query.GET_ALL_BY_CLAUSE, String.valueOf(wantedStateAsStringBuffer), wantedState, idPrj);
+        } catch (WebStorageException wse) {
+            String msg = FOR_NAME + "Si e\' verificato un problema nel recupero di misurazioni in base allo stato del loro indicatore.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + wse.getMessage(), wse);
+        } catch (NullPointerException npe) {
+            String msg = FOR_NAME + "Si e\' verificato un problema di puntamento a null.\n Attenzione: controllare di essere autenticati nell\'applicazione!\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + npe.getMessage(), npe);
+        } catch (Exception e) {
+            String msg = FOR_NAME + "Si e\' verificato un problema.\n";
+            LOG.severe(msg);
+            throw new CommandException(msg + e.getMessage(), e);
+        }
+        return vMeasurements;
     }
 
 }
