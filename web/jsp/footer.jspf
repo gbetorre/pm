@@ -10,6 +10,7 @@
       <div id="footer">
         &nbsp;
         <a class="linkFooter" href="https://www.univr.it/it/privacy" target="_blank">Privacy / Policy</a>
+        |&nbsp; <a class="linkFooter" href="${initParam.urlDirectoryDocumenti}/download/Manuale.pdf">Guida per l'utente</a>
         <%-- |&nbsp; <a class="linkFooter" href="${credits}">Credits</a> --%>
         <br /><br />
       </div>
