@@ -28,6 +28,7 @@
           <c:set var="activeAll" value="selected" scope="page" />
         </c:otherwise>
       </c:choose>
+      <label for="indicatorSelection" class="col-form-label linkStatus">Seleziona indicatori:</label>
       <select id="indicatorSelection" onchange="viewSome()">
         <option value="o" ${activeOpe}>Aperti</option>
         <option value="c" ${activeClo}>Chiusi</option>
@@ -41,7 +42,7 @@
     </span>
     <ul class="nav nav-tabs responsive" role="tablist" id="tabs-0">
       <li class="nav-item"><a class="nav-link active tabactive" data-toggle="tab" href="#">Indicatori</a></li>
-      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${monInd}${p.id}">Misurazioni</a></li>
+      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${monInd}${p.id}&v=o">Misurazioni</a></li>
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${repInd}${p.id}">Report</a></li>
     </ul>
     <hr class="separatore" />
@@ -104,15 +105,19 @@
               <c:out value="${in.target}" />
             </c:when>
             <c:otherwise>
+            <c:set var="abbrevia" value="..." scope="page" />
             <fmt:formatDate var="lastReview" value="${in.dataRevisione}" pattern="dd/MM/yyyy" />
-            <span class="badge badge-warning" title="Attenzione: Il target &egrave; stato modificato il ${lastReview} da ${in.autoreUltimaRevisione} con la seguente motivazione: '${in.noteRevisione}'">
-              <c:out value="${in.targetRivisto}" />
+            <span class="badge badge-warning" title="Attenzione: Il target originale ('${in.target}') &egrave; stato modificato in: '${in.targetRivisto}' il ${lastReview} da ${in.autoreUltimaRevisione} con la seguente motivazione: '${in.noteRevisione}'">
+            <c:if test="${fn:length(in.targetRivisto) lt 32}">
+              <c:set var="abbrevia" value="" scope="page" />
+            </c:if>
+              <c:out value="${fn:substring(in.targetRivisto, 0, 32)}${abbrevia}" />
             </span>
             </c:otherwise>
           </c:choose>
           <c:if test="${openSeason}"> 
             <a href="<c:out value="${extInd}${p.id}&idi=${in.id}" escapeXml="false" />" id='btn-tar'>
-              <button type="button" class="btn btn-sm badge-warning" title="In questa fase del monitoraggio il target di questo indicatore è modificabile. Clicca per andare alla pagina di modifica di questo target.">Modifica</button>
+              <button type="button" class="btn btn-sm badge-primary" title="In questa fase del monitoraggio il target di questo indicatore è modificabile. Clicca per andare alla pagina di modifica di questo target.">Modifica</button>
             </a>
           </c:if>
           </td>
@@ -127,7 +132,7 @@
             <td scope="row" class="bgcolorgreen">
               <div class="form-check text-center">
                 <span>
-                  <a href="${monInd}${p.id}" title="Clicca per visualizzare le misurazioni">SI</a>
+                  <a href="${monInd}${p.id}&v=a" title="Clicca per visualizzare le misurazioni">SI</a>
                   <span class="badge badge-dark">
                     <c:out value="${in.totMisurazioni}" />
                   </span>
@@ -153,6 +158,9 @@
     <div class="alert alert-danger">
       <p>
         Non sono stati trovati indicatori <strong><c:out value="${labelResult}" /></strong> associati all'obiettivo strategico.<br />
+        <c:if test="${labelResult ne ''}">
+          Forse cercavi <strong><a href="${ind}${p.id}&v=a">tutti gli indicatori</a></strong><br />
+        </c:if>
         Se si ritiene che ci&ograve; sia un errore, &egrave; possibile rivolgersi al <a href="mailto:reporting@ateneo.univr.it">PMO di Ateneo</a>.
       </p>
     </div>
