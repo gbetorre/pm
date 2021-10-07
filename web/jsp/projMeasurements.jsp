@@ -1,12 +1,39 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"  %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ include file="pcURL.jspf" %>
+<c:set var="labelResult" value="" scope="page" />
     <h4>
       Misurazioni dell'obiettivo strategico <br />
       <strong><c:out value="${p.titolo}" /></strong>
     </h4>
     <hr class="separatore" />
-    <span class="float-right">
+    <span class="float-right form-row">
+      <c:set var="activeOpe" value="" scope="page" />
+      <c:set var="activeClo" value="" scope="page" />
+      <c:set var="activeAll" value="" scope="page" />
+      <c:choose>
+        <c:when test="${param['v'] eq 'o'}">
+          <c:set var="activeOpe" value="selected" scope="page" />
+          <c:set var="labelResult" value="aperti" scope="page" />
+        </c:when>
+        <c:when test="${param['v'] eq 'c'}">
+          <c:set var="activeClo" value="selected" scope="page" />
+          <c:set var="labelResult" value="chiusi" scope="page" />
+        </c:when>
+        <c:when test="${param['v'] eq 'a'}">
+          <c:set var="activeAll" value="selected" scope="page" />
+        </c:when>
+        <c:otherwise>
+          <c:set var="activeAll" value="selected" scope="page" />
+        </c:otherwise>
+      </c:choose>
+      <label for="measurementSelection" class="col-form-label linkStatus">Seleziona misurazioni di indicatori:</label>
+      <select id="measurementSelection" onchange="viewSome()">
+        <option value="o" ${activeOpe}>Aperti</option>
+        <option value="c" ${activeClo}>Chiusi</option>
+        <option value="a" ${activeAll}>Tutti</option>
+      </select>
+      &nbsp;    
       <a class="btn btnNav" href="${project}">
         <i class="fas fa-home"></i>
         Progetti
@@ -117,13 +144,16 @@
       </c:forEach>
       </tbody>
     </table>
-    <div class="avvisiTot"><c:out value="${fn:length(requestScope.misurazioni)} misurazioni" /></div>
+    <div class="avvisiTot"><c:out value="${fn:length(requestScope.misurazioni)} misurazioni di indicatori ${labelResult}" /></div>
     </c:when>
     <c:otherwise>
     <div class="alert alert-danger">
       <p>
-        Non &egrave; stata trovata alcuna misurazione gi&agrave; associata ad indicatori dell'obiettivo strategico.<br />
-        Per problemi o necessit&agrave; di aggiornamento dati, si prega di rivolgersi al <a href="mailto:reporting@ateneo.univr.it">PMO di Ateneo</a>.
+        Non sono state trovate misurazioni associate ad indicatori <strong><c:out value="${labelResult}" /></strong> relativi all'obiettivo strategico.<br />
+        <c:if test="${labelResult ne ''}">
+          Forse cercavi le <strong><a href="${monInd}${p.id}&v=a">misurazioni di tutti gli indicatori</a></strong><br />
+        </c:if>
+        Per problemi o necessit&agrave; di aggiornamento dati, &egrave; possibile rivolgersi al <a href="mailto:reporting@ateneo.univr.it">PMO di Ateneo</a>.
       </p>
     </div>
     </c:otherwise>
@@ -144,6 +174,13 @@
       </div>
     </div>
     <%@ include file="subPopup.jspf" %>
+    <script type="text/javascript">
+    function viewSome() {
+      var v = document.getElementById("measurementSelection");
+      //y.value = x.value.toUpperCase();
+      window.self.location.href = '${monInd}${p.id}&v=' + v.value;
+    }
+    </script>
     <script type="text/javascript">
       $(document).ready(function() {
         $('#listMes').DataTable({
