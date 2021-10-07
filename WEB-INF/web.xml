@@ -66,6 +66,7 @@
       <url-pattern>/documenti/upload/monitoraggio_d8/*</url-pattern>
       <url-pattern>/documenti/upload/monitoraggio_all/*</url-pattern>
       <url-pattern>/documenti/upload/indicatoregestione_all/*</url-pattern>
+      <url-pattern>/documenti/download/*</url-pattern>
    </servlet-mapping>
 
    <!-- Note: Custom Error Pages -->
