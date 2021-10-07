@@ -2546,7 +2546,20 @@ public class DBWrapper implements Query {
     
     /**
      * <p>Restituisce il numero di attivit&agrave; presenti all'interno di una data wbs, 
-     * identificata tramite id, passato come parametro.</p>
+     * identificata tramite id, passato come parametro, ma aventi: <ol> 
+     * <li>data di inizio (effettiva o, in mancanza, prevista) compresa tra due date passate come parametro</li>
+     * <li>oppure data di inizio prevista uguale a una certa data e data di fine prevista uguale a un'altra data, passate come parametro</li>
+     * <li>unito a attivit&agrave; con data di fine (effettiva o, in mancanza, prevista) compresa tra altre due date passate come parametro</li>
+     * </ol>
+     * Se le date passate seguono il seguente pattern:<ol>
+     * <li>1° giorno dell'anno X, ultimo giorno dell'anno X</li>
+     * <li>1° giorno dell'anno X-1, ultimo giorno dell'anno X+1</li>
+     * <li>1° giorno dell'anno X, ultimo giorno dell'anno X</li></ol>
+     * allora il set di attivit&agrave; estratte permetter&agrave; di identificare
+     * la WBS come una WBS che, dato come riferimento l'anno solare X, contiene
+     * attivit&agrave; attinenti all'anno X stesso, e quindi potr&agrave; essere usata
+     * per marcare il progetto che la aggrega (cio&egrave; l'obiettivo strategico)
+     * come attivo nell'anno X.</p>
      * 
      * @param idProj              id del progetto a cui appartengono la wbs e le attivit&agrave;
      * @param idWbs               id della wbs a cui appartengono le attivit&agrave;
@@ -3115,7 +3128,7 @@ public class DBWrapper implements Query {
      * @param date data baseline a partire dalla quale recuperare gli indicatori; se si vogliono recuperare indicatori di qualsivoglia data passare una data antidiluviana
      * @param getSpecificType tipo specifico di indicatore che si vuol recuperare
      * @param getSpecificState String specificante eventuale stato in cui si vogliono recuperare gli indicatori (p.es. 'APERTO' o 'CONCLUSO'); puo' essere usata dalla query per recuperare il relativo id
-     * @param getAllState valore intero che, se vale -1, baipassa la selezione effettuata in base al nome dello stato passato tramite la String getSpecificState
+     * @param getAllStates valore intero che, se vale -1, baipassa la selezione effettuata in base al nome dello stato passato tramite la String getSpecificState
      * @param getAll se si vogliono recuperare gli indicatori di tutti i tipi bisogna passare -1 sia sul parametro precedente che su questo; altrimenti bisogna passare l'id tipo su entrambi
      * @param getMeasuresToo flag specificante se bisogna recuperare anche le misurazioni di ogni indicatore (true) o non interessa (false)
      * @return <code>Vector&lt;IndicatorBean&gt;</code> - IndicatorBean rappresentante l'indicatore del progetto.
@@ -3127,7 +3140,7 @@ public class DBWrapper implements Query {
                                                Date date,
                                                int getSpecificType,
                                                String getSpecificState,
-                                               int getAllState,
+                                               int getAllStates,
                                                int getAll,
                                                boolean getMeasuresToo) 
                                         throws WebStorageException {
@@ -3153,7 +3166,7 @@ public class DBWrapper implements Query {
             pst.setInt(++nextParam, getSpecificType);
             pst.setInt(++nextParam, getAll);
             pst.setString(++nextParam, getSpecificState);
-            pst.setInt(++nextParam, getAllState);
+            pst.setInt(++nextParam, getAllStates);
             rs = pst.executeQuery();
             while (rs.next()) {
                 indicatore = new IndicatorBean();
@@ -3488,15 +3501,17 @@ public class DBWrapper implements Query {
      * tutte le relative informazioni (indicatore di appartenenza, wbs, allegati,
      * etc.).</p>
      * <p>Pu&ograve; essere usato per recuperare tutte le misurazioni di
-     * tutti gli indicatori o di uno specifico indicatore, o di tutti i 
-     * progetti o di uno specifico progetto, a seconda dei flag passati
-     * come parametri.</p>
+     * tutti gli indicatori, o di solo quelli in un dato stato, 
+     * o di uno specifico indicatore, o di tutti i progetti 
+     * o di uno specifico progetto, a seconda dei flag passati come parametri.</p>
      * 
      * @param projId  id del progetto di cui estrarre le misurazioni
      * @param user utente loggato
      * @param date data misurazionie a partire dalla quale recuperare le misurazioni; se si vogliono recuperare le misurazioni di qualsivoglia data passare una data antidiluviana
      * @param indicatorId identificativo indicatore di cui si vogliono recuperare le misurazioni
      * @param indicatorFlag se si vogliono recuperare tutte le misurazioni di tutti gli indicatori basta passare -1 su questo parametro; altrimenti bisogna passare l'id indicatore su entrambi
+     * @param getSpecificState String specificante eventuale stato in cui si vogliono recuperare gli indicatori (p.es. 'APERTO' o 'CONCLUSO') delle misurazioni
+     * @param getAllStates valore intero che, se vale -1, baipassa la selezione effettuata in base al nome dello stato passato tramite la String getSpecificState
      * @param projFlag se si vogliono recuperare tutte le misurazioni di tutti i progetti basta passare -1 su questo parametro, indipendentemente dal valore di projId
      * @return <code>Vector&lt;MeasurementBean&gt;</code> - Vector di MeasurementBean rappresentante le misurazioni cercate.
      * @throws WebStorageException se si verifica un problema nell'esecuzione delle query, nell'accesso al db o in qualche tipo di puntamento 
@@ -3507,6 +3522,8 @@ public class DBWrapper implements Query {
                                                Date date,
                                                int indicatorId,
                                                int indicatorFlag,
+                                               String getSpecificState,
+                                               int getAllStates,
                                                int projFlag) 
                                         throws WebStorageException {
         ResultSet rs = null;
@@ -3529,6 +3546,8 @@ public class DBWrapper implements Query {
             pst.clearParameters();
             pst.setInt(++nextParam, indicatorId);
             pst.setInt(++nextParam, indicatorFlag);
+            pst.setString(++nextParam, getSpecificState);
+            pst.setInt(++nextParam, getAllStates);
             pst.setInt(++nextParam, projId);
             pst.setInt(++nextParam, projFlag);
             pst.setDate(++nextParam, Utils.convert(date));
@@ -5385,7 +5404,6 @@ public class DBWrapper implements Query {
                                  (rs.getBoolean("milestone") (activities.get(i).isMilestone())) ) {
                                 
                             }
-                            
                         }*/
                         pst = null;
                         pst = con.prepareStatement(UPDATE_ATTIVITA_FROM_PROGETTO);
