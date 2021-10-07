@@ -15,7 +15,7 @@
     </span>
     <ul class="nav nav-tabs responsive" role="tablist" id="tabs-0">
       <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${ind}${prj.id}&v=o">Indicatori</a></li>
-      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${monInd}${p.id}">Misurazioni</a></li>
+      <li class="nav-item"><a class="nav-link" data-toggle="tab" href="${monInd}${p.id}&v=o">Misurazioni</a></li>
       <li class="nav-item"><a class="nav-link active tabactive" data-toggle="tab" href="#">Report</a></li>
     </ul>
     <hr class="separatore" />
