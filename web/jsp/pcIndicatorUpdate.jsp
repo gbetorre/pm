@@ -119,7 +119,7 @@
           <div class="row">
             <div class="col-sm-5 mandatory">Nuovo Target</div>
             <div class="col-sm-5">
-              <input type="text" class="form-control" id="ext-target" name="ext-target" value="" placeholder="Inserisci nuovo valore target">
+              <input type="text" class="form-control bg-warning" id="ext-target" name="ext-target" value="" placeholder="Inserisci nuovo valore target">
               <div class="charNum"></div> 
             </div>
           </div>
