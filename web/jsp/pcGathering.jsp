@@ -61,9 +61,11 @@
       <form id="mon_form" action="" method="post">
         <input type="hidden" id="ind-id" name="ind-id" value="${indicatore.id}" />
         <input type="hidden" id="prj-id" name="prj-id" value="${p.id}" />
-        <h4 class="heading">Dati dell'indicatore misurato:</h4>
-        <div class="bg-note text-dark" style="padding-left:1%;padding-top:1%;padding-bottom:1%;margin:0.1%">
-          <hr class="separatore" />
+        <div class="row lightTable" style="padding-left:1%;padding-top:1%;padding-bottom:1%;margin:0.1%">
+        <h4 class="bordo">Dati dell'indicatore misurato:</h4>
+        <small>
+          <br />
+          <hr class="riga" />
           <div class="row">
             <div class="col-sm-5 initialism"><cite>Nome WBS</cite></div>
             <div class="col-sm-5">
@@ -73,8 +75,10 @@
           <hr class="riga" />
           <div class="row">
             <div class="col-sm-5 initialism"><cite>Nome Indicatore</cite></div>
-            <div class="col-sm-5">
-              <c:out value="${indicatore.nome}" />
+            <div class="col-sm-6">
+              <a href="${modInd}${p.id}&idi=${indicatore.id}" class="btn-spacer">
+                <c:out value="${indicatore.nome}" />
+              </a>
             </div>
           </div>
           <hr class="riga" />
@@ -82,29 +86,35 @@
             <div class="col-sm-5 initialism">
               <cite>Tipo indicatore:</cite>
             </div>
-            <div class="col-sm-5">
+            <div class="col-sm-6">
               <c:out value="${indicatore.tipo.nome}" />
             </div>
           </div>
           <hr class="riga" />
           <div class="row">
             <div class="col-sm-5 initialism"><cite>Descrizione</cite></div>
-            <div class="col-sm-5">
-              <c:out value="${fn:substring(indicatore.descrizione, 0, 80)}" />...
-              <div class="charNum"></div>
+            <div class="col-sm-6">
+            <c:choose>
+            <c:when test="${fn:length(indicatore.descrizione) gt 120}">
+              <c:out value="${fn:substring(indicatore.descrizione, 0, 120)}" />...
+            </c:when>
+            <c:otherwise>
+              <c:out value="${indicatore.descrizione}" />
+            </c:otherwise>
+            </c:choose>
             </div>
           </div>
           <hr class="riga" />
           <div class="row">
             <div class="col-sm-5 initialism"><cite>Baseline</cite></div>
-            <div class="col-sm-5">
+            <div class="col-sm-6">
               <c:out value="${indicatore.baseline}" /> <em>(<fmt:formatDate value="${indicatore.dataBaseline}" pattern="dd/MM/yyyy" />)</em>
             </div>
           </div>
           <hr class="riga" />
           <div class="row">
             <div class="col-sm-5 initialism"><cite>Target</cite></div>
-            <div class="col-sm-5">
+            <div class="col-sm-6">
               <c:out value="${indicatore.target}" /> <em>(<fmt:formatDate value="${indicatore.dataTarget}" pattern="dd/MM/yyyy" />)</em>
             </div>
           </div>
@@ -114,9 +124,11 @@
               <cite>N. Misurazioni trovate:</cite>
             </div>
             <div class="col-sm-5">
-              <a href="${monInd}${p.id}" class="btn btn-spacer text-secondary"><c:out value="${indicatore.totMisurazioni}" /></a>
+              <a href="${monInd}${p.id}&v=a" class="btn btn-spacer text-secondary"><c:out value="${indicatore.totMisurazioni}" /></a>
             </div>
           </div>
+        
+        </small>
           </div>
           <hr class="riga" />
           <h4 class="heading">Inserisci gli estremi della misurazione:</h4>
@@ -132,7 +144,7 @@
             </script>
             <div class="col-sm-5 mandatory">Valore Misurazione</div>
             <div class="col-sm-5">
-              <select class="form-custom" id="mon-value" name="mon-value" onchange="saveVal(this.value)">
+              <select class="form-custom bg-warning" id="mon-value" name="mon-value" onchange="saveVal(this.value)">
                 <option value="OFF" selected>Off</option>
                 <option value="ON">On</option>
               </select>
@@ -146,7 +158,7 @@
               </a>
             </div>
             <div class="col-sm-5">
-              <input type="text" class="form-custom" id="mon-nome" name="mon-nome" value="" placeholder="Inserisci un numero">
+              <input type="text" class="form-custom bg-warning" id="mon-nome" name="mon-nome" value="" placeholder="Inserisci un numero">
             </div>
             </c:when>
             <c:when test="${indicatore.tipo.id eq 3}">
@@ -166,7 +178,7 @@
               </a>
             </div>
             <div class="col-sm-5">
-              <input type="text" class="form-custom" id="mon-value" name="mon-value" value="" placeholder="Inserisci una percentuale" onblur="saveVal(this.value)">%
+              <input type="text" class="form-custom bg-warning" id="mon-value" name="mon-value" value="" placeholder="Inserisci una percentuale" onblur="saveVal(this.value)">%
               <i class="fa fa-arrow-right"></i>
               <input type="text" class="form-control-custom" id="mon-nome" name="mon-nome" value="" readonly onclick="reset('')">
             </div>
