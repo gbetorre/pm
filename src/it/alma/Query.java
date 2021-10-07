@@ -1749,8 +1749,21 @@ public interface Query extends Serializable {
     
     /**
      * <p>Estrae il numero di tuple presenti nella tabella attivit&agrave;
-     * con l'id della wbs selezionata dall'utente, identificata tramite id
-     * ed aventi data di fine maggiore di una data passata come parametro e...</p>TODO
+     * con la wbs identificata tramite id, ed aventi:<ol>
+     * <li>data di inizio (effettiva o, in mancanza, prevista) compresa tra due date passate come parametro</li>
+     * <li>oppure data di inizio prevista uguale a una certa data e data di fine prevista uguale a un'altra data, passate come parametro</li>
+     * <li>unito a attivit&agrave; con data di fine (effettiva o, in mancanza, prevista) compresa tra altre due date passate come parametro</li>
+     * </ol>
+     * Se le date passate seguono il seguente pattern:<ol>
+     * <li>1° giorno dell'anno X, ultimo giorno dell'anno X</li>
+     * <li>1° giorno dell'anno X-1, ultimo giorno dell'anno X+1</li>
+     * <li>1° giorno dell'anno X, ultimo giorno dell'anno X</li></ol>
+     * allora il set di attivit&agrave; estratte permetter&agrave; di identificare
+     * la WBS come una WBS che, dato come riferimento l'anno solare X, contiene
+     * attivit&agrave; attinenti all'anno X stesso, e quindi potr&agrave; essere usata
+     * per marcare il progetto che la aggrega (cio&egrave; l'obiettivo strategico)
+     * come attivo nell'anno X.
+     * </p>
      */
     public static final String GET_ACTIVITIES_COUNT_BY_WBS_AND_YEAR =
             "(SELECT A.id" +
@@ -2064,8 +2077,11 @@ public interface Query extends Serializable {
             "       AND M.id_progetto = ? OR -1 = ?";
     
     /**
-     * <p>Estrae le misurazioni collegata ad un dato 
-     * progetto/obiettivo strategico</p>
+     * <p>Estrae le misurazioni in base ai seguenti criteri:<ul>
+     * <li>collegate ad un dato progetto/obiettivo strategico (oppure a tutti i progetti in base ai parametri passati per questo criterio)</li>
+     * <li>collegate a un dato indicatore (oppure a tutti gli indicatori in base ai parametri passati per questo criterio)</li>
+     * <li>collegate a indicatori in un dato stato (oppure a indicatori di tutti gli stati in base ai parametri passati per questo criterio)</li>
+     * </ul></p>
      */
     public static final String GET_MEASURES = 
             "SELECT " +
@@ -2081,6 +2097,7 @@ public interface Query extends Serializable {
             "   FROM indicatoregestione M" +
             "       INNER JOIN indicatore I ON M.id_indicatore = I.id" +
             "   WHERE (I.id = ? OR -1 = ?)" +
+            "       AND (I.id_stato IN (SELECT id FROM statoprogetto WHERE nome = ?  OR -1 = ?))" +
             "       AND (M.id_progetto = ? OR -1 = ?)" +
             "       AND (M.data >= ?)" +
             "   ORDER BY M.data DESC";
